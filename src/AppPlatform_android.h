@@ -119,7 +119,7 @@ public:
         }
 
         // Get Class reference
-        const char* interface_path = "com/mojang/minecraftpe/MainActivity";
+        const char* interface_path = "net/bycesardev/pocketmc/MainActivity";
         jclass clazz = NULL;
         if( (clazz = env->FindClass( interface_path )) == 0 ) {
             return -3;

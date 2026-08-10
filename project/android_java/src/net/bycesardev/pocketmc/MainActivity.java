@@ -1,4 +1,4 @@
-package com.mojang.minecraftpe;
+package net.bycesardev.pocketmc;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,8 +51,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.mojang.minecraftpe.R;
-import com.mojang.minecraftpe.sound.SoundPlayer;
+import net.bycesardev.pocketmc.R;
+import net.bycesardev.pocketmc.sound.SoundPlayer;
 
 public class MainActivity extends Activity {
 	/** Called when the activity is first created. */

@@ -1,4 +1,4 @@
-package com.mojang.minecraftpe;
+package net.bycesardev.pocketmc;
 
 import android.content.Intent;
 import android.net.Uri;

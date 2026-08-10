@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="com/mojang/minecraftpe/Minecraft_Verizon.java|com/mojang/minecraftpe/stats/|com/mojang/minecraftpe/Receiver.java|com/mojang/minecraftpe/Minecraft_Market.java" kind="src" path="src"/>
+	<classpathentry excluding="net/bycesardev/pocketmc/Minecraft_Verizon.java|net/bycesardev/pocketmc/stats/|net/bycesardev/pocketmc/Receiver.java|net/bycesardev/pocketmc/Minecraft_Market.java" kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="lib" path="C:/Users/Usuario/AppData/Local/Android/Sdk/platforms/android-34/android.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

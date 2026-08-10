@@ -10,7 +10,7 @@
 
 	        <uses-library android:name="xperiaplaycertified" android:required="false"/>
 	
-		<receiver android:name="com.mojang.minecraftpe.Receiver" android:exported="true">
+		<receiver android:name="net.bycesardev.pocketmc.Receiver" android:exported="true">
 		<intent-filter>
 		    <action android:name="com.android.vending.INSTALL_REFERRER" />
 		</intent-filter>

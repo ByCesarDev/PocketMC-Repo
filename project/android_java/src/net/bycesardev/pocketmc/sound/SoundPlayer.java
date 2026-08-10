@@ -1,4 +1,4 @@
-package com.mojang.minecraftpe.sound;
+package net.bycesardev.pocketmc.sound;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import java.util.Random;
 import android.content.Context;
 import android.media.SoundPool;
 
-import com.mojang.minecraftpe.R;
+import net.bycesardev.pocketmc.R;
 
 public class SoundPlayer
 {

@@ -1,4 +1,4 @@
-package com.mojang.minecraftpe;
+package net.bycesardev.pocketmc;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package com.mojang.minecraftpe;
+package net.bycesardev.pocketmc;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,7 +49,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.inputmethod.*;
-import com.mojang.minecraftpe.R;
+import net.bycesardev.pocketmc.R;
 
 public class MainActivity extends NativeActivity {
 	private boolean _isTouchscreen = true;

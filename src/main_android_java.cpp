@@ -106,20 +106,20 @@ JNI_OnLoad( JavaVM * vm, void * reserved )
 
 // Register/save a reference to the java main activity instance
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeRegisterThis(JNIEnv* env, jobject clazz) {
+Java_net_bycesardev_pocketmc_MainActivity_nativeRegisterThis(JNIEnv* env, jobject clazz) {
     LOGI("@RegisterThis\n");
     g_pActivity = (jobject)env->NewGlobalRef( clazz );
 }
 
 // Unregister/delete the reference to the java main activity instance
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeUnregisterThis(JNIEnv* env, jobject clazz) {
+Java_net_bycesardev_pocketmc_MainActivity_nativeUnregisterThis(JNIEnv* env, jobject clazz) {
     LOGI("@UnregisterThis\n");
     env->DeleteGlobalRef( g_pActivity );
 }
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeOnCreate(JNIEnv* env, jobject thiz, jint screenWidth, jint screenHeight) {
+Java_net_bycesardev_pocketmc_MainActivity_nativeOnCreate(JNIEnv* env, jobject thiz, jint screenWidth, jint screenHeight) {
     LOGI("@nativeOnCreate w=%d h=%d\n", (int)screenWidth, (int)screenHeight);
     g_inNativeOnCreate = true;
 
@@ -168,15 +168,15 @@ void extractAsset_JNI(const char* asset, const char* dest) {
 static int s_surfaceCreatedCount = 0;
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_GLRenderer_nativeOnSurfaceCreated(JNIEnv* env, jclass cls);
+Java_net_bycesardev_pocketmc_GLRenderer_nativeOnSurfaceCreated(JNIEnv* env, jclass cls);
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeOnSurfaceCreated(JNIEnv* env, jclass cls) {
-    Java_com_mojang_minecraftpe_GLRenderer_nativeOnSurfaceCreated(env, cls);
+Java_net_bycesardev_pocketmc_MainActivity_nativeOnSurfaceCreated(JNIEnv* env, jclass cls) {
+    Java_net_bycesardev_pocketmc_GLRenderer_nativeOnSurfaceCreated(env, cls);
 }
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_GLRenderer_nativeOnSurfaceCreated(JNIEnv* env, jclass cls) {
+Java_net_bycesardev_pocketmc_GLRenderer_nativeOnSurfaceCreated(JNIEnv* env, jclass cls) {
     s_surfaceCreatedCount++;
     if (g_inNativeOnCreate) {
         // Skip re-entrant surface callbacks that fire during nativeOnCreate
@@ -200,15 +200,15 @@ Java_com_mojang_minecraftpe_GLRenderer_nativeOnSurfaceCreated(JNIEnv* env, jclas
 }
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_GLRenderer_nativeOnSurfaceChanged(JNIEnv* env, jclass cls, jint w, jint h);
+Java_net_bycesardev_pocketmc_GLRenderer_nativeOnSurfaceChanged(JNIEnv* env, jclass cls, jint w, jint h);
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeOnSurfaceChanged(JNIEnv* env, jclass cls, jint w, jint h) {
-    Java_com_mojang_minecraftpe_GLRenderer_nativeOnSurfaceChanged(env, cls, w, h);
+Java_net_bycesardev_pocketmc_MainActivity_nativeOnSurfaceChanged(JNIEnv* env, jclass cls, jint w, jint h) {
+    Java_net_bycesardev_pocketmc_GLRenderer_nativeOnSurfaceChanged(env, cls, w, h);
 }
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_GLRenderer_nativeOnSurfaceChanged(JNIEnv* env, jclass cls, jint w, jint h) {
+Java_net_bycesardev_pocketmc_GLRenderer_nativeOnSurfaceChanged(JNIEnv* env, jclass cls, jint w, jint h) {
     LOGI("@nativeOnSurfaceChanged: %lu\n", (unsigned long)pthread_self());
 
     if (gApp) {
@@ -223,15 +223,15 @@ Java_com_mojang_minecraftpe_GLRenderer_nativeOnSurfaceChanged(JNIEnv* env, jclas
 }
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_GLRenderer_nativeUpdate(JNIEnv* env, jclass cls);
+Java_net_bycesardev_pocketmc_GLRenderer_nativeUpdate(JNIEnv* env, jclass cls);
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeUpdate(JNIEnv* env, jclass cls) {
-    Java_com_mojang_minecraftpe_GLRenderer_nativeUpdate(env, cls);
+Java_net_bycesardev_pocketmc_MainActivity_nativeUpdate(JNIEnv* env, jclass cls) {
+    Java_net_bycesardev_pocketmc_GLRenderer_nativeUpdate(env, cls);
 }
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_GLRenderer_nativeUpdate(JNIEnv* env, jclass cls) {
+Java_net_bycesardev_pocketmc_GLRenderer_nativeUpdate(JNIEnv* env, jclass cls) {
     //LOGI("@nativeUpdate: %p\n", pthread_self());
     if (gApp) {
         if (!gApp->isInited())
@@ -264,7 +264,7 @@ static int androidKeyToInternal(int androidKey) {
 }
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeOnDestroy(JNIEnv* env) {
+Java_net_bycesardev_pocketmc_MainActivity_nativeOnDestroy(JNIEnv* env) {
     LOGI("@nativeOnDestroy\n");
 
     delete gApp;
@@ -273,13 +273,13 @@ Java_com_mojang_minecraftpe_MainActivity_nativeOnDestroy(JNIEnv* env) {
 }
 
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeOnKeyDown(JNIEnv* env, jclass cls, jint keyCode) {
+Java_net_bycesardev_pocketmc_MainActivity_nativeOnKeyDown(JNIEnv* env, jclass cls, jint keyCode) {
     LOGI("@nativeOnKeyDown: %d\n", keyCode);
     int mapped = androidKeyToInternal(keyCode);
     Keyboard::feed(mapped, true);
 }
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeTextChar(JNIEnv* env, jclass cls, jint unicodeChar) {
+Java_net_bycesardev_pocketmc_MainActivity_nativeTextChar(JNIEnv* env, jclass cls, jint unicodeChar) {
     // soft-keyboards may send a backspace as a character code
     if (unicodeChar == 8) {
         Keyboard::feed(Keyboard::KEY_BACKSPACE, true);
@@ -289,14 +289,14 @@ Java_com_mojang_minecraftpe_MainActivity_nativeTextChar(JNIEnv* env, jclass cls,
     }
 }
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeOnKeyUp(JNIEnv* env, jclass cls, jint keyCode) {
+Java_net_bycesardev_pocketmc_MainActivity_nativeOnKeyUp(JNIEnv* env, jclass cls, jint keyCode) {
     LOGI("@nativeOnKeyUp: %d\n", (int)keyCode);
     int mapped = androidKeyToInternal(keyCode);
     Keyboard::feed(mapped, false);
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeHandleBack(JNIEnv* env, jclass cls, jboolean isDown) {
+Java_net_bycesardev_pocketmc_MainActivity_nativeHandleBack(JNIEnv* env, jclass cls, jboolean isDown) {
     LOGI("@nativeHandleBack: %d\n", isDown);
     if (gApp) return gApp->handleBack(isDown)? JNI_TRUE : JNI_FALSE;
     return JNI_FALSE;
@@ -306,19 +306,19 @@ Java_com_mojang_minecraftpe_MainActivity_nativeHandleBack(JNIEnv* env, jclass cl
 // Mouse events
 //
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeMouseDown(JNIEnv* env, jclass cls, jint pointerId, jint buttonId, jfloat x, jfloat y) {
+Java_net_bycesardev_pocketmc_MainActivity_nativeMouseDown(JNIEnv* env, jclass cls, jint pointerId, jint buttonId, jfloat x, jfloat y) {
     //LOGI("@nativeMouseDown: %f %f\n", x, y);
     mouseDown(1, x, y);
     pointerDown(pointerId, x, y);
 }
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeMouseUp(JNIEnv* env, jclass cls, jint pointerId, jint buttonId, jfloat x, jfloat y) {
+Java_net_bycesardev_pocketmc_MainActivity_nativeMouseUp(JNIEnv* env, jclass cls, jint pointerId, jint buttonId, jfloat x, jfloat y) {
     //LOGI("@nativeMouseUp: %f %f\n", x, y);
     mouseUp(1, x, y);
     pointerUp(pointerId, x, y);
 }
 JNIEXPORT void JNICALL
-Java_com_mojang_minecraftpe_MainActivity_nativeMouseMove(JNIEnv* env, jclass cls, jint pointerId, jfloat x, jfloat y) {
+Java_net_bycesardev_pocketmc_MainActivity_nativeMouseMove(JNIEnv* env, jclass cls, jint pointerId, jfloat x, jfloat y) {
     //LOGI("@nativeMouseMove: %f %f\n", x, y);
     mouseMove(x, y);
     pointerMove(pointerId, x, y);

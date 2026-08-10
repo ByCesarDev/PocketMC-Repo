@@ -1,7 +1,7 @@
-package com.mojang.minecraftpe;
+package net.bycesardev.pocketmc;
 
 import com.mojang.android.StringValue;
-import com.mojang.minecraftpe.R;
+import net.bycesardev.pocketmc.R;
 
 import android.content.Context;
 import android.util.AttributeSet;

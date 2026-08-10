@@ -90,7 +90,7 @@ JNIEXPORT jint JNICALL
 
 	// Register/save a reference to the java main activity instance
 	JNIEXPORT void JNICALL
-	Java_com_mojang_minecraftpe_MainActivity_nativeRegisterThis(JNIEnv* env, jobject clazz) {
+	Java_net_bycesardev_pocketmc_MainActivity_nativeRegisterThis(JNIEnv* env, jobject clazz) {
 		LOGI("@RegisterThis %d\n", pthread_self());
 		g_pActivity = (jobject)env->NewGlobalRef( clazz );
 
@@ -99,7 +99,7 @@ JNIEXPORT jint JNICALL
 
 	// Unregister/delete the reference to the java main activity instance
 	JNIEXPORT void JNICALL
-	Java_com_mojang_minecraftpe_MainActivity_nativeUnregisterThis(JNIEnv* env, jobject clazz) {
+	Java_net_bycesardev_pocketmc_MainActivity_nativeUnregisterThis(JNIEnv* env, jobject clazz) {
 		LOGI("@UnregisterThis %d\n", pthread_self());
 		env->DeleteGlobalRef( g_pActivity ); 
 		g_pActivity = 0;
@@ -108,7 +108,7 @@ JNIEXPORT jint JNICALL
 	}
 
 	JNIEXPORT void JNICALL
-	Java_com_mojang_minecraftpe_MainActivity_nativeStopThis(JNIEnv* env, jobject clazz) {
+	Java_net_bycesardev_pocketmc_MainActivity_nativeStopThis(JNIEnv* env, jobject clazz) {
 			LOGI("Lost Focus!");
 	}
 }

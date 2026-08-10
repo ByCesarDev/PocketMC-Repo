@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mojang.minecraftpe"
+    package="net.bycesardev.pocketmc"
     android:versionCode="6010"
     android:versionName="0.6.1-alpha-0.0.3">
 

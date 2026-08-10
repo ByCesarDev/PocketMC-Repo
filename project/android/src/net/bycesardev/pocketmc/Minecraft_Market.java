@@ -1,8 +1,7 @@
-package com.mojang.minecraftpe;
+package net.bycesardev.pocketmc;
 
 import android.content.Intent;
 import android.net.Uri;
-import com.mojang.minecraftpe.MainActivity;
 
 public class Minecraft_Market extends MainActivity {
 	@Override

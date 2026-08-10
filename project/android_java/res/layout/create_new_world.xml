@@ -84,7 +84,7 @@
             android:layout_height="50dp"
             android:gravity="center_horizontal">
 
-            <com.mojang.minecraftpe.GameModeButton
+            <net.bycesardev.pocketmc.GameModeButton
                 android:id="@+id/button_gameMode"
                 android:layout_width="173dp"
                 android:layout_height="46dp"
