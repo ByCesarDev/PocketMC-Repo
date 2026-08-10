@@ -94,7 +94,7 @@ void ExternalFileLevelStorageSource::getLevelList(LevelSummaryList& dest)
 	}
 
 	while ((dirp = readdir(dp)) != NULL) {
-		if (dirp->d_type == DT_DIR)
+		if ((dirp->d_type == DT_DIR || dirp->d_type == DT_UNKNOWN) && dirp->d_name[0] != '.')
 		{
 			addLevelSummaryIfExists(dest, dirp->d_name);
 		}

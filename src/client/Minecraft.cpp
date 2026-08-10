@@ -8,6 +8,10 @@
 #include <string>
 #include <cstdlib>
 
+#if defined(ANDROID)
+#include "../AppPlatform_android.h"
+#endif
+
 #if defined(APPLE_DEMO_PROMOTION)
     #define NO_NETWORK
 #endif
@@ -1550,7 +1554,23 @@ void Minecraft::hostMultiplayer(int port) {
 void* Minecraft::prepareLevel_tspawn(void *p_param)
 {
 	Minecraft* mc = (Minecraft*) p_param;
+#if defined(ANDROID)
+	JavaVM* vm = NULL;
+	if (mc && mc->platform()) {
+		AppPlatform_android* appPlatform = dynamic_cast<AppPlatform_android*>(mc->platform());
+		if (appPlatform && appPlatform->getJavaVM()) {
+			vm = appPlatform->getJavaVM();
+			JNIEnv* env = NULL;
+			vm->AttachCurrentThread(&env, NULL);
+		}
+	}
+#endif
 	mc->generateLevel("Currently not used", mc->level);
+#if defined(ANDROID)
+	if (vm) {
+		vm->DetachCurrentThread();
+	}
+#endif
 	return 0;
 }
 

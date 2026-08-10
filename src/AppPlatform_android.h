@@ -595,6 +595,7 @@ public:
 
 		return (int) env->CallIntMethod(instance, _methodGetKeyFromKeyCode, keyCode, metaState, deviceId);
 	}
+	JavaVM* getJavaVM() const { return _vm; }
 public:
     jobject instance;
 
