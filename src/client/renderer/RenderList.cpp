@@ -67,7 +67,11 @@ void RenderList::render() {
 }
 
 void RenderList::renderChunks() {
-	//glDisableClientState2(GL_NORMAL_ARRAY);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+
 	glEnableClientState2(GL_VERTEX_ARRAY);
 	glEnableClientState2(GL_COLOR_ARRAY);
 	glEnableClientState2(GL_TEXTURE_COORD_ARRAY);
@@ -81,6 +85,11 @@ void RenderList::renderChunks() {
 		glTranslatef2(rc.pos.x, rc.pos.y, rc.pos.z);
 		glBindBuffer2(GL_ARRAY_BUFFER, rc.vboId);
 
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Stride, (void*)0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, Stride, (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, Stride, (void*)(5 * sizeof(float)));
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, Stride, (void*)(6 * sizeof(float)));
+
 		glVertexPointer2	(3, GL_FLOAT, Stride,  0);
 		glTexCoordPointer2	(2, GL_FLOAT, Stride, (GLvoid*) (3 * 4));
 		glColorPointer2		(4, GL_UNSIGNED_BYTE, Stride, (GLvoid*) (5 * 4));
@@ -89,6 +98,11 @@ void RenderList::renderChunks() {
 
 		glPopMatrix2();
 	}
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(3);
 
 	glDisableClientState2(GL_VERTEX_ARRAY);
 	glDisableClientState2(GL_COLOR_ARRAY);

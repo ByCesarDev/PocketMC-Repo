@@ -110,12 +110,17 @@ private:
 	int vboCounts = 0;
 	int vboId = -1;
 	GLuint* vboIds = nullptr;
+	GLuint defaultVao = 0;
+	GLuint* vaoIds = nullptr;
 	int size = 0;
 	int totalSize = 0;
 	int maxVertices = 0;
 	int mode = 0;
 	int accessMode = 0;
 	IntGLMap map;
+
+	void setupVertexAttributes();
+	void disableVertexAttributes();
 };
 
 #endif /*NET_MINECRAFT_CLIENT_RENDERER__Tesselator_H__*/

@@ -884,6 +884,8 @@ void GameRenderer::unZoomRegion()
 	zoom = 1;
 }
 
+#include "GuiShader.h"
+
 void GameRenderer::setupGuiScreen( bool clearColorBuffer )
 {
 	int screenWidth = (int)(mc->width * Gui::InvGuiScale);
@@ -900,6 +902,8 @@ void GameRenderer::setupGuiScreen( bool clearColorBuffer )
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity2();
 	glTranslatef2(0, 0, -2000);
+
+	GuiShader::setupOrtho((float)screenWidth, (float)screenHeight);
 }
 
 /*private*/
