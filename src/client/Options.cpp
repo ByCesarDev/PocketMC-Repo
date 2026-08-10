@@ -98,6 +98,7 @@ OptionBool skinLeftPants("skinLeftPants", true);
 OptionBool skinRightPants("skinRightPants", true);
 OptionBool skinHat("skinHat", true);
 OptionBool skinMainHand("skinMainHand", true);
+OptionString skinModel("skinModel", "normal");
 
 // Graphics additions
 OptionBool reduceFpsIdle("reduceFpsIdle", false);
@@ -282,6 +283,7 @@ void Options::initTable() {
     m_options[OPTIONS_SKIN_RIGHT_PANTS] = &skinRightPants;
     m_options[OPTIONS_SKIN_HAT] = &skinHat;
     m_options[OPTIONS_SKIN_MAIN_HAND] = &skinMainHand;
+    m_options[OPTIONS_SKIN_MODEL] = &skinModel;
     m_options[OPTIONS_REDUCE_FPS_IDLE] = &reduceFpsIdle;
     m_options[OPTIONS_FULLSCREEN] = &fullscreenOpt;
     m_options[OPTIONS_GRAPHICS_API] = &graphicsApi;

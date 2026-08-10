@@ -44,11 +44,15 @@ private:
 	Button btnRename;
 	Button btnDelete;
 	Button btnNewPack;
+	Button btnModel;
 
 	std::vector<SkinPack> skinPacks;
 	int currentPackIndex;
 	int currentSkinIndex;
+	bool isSlimModel;
 	float playerRot;
+	void updateModelButtonText();
+	void updateDefaultModelForSkin();
 };
 
 #endif /*NET_MINECRAFT_CLIENT_GUI_SCREENS_SKINDEXSCREEN_H__*/

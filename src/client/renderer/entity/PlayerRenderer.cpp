@@ -4,6 +4,7 @@
 #include "../../../world/entity/player/Player.h"
 #include "../../../world/level/Level.h"
 #include "../../../world/item/ArmorItem.h"
+#include "../../Options.h"
 
 #include <unordered_map>
 
@@ -19,6 +20,7 @@ PlayerRenderer::PlayerRenderer( HumanoidModel* humanoidModel, float shadow )
 :	super(humanoidModel, shadow),
 	playerModel64(humanoidModel),
 	playerModel32(new HumanoidModel(0, 0, 64, 32)),
+	playerModelSlim(new HumanoidModel(0, 0, 64, 64, true)),
 	armorParts1(new HumanoidModel(1.0f, 0, 64, 32)),
 	armorParts2(new HumanoidModel(0.5f, 0, 64, 32))
 {
@@ -33,6 +35,7 @@ PlayerRenderer::~PlayerRenderer() {
 
 	delete playerModel32;
 	delete playerModel64;
+	delete playerModelSlim;
 	delete armorParts1;
 	delete armorParts2;
 }
@@ -65,6 +68,20 @@ bool PlayerRenderer::isModernPlayerSkin(Mob* mob) {
 	return texData && texData->w == 64 && texData->h == 64;
 }
 
+static bool isSlimPlayerSkin(Mob* mob, EntityRenderDispatcher* dispatcher) {
+	std::string tex = mob->getTexture();
+	if (tex.find("cesar.png") != std::string::npos || tex.find("cesar malo.png") != std::string::npos) {
+		return true;
+	}
+	if (tex.find("steve.png") != std::string::npos) {
+		return false;
+	}
+	if (dispatcher && dispatcher->options) {
+		return dispatcher->options->getStringValue(OPTIONS_SKIN_MODEL) == "slim";
+	}
+	return false;
+}
+
 void PlayerRenderer::renderName( Mob* mob, float x, float y, float z ){
 	//@todo: figure out how to handle HideGUI
 	if (mob != entityRenderDispatcher->cameraEntity && mob->level->adventureSettings.showNameTags) {
@@ -74,7 +91,10 @@ void PlayerRenderer::renderName( Mob* mob, float x, float y, float z ){
 
 void PlayerRenderer::render(Entity* mob_, float x, float y, float z, float rot, float a) {
 	Mob* mob = (Mob*) mob_;
-	HumanoidModel* desired = isModernPlayerSkin(mob) ? playerModel64 : playerModel32;
+	HumanoidModel* desired = playerModel32;
+	if (isModernPlayerSkin(mob)) {
+		desired = isSlimPlayerSkin(mob, entityRenderDispatcher) ? playerModelSlim : playerModel64;
+	}
 	if (model != desired || humanoidModel != desired) {
 		model = desired;
 		humanoidModel = desired;
@@ -82,13 +102,13 @@ void PlayerRenderer::render(Entity* mob_, float x, float y, float z, float rot, 
 	// Avoid spamming the log every frame: only log when texture/format changes for a player
 	static std::unordered_map<std::string, std::string> s_lastLog;
 	std::string playerName = ((Player*)mob)->name;
-	std::string cur = mob->getTexture() + ":" + std::to_string(humanoidModel->texWidth) + "x" + std::to_string(humanoidModel->texHeight);
+	std::string cur = mob->getTexture() + ":" + std::to_string(humanoidModel->texWidth) + "x" + std::to_string(humanoidModel->texHeight) + (desired == playerModelSlim ? ":slim" : ":normal");
 	auto it = s_lastLog.find(playerName);
 	if (it == s_lastLog.end() || it->second != cur) {
-		LOGI("[PlayerRenderer] %s: skin=%s, modelTex=%dx%d, desired=%s\n", 
+		LOGI("[PlayerRenderer] %s: skin=%s, modelTex=%dx%d, model=%s\n", 
 			playerName.c_str(), mob->getTexture().c_str(), 
 			humanoidModel->texWidth, humanoidModel->texHeight,
-			(desired == playerModel64 ? "64" : "32"));
+			(desired == playerModelSlim ? "slim" : (desired == playerModel64 ? "64" : "32")));
 		s_lastLog[playerName] = cur;
 	}
 	HumanoidMobRenderer::render(mob_, x, y, z, rot, a);
@@ -126,6 +146,7 @@ int PlayerRenderer::prepareArmor(Mob* mob, int layer, float a) {
 void PlayerRenderer::onGraphicsReset() {
 	if (playerModel32) playerModel32->onGraphicsReset();
 	if (playerModel64) playerModel64->onGraphicsReset();
+	if (playerModelSlim) playerModelSlim->onGraphicsReset();
 
 	if (armorParts1) armorParts1->onGraphicsReset();
 	if (armorParts2) armorParts2->onGraphicsReset();

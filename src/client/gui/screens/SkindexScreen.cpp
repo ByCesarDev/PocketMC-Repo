@@ -35,13 +35,35 @@ SkindexScreen::SkindexScreen()
 	btnRename(7, 0, 0, 60, 20, I18n::get("gui.rename")),
 	btnDelete(8, 0, 0, 60, 20, I18n::get("gui.delete")),
 	btnNewPack(9, 0, 0, 80, 20, I18n::get("gui.newPack")),
+	btnModel(10, 0, 0, 110, 20, "Modelo: Normal"),
 	currentPackIndex(0),
 	currentSkinIndex(0),
+	isSlimModel(false),
 	playerRot(0.0f)
 {
 }
 
 SkindexScreen::~SkindexScreen() {
+}
+
+void SkindexScreen::updateModelButtonText() {
+	btnModel.msg = isSlimModel ? "Modelo: Slim" : "Modelo: Normal";
+}
+
+void SkindexScreen::updateDefaultModelForSkin() {
+	if (skinPacks.empty() || currentPackIndex < 0 || currentPackIndex >= (int)skinPacks.size()) return;
+	SkinPack& pack = skinPacks[currentPackIndex];
+	if (pack.skins.empty() || currentSkinIndex < 0 || currentSkinIndex >= (int)pack.skins.size()) return;
+
+	std::string currentSkin = pack.skins[currentSkinIndex];
+	if (currentSkin.find("cesar.png") != std::string::npos || currentSkin.find("cesar malo.png") != std::string::npos) {
+		isSlimModel = true;
+	} else if (currentSkin.find("steve.png") != std::string::npos) {
+		isSlimModel = false;
+	} else if (minecraft) {
+		isSlimModel = (minecraft->options.getStringValue(OPTIONS_SKIN_MODEL) == "slim");
+	}
+	updateModelButtonText();
 }
 
 void SkindexScreen::ensureSkinsDir() {
@@ -178,6 +200,9 @@ void SkindexScreen::init() {
 	buttons.push_back(&btnRename);
 	buttons.push_back(&btnDelete);
 	buttons.push_back(&btnNewPack);
+	buttons.push_back(&btnModel);
+
+	updateDefaultModelForSkin();
 }
 
 void SkindexScreen::setupPositions() {
@@ -205,6 +230,10 @@ void SkindexScreen::setupPositions() {
 	btnNewPack.width = (std::max)(80, font->width(btnNewPack.msg) + 16);
 	btnNewPack.x = 4;
 	btnNewPack.y = 4;
+
+	btnModel.width = (std::max)(90, font->width(btnModel.msg) + 16);
+	btnModel.x = 10;
+	btnModel.y = height / 2 - 20;
 
 	int packY = yBase - 26;
 	btnPackPrev.x = width / 2 - 80;
@@ -286,7 +315,7 @@ void SkindexScreen::render(int xm, int ym, float a) {
 		glRotatef(playerRot, 0, 1, 0);
 
 		glColor4f2(1.0f, 1.0f, 1.0f, 1.0f);
-		HumanoidModel model(0.0f, 0.0f, skinW, skinH);
+		HumanoidModel model(0.0f, 0.0f, skinW, skinH, isSlimModel);
 		model.render(nullptr, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f);
 
 		glPopMatrix();
@@ -303,6 +332,7 @@ void SkindexScreen::buttonClicked(Button* button) {
 		SkinPack& activePack = skinPacks[currentPackIndex];
 		if (!activePack.skins.empty()) {
 			minecraft->options.set(OPTIONS_SKIN, activePack.skins[currentSkinIndex]);
+			minecraft->options.set(OPTIONS_SKIN_MODEL, isSlimModel ? "slim" : "normal");
 			minecraft->options.save();
 			
 			if (minecraft->player) {
@@ -315,21 +345,28 @@ void SkindexScreen::buttonClicked(Button* button) {
 		if (!activePack.skins.empty()) {
 			currentSkinIndex--;
 			if (currentSkinIndex < 0) currentSkinIndex = (int)activePack.skins.size() - 1;
+			updateDefaultModelForSkin();
 		}
 	} else if (button->id == btnNext.id) {
 		SkinPack& activePack = skinPacks[currentPackIndex];
 		if (!activePack.skins.empty()) {
 			currentSkinIndex++;
 			if (currentSkinIndex >= (int)activePack.skins.size()) currentSkinIndex = 0;
+			updateDefaultModelForSkin();
 		}
 	} else if (button->id == btnPackPrev.id) {
 		currentPackIndex--;
 		if (currentPackIndex < 0) currentPackIndex = (int)skinPacks.size() - 1;
 		currentSkinIndex = 0;
+		updateDefaultModelForSkin();
 	} else if (button->id == btnPackNext.id) {
 		currentPackIndex++;
 		if (currentPackIndex >= (int)skinPacks.size()) currentPackIndex = 0;
 		currentSkinIndex = 0;
+		updateDefaultModelForSkin();
+	} else if (button->id == btnModel.id) {
+		isSlimModel = !isSlimModel;
+		updateModelButtonText();
 	} else if (button->id == btnImport.id) {
 #ifdef _WIN32
 		OPENFILENAMEA ofn;
@@ -360,6 +397,7 @@ void SkindexScreen::buttonClicked(Button* button) {
 						break;
 					}
 				}
+				updateDefaultModelForSkin();
 			}
 		}
 #elif defined(ANDROID)
@@ -380,6 +418,7 @@ void SkindexScreen::buttonClicked(Button* button) {
 			if (std::remove(currentSkin.c_str()) == 0) {
 				scanSkins();
 				currentSkinIndex = 0;
+				updateDefaultModelForSkin();
 			}
 		}
 	}

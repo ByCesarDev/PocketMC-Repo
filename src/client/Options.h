@@ -98,6 +98,7 @@ enum OptionId {
     OPTIONS_SKIN_RIGHT_PANTS,
     OPTIONS_SKIN_HAT,
     OPTIONS_SKIN_MAIN_HAND,
+    OPTIONS_SKIN_MODEL,
 
     // Graphics additions
     OPTIONS_REDUCE_FPS_IDLE,

@@ -4,8 +4,9 @@
 #include "../../world/entity/player/Player.h"
 #include "../../world/entity/player/Inventory.h"
 
-HumanoidModel::HumanoidModel( float g /*= 0*/, float yOffset /*= 0*/, int texW /*= 64*/, int texH /*= 32*/ )
-:    holdingLeftHand(false),
+HumanoidModel::HumanoidModel( float g /*= 0*/, float yOffset /*= 0*/, int texW /*= 64*/, int texH /*= 32*/, bool slim /*= false*/ )
+:   isSlim(slim),
+    holdingLeftHand(false),
 	holdingRightHand(false),
 	sneaking(false),
 	bowAndArrow(false),
@@ -48,12 +49,21 @@ HumanoidModel::HumanoidModel( float g /*= 0*/, float yOffset /*= 0*/, int texW /
 	body.addBox(-4, 0, -2, 8, 12, 4, g); // Body
 	body.setPos(0, 0 + yOffset, 0);
 
-	arm0.addBox(-3, -2, -2, 4, 12, 4, g); // Arm0
-	arm0.setPos(-5, 2 + yOffset, 0);
+	if (isSlim) {
+		arm0.addBox(-2, -2, -2, 3, 12, 4, g); // Slim Arm0 (3 wide)
+		arm0.setPos(-5, 2.5f + yOffset, 0);
 
-	arm1.mirror = true;
-	arm1.addBox(-1, -2, -2, 4, 12, 4, g); // Arm1
-	arm1.setPos(5, 2 + yOffset, 0);
+		arm1.mirror = true;
+		arm1.addBox(-1, -2, -2, 3, 12, 4, g); // Slim Arm1 (3 wide)
+		arm1.setPos(5, 2.5f + yOffset, 0);
+	} else {
+		arm0.addBox(-3, -2, -2, 4, 12, 4, g); // Normal Arm0 (4 wide)
+		arm0.setPos(-5, 2 + yOffset, 0);
+
+		arm1.mirror = true;
+		arm1.addBox(-1, -2, -2, 4, 12, 4, g); // Normal Arm1 (4 wide)
+		arm1.setPos(5, 2 + yOffset, 0);
+	}
 
 	leg0.addBox(-2, 0, -2, 4, 12, 4, g); // Leg0
 	leg0.setPos(-2, 12 + yOffset, 0);
@@ -69,19 +79,27 @@ HumanoidModel::HumanoidModel( float g /*= 0*/, float yOffset /*= 0*/, int texW /
 	if (modernSkin) {
 		// Overlay layers for 64x64 skins (same geometry, different texture regions)
 		body.texOffs(16, 32);
-		body.addBox(-4, 0, -2, 8, 12, 4, g + 0.5f);
+		body.addBox(-4, 0, -2, 8, 12, 4, g + 0.25f);
 
-		arm0.texOffs(40, 32);
-		arm0.addBox(-3, -2, -2, 4, 12, 4, g + 0.5f);
+		if (isSlim) {
+			arm0.texOffs(40, 32);
+			arm0.addBox(-2, -2, -2, 3, 12, 4, g + 0.25f);
 
-		arm1.texOffs(48, 48);
-		arm1.addBox(-1, -2, -2, 4, 12, 4, g + 0.5f);
+			arm1.texOffs(48, 48);
+			arm1.addBox(-1, -2, -2, 3, 12, 4, g + 0.25f);
+		} else {
+			arm0.texOffs(40, 32);
+			arm0.addBox(-3, -2, -2, 4, 12, 4, g + 0.5f);
+
+			arm1.texOffs(48, 48);
+			arm1.addBox(-1, -2, -2, 4, 12, 4, g + 0.5f);
+		}
 
 		leg0.texOffs(0, 32);
-		leg0.addBox(-2, 0, -2, 4, 12, 4, g + 0.5f);
+		leg0.addBox(-2, 0, -2, 4, 12, 4, g + 0.25f);
 
 		leg1.texOffs(0, 48);
-		leg1.addBox(-2, 0, -2, 4, 12, 4, g + 0.5f);
+		leg1.addBox(-2, 0, -2, 4, 12, 4, g + 0.25f);
 	}
 }
 
