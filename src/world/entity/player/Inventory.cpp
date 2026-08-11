@@ -1,4 +1,6 @@
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 
 #include "Inventory.h"
 #include "../../level/material/Material.h"
