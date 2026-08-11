@@ -15,7 +15,7 @@ int _access( const char* name, int mode ) {
 	return access(name, mode);
 }
 
-int _errno() {
+int getErrno() {
 	return errno;
 }
 
@@ -35,7 +35,7 @@ bool createFolderIfNotExists( const char* name ) {
 
     int errorCode = 0;
 	if ((errorCode = _mkdir(name)) != 0) {
-        LOGI("FAILED to create folder %s, %d! Escape plan?\n", name, _errno());
+        LOGI("FAILED to create folder %s, %d! Escape plan?\n", name, getErrno());
         return false;
     }
 

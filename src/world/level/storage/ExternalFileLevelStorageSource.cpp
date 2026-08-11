@@ -89,7 +89,7 @@ void ExternalFileLevelStorageSource::getLevelList(LevelSummaryList& dest)
 	DIR *dp;
 	struct dirent *dirp;
 	if((dp  = opendir(basePath.c_str())) == NULL) {
-		LOGI("Error listing base folder %s: %d", basePath.c_str(), _errno());
+		LOGI("Error listing base folder %s: %d", basePath.c_str(), getErrno());
 		return;
 	}
 
