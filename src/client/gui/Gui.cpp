@@ -26,6 +26,11 @@
 #include "../../world/item/ItemInstance.h"
 #include "../../platform/input/Mouse.h"
 #include "../../world/level/Level.h"
+#include "../../world/level/biome/Biome.h"
+#include "../../world/level/dimension/Dimension.h"
+#include "../../world/level/tile/Tile.h"
+#include "../../world/Direction.h"
+#include "../particle/ParticleEngine.h"
 #include "../../world/PosTranslator.h"
 #include "../../platform/time.h"
 #include <cmath>
@@ -282,6 +287,9 @@ void Gui::handleKeyPressed(int key)
 
 	if (key == Keyboard::KEY_F1) {
 		minecraft->options.toggle(OPTIONS_HIDEGUI);
+	}
+	if (key == Keyboard::KEY_F3) {
+		minecraft->options.toggle(OPTIONS_RENDER_DEBUG);
 	}
 	
 	if (key == 99)
@@ -789,88 +797,141 @@ void Gui::onLevelGenerated() {
 }
 
 void Gui::renderDebugInfo() {
-	// FPS counter (updates once per second)
-	static float fps = 0.0f;
-	static float fpsLastTime = 0.0f;
-	static int   fpsFrames = 0;
-	float now = getTimeS();
-	fpsFrames++;
-	if (now - fpsLastTime >= 1.0f) {
-		fps = fpsFrames / (now - fpsLastTime);
-		fpsFrames = 0;
-		fpsLastTime = now;
-	}
-
-	LocalPlayer* p   = minecraft->player;
-	Level*       lvl = minecraft->level;
-
-	// Position
-	float px = p->x, py = p->y - p->heightOffset, pz = p->z;
-	posTranslator.to(px, py, pz);
-	int bx = (int)floorf(px), by = (int)floorf(py), bz = (int)floorf(pz);
-	int cx = bx >> 4, cz = bz >> 4;
-
-	// Facing direction
-	float yMod = fmodf(p->yRot, 360.0f);
-	if (yMod < 0) yMod += 360.0f;
-	const char* facing;
-	const char* axis;
-	if      (yMod < 45  || yMod >= 315) { facing = "South"; axis = "+Z"; }
-	else if (yMod < 135)                 { facing = "West";  axis = "-X"; }
-	else if (yMod < 225)                 { facing = "North"; axis = "-Z"; }
-	else                                 { facing = "East";  axis = "+X"; }
-
-	// Biome
-	const char* biomeName = "unknown";
-	if (lvl) {
-		Biome* biome = lvl->getBiome(bx, bz);
-		if (biome) biomeName = biome->name.c_str();
-	}
-
-	// Time
-	long worldTime = lvl ? lvl->getTime() : 0;
-	long dayTime   = worldTime % Level::TICKS_PER_DAY;
-	long day       = worldTime / Level::TICKS_PER_DAY;
-	long seed      = lvl ? lvl->getSeed() : 0;
-
-	// Build lines (NULL entry = blank gap)
-	static char ln[8][96];
-	sprintf(ln[0], "Minecraft PE 0.6.1 alpha (mcpe64)");
-	sprintf(ln[1], "%.1f fps", fps);
-	ln[2][0] = '\0'; // blank separator
-	sprintf(ln[3], "XYZ: %.3f / %.3f / %.3f", px, py, pz);
-	sprintf(ln[4], "Block: %d %d %d   Chunk: %d %d", bx, by, bz, cx, cz);
-	sprintf(ln[5], "Facing: %s (%s)  (%.1f / %.1f)", facing, axis, p->yRot, p->xRot);
-	sprintf(ln[6], "Biome: %s", biomeName);
-	sprintf(ln[7], "Day %ld  Time: %ld  Seed: %ld", day, dayTime, seed);
-
-	const int N   = 8;
-	const float LH  = (float)Font::DefaultLineHeight; // 10 font-pixels
-	const float MGN = 2.0f;  // left/top margin in font-pixels
-	const float PAD = 2.0f;  // horizontal padding for background
 	Font* font = minecraft->font;
+	if (!font) return;
 
-	// 1) Draw semi-transparent background boxes behind each line
-	for (int i = 0; i < N; i++) {
-		if (ln[i][0] == '\0') continue;
-		float w  = (float)font->width(ln[i]);
-		float x0 = MGN - PAD;
-		float y0 = MGN + i * LH - 1.0f;
-		float x1 = MGN + w + PAD;
-		float y1 = MGN + (i + 1) * LH - 1.0f;
-		fill(x0, y0, x1, y1, 0x90000000);
+	static int lastFps = 0;
+	static int frameCounter = 0;
+	static float lastFpsTime = 0.0f;
+	float curTime = getTimeS();
+	frameCounter++;
+	if (curTime - lastFpsTime >= 1.0f) {
+		lastFps = frameCounter;
+		frameCounter = 0;
+		lastFpsTime = curTime;
 	}
 
-	// 2) Draw text (no extra scale — font coords are in GUI units, same as fill)
-	Tesselator& t = Tesselator::instance;
-	t.beginOverride();
-	for (int i = 0; i < N; i++) {
-		if (ln[i][0] == '\0') continue;
-		float y = MGN + i * LH;
-		int col = (i == 0) ? 0xffFFFF55 : 0xffffffff; // title yellow, rest white
-		font->draw(ln[i], MGN, y, col);
+	float y = 2.0f;
+	float lineHeight = 10.0f;
+
+	// Line 1: Minecraft - Pocket Edition (X fps, Y chunk updates)
+	int chunkUpdates = minecraft->levelRenderer ? (int)minecraft->levelRenderer->dirtyChunks.size() : 0;
+	std::string line1 = "Minecraft - Pocket Edition (" + std::to_string(lastFps) + " fps, " + std::to_string(chunkUpdates) + " chunk updates)";
+	font->drawShadow(line1, 2.0f, y, 0xffffffff);
+	y += lineHeight;
+
+	// Line 2: C: 62/648, F: 31, O: 0, E: 555
+	int renderedC = 0, totalC = 0, emptyC = 0, farC = 0;
+	if (minecraft->levelRenderer) {
+		renderedC = minecraft->levelRenderer->renderedChunks;
+		totalC = minecraft->levelRenderer->totalChunks;
+		emptyC = minecraft->levelRenderer->emptyChunks;
+		farC = minecraft->levelRenderer->offscreenChunks;
 	}
-	t.endOverrideAndDraw();
+	std::string line2 = "C: " + std::to_string(renderedC) + "/" + std::to_string(totalC) + ", F: " + std::to_string(farC) + ", O: 0, E: " + std::to_string(emptyC);
+	font->drawShadow(line2, 2.0f, y, 0xffffffff);
+	y += lineHeight;
+
+	// Line 3: E: 0/70, B: 0, I: 70
+	int renderedE = 0, totalE = 0;
+	if (minecraft->level) {
+		totalE = (int)minecraft->level->entities.size();
+	}
+	if (minecraft->levelRenderer) {
+		renderedE = minecraft->levelRenderer->renderedEntities;
+	}
+	std::string line3 = "E: " + std::to_string(renderedE) + "/" + std::to_string(totalE) + ", B: 0, I: " + std::to_string(totalE);
+	font->drawShadow(line3, 2.0f, y, 0xffffffff);
+	y += lineHeight;
+
+	// Line 4: P: 0. T: All: 70
+	int pCount = 0;
+	if (minecraft->particleEngine) {
+		pCount = (int)minecraft->particleEngine->countParticles().length();
+	}
+	std::string line4 = "P: " + std::to_string(pCount) + ". T: All: " + std::to_string(totalE);
+	font->drawShadow(line4, 2.0f, y, 0xffffffff);
+	y += lineHeight;
+
+	// Line 5: ChunkCache: 256
+	std::string line5 = "ChunkCache: 256";
+	font->drawShadow(line5, 2.0f, y, 0xffffffff);
+	y += lineHeight;
+
+	// Line 6: Graphics: OpenGL
+	std::string line6 = "Graphics: OpenGL";
+	font->drawShadow(line6, 2.0f, y, 0xffffffff);
+	y += lineHeight;
+
+	// Line 7: Driver: Mesa llvmpipe (LLVM 20.1.2, 256 bits) or glGetString(GL_RENDERER)
+	const char* rendererStr = (const char*)glGetString(GL_RENDERER);
+	std::string line7 = "Driver: " + std::string(rendererStr ? rendererStr : "OpenGL ES 3.0 / OpenGL 3.3");
+	font->drawShadow(line7, 2.0f, y, 0xffffffff);
+	y += lineHeight;
+
+	if (minecraft->player) {
+		float px = minecraft->player->x;
+		float py = minecraft->player->y;
+		float pz = minecraft->player->z;
+
+		char bufX[64], bufY[64], bufZ[64];
+		sprintf(bufX, "x: %.8f", px);
+		sprintf(bufY, "y: %.8f", py);
+		sprintf(bufZ, "z: %.8f", pz);
+		font->drawShadow(bufX, 2.0f, y, 0xffffffff); y += lineHeight;
+		font->drawShadow(bufY, 2.0f, y, 0xffffffff); y += lineHeight;
+		font->drawShadow(bufZ, 2.0f, y, 0xffffffff); y += lineHeight;
+
+		int facing = ((int)Mth::floor((minecraft->player->yRot * 4.0f / 360.0f) + 0.5f)) & 3;
+		std::string lineF = "f: " + std::to_string(facing);
+		font->drawShadow(lineF, 2.0f, y, 0xffffffff);
+		y += lineHeight + 4.0f;
+	}
+
+	if (minecraft->level) {
+		long seed = minecraft->level->getSeed();
+		std::string lineSeed = "Seed: " + std::to_string(seed);
+		font->drawShadow(lineSeed, 2.0f, y, 0xffffffff);
+		y += lineHeight;
+
+		int dimId = 0;
+		std::string dimName = "Overworld";
+		if (minecraft->level->dimension) {
+			dimId = minecraft->level->dimension->id;
+			if (dimId == -1) dimName = "Nether";
+		}
+		std::string lineDim = "Dimension: " + std::to_string(dimId) + " (" + dimName + ")";
+		font->drawShadow(lineDim, 2.0f, y, 0xffffffff);
+		y += lineHeight;
+
+		std::string biomeName = "Plains";
+		if (minecraft->player && minecraft->level->dimension && minecraft->level->dimension->biomeSource) {
+			Biome* biome = minecraft->level->getBiome((int)minecraft->player->x, (int)minecraft->player->z);
+			if (biome && !biome->name.empty()) {
+				biomeName = biome->name;
+			}
+		}
+		std::string lineBiome = "Biome: " + biomeName;
+		font->drawShadow(lineBiome, 2.0f, y, 0xffffffff);
+		y += lineHeight;
+	}
+
+	std::string lookingAt = "Air";
+	if (minecraft->hitResult.isHit()) {
+		if (minecraft->hitResult.type == TILE) {
+			int tileId = minecraft->level->getTile(minecraft->hitResult.x, minecraft->hitResult.y, minecraft->hitResult.z);
+			if (tileId > 0 && Tile::tiles[tileId]) {
+				lookingAt = Tile::tiles[tileId]->getDescriptionId();
+				if (lookingAt.find("tile.") == 0) lookingAt = lookingAt.substr(5);
+			} else {
+				lookingAt = "Tile " + std::to_string(tileId);
+			}
+		} else if (minecraft->hitResult.type == ENTITY) {
+			lookingAt = "Entity";
+		}
+	}
+	std::string lineLook = "Looking at: " + lookingAt;
+	font->drawShadow(lineLook, 2.0f, y, 0xffffffff);
 }
 
 void Gui::renderPlayerList(Font* font, int screenWidth, int screenHeight) {
@@ -1203,3 +1264,4 @@ void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
 
 	glPopMatrix2();
 }
+

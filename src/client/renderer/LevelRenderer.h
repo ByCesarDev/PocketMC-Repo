@@ -85,25 +85,26 @@ private:
 	__inline int getLinearCoord(int x, int y, int z) {
 		return (z * yChunks + y) * xChunks + x;
 	}
+public:
+	int totalEntities;
+	int renderedEntities;
+	int culledEntities;
+	int totalChunks, offscreenChunks, occludedChunks, renderedChunks, emptyChunks;
+	std::vector<Chunk*> dirtyChunks;
+private:
 	int noEntityRenderFrames;
-    int totalEntities;
-    int renderedEntities;
-    int culledEntities;
 
 	std::vector<Chunk*> _renderChunks;
 
     int cullStep;
 	//static const int renderListsLength = 4;
     RenderList renderList;//[renderListsLength];
-
-	int totalChunks, offscreenChunks, occludedChunks, renderedChunks, emptyChunks;
     int chunkFixOffs;
 
     int xMinChunk, yMinChunk, zMinChunk;
     int xMaxChunk, yMaxChunk, zMaxChunk;
 
 	Level* level;
-	std::vector<Chunk*> dirtyChunks;
 
 	Chunk** chunks;
     Chunk** sortedChunks;
