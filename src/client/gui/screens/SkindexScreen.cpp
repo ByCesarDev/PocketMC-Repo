@@ -8,6 +8,7 @@
 #include "../../renderer/entity/EntityRenderDispatcher.h"
 #include "../../renderer/Textures.h"
 #include "../../model/HumanoidModel.h"
+#include "../../renderer/GuiShader.h"
 #include "../../../locale/I18n.h"
 #include "../../../util/Mth.h"
 #include "world/level/storage/FolderMethods.h"
@@ -306,6 +307,7 @@ void SkindexScreen::render(int xm, int ym, float a) {
 		}
 
 		glEnable2(GL_DEPTH_TEST);
+		GuiShader::unbind();
 		glPushMatrix();
 		glTranslatef((float)(width / 2), (float)(height / 2 - 20), -200);
 		float ss = 60.0f;
@@ -320,6 +322,7 @@ void SkindexScreen::render(int xm, int ym, float a) {
 
 		glPopMatrix();
 		glDisable2(GL_DEPTH_TEST);
+		GuiShader::bind();
 	} else {
 		drawCenteredString(font, I18n::get("skindex.noSkins"), width / 2, height / 2 - 10, 0xffaaaaaa);
 	}

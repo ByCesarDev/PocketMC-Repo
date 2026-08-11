@@ -1,6 +1,7 @@
 #include "GameRenderer.h"
 #include "client/Options.h"
 #include "gles.h"
+#include "GuiShader.h"
 #include "../../world/item/ItemInstance.h"
 
 #include "../../util/PerfTimer.h"
@@ -183,6 +184,7 @@ void GameRenderer::render(float a) {
 			if (mc->screen && mc->screen->hasClippingArea(screenScissorArea))
 				useScreenScissor = true;
 
+			GuiShader::unbind();
 			renderLevel(a);
 			hasClearedColorBuffer = true;
 

@@ -84,6 +84,7 @@ void Tesselator::setupVertexAttributes()
 		glEnableVertexAttribArray(1);
 	} else {
 		glDisableVertexAttribArray(1);
+		glVertexAttrib2f(1, 0.0f, 0.0f);
 	}
 
 	// Location 2: a_Color (vec4 ubyte normalized)
@@ -92,6 +93,7 @@ void Tesselator::setupVertexAttributes()
 		glEnableVertexAttribArray(2);
 	} else {
 		glDisableVertexAttribArray(2);
+		glVertexAttrib4f(2, 1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	// Location 3: a_Normal (vec3 float)
@@ -100,6 +102,7 @@ void Tesselator::setupVertexAttributes()
 		glEnableVertexAttribArray(3);
 	} else {
 		glDisableVertexAttribArray(3);
+		glVertexAttrib3f(3, 0.0f, 1.0f, 0.0f);
 	}
 
 	// Sync fixed-function pointer arrays for backwards compatibility
