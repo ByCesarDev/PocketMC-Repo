@@ -1,10 +1,15 @@
 #include "FolderMethods.h"
 #include <string>
 
+#include <errno.h>
+
+int getErrno() {
+	return errno;
+}
+
 #ifndef WIN32
 
 #include <unistd.h>
-#include <errno.h>
 #include <sys/stat.h>
 
 int _mkdir( const char* name ) {
@@ -13,10 +18,6 @@ int _mkdir( const char* name ) {
 
 int _access( const char* name, int mode ) {
 	return access(name, mode);
-}
-
-int getErrno() {
-	return errno;
 }
 
 #else

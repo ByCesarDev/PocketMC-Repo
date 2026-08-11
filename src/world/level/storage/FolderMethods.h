@@ -8,8 +8,9 @@
 #else
 int _mkdir(const char* name);
 int _access(const char* name, int mode);
-int _errno();
 #endif
+
+int getErrno();
 
 bool exists(const char* name);
 bool createFolderIfNotExists(const char* name);
