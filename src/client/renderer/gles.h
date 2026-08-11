@@ -20,6 +20,10 @@
         #include <GLES/gl.h>
         #include <GLES/glext.h>
     #else
+        #if defined(_WIN32) && !defined(WIN32_LEAN_AND_MEAN)
+            #define WIN32_LEAN_AND_MEAN
+            #include <windows.h>
+        #endif
         #include <glad/glad.h>
 
 		// https://github.com/programmer1o1/MinecraftPE-v0.6.1/blob/main/handheld/src/client/renderer/gles.h#L135-L138
