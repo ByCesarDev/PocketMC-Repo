@@ -171,6 +171,7 @@ LOCAL_STATIC_LIBRARIES := libpng RakNet
 LOCAL_LDLIBS := \
 	-lEGL \
 	-lGLESv1_CM \
+	-lGLESv2 \
 	-landroid \
 	-llog \
 	-lOpenSLES \
