@@ -528,11 +528,13 @@ void Minecraft::tick(int nTick, int maxTick) {
 	// A game is multiplayer only if connected to an external server or if multiple players exist in the level.
 	bool isMultiplayer = isOnlineClient() || (level != NULL && level->players.size() > 1);
 
+#ifndef STANDALONE_SERVER
 	if (screen != NULL && screen->isPauseScreen() && !isMultiplayer) {
 		pause = true;
 	} else if (screen == NULL && !isMultiplayer) {
 		pause = false;
 	}
+#endif
 
 	if (level && !pause) {
 		gameMode->tick();

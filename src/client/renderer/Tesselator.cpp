@@ -74,6 +74,7 @@ void Tesselator::setupVertexAttributes()
 {
 #ifndef STANDALONE_SERVER
 	const int stride = VertexSizeBytes;
+#if !defined(OPENGL_ES)
 	GLint currentProgram = 0;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 
@@ -112,12 +113,16 @@ void Tesselator::setupVertexAttributes()
 		if (GuiShader::inited && currentProgram == (GLint)GuiShader::instance.getProgramId()) {
 			GuiShader::instance.setUniform1i("u_UseTexture", hasTexture ? 1 : 0);
 		}
-	} else {
+	} else
+#endif
+	{
+#if !defined(OPENGL_ES)
 		// Disable generic vertex attributes when in fixed-function mode
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(2);
 		glDisableVertexAttribArray(3);
+#endif
 
 		// Sync fixed-function pointer arrays
 		if (hasTexture) {
