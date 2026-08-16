@@ -495,7 +495,13 @@ void Options::save() {
 }
 
 void Options::setOptionsFilePath(const std::string& path) {
-	optionsFile.setOptionsPath(path + "/options.txt");
+	if (path.empty() || path == ".") {
+		optionsFile.setOptionsPath("games/com.mojang/options.txt");
+	} else if (path.find("games/com.mojang") != std::string::npos) {
+		optionsFile.setOptionsPath(path + "/options.txt");
+	} else {
+		optionsFile.setOptionsPath(path + "/games/com.mojang/options.txt");
+	}
 }
 
 void Options::notifyOptionUpdate(OptionId key, bool value) {

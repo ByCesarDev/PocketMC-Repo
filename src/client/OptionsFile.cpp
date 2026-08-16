@@ -12,15 +12,7 @@
 #endif
 
 OptionsFile::OptionsFile() {
-#ifdef __APPLE__
-	settingsPath = "./Documents/options.txt";
-#elif defined(ANDROID)
-	settingsPath = "options.txt";
-#elif defined(__EMSCRIPTEN__)
-    settingsPath = "/games/com.mojang/options.txt";
-#else
-	settingsPath = "options.txt";
-#endif
+	settingsPath = "games/com.mojang/options.txt";
 }
 
 void OptionsFile::setOptionsPath(const std::string& path) {
@@ -74,6 +66,15 @@ void OptionsFile::save(const StringVector& settings) {
 StringVector OptionsFile::getOptionStrings() {
 	StringVector returnVector;
 	FILE* pFile = fopen(settingsPath.c_str(), "r");
+	if (!pFile) {
+		// Try fallback to legacy location outside com.mojang
+		size_t pos = settingsPath.find("games/com.mojang/");
+		if (pos != std::string::npos) {
+			std::string legacyPath = settingsPath;
+			legacyPath.erase(pos, strlen("games/com.mojang/"));
+			pFile = fopen(legacyPath.c_str(), "r");
+		}
+	}
 	if(pFile != NULL) {
 		char lineBuff[128];
 		while(fgets(lineBuff, sizeof lineBuff, pFile)) {
