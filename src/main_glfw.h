@@ -104,6 +104,10 @@ inline LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS* info) {
 #include "client/renderer/entity/PlayerRenderer.h"
 #include "client/renderer/gles.h"
 #include "GLFW/glfw3.h"
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include "GLFW/glfw3native.h"
+#endif
 
 #include <cstdio>
 #include <chrono>
@@ -289,6 +293,23 @@ int main(void) {
 	if (platform->window == NULL) {
 		return 1;
 	}
+
+#ifdef _WIN32
+	HWND hwnd = glfwGetWin32Window(platform->window);
+	if (hwnd) {
+		HICON hIcon = (HICON)LoadImageA(GetModuleHandle(NULL), MAKEINTRESOURCE(1), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
+		if (!hIcon) {
+			hIcon = (HICON)LoadImageA(NULL, "data/images/app.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE);
+		}
+		if (!hIcon) {
+			hIcon = (HICON)LoadImageA(NULL, "data/app.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE);
+		}
+		if (hIcon) {
+			SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+			SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+		}
+	}
+#endif
 
 	glfwSetKeyCallback(platform->window, key_callback);
 	glfwSetCharCallback(platform->window, character_callback);
