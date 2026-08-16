@@ -8,7 +8,7 @@
 #include "KeyOption.h"
 
 OptionsGroup::OptionsGroup( std::string labelID )  {
-	label = I18n::get(labelID);
+	label = labelID;
 	scrollOffset = 0;
 	contentHeight = 0;
 }
@@ -34,7 +34,9 @@ void OptionsGroup::render( Minecraft* minecraft, int xm, int ym ) {
 	float padX = 10.0f;
 	float padY = 5.0f;
 	
-	minecraft->font->draw(label, (float)x + padX, (float)y + padY, 0xffffffff, false);
+	std::string headerText = I18n::get(label);
+	if (!headerText.empty() && headerText.back() == '<') headerText = label;
+	minecraft->font->draw(headerText, (float)x + padX, (float)y + padY, 0xffffffff, false);
 
 	// Render children with vertical scroll offset and simple clipping
 	for(std::vector<GuiElement*>::iterator it = children.begin(); it != children.end(); ++it) {
@@ -80,7 +82,7 @@ void OptionsGroup::createToggle(OptionId optId, Minecraft* minecraft ) {
 	element->setImageDef(def, true);
 	element->updateImage(&minecraft->options);
 	
-	std::string itemLabel = I18n::get(minecraft->options.getOpt(optId)->getStringId());
+	std::string itemLabel = minecraft->options.getOpt(optId)->getStringId();
 	
 	OptionsItem* item = new OptionsItem(optId, itemLabel, element);
 	
@@ -93,7 +95,7 @@ void OptionsGroup::createProgressSlider(OptionId optId, Minecraft* minecraft ) {
 	element->width = 100;
 	element->height = 20;
 
-	std::string itemLabel = I18n::get(minecraft->options.getOpt(optId)->getStringId());
+	std::string itemLabel = minecraft->options.getOpt(optId)->getStringId();
 	OptionsItem* item = new OptionsItem(optId, itemLabel, element);
 	addChild(item);
 	setupPositions();
@@ -104,7 +106,7 @@ void OptionsGroup::createStepSlider(OptionId optId, Minecraft* minecraft ) {
 	element->width = 100;
 	element->height = 20;
 
-	std::string itemLabel = I18n::get(minecraft->options.getOpt(optId)->getStringId());
+	std::string itemLabel = minecraft->options.getOpt(optId)->getStringId();
 	OptionsItem* item = new OptionsItem(optId, itemLabel, element);
 	addChild(item);
 	setupPositions();
@@ -115,7 +117,7 @@ void OptionsGroup::createTextbox(OptionId optId, Minecraft* minecraft) {
 	element->width = 100;
 	element->height = 20;
 
-	std::string itemLabel = I18n::get(minecraft->options.getOpt(optId)->getStringId());
+	std::string itemLabel = minecraft->options.getOpt(optId)->getStringId();
 	OptionsItem* item = new OptionsItem(optId, itemLabel, element);
 	addChild(item);
 	setupPositions();
@@ -126,7 +128,7 @@ void OptionsGroup::createKey(OptionId optId, Minecraft* minecraft) {
 	element->width = 50;
 	element->height = 20;
 
-	std::string itemLabel = I18n::get(minecraft->options.getOpt(optId)->getStringId());
+	std::string itemLabel = minecraft->options.getOpt(optId)->getStringId();
 	OptionsItem* item = new OptionsItem(optId, itemLabel, element);
 	addChild(item);
 	setupPositions();

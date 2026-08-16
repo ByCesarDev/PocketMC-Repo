@@ -1112,3 +1112,49 @@ username.title=Enter your username
 username.desc1=Please choose a username so others can easily
 username.desc2=identify you in chat. Don't worry, you can
 username.desc3=change it anytime.
+
+options.renderDistance.0=Far
+options.renderDistance.1=Normal
+options.renderDistance.2=Short
+options.renderDistance.3=Tiny
+
+options.showVignette=Vignette
+options.skinCape=Cape
+options.skinJacket=Jacket
+options.skinLeftSleeve=Left Sleeve
+options.skinRightSleeve=Right Sleeve
+options.skinLeftPants=Left Pants Leg
+options.skinRightPants=Right Pants Leg
+options.skinHat=Hat
+options.skinMainHand=Main Hand
+
+options.musicBlocksVolume=Jukebox/Note Blocks
+options.weatherVolume=Weather
+options.blocksVolume=Blocks
+options.hostileVolume=Hostile Creatures
+options.passiveVolume=Friendly Creatures
+options.playerVolume=Players
+options.ambientVolume=Ambient/Environment
+options.uiVolume=UI Sounds
+options.showSubtitles=Show Subtitles
+options.directionalAudio=Directional Audio
+
+options.discreteScroll=Discrete Scrolling
+options.directInput=Raw Input
+options.wheelSensitivity=Scroll Sensitivity
+options.invertXMouse=Invert X-Axis
+options.allowCursorChanges=Allow Cursor Changes
+
+options.chatVisible=Chat: Shown
+options.chatColors=Chat Colors
+options.webLinks=Web Links
+options.warnWebLinks=Prompt on Links
+options.chatOpacity=Chat Text Opacity
+options.chatBgOpacity=Chat Background Opacity
+options.chatSize=Text Scale
+options.chatLineSpacing=Line Spacing
+options.chatWidth=Chat Width
+options.suggestCommands=Command Suggestions
+
+options.distortionEffects=Distortion Effects
+options.darknessPulse=Darkness Pulsing

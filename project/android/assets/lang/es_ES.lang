@@ -1110,3 +1110,49 @@ username.title=Ingresa tu nombre de usuario
 username.desc1=Elige un nombre de usuario para que otros te reconozcan
 username.desc2=fácilmente en el chat. Puedes cambiarlo
 username.desc3=en cualquier momento.
+
+options.renderDistance.0=Lejano
+options.renderDistance.1=Normal
+options.renderDistance.2=Corto
+options.renderDistance.3=Mínimo
+
+options.showVignette=Viñeta
+options.skinCape=Capa
+options.skinJacket=Chaqueta
+options.skinLeftSleeve=Manga Izquierda
+options.skinRightSleeve=Manga Derecha
+options.skinLeftPants=Pierna Izquierda
+options.skinRightPants=Pierna Derecha
+options.skinHat=Sombrero
+options.skinMainHand=Mano Principal
+
+options.musicBlocksVolume=Bloques Musicales/Tocadiscos
+options.weatherVolume=Clima
+options.blocksVolume=Bloques
+options.hostileVolume=Criaturas Hostiles
+options.passiveVolume=Criaturas Pacíficas
+options.playerVolume=Jugadores
+options.ambientVolume=Ambiente/Entorno
+options.uiVolume=Sonidos de Interfaz
+options.showSubtitles=Mostrar Subtítulos
+options.directionalAudio=Audio Direccional
+
+options.discreteScroll=Desplazamiento Discreto
+options.directInput=Entrada Directa (Raw Input)
+options.wheelSensitivity=Sensibilidad de Rueda
+options.invertXMouse=Invertir Eje X
+options.allowCursorChanges=Permitir Cambios de Cursor
+
+options.chatVisible=Chat: Visible
+options.chatColors=Colores de Chat
+options.webLinks=Enlaces Web
+options.warnWebLinks=Advertir Enlaces
+options.chatOpacity=Opacidad del Texto del Chat
+options.chatBgOpacity=Opacidad del Fondo del Chat
+options.chatSize=Escala de Texto
+options.chatLineSpacing=Espaciado de Líneas
+options.chatWidth=Ancho del Chat
+options.suggestCommands=Sugerencias de Comandos
+
+options.distortionEffects=Efectos de Distorsión
+options.darknessPulse=Pulsación de Oscuridad
