@@ -174,13 +174,16 @@ void ModListScreen::buttonClicked(Button* button)
 
 void ModListScreen::openModsFolder()
 {
-    std::string path = joinRoot(minecraft->externalStoragePath, "com.mojang/mods");
     ModRegistry::ensureFolders(minecraft->externalStoragePath);
+    std::string path = joinRoot(minecraft->externalStoragePath, "games/com.mojang/mods");
 #ifdef _WIN32
-    ShellExecuteA(NULL, "open", path.c_str(), NULL, NULL, SW_SHOWNORMAL);
-#elif defined(__APPLE__)
-    std::system(("open \"" + path + "\"").c_str());
-#else
-    std::system(("xdg-open \"" + path + "\"").c_str());
+    std::replace(path.begin(), path.end(), '/', '\\');
+    char fullPath[MAX_PATH];
+    if (_fullpath(fullPath, path.c_str(), MAX_PATH)) {
+        path = fullPath;
+    }
 #endif
+    if (minecraft && minecraft->platform()) {
+        minecraft->platform()->openURL(path);
+    }
 }
