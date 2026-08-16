@@ -16,6 +16,7 @@ public:
 	virtual void render(int xm, int ym, float a);
 	virtual void tick();
 	virtual void keyPressed(int eventKey);
+	virtual void removed();
     
     virtual void renderBackground();
 

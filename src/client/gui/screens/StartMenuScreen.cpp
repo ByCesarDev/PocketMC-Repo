@@ -23,6 +23,7 @@
 #include "SimpleChooseLevelScreen.h"
 #include "../../renderer/Textures.h"
 #include "../../renderer/TextureData.h"
+#include "../../renderer/GuiShader.h"
 #include "../../model/HumanoidModel.h"
 #include "../../../SharedConstants.h"
 #include "../../../locale/I18n.h"
@@ -186,7 +187,8 @@ bool StartMenuScreen::isInGameScreen() { return false; }
 
 void StartMenuScreen::render( int xm, int ym, float a )
 {
-	renderPanorama(panoramaTicks, a);
+	float panoTime = getPanoramaTime();
+	renderPanorama((int)panoTime, panoTime - (int)panoTime);
 
 #if defined(RPI)
 	TextureId id = minecraft->textures->loadTexture("gui/pi_title.png");
@@ -254,6 +256,7 @@ void StartMenuScreen::render( int xm, int ym, float a )
 		minecraft->textures->bind(skinTexId);
 
 		glEnable2(GL_DEPTH_TEST);
+		GuiShader::unbind();
 		glPushMatrix();
 		glTranslatef((float)centerX, (float)centerY, -100);
 		float ss = 25.0f; // Slightly larger
@@ -280,6 +283,7 @@ void StartMenuScreen::render( int xm, int ym, float a )
 		skinModel.render(nullptr, 0, 0, 0, headYaw, headPitch, 0.0625f);
 		glPopMatrix();
 		glDisable2(GL_DEPTH_TEST);
+		GuiShader::bind();
 	}
 }
 

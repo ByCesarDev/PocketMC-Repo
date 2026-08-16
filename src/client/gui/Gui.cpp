@@ -99,7 +99,7 @@ void Gui::render(float a, bool mouseFree, int xMouse, int yMouse) {
     // F: 3
 	int ySlot = screenHeight - 16 - 3;
 
-	if (!minecraft->options.getBooleanValue(OPTIONS_HIDEGUI)) {
+	if (!minecraft->options.getBooleanValue(OPTIONS_HIDEGUI) && minecraft->screen == NULL) {
 		if (minecraft->gameMode->canHurtPlayer()) {
 			minecraft->textures->loadAndBindTexture("gui/icons.png");
 			Tesselator& t = Tesselator::instance;
@@ -120,8 +120,9 @@ void Gui::render(float a, bool mouseFree, int xMouse, int yMouse) {
 		glEnable(GL_ALPHA_TEST);
 		glEnable(GL_DEPTH_TEST);
 	}
-	if (!minecraft->options.getBooleanValue(OPTIONS_HIDEGUI)) {
-	renderToolBar(a, ySlot, screenWidth);
+	if (!minecraft->options.getBooleanValue(OPTIONS_HIDEGUI) && minecraft->screen == NULL) {
+		renderToolBar(a, ySlot, screenWidth);
+	}
 
 	glEnable(GL_BLEND);
 	bool isChatting = (minecraft->screen && (dynamic_cast<ChatScreen*>(minecraft->screen) || dynamic_cast<ConsoleScreen*>(minecraft->screen)));
@@ -150,7 +151,6 @@ void Gui::render(float a, bool mouseFree, int xMouse, int yMouse) {
 
 	if (minecraft->options.getBooleanValue(OPTIONS_RENDER_DEBUG))
 		renderDebugInfo();
-	}
 
     glDisable(GL_BLEND);
 	glEnable2(GL_ALPHA_TEST);
@@ -287,9 +287,6 @@ void Gui::handleKeyPressed(int key)
 
 	if (key == Keyboard::KEY_F1) {
 		minecraft->options.toggle(OPTIONS_HIDEGUI);
-	}
-	if (key == Keyboard::KEY_F3) {
-		minecraft->options.toggle(OPTIONS_RENDER_DEBUG);
 	}
 	
 	if (key == 99)

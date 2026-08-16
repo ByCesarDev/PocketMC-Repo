@@ -1,4 +1,5 @@
 #include "Tesselator.h"
+#include "GuiShader.h"
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
@@ -73,63 +74,88 @@ void Tesselator::setupVertexAttributes()
 {
 #ifndef STANDALONE_SERVER
 	const int stride = VertexSizeBytes;
+	GLint currentProgram = 0;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 
-	// Location 0: a_Position (vec3 float)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-	glEnableVertexAttribArray(0);
+	if (currentProgram != 0) {
+		// Location 0: a_Position (vec3 float)
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+		glEnableVertexAttribArray(0);
 
-	// Location 1: a_TexCoord (vec2 float)
-	if (hasTexture) {
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
+		// Location 1: a_TexCoord (vec2 float)
+		if (hasTexture) {
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+			glEnableVertexAttribArray(1);
+		} else {
+			glDisableVertexAttribArray(1);
+			glVertexAttrib2f(1, 0.0f, 0.0f);
+		}
+
+		// Location 2: a_Color (vec4 ubyte normalized)
+		if (hasColor) {
+			glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, (void*)(5 * sizeof(float)));
+			glEnableVertexAttribArray(2);
+		} else {
+			glDisableVertexAttribArray(2);
+			glVertexAttrib4f(2, 1.0f, 1.0f, 1.0f, 1.0f);
+		}
+
+		// Location 3: a_Normal (vec3 float)
+		if (hasNormal) {
+			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+			glEnableVertexAttribArray(3);
+		} else {
+			glDisableVertexAttribArray(3);
+			glVertexAttrib3f(3, 0.0f, 1.0f, 0.0f);
+		}
+
+		if (GuiShader::inited && currentProgram == (GLint)GuiShader::instance.getProgramId()) {
+			GuiShader::instance.setUniform1i("u_UseTexture", hasTexture ? 1 : 0);
+		}
 	} else {
+		// Disable generic vertex attributes when in fixed-function mode
+		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
-		glVertexAttrib2f(1, 0.0f, 0.0f);
-	}
-
-	// Location 2: a_Color (vec4 ubyte normalized)
-	if (hasColor) {
-		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, (void*)(5 * sizeof(float)));
-		glEnableVertexAttribArray(2);
-	} else {
 		glDisableVertexAttribArray(2);
-		glVertexAttrib4f(2, 1.0f, 1.0f, 1.0f, 1.0f);
-	}
-
-	// Location 3: a_Normal (vec3 float)
-	if (hasNormal) {
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
-		glEnableVertexAttribArray(3);
-	} else {
 		glDisableVertexAttribArray(3);
-		glVertexAttrib3f(3, 0.0f, 1.0f, 0.0f);
-	}
 
-	// Sync fixed-function pointer arrays for backwards compatibility
-	if (hasTexture) {
-		glTexCoordPointer2(2, GL_FLOAT, stride, (GLvoid*)(3 * sizeof(float)));
-		glEnableClientState2(GL_TEXTURE_COORD_ARRAY);
+		// Sync fixed-function pointer arrays
+		if (hasTexture) {
+			glTexCoordPointer2(2, GL_FLOAT, stride, (GLvoid*)(3 * sizeof(float)));
+			glEnableClientState2(GL_TEXTURE_COORD_ARRAY);
+		} else {
+			glDisableClientState2(GL_TEXTURE_COORD_ARRAY);
+		}
+		if (hasColor) {
+			glColorPointer2(4, GL_UNSIGNED_BYTE, stride, (GLvoid*)(5 * sizeof(float)));
+			glEnableClientState2(GL_COLOR_ARRAY);
+		} else {
+			glDisableClientState2(GL_COLOR_ARRAY);
+		}
+		if (hasNormal) {
+			glNormalPointer(GL_FLOAT, stride, (GLvoid*)(6 * sizeof(float)));
+			glEnableClientState2(GL_NORMAL_ARRAY);
+		} else {
+			glDisableClientState2(GL_NORMAL_ARRAY);
+		}
+		glVertexPointer2(3, GL_FLOAT, stride, 0);
+		glEnableClientState2(GL_VERTEX_ARRAY);
 	}
-	if (hasColor) {
-		glColorPointer2(4, GL_UNSIGNED_BYTE, stride, (GLvoid*)(5 * sizeof(float)));
-		glEnableClientState2(GL_COLOR_ARRAY);
-	}
-	if (hasNormal) {
-		glNormalPointer(GL_FLOAT, stride, (GLvoid*)(6 * sizeof(float)));
-		glEnableClientState2(GL_NORMAL_ARRAY);
-	}
-	glVertexPointer2(3, GL_FLOAT, stride, 0);
-	glEnableClientState2(GL_VERTEX_ARRAY);
 #endif
 }
 
 void Tesselator::disableVertexAttributes()
 {
 #ifndef STANDALONE_SERVER
-	glDisableVertexAttribArray(0);
-	if (hasTexture) glDisableVertexAttribArray(1);
-	if (hasColor) glDisableVertexAttribArray(2);
-	if (hasNormal) glDisableVertexAttribArray(3);
+	GLint currentProgram = 0;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+
+	if (currentProgram != 0) {
+		glDisableVertexAttribArray(0);
+		if (hasTexture) glDisableVertexAttribArray(1);
+		if (hasColor) glDisableVertexAttribArray(2);
+		if (hasNormal) glDisableVertexAttribArray(3);
+	}
 
 	glDisableClientState2(GL_VERTEX_ARRAY);
 	if (hasTexture) glDisableClientState2(GL_TEXTURE_COORD_ARRAY);

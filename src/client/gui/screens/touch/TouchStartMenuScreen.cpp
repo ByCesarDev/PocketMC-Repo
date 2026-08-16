@@ -14,6 +14,7 @@
 #include "../../../renderer/Tesselator.h"
 #include "../../../renderer/Textures.h"
 #include "../../../renderer/TextureData.h"
+#include "../../../renderer/GuiShader.h"
 #include "../../../model/HumanoidModel.h"
 #include "../../../../SharedConstants.h"
 #include "../../../../AppPlatform.h"
@@ -189,7 +190,8 @@ void StartMenuScreen::tick() {
 
 void StartMenuScreen::render( int xm, int ym, float a )
 {
-	renderPanorama(panoramaTicks, a);
+	float panoTime = getPanoramaTime();
+	renderPanorama((int)panoTime, panoTime - (int)panoTime);
 
     glEnable2(GL_BLEND);
 	glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -256,6 +258,7 @@ void StartMenuScreen::render( int xm, int ym, float a )
 		minecraft->textures->bind(skinTexId);
 
 		glEnable2(GL_DEPTH_TEST);
+		GuiShader::unbind();
 		glPushMatrix();
 		glTranslatef((float)centerX, (float)centerY, -100);
 		float ss = 25.0f; // Slightly larger
@@ -271,6 +274,7 @@ void StartMenuScreen::render( int xm, int ym, float a )
 		skinModel.render(nullptr, 0, 0, 0, headYaw, headPitch, 0.0625f);
 		glPopMatrix();
 		glDisable2(GL_DEPTH_TEST);
+		GuiShader::bind();
 	}
 }
 

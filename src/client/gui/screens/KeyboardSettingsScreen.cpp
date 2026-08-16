@@ -1,4 +1,4 @@
-﻿#include "KeyboardSettingsScreen.h"
+#include "KeyboardSettingsScreen.h"
 #include "../../Minecraft.h"
 #include "../../Options.h"
 #include "locale/I18n.h"
@@ -14,6 +14,9 @@ void KeyboardSettingsScreen::init() {
     group->y = 40;
     group->width = 300;
     group->height = height - 80;
+    for (int i = OPTIONS_KEY_FORWARD; i <= OPTIONS_KEY_USE; i++) {
+        group->addOptionItem((OptionId)i, minecraft);
+    }
     group->setupPositions();
 }
 

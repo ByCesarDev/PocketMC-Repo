@@ -1,6 +1,7 @@
-﻿#include "OptionsScreen.h"
+#include "OptionsScreen.h"
 #include "../../Minecraft.h"
 #include "../../Options.h"
+#include "../../renderer/LevelRenderer.h"
 #include "locale/I18n.h"
 #include "SkinCustomizationScreen.h"
 #include "GraphicsScreen.h"
@@ -90,5 +91,12 @@ void OptionsScreen::tick() {
 void OptionsScreen::keyPressed(int eventKey) {
     if (eventKey == Keyboard::KEY_ESCAPE) {
         minecraft->popScreen();
+    }
+}
+
+void OptionsScreen::removed() {
+    minecraft->options.save();
+    if (minecraft->level && minecraft->levelRenderer) {
+        minecraft->levelRenderer->allChanged();
     }
 }

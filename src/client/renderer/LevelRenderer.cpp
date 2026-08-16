@@ -1279,10 +1279,7 @@ void LevelRenderer::renderSky(float alpha) {
         sb = sbb;
     }
     glColor4f2(sr, sg, sb, 1.0f);
-
-#ifdef OPENGL_ES
 	drawArrayVT(skyBuffer, skyVertexCount);
-#endif
 
 	hsr = sr;
 	hsg = sg;
@@ -1366,7 +1363,7 @@ void LevelRenderer::generateCloudMesh(float cr, float cg, float cb) {
 
 	int width = texData->w;
 	int height = texData->h;
-	float scale = 8.0f;
+	float scale = 12.0f;
 	float cHeight = 4.0f;
 
 	auto getAlpha = [&](int px, int pz) -> unsigned char {
@@ -1393,9 +1390,10 @@ void LevelRenderer::generateCloudMesh(float cr, float cg, float cb) {
 	std::vector<VERTEX> verts;
 	verts.reserve(width * height / 3);
 
-	GLuint topColor = packColor(cr, cg, cb, 0.8f);
-	GLuint bottomColor = packColor(cr * 0.7f, cg * 0.7f, cb * 0.7f, 0.8f);
-	GLuint sideColor = packColor(cr * 0.85f, cg * 0.85f, cb * 0.85f, 0.8f);
+	// Bake white shading for faces (1.0 top, 0.7 bottom, 0.85 sides) with opaque alpha (1.0f)
+	GLuint topColor = packColor(1.0f, 1.0f, 1.0f, 1.0f);
+	GLuint bottomColor = packColor(0.7f, 0.7f, 0.7f, 1.0f);
+	GLuint sideColor = packColor(0.85f, 0.85f, 0.85f, 1.0f);
 
 	auto addQuad = [&](float ax0, float ay0, float az0,
 	                   float ax1, float ay1, float az1,
@@ -1455,19 +1453,22 @@ void LevelRenderer::generateCloudMesh(float cr, float cg, float cb) {
 }
 
 void LevelRenderer::renderClouds( float alpha ) {
-	glDisable2(GL_TEXTURE_2D);  // Clouds are solid color, no texture needed
-	glEnable(GL_CULL_FACE);
-	float yOffs = (float) (mc->player->yOld + (mc->player->y - mc->player->yOld) * alpha);
-	
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if (!mc->options.getBooleanValue(OPTIONS_CLOUDS)) return;
+
+	glDisable2(GL_TEXTURE_2D);
+	glEnable2(GL_CULL_FACE);
+	glEnable2(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
+	glDisable2(GL_BLEND);
 
 	Vec3 cc = level->getCloudColor(alpha);
+	glColor4f2((float)cc.x, (float)cc.y, (float)cc.z, 1.0f);
 	
 	if (!isCloudMeshGenerated) {
-		generateCloudMesh((float)cc.x, (float)cc.y, (float)cc.z);
+		generateCloudMesh(1.0f, 1.0f, 1.0f);
 	}
 
+	float yOffs = (float) (mc->player->yOld + (mc->player->y - mc->player->yOld) * alpha);
 	float time = (ticks + alpha);
 	float xo = mc->player->xo + (mc->player->x - mc->player->xo) * alpha + time * 0.03f;
 	float zo = mc->player->zo + (mc->player->z - mc->player->zo) * alpha;
@@ -1483,6 +1484,7 @@ void LevelRenderer::renderClouds( float alpha ) {
 		const int Stride = VertexSizeBytes;
 		glBindBuffer2(GL_ARRAY_BUFFER, cloudRenderChunk.vboId);
 
+		glDisableClientState2(GL_TEXTURE_COORD_ARRAY);
 		glEnableClientState2(GL_VERTEX_ARRAY);
 		glEnableClientState2(GL_COLOR_ARRAY);
 
@@ -1509,15 +1511,13 @@ void LevelRenderer::renderClouds( float alpha ) {
 #ifdef USE_VBO
 		glDisableClientState2(GL_VERTEX_ARRAY);
 		glDisableClientState2(GL_COLOR_ARRAY);
-		
 		glBindBuffer2(GL_ARRAY_BUFFER, 0);
 #endif
 	}
 
-	glColor4f(1, 1, 1, 1.0f);
-	glDisable(GL_BLEND);
+	glColor4f2(1, 1, 1, 1.0f);
 	glEnable2(GL_TEXTURE_2D);  // Restore texture for rest of rendering
-	glEnable(GL_CULL_FACE);
+	glEnable2(GL_CULL_FACE);
 }
 
 void LevelRenderer::playSound(const std::string& name, float x, float y, float z, float volume, float pitch) {

@@ -28,6 +28,7 @@ public:
 	SliderFloat(Minecraft* minecraft, OptionId option);
 
 	virtual void mouseReleased( Minecraft* minecraft, int x, int y, int buttonNum ) override;	
+	virtual void tick(Minecraft* minecraft) override;
 
 protected:
 	OptionFloat* m_option;
@@ -40,6 +41,7 @@ public:
 
 	virtual void render( Minecraft* minecraft, int xm, int ym ) override;
 	virtual void mouseReleased( Minecraft* minecraft, int x, int y, int buttonNum ) override;
+	virtual void tick(Minecraft* minecraft) override;
 
 protected:
 	OptionInt* m_option;

@@ -1,6 +1,7 @@
-﻿#include "GraphicsScreen.h"
+#include "GraphicsScreen.h"
 #include "../../Minecraft.h"
 #include "../../Options.h"
+#include "../../renderer/LevelRenderer.h"
 #include "locale/I18n.h"
 
 GraphicsScreen::GraphicsScreen() : group(nullptr) {}
@@ -16,9 +17,16 @@ void GraphicsScreen::init() {
     group->height = height - 80;
     group->addOptionItem(OPTIONS_FOV, minecraft);
     group->addOptionItem(OPTIONS_FANCY_GRAPHICS, minecraft);
+    group->addOptionItem(OPTIONS_VIEW_DISTANCE, minecraft);
+    group->addOptionItem(OPTIONS_VIEW_BOBBING, minecraft);
+    group->addOptionItem(OPTIONS_AMBIENT_OCCLUSION, minecraft);
+    group->addOptionItem(OPTIONS_LIMIT_FRAMERATE, minecraft);
     group->addOptionItem(OPTIONS_VSYNC, minecraft);
     group->addOptionItem(OPTIONS_CLOUDS, minecraft);
     group->addOptionItem(OPTIONS_PARTICLES, minecraft);
+    group->addOptionItem(OPTIONS_ANAGLYPH_3D, minecraft);
+    group->addOptionItem(OPTIONS_RENDER_DEBUG, minecraft);
+    group->addOptionItem(OPTIONS_SHOW_VIGNETTE, minecraft);
     group->setupPositions();
 }
 
@@ -63,4 +71,11 @@ void GraphicsScreen::keyPressed(int eventKey) {
 void GraphicsScreen::tick() {
     if (group) group->tick(minecraft);
     Screen::tick();
+}
+
+void GraphicsScreen::removed() {
+    minecraft->options.save();
+    if (minecraft->level && minecraft->levelRenderer) {
+        minecraft->levelRenderer->allChanged();
+    }
 }

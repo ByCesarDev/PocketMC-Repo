@@ -1,4 +1,4 @@
-﻿#include "AccessibilitySettingsScreen.h"
+#include "AccessibilitySettingsScreen.h"
 #include "../../Minecraft.h"
 #include "../../Options.h"
 #include "locale/I18n.h"
@@ -14,6 +14,11 @@ void AccessibilitySettingsScreen::init() {
     group->y = 40;
     group->width = 300;
     group->height = height - 80;
+    group->addOptionItem(OPTIONS_USERNAME, minecraft);
+    group->addOptionItem(OPTIONS_DIFFICULTY, minecraft);
+    group->addOptionItem(OPTIONS_THIRD_PERSON_VIEW, minecraft);
+    group->addOptionItem(OPTIONS_GUI_SCALE, minecraft);
+    group->addOptionItem(OPTIONS_SERVER_VISIBLE, minecraft);
     group->addOptionItem(OPTIONS_HIGH_CONTRAST, minecraft);
     group->addOptionItem(OPTIONS_DAMAGE_TILT, minecraft);
     group->setupPositions();

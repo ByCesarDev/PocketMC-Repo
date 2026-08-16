@@ -15,6 +15,7 @@ public:
     virtual void renderBackground();
     virtual void keyPressed(int eventKey);
 	virtual void tick();
+	virtual void removed();
 private:
     Button* btnDone;
     OptionsGroup* group;

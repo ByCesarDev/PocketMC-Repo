@@ -96,7 +96,10 @@ void GameRenderer::setupCamera(float a, int eye) {
     glEnable2(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 
-    renderDistance = (float) (16 * 16 >> (mc->options.getIntValue(OPTIONS_VIEW_DISTANCE)));
+    int viewDist = mc->options.getIntValue(OPTIONS_VIEW_DISTANCE);
+    if (viewDist > 3) viewDist = 3;
+    if (viewDist < 0) viewDist = 0;
+    renderDistance = (float) (16 * 16 >> viewDist);
 #if defined(ANDROID)
     if (mc->isPowerVR() && mc->options.getIntValue(OPTIONS_VIEW_DISTANCE) <= 2)
 		renderDistance *= 0.8f;
@@ -795,7 +798,10 @@ void GameRenderer::tick(int nTick, int maxTick) {
 											Mth::floor(mc->cameraTargetPlayer->y),
 											Mth::floor(mc->cameraTargetPlayer->z));
 
-	float whiteness = (3 - mc->options.getIntValue(OPTIONS_VIEW_DISTANCE)) / 3.0f;
+    int vDist = mc->options.getIntValue(OPTIONS_VIEW_DISTANCE);
+    if (vDist > 3) vDist = 3;
+    if (vDist < 0) vDist = 0;
+	float whiteness = (3 - vDist) / 3.0f;
     float fogBrT = brr * (1 - whiteness) + whiteness;
     fogBr += (fogBrT - fogBr) * 0.1f;
 
@@ -815,7 +821,10 @@ void GameRenderer::setupClearColor(float a) {
     Level* level = mc->level;
     Mob* player = mc->cameraTargetPlayer;
 
-    float whiteness = 1.0f / (4 - mc->options.getIntValue(OPTIONS_VIEW_DISTANCE));
+    int vDistColor = mc->options.getIntValue(OPTIONS_VIEW_DISTANCE);
+    if (vDistColor > 3) vDistColor = 3;
+    if (vDistColor < 0) vDistColor = 0;
+    float whiteness = 1.0f / (4 - vDistColor);
     whiteness = 1 - (float) pow(whiteness, 0.25f);
 
     Vec3 skyColor = level->getSkyColor(mc->cameraTargetPlayer, a);

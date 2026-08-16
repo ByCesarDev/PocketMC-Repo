@@ -50,7 +50,7 @@ OptionFloat soundVolume("sound", 1.f, SOUND_MIN_VALUE, SOUND_MAX_VALUE);
 OptionFloat sensitivityOpt("sensitivity", 0.5f, SENSITIVITY_MIN_VALUE, SENSITIVITY_MAX_VALUE);
 
 OptionBool invertYMouse("invertMouse", false);
-OptionInt viewDistance("renderDistance", 2, 0, 4);
+OptionInt viewDistance("renderDistance", 2, 0, 3);
 
 OptionBool anaglyph3d("anaglyph3d", false);
 OptionBool limitFramerate("limitFramerate", false);

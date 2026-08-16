@@ -71,8 +71,8 @@ public:
     static const short SEA_LEVEL = DEPTH / 2 - 1;
 
     static const int MAX_BRIGHTNESS = 15;
-    static const int TICKS_PER_DAY = SharedConstants::TicksPerSecond * 60 * 16;// SharedConstants::TicksPerSecond * 60 * 12; // ORG:20*60*20
-	static const int MIDDLE_OF_NIGHT_TIME = 12000;
+    static const int TICKS_PER_DAY = SharedConstants::TicksPerSecond * 60 * 20; // 24,000 ticks = 20 real minutes
+	static const int MIDDLE_OF_NIGHT_TIME = 18000;
 	static const int genDepthBits = 7;
 	static const int genDepthBitsPlusFour = genDepthBits + 4;
 	static const int genDepth = 1 << genDepthBits;

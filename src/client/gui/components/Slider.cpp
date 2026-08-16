@@ -88,7 +88,26 @@ void SliderInt::mouseReleased( Minecraft* minecraft, int x, int y, int buttonNum
 void SliderFloat::mouseReleased( Minecraft* minecraft, int x, int y, int buttonNum ) {
 	Slider::mouseReleased(minecraft, x, y, buttonNum);
 
-	if (pointInside(x, y)) {
+	if (pointInside(x, y) && m_option) {
 		minecraft->options.set(m_optId, m_percentage * (m_option->getMax() - m_option->getMin()) + m_option->getMin());
+	}
+}
+
+void SliderFloat::tick(Minecraft* minecraft) {
+	Slider::tick(minecraft);
+	if (m_mouseDownOnElement && m_option) {
+		float val = m_percentage * (m_option->getMax() - m_option->getMin()) + m_option->getMin();
+		minecraft->options.set(m_optId, val);
+	}
+}
+
+void SliderInt::tick(Minecraft* minecraft) {
+	Slider::tick(minecraft);
+	if (m_mouseDownOnElement && m_option && m_numSteps > 1) {
+		int curStep = int(m_percentage * (m_numSteps - 1) + 0.5f);
+		curStep = Mth::clamp(curStep + m_option->getMin(), m_option->getMin(), m_option->getMax());
+		if (minecraft->options.getIntValue(m_optId) != curStep) {
+			minecraft->options.set(m_optId, curStep);
+		}
 	}
 }

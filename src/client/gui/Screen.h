@@ -42,6 +42,7 @@ public:
     virtual void renderBackground(int vo);
     virtual void renderDirtBackground(int vo);
     virtual void renderPanorama(int ticks, float a);
+    static float getPanoramaTime();
 	// query
 	virtual bool renderGameBehind();
 	virtual bool hasClippingArea(IntRectangle& out);

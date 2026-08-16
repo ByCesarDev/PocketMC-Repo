@@ -65,6 +65,20 @@ void OptionsItem::render( Minecraft* minecraft, int xm, int ym ) {
 			valText = "+" + std::to_string((int)std::round(val * 100.0f)) + "%";
 		}
 		text += ": " + valText;
+	} else if (m_optionId == OPTIONS_VIEW_DISTANCE) {
+		int val = minecraft->options.getIntValue(OPTIONS_VIEW_DISTANCE);
+		std::string valText = std::to_string(val);
+		static const char* defaultNames[] = {"Lejano", "Normal", "Corto", "Mínimo"};
+		std::string name = I18n::get("options.renderDistance." + std::to_string(val));
+		if (name.empty() || name.back() == '<') {
+			if (val >= 0 && val <= 3) {
+				name = defaultNames[val];
+			}
+		}
+		if (!name.empty()) {
+			valText += " (" + name + ")";
+		}
+		text += ": " + valText;
 	}
 
 	minecraft->font->draw(text, (float)x, (float)y + yOffset, 0x909090, false);

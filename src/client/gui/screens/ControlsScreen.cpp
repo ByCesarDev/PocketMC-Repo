@@ -1,4 +1,4 @@
-﻿#include "ControlsScreen.h"
+#include "ControlsScreen.h"
 #include "../../Minecraft.h"
 #include "../../Options.h"
 #include "locale/I18n.h"
@@ -17,6 +17,9 @@ void ControlsScreen::init() {
     group->width = 300;
     group->height = height - 100;
     group->addOptionItem(OPTIONS_AUTOJUMP, minecraft);
+    group->addOptionItem(OPTIONS_ALLOW_SPRINT, minecraft);
+    group->addOptionItem(OPTIONS_IS_LEFT_HANDED, minecraft);
+    group->addOptionItem(OPTIONS_IS_JOY_TOUCH_AREA, minecraft);
     group->setupPositions();
     
     buttons.push_back(new Button(1, width / 2 - 155, height - 55, 150, 20, I18n::get("options.mouse_settings")));

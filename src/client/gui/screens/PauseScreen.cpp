@@ -1,4 +1,4 @@
-﻿#include "PauseScreen.h"
+#include "PauseScreen.h"
 #include "StartMenuScreen.h"
 #include "../components/ImageButton.h"
 #include "../../Minecraft.h"
@@ -12,6 +12,7 @@
 #include "client/model/HumanoidModel.h"
 #include "client/renderer/TextureData.h"
 #include "client/renderer/Textures.h"
+#include "client/renderer/GuiShader.h"
 #include "../../../locale/I18n.h"
 
 PauseScreen::PauseScreen(bool wasBackPaused)
@@ -197,6 +198,7 @@ void PauseScreen::render(int xm, int ym, float a) {
 
 	minecraft->textures->bind(skinTexId);
 	glEnable2(GL_DEPTH_TEST);
+	GuiShader::unbind();
 	glPushMatrix();
 	glTranslatef((float)centerX, (float)centerY, -100);
 	glScalef(-ss, ss, ss);
@@ -217,6 +219,7 @@ void PauseScreen::render(int xm, int ym, float a) {
 	skinModel.render(nullptr, 0, 0, 0, headYaw, headPitch, 0.0625f);
 	glPopMatrix();
 	glDisable2(GL_DEPTH_TEST);
+	GuiShader::bind();
 }
 
 void PauseScreen::buttonClicked(Button* button) {

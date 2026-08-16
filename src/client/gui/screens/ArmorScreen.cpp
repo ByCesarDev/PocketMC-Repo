@@ -1,4 +1,4 @@
-﻿#include "ArmorScreen.h"
+#include "ArmorScreen.h"
 #include "../../../locale/I18n.h"
 #include "../Screen.h"
 #include "../components/NinePatch.h"
@@ -19,6 +19,7 @@
 #include "../../../world/level/Level.h"
 #include "../../../network/RakNetInstance.h"
 #include "../../renderer/entity/EntityRenderDispatcher.h"
+#include "../../renderer/GuiShader.h"
 #include "../../../world/item/ArmorItem.h"
 
 static void setIfNotSet(bool& ref, bool condition) {
@@ -415,6 +416,7 @@ void ArmorScreen::takeAndClearSlot( int slot ) {
 }
 
 void ArmorScreen::renderPlayer(float xo, float yo) {
+	GuiShader::unbind();
 	// Push GL and player state
 	glPushMatrix();
 
@@ -473,4 +475,5 @@ void ArmorScreen::renderPlayer(float xo, float yo) {
 	player->xRot = oxr;
 
 	glPopMatrix();
+	GuiShader::bind();
 }

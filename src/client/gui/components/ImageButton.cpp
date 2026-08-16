@@ -124,11 +124,8 @@ void OptionButton::toggle(Options* options) {
 
 void OptionButton::updateImage(Options* options) {
 	// Support both boolean and int-backed options so toggles show correctly
-	// for OptionBool (true/false) and OptionInt (enum/0/1)
-	bool val = false;
-	// try boolean first
-	val = options->getBooleanValue(m_optId);
-	// if boolean returns false, check int value (covers enums and int toggles)
+	// for OptionBool (true/false) and OptionInt (enum/0/1).
+	bool val = options->getBooleanValue(m_optId);
 	if (!val) {
 		val = options->getIntValue(m_optId) > 0;
 	}

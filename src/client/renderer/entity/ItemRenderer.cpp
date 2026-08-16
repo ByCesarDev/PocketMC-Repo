@@ -12,6 +12,7 @@
 #include "EntityRenderer.h"
 #include "../ItemInHandRenderer.h"
 #include "../../gui/Gui.h"
+#include "../GuiShader.h"
 #include "../../../world/item/Item.h"
 
 /*static*/
@@ -251,6 +252,8 @@ void ItemRenderer::renderGuiItemCorrect(Font* font, Textures* textures, const It
 	if (item->id >= 0 && item->id < 256 && Tile::tiles[item->id] != NULL &&
 		TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape()))
 	{
+		GuiShader::unbind();
+
 		int paint = item->id;
 		// Choose atlas based on tile texture flag so tiles using the
 		// secondary atlas (terrain2.png) render correctly in GUI.
@@ -310,6 +313,8 @@ void ItemRenderer::renderGuiItemCorrect(Font* font, Textures* textures, const It
 
 		if (!depthWriteMaskWasEnabled) glDepthMask(GL_FALSE);
 		if (!depthWasEnabled) glDisable2(GL_DEPTH_TEST);
+
+		GuiShader::bind();
 	}
 	else if (item->getIcon() >= 0)
 	{

@@ -4,6 +4,7 @@
 #include "../Minecraft.h"
 #include "../renderer/Tesselator.h"
 #include "../renderer/gles.h"
+#include "../renderer/GuiShader.h"
 #include "../sound/SoundEngine.h"
 #include "../../platform/input/Keyboard.h"
 #include "../../platform/input/Mouse.h"
@@ -169,7 +170,7 @@ void Screen::renderBackground( int vo )
 
 #include <chrono>
 
-static float getPanoramaTime() {
+float Screen::getPanoramaTime() {
     static auto start_time = std::chrono::steady_clock::now();
     auto now = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
@@ -193,6 +194,8 @@ void Screen::renderDirtBackground( int vo )
 
 void Screen::renderPanorama(int ticks, float a)
 {
+	GuiShader::unbind();
+
 	Tesselator& t = Tesselator::instance;
 
 	glDisable2(GL_DEPTH_TEST);
@@ -244,6 +247,8 @@ void Screen::renderPanorama(int ticks, float a)
 	glEnable2(GL_DEPTH_TEST);
 	glEnable2(GL_CULL_FACE);
 	glEnable2(GL_ALPHA_TEST);
+
+	GuiShader::bind();
 }
 
 bool Screen::isPauseScreen()
