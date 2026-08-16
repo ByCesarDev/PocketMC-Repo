@@ -188,7 +188,7 @@ void GameRenderer::render(float a) {
 				useScreenScissor = true;
 
 			GuiShader::unbind();
-			renderLevel(a);
+			renderLevel(mc->pause ? 1.0f : a);
 			hasClearedColorBuffer = true;
 
 			if (!mc->options.getBooleanValue(OPTIONS_HIDEGUI)) {

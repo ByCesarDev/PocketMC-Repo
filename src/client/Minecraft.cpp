@@ -524,6 +524,21 @@ void Minecraft::tick(int nTick, int maxTick) {
 	}
 #endif
 	TIMER_PUSH("gameMode");
+	// Automatically evaluate pause state for singleplayer / LAN
+	bool isMultiplayer = isOnlineClient();
+	if (raknetInstance && raknetInstance->isServer() && netCallback) {
+		ServerSideNetworkHandler* ss = (ServerSideNetworkHandler*) netCallback;
+		if (ss->allowsIncomingConnections()) {
+			isMultiplayer = true;
+		}
+	}
+
+	if (screen != NULL && screen->isPauseScreen() && !isMultiplayer) {
+		pause = true;
+	} else if (screen == NULL && !isMultiplayer) {
+		pause = false;
+	}
+
 	if (level && !pause) {
 		gameMode->tick();
 	}
