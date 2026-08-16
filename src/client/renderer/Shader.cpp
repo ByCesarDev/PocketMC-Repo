@@ -42,6 +42,9 @@ unsigned int Shader::compileShader(unsigned int type, const std::string& source)
 
 bool Shader::loadFromSource(const std::string& vertexSource, const std::string& fragmentSource)
 {
+#if defined(OPENGL_ES)
+    return true;
+#else
     unsigned int vs = compileShader(GL_VERTEX_SHADER, vertexSource);
     unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
 
@@ -76,18 +79,25 @@ bool Shader::loadFromSource(const std::string& vertexSource, const std::string& 
     glDeleteShader(vs);
     glDeleteShader(fs);
     return true;
+#endif
 }
 
 void Shader::bind() const
 {
+#if !defined(OPENGL_ES)
     if (m_programId != 0) {
         glUseProgram(m_programId);
     }
+#endif
 }
 
 void Shader::unbind() const
 {
-    glUseProgram(0);
+#if !defined(OPENGL_ES)
+    if (m_programId != 0) {
+        glUseProgram(0);
+    }
+#endif
 }
 
 int Shader::getUniformLocation(const std::string& name)
