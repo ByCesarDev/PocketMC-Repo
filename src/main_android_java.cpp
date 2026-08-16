@@ -26,35 +26,21 @@ static AppPlatform_android appPlatform;
 
 static void setupExternalPath(JNIEnv* env, MAIN_CLASS* app)
 {
-    //JVMAttacher ta(vm);
-    //JNIEnv* env = ta.getEnv();
-
     LOGI("setupExternalPath");
 
     if (env)
     {
         LOGI("Environment exists");
     }
-    // try appspecific external directory first
-    jobject activity = g_pActivity;
-    jclass activityClass = env->GetObjectClass(activity);
-    jmethodID getExternalFilesDir = env->GetMethodID(activityClass, "getExternalFilesDir", "(Ljava/lang/String;)Ljava/io/File;");
-
-    jobject file = NULL;
-    if (getExternalFilesDir != NULL) {
-        file = env->CallObjectMethod(activity, getExternalFilesDir, NULL);
+    
+    // Use external storage root directory directly (/storage/emulated/0) instead of Android/data
+    jclass clazz = env->FindClass("android/os/Environment");
+    jmethodID method = env->GetStaticMethodID(clazz, "getExternalStorageDirectory", "()Ljava/io/File;");
+    if (env->ExceptionOccurred()) {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
     }
-
-    if (file == NULL) {
-        // Fallback to the legacy shared storage directory
-        jclass clazz = env->FindClass("android/os/Environment");
-        jmethodID method = env->GetStaticMethodID(clazz, "getExternalStorageDirectory", "()Ljava/io/File;");
-        if (env->ExceptionOccurred()) {
-            env->ExceptionDescribe();
-            env->ExceptionClear();
-        }
-        file = env->CallStaticObjectMethod(clazz, method);
-    }
+    jobject file = env->CallStaticObjectMethod(clazz, method);
 
     if (!file) {
         LOGI("Failed to get external storage file object, using current working dir");
