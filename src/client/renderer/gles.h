@@ -5,8 +5,10 @@
 #include "../Options.h"
 
 // Android should always run OPENGL_ES
+#ifndef OPENGL_ES
 #if defined(ANDROID) || defined(__APPLE__) || defined(RPI)
     #define OPENGL_ES
+#endif
 #endif
 
 // Other systems might run it, if they #define OPENGL_ES
@@ -19,6 +21,8 @@
     #elif defined(ANDROID) || defined(__EMSCRIPTEN__)
         #include <GLES/gl.h>
         #include <GLES/glext.h>
+        #include <GLES2/gl2.h>
+        #include <GLES2/gl2ext.h>
     #else
         #if defined(_WIN32)
             #include <winsock2.h>
