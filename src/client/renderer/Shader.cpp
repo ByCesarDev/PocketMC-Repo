@@ -10,14 +10,19 @@ Shader::Shader()
 
 Shader::~Shader()
 {
+#if !defined(OPENGL_ES)
     if (m_programId != 0) {
         glDeleteProgram(m_programId);
         m_programId = 0;
     }
+#endif
 }
 
 unsigned int Shader::compileShader(unsigned int type, const std::string& source)
 {
+#if defined(OPENGL_ES)
+    return 0;
+#else
     unsigned int id = glCreateShader(type);
     const char* src = source.c_str();
     glShaderSource(id, 1, &src, NULL);
@@ -38,6 +43,7 @@ unsigned int Shader::compileShader(unsigned int type, const std::string& source)
         return 0;
     }
     return id;
+#endif
 }
 
 bool Shader::loadFromSource(const std::string& vertexSource, const std::string& fragmentSource)
@@ -102,6 +108,9 @@ void Shader::unbind() const
 
 int Shader::getUniformLocation(const std::string& name)
 {
+#if defined(OPENGL_ES)
+    return -1;
+#else
     auto it = m_uniformLocations.find(name);
     if (it != m_uniformLocations.end()) {
         return it->second;
@@ -110,10 +119,14 @@ int Shader::getUniformLocation(const std::string& name)
     int location = glGetUniformLocation(m_programId, name.c_str());
     m_uniformLocations[name] = location;
     return location;
+#endif
 }
 
 int Shader::getAttribLocation(const std::string& name)
 {
+#if defined(OPENGL_ES)
+    return -1;
+#else
     auto it = m_attribLocations.find(name);
     if (it != m_attribLocations.end()) {
         return it->second;
@@ -122,52 +135,65 @@ int Shader::getAttribLocation(const std::string& name)
     int location = glGetAttribLocation(m_programId, name.c_str());
     m_attribLocations[name] = location;
     return location;
+#endif
 }
 
 void Shader::setUniformMatrix4f(const std::string& name, const Matrix4f& matrix)
 {
+#if !defined(OPENGL_ES)
     int loc = getUniformLocation(name);
     if (loc != -1) {
         glUniformMatrix4fv(loc, 1, GL_FALSE, matrix.getValues());
     }
+#endif
 }
 
 void Shader::setUniform1i(const std::string& name, int value)
 {
+#if !defined(OPENGL_ES)
     int loc = getUniformLocation(name);
     if (loc != -1) {
         glUniform1i(loc, value);
     }
+#endif
 }
 
 void Shader::setUniform1f(const std::string& name, float value)
 {
+#if !defined(OPENGL_ES)
     int loc = getUniformLocation(name);
     if (loc != -1) {
         glUniform1f(loc, value);
     }
+#endif
 }
 
 void Shader::setUniform2f(const std::string& name, float x, float y)
 {
+#if !defined(OPENGL_ES)
     int loc = getUniformLocation(name);
     if (loc != -1) {
         glUniform2f(loc, x, y);
     }
+#endif
 }
 
 void Shader::setUniform3f(const std::string& name, float x, float y, float z)
 {
+#if !defined(OPENGL_ES)
     int loc = getUniformLocation(name);
     if (loc != -1) {
         glUniform3f(loc, x, y, z);
     }
+#endif
 }
 
 void Shader::setUniform4f(const std::string& name, float x, float y, float z, float w)
 {
+#if !defined(OPENGL_ES)
     int loc = getUniformLocation(name);
     if (loc != -1) {
         glUniform4f(loc, x, y, z, w);
     }
+#endif
 }
