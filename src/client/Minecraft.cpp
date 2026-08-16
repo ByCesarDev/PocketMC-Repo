@@ -524,14 +524,9 @@ void Minecraft::tick(int nTick, int maxTick) {
 	}
 #endif
 	TIMER_PUSH("gameMode");
-	// Automatically evaluate pause state for singleplayer / LAN
-	bool isMultiplayer = isOnlineClient();
-	if (raknetInstance && raknetInstance->isServer() && netCallback) {
-		ServerSideNetworkHandler* ss = (ServerSideNetworkHandler*) netCallback;
-		if (ss->allowsIncomingConnections()) {
-			isMultiplayer = true;
-		}
-	}
+	// Automatically evaluate pause state for singleplayer
+	// A game is multiplayer only if connected to an external server or if multiple players exist in the level.
+	bool isMultiplayer = isOnlineClient() || (level != NULL && level->players.size() > 1);
 
 	if (screen != NULL && screen->isPauseScreen() && !isMultiplayer) {
 		pause = true;
@@ -1127,16 +1122,8 @@ bool Minecraft::isOnline()
 }
 
 void Minecraft::pauseGame(bool isBackPaused) {
-	// Only freeze gameplay when running a local server and it is not accepting
-	// incoming connections (invisible server), which includes typical single-
-	// player/lobby mode. If the server is visible, the game should keep ticking.
-	bool canFreeze = false;
-	if (raknetInstance && raknetInstance->isServer() && netCallback) {
-		ServerSideNetworkHandler* ss = (ServerSideNetworkHandler*) netCallback;
-		if (!ss->allowsIncomingConnections())
-			canFreeze = true;
-	}
-	pause = canFreeze;
+	bool isMultiplayer = isOnlineClient() || (level != NULL && level->players.size() > 1);
+	pause = !isMultiplayer;
 
 #ifndef STANDALONE_SERVER
 	if (screen != NULL) return;
