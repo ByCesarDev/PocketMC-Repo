@@ -762,7 +762,7 @@ class DialogDefinitions {
 class GLView extends GLSurfaceView {
 	public GLView(Context context, MainActivity activity) {
         super(context);
-        setEGLContextClientVersion(3);
+        setEGLContextClientVersion(1);
         _activity = activity;
         _renderer = new GLRenderer(activity);
     }
