@@ -56,12 +56,12 @@ PauseScreen::~PauseScreen() {
 }
 
 void PauseScreen::init() {
-	bContinue = new Button(1, "Resume Game");
-	bOptions = new Button(5, "Options");
-	bQuit = new Button(2, "Save and Exit");
-	bQuitAndSaveLocally = new Button(3, "Save and Exit");
-	bServerVisibility = new Button(4, "Open to LAN");
-	bDressingRoom = new Button(6, "Dressing Room");
+	bContinue = new Button(1, I18n::get("menu.returnToGame"));
+	bOptions = new Button(5, I18n::get("menu.options"));
+	bQuit = new Button(2, I18n::get("menu.returnToMenu"));
+	bQuitAndSaveLocally = new Button(3, I18n::get("menu.quitAndSaveLocally"));
+	bServerVisibility = new Button(4, I18n::get("menu.serverVisible"));
+	bDressingRoom = new Button(6, I18n::get("skindex.title"));
 
 	buttons.push_back(bContinue);
 	buttons.push_back(bOptions);
@@ -164,7 +164,7 @@ void PauseScreen::tick() {
 void PauseScreen::render(int xm, int ym, float a) {
 	renderBackground();
 
-	drawCenteredString(font, "Game Menu", width / 4, 18, 0xffffff);
+	drawCenteredString(font, I18n::get("menu.gameMenu"), width / 4, 18, 0xffffff);
 
 	super::render(xm, ym, a);
 

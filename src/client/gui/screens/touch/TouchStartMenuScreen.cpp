@@ -37,7 +37,7 @@ StartMenuScreen::StartMenuScreen()
 	bJoin(    3, 0, 0, 160, 24, I18n::get("menu.joinGame")),
 	bProfile( 6, 0, 0, 60,  24, I18n::get("menu.profile")),
 	bSkindex( 7, 0, 0, 60,  24, I18n::get("menu.skindex")),
-	bMods(    8, 0, 0, 60,  24, "Mods"),
+	bMods(    8, 0, 0, 60,  24, I18n::get("menu.mods")),
 	bQuit(    5, 0, 0, 160, 24, I18n::get("menu.quit")),
 	panoramaTicks(0)
 {

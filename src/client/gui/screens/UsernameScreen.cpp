@@ -1,14 +1,15 @@
-﻿#include "UsernameScreen.h"
+#include "UsernameScreen.h"
 #include "StartMenuScreen.h"
 #include "../../Minecraft.h"
 #include "../Font.h"
 #include "../components/Button.h"
 #include "../../../platform/input/Keyboard.h"
 #include "../../../AppPlatform.h"
+#include "locale/I18n.h"
 
 UsernameScreen::UsernameScreen()
-:   _btnDone(0, "Done"),
-    tUsername(0, "Username"),
+:   _btnDone(0, I18n::get("gui.done")),
+    tUsername(0, I18n::get("options.username")),
     _cursorBlink(0)
 {
 }
@@ -56,7 +57,7 @@ void UsernameScreen::keyPressed(int eventKey)
             buttonClicked(&_btnDone);
     }
 
-    // deliberately do NOT call super::keyPressed â€” that would close the screen on Escape
+    // deliberately do NOT call super::keyPressed — that would close the screen on Escape
     Screen::keyPressed(eventKey);
 
     // enable the Done button only when there is some text (and ensure it updates after backspace)
@@ -86,12 +87,12 @@ void UsernameScreen::render(int xm, int ym, float a)
     int cy = height / 2;
 
     // Title
-    drawCenteredString(font, "Enter your username", cx, cy - 70, 0xffffffff);
+    drawCenteredString(font, I18n::get("username.title"), cx, cy - 70, 0xffffffff);
 
     // Subtitle
-    drawCenteredString(font, "Please choose a username so others can easily", cx, cy - 52, 0xffaaaaaa);
-    drawCenteredString(font, "identify you in chat. Don't worry, you can", cx, cy - 40, 0xffaaaaaa);
-    drawCenteredString(font, "change it anytime.", cx, cy - 28, 0xffaaaaaa);
+    drawCenteredString(font, I18n::get("username.desc1"), cx, cy - 52, 0xffaaaaaa);
+    drawCenteredString(font, I18n::get("username.desc2"), cx, cy - 40, 0xffaaaaaa);
+    drawCenteredString(font, I18n::get("username.desc3"), cx, cy - 28, 0xffaaaaaa);
 
     // // Hint below box
     // drawCenteredString(font, "Max 16 characters", cx, cy + 20, 0xff808080);

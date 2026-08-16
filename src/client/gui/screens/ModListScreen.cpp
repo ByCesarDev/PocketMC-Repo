@@ -1,8 +1,9 @@
-﻿#include "ModListScreen.h"
+#include "ModListScreen.h"
 
 #include "../../Minecraft.h"
 #include "../../renderer/Textures.h"
 #include "../../../platform/input/Mouse.h"
+#include "locale/I18n.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -19,8 +20,8 @@ static std::string joinRoot(const std::string& a, const std::string& b)
 }
 
 ModListScreen::ModListScreen()
-    : bOpenFolder(1, "Open Mods Folder"),
-      bDone(2, "Done"),
+    : bOpenFolder(1, I18n::get("mods.openFolder")),
+      bDone(2, I18n::get("gui.done")),
       selected(0),
       scrollOffset(0),
       listX(0),
@@ -80,7 +81,7 @@ void ModListScreen::setupPositions()
 void ModListScreen::render(int xm, int ym, float a)
 {
     renderBackground();
-    drawCenteredString(font, "Mods", width / 2, 12, 0xffffffff);
+    drawCenteredString(font, I18n::get("menu.mods"), width / 2, 12, 0xffffffff);
 
     fill(listX, listY, listX + listW, listY + listH, 0x90000000);
     fill(detailX, detailY, detailX + detailW, detailY + detailH, 0x90000000);

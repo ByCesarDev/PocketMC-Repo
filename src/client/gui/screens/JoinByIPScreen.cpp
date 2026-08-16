@@ -1,4 +1,4 @@
-﻿#include "JoinByIPScreen.h"
+#include "JoinByIPScreen.h"
 
 #include "JoinGameScreen.h"
 #include "StartMenuScreen.h"
@@ -98,8 +98,8 @@ void JoinByIPScreen::render( int xm, int ym, float a )
 {
 	renderBackground();
 	
-	drawCenteredString(minecraft->font, "Direct Connection", width / 2, 17, 0xffffffff);
-	drawString(minecraft->font, "Server Address", width / 2 - 100, height / 4 + 36 - 10, 0xa0a0a0);
+	drawCenteredString(minecraft->font, I18n::get("selectServer.direct"), width / 2, 17, 0xffffffff);
+	drawString(minecraft->font, I18n::get("addServer.enterIp"), width / 2 - 100, height / 4 + 36 - 10, 0xa0a0a0);
 
 	Screen::render(xm, ym, a);
 }
