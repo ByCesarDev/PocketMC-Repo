@@ -152,6 +152,7 @@ void Tesselator::setupVertexAttributes()
 void Tesselator::disableVertexAttributes()
 {
 #ifndef STANDALONE_SERVER
+#if !defined(OPENGL_ES)
 	GLint currentProgram = 0;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 
@@ -161,6 +162,7 @@ void Tesselator::disableVertexAttributes()
 		if (hasColor) glDisableVertexAttribArray(2);
 		if (hasNormal) glDisableVertexAttribArray(3);
 	}
+#endif
 
 	glDisableClientState2(GL_VERTEX_ARRAY);
 	if (hasTexture) glDisableClientState2(GL_TEXTURE_COORD_ARRAY);
