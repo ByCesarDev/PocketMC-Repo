@@ -911,10 +911,24 @@ bool LevelRenderer::updateDirtyChunks( Mob* player, bool force )
 				std::sort(nearChunks->begin(), nearChunks->end(), dirtyChunkSorter);
 			}
 
-			for (int i = nearChunks->size() - 1; i >= 0; i--) {
+			int processed = 0;
+			int totalNear = (int)nearChunks->size();
+			for (int i = totalNear - 1; i >= 0; i--) {
 				Chunk* chunk = (*nearChunks)[i];
 				chunk->rebuild();
 				chunk->setClean();
+				processed++;
+
+				if (processed >= 2 || chunkWatch.stopContinue() > MaxFrameTime) {
+					for (int j = i - 1; j >= 0; j--) {
+						Chunk* rem = (*nearChunks)[j];
+						if (rem) {
+							rem->setDirty();
+							dirtyChunks.push_back(rem);
+						}
+					}
+					break;
+				}
 			}
 			delete nearChunks;
 		}
