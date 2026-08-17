@@ -714,6 +714,14 @@ public class MainActivity extends Activity {
     }
 
     protected boolean isDemo() { return false; }
+
+    private SoundPlayer _soundPlayer;
+
+    public void playSound(String filename, float volume, float pitch) {
+        if (_soundPlayer != null) {
+            _soundPlayer.play(filename, volume, pitch);
+        }
+    }
     
     //
     // Native interface

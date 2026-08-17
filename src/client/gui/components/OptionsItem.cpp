@@ -79,6 +79,24 @@ void OptionsItem::render( Minecraft* minecraft, int xm, int ym ) {
 			valText += " (" + name + ")";
 		}
 		text += ": " + valText;
+	} else if (m_optionId == OPTIONS_MUSIC_VOLUME) {
+		float val = minecraft->options.getProgressValue(OPTIONS_MUSIC_VOLUME);
+		std::string valText;
+		if (val <= 0.0f + 0.01f) {
+			valText = I18n::get("options.off");
+		} else {
+			valText = std::to_string((int)std::round(val * 100.0f)) + "%";
+		}
+		text += ": " + valText;
+	} else if (m_optionId == OPTIONS_SOUND_VOLUME) {
+		float val = minecraft->options.getProgressValue(OPTIONS_SOUND_VOLUME);
+		std::string valText;
+		if (val <= 0.0f + 0.01f) {
+			valText = I18n::get("options.off");
+		} else {
+			valText = std::to_string((int)std::round(val * 100.0f)) + "%";
+		}
+		text += ": " + valText;
 	}
 
 	minecraft->font->draw(text, (float)x, (float)y + yOffset, 0x909090, false);

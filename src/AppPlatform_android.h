@@ -130,10 +130,8 @@ public:
         _methodSaveScreenshot = env->GetStaticMethodID( _activityClass, "saveScreenshot", "(Ljava/lang/String;II[I)V");
         _postScreenshotToFacebook = env->GetMethodID( _activityClass, "postScreenshotToFacebook", "(Ljava/lang/String;II[I)V");
         _getImageData = env->GetMethodID( _activityClass, "getImageData", "(Ljava/lang/String;)[I");
-		_readAssetFile = env->GetMethodID( _activityClass, "getFileDataBytes", "(Ljava/lang/String;)[B");
-        #if defined(PRE_ANDROID23)
-            _methodPlaySound = env->GetMethodID( _activityClass, "playSound", "(Ljava/lang/String;FF)V");
-        #endif
+        _readAssetFile = env->GetMethodID( _activityClass, "getFileDataBytes", "(Ljava/lang/String;)[B");
+        _methodPlaySound = env->GetMethodID( _activityClass, "playSound", "(Ljava/lang/String;FF)V");
         _showDialog = env->GetMethodID( _activityClass, "displayDialog", "(I)V");
         _methodTick = env->GetMethodID( _activityClass, "tick", "()V");
         _methodFinish = env->GetMethodID( _activityClass, "quit", "()V");
