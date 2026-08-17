@@ -6,11 +6,15 @@
 #include "../../../locale/I18n.h"
 #include "TextOption.h"
 #include "KeyOption.h"
+#include "../../../platform/input/Mouse.h"
 
 OptionsGroup::OptionsGroup( std::string labelID )  {
 	label = labelID;
 	scrollOffset = 0;
 	contentHeight = 0;
+	isDragging = false;
+	lastDragY = 0;
+	dragInertia = 0.0f;
 }
 
 void OptionsGroup::setupPositions() {
@@ -31,6 +35,38 @@ void OptionsGroup::setupPositions() {
 }
 
 void OptionsGroup::render( Minecraft* minecraft, int xm, int ym ) {
+	// Touch / mouse drag scrolling
+	if (Mouse::isButtonDown(MouseAction::ACTION_LEFT)) {
+		if (isDragging) {
+			int dy = ym - lastDragY;
+			if (dy != 0) {
+				scrollOffset -= dy;
+				dragInertia = (float)dy;
+				lastDragY = ym;
+			}
+		} else if (xm >= x && xm <= x + width && ym >= y && ym <= y + height) {
+			isDragging = true;
+			lastDragY = ym;
+			dragInertia = 0.0f;
+		}
+	} else {
+		if (isDragging) {
+			isDragging = false;
+		}
+		if (std::abs(dragInertia) > 0.5f) {
+			scrollOffset -= (int)dragInertia;
+			dragInertia *= 0.85f;
+		} else {
+			dragInertia = 0.0f;
+		}
+	}
+
+	// Clamp scrollOffset
+	int maxOffset = contentHeight - height;
+	if (maxOffset < 0) maxOffset = 0;
+	if (scrollOffset < 0) scrollOffset = 0;
+	if (scrollOffset > maxOffset) scrollOffset = maxOffset;
+
 	float padX = 10.0f;
 	float padY = 5.0f;
 	

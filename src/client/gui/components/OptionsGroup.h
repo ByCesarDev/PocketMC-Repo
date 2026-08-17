@@ -34,6 +34,9 @@ protected:
 	std::string label;
 	int scrollOffset;
 	int contentHeight;
+	bool isDragging;
+	int lastDragY;
+	float dragInertia;
 };
 
 #endif /*NET_MINECRAFT_CLIENT_GUI_COMPONENTS__OptionsGroup_H__*/
