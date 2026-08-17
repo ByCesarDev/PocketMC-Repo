@@ -41,10 +41,12 @@ void Dimension::init()
 bool Dimension::isValidSpawn(int x, int z) {
     int topTile = level->getTopTile(x, z);
 
+    if (topTile <= 0 || topTile >= 256 || Tile::tiles[topTile] == NULL)
+        return false;
+
 	if (topTile == Tile::invisible_bedrock->id)
 		return false;
 
-    //if (topTile != Tile::sand->id) return false;
 	if (!Tile::tiles[topTile]->isSolidRender()) return false;
 
     return true;
