@@ -190,7 +190,7 @@ void Level::tick() {
 			_mobSpawnTick = 0;
 			TIMER_PUSH("mobSpawner");
 			MobSpawner::tick(this,	_spawnEnemies && difficulty > Difficulty::PEACEFUL,
-									_spawnFriendlies && (levelData.getTime() % 200) < MobSpawnInterval);
+									_spawnFriendlies && (levelData.getTime() % 40) < MobSpawnInterval);
 			TIMER_POP();
 		}
 	}

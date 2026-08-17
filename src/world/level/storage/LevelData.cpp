@@ -12,11 +12,11 @@ LevelData::LevelData()
 	dimension(Dimension::NORMAL),
 	playerDataVersion(-1),
 	storageVersion(0),
-	gameType(GameType::Default),	spawnMobs(false),
+	gameType(GameType::Default),	spawnMobs(true),
 	allowCheats(false),	loadedPlayerTag(NULL)
 {
 	//LOGI("ctor 1: %p\n", this);
-	spawnMobs = (gameType == GameType::Survival);
+	spawnMobs = true;
 }
 
 LevelData::LevelData( const LevelSettings& settings, const std::string& levelName, int generatorVersion /*= -1*/ )
@@ -37,7 +37,7 @@ LevelData::LevelData( const LevelSettings& settings, const std::string& levelNam
 		generatorVersion = SharedConstants::GeneratorVersion;
 
 	this->generatorVersion = generatorVersion;
-	spawnMobs = (gameType == GameType::Survival);
+	spawnMobs = true;
 }
 
 LevelData::LevelData( CompoundTag* tag )

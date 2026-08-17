@@ -73,7 +73,7 @@ static std::map<std::string, std::string> pmcReadManifest(const std::string& pat
 
 std::string ModRegistry::modsRoot(const std::string& storageRoot)
 {
-    return pmcJoin(storageRoot, "com.mojang/mods");
+    return pmcJoin(storageRoot, "games/com.mojang/mods");
 }
 
 void ModRegistry::ensureFolders(const std::string& storageRoot)
