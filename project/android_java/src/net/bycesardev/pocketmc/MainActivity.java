@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
         _screenHeight = Math.min(_dm.widthPixels, _dm.heightPixels);
 
         _glView = new GLView(getApplication(), this);
-        _glView.setEGLConfigChooser(5, 6, 5, 0, 16, 0);
+        _glView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 
         //_glView.setEGLConfigChooser(true);
         //_glView

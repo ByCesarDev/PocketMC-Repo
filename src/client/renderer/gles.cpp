@@ -100,7 +100,7 @@ void drawArrayVTC(int bufferId, int vertices, int vertexSize /* = 36 */) {
 
 	glShadeModel(GL_SMOOTH);
 	glDrawArrays2(GL_TRIANGLES, 0, vertices);
-	glShadeModel(GL_FLAT);
+	glShadeModel(GL_SMOOTH);
 
 	glDisableClientState2(GL_VERTEX_ARRAY);
 	glDisableClientState2(GL_TEXTURE_COORD_ARRAY);
@@ -117,7 +117,7 @@ void drawArrayVTC_NoState(int bufferId, int vertices, int vertexSize /* = 36 */)
 
 	glShadeModel(GL_SMOOTH);
 	glDrawArrays2(GL_TRIANGLES, 0, vertices);
-	glShadeModel(GL_FLAT);
+	glShadeModel(GL_SMOOTH);
 }
 #endif
 

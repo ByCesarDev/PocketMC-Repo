@@ -186,21 +186,16 @@ void NinecraftApp::updateStats()
 	if (now >= lastTime + 1000)
 	{
 		if (player) {
-			LOGI("%d fps   \t%3d chunk updates.   (%.2f, %.2f, %.2f)\n",
-				_frames, Chunk::updates, player->x, player->y, player->z);
+			if (Options::debugGl) {
+				LOGI("%d fps   \t%3d chunk updates.   (%.2f, %.2f, %.2f)\n",
+					_frames, Chunk::updates, player->x, player->y, player->z);
+				LOGI("%s", levelRenderer->gatherStats1().c_str());
+			}
 			Chunk::resetUpdates();
-
-			//static int _n = 0;
-			//if (++_n % 5 == -1) { // @note: -1
-			//	static char filename[256];
-			//	sprintf(filename, "%s/games/com.mojang/img_%.4d.jpg", externalStoragePath.c_str(), _n/5);
-			//	_context.platform->saveScreenshot(filename, width, height);
-			//}
-
-			LOGI("%s", levelRenderer->gatherStats1().c_str());
-			//printf("Texture swaps (this frame): %d\n", Textures::textureChanges);
 		} else {
-			LOGI("%d fps\n", _frames);
+			if (Options::debugGl) {
+				LOGI("%d fps\n", _frames);
+			}
 		}
 
 		//const int* pointerIds;
