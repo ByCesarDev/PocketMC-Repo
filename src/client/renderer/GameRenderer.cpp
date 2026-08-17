@@ -326,7 +326,7 @@ void GameRenderer::renderLevel(float a) {
         glEnable2(GL_ALPHA_TEST);
         levelRenderer->render(cameraEntity, 1, a);
         
-        glShadeModel2(GL_FLAT);
+        glShadeModel2(GL_SMOOTH);
 		TIMER_POP_PUSH("entities");
 		mc->levelRenderer->renderEntities(cameraEntity->getPos(a), &frustum, a);
 //        setupFog(0);

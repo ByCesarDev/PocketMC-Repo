@@ -67,6 +67,7 @@ void RenderList::render() {
 }
 
 void RenderList::renderChunks() {
+	glShadeModel2(GL_SMOOTH);
 	glEnableClientState2(GL_VERTEX_ARRAY);
 	glEnableClientState2(GL_COLOR_ARRAY);
 	glEnableClientState2(GL_TEXTURE_COORD_ARRAY);
