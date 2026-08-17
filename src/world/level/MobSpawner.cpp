@@ -254,8 +254,9 @@ void MobSpawner::postProcessSpawnMobs(Level* level, Biome* biome, int xo, int zo
 /*static*/
 TilePos MobSpawner::getRandomPosWithin(Level* level, int xo, int zo) {
     int x = xo + level->random.nextInt(16);
-	int y = level->random.nextInt(Level::DEPTH); //@note: level->depth);
     int z = zo + level->random.nextInt(16);
+    int topY = level->getTopSolidBlock(x, z);
+    int y = (topY > 4) ? level->random.nextInt(topY + 4) : level->random.nextInt(Level::DEPTH);
 
     return TilePos(x, y, z);
 }
