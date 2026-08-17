@@ -275,6 +275,7 @@ options.smoothCamera=Cámara suave
 options.destroyVibration=Vibración de destrucción
 options.isLeftHanded=Zurdo
 options.useTouchscreen=Usar pantalla táctil
+options.isJoyTouchArea=Controles Divididos
 options.fancyGraphics=Gráficos fancy
 options.renderDebug=Renderizado de depuración
 options.anaglyph3d=Anaglifo 3D

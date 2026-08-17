@@ -277,6 +277,7 @@ options.smoothCamera=Smooth camera
 options.destroyVibration=Destroy vibration
 options.isLeftHanded=Left handed
 options.useTouchscreen=Use touchscreen
+options.isJoyTouchArea=Split Controls
 options.fancyGraphics=Fancy graphics
 options.renderDebug=Debug render
 options.anaglyph3d=3D anaglyph

@@ -1428,28 +1428,29 @@ void LevelRenderer::generateCloudMesh(float cr, float cg, float cb) {
 		v.x = ax3; v.y = ay3; v.z = az3; verts.push_back(v);
 	};
 
-	for (int cx = 0; cx < width; cx++) {
-		for (int cz = 0; cz < height; cz++) {
+	int step = 4; // Reduce vertex count by 16x
+	for (int cx = 0; cx < width; cx += step) {
+		for (int cz = 0; cz < height; cz += step) {
 			unsigned char alpha = getAlpha(cx, cz);
 			if (alpha < 10) continue;
 
 			float x0 = cx * scale;
 			float z0 = cz * scale;
-			float x1 = x0 + scale;
-			float z1 = z0 + scale;
+			float x1 = x0 + scale * step;
+			float z1 = z0 + scale * step;
 			float y0 = 0.0f;
 			float y1 = cHeight;
 
 			addQuad(x0,y1,z1, x1,y1,z1, x1,y1,z0, x0,y1,z0, topColor);
 			addQuad(x0,y0,z0, x1,y0,z0, x1,y0,z1, x0,y0,z1, bottomColor);
 
-			if (getAlpha(cx - 1, cz) < 10)
+			if (getAlpha(cx - step, cz) < 10)
 				addQuad(x0,y0,z1, x0,y1,z1, x0,y1,z0, x0,y0,z0, sideColor);
-			if (getAlpha(cx + 1, cz) < 10)
+			if (getAlpha(cx + step, cz) < 10)
 				addQuad(x1,y0,z0, x1,y1,z0, x1,y1,z1, x1,y0,z1, sideColor);
-			if (getAlpha(cx, cz - 1) < 10)
+			if (getAlpha(cx, cz - step) < 10)
 				addQuad(x0,y0,z0, x0,y1,z0, x1,y1,z0, x1,y0,z0, sideColor);
-			if (getAlpha(cx, cz + 1) < 10)
+			if (getAlpha(cx, cz + step) < 10)
 				addQuad(x1,y0,z1, x1,y1,z1, x0,y1,z1, x0,y0,z1, sideColor);
 		}
 	}
