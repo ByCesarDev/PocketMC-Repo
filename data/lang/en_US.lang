@@ -63,6 +63,16 @@ skindex.pack=Pack:
 skindex.noSkins=No skins in this pack
 skindex.renameTitle=Rename Skin
 skindex.newPackTitle=New Skin Pack
+skindex.emptyPack=(No skins - Click Import)
+skindex.model=Model
+skindex.model.normal=Normal
+skindex.model.slim=Slim
+skindex.view=View
+skindex.view.body=Body
+skindex.view.head=Head
+skindex.autoRotate=Auto Rotate: On
+skindex.manualRotate=Auto Rotate: Off
+gui.confirm=Confirm
 
 gui.done=Done
 gui.cancel=Cancel

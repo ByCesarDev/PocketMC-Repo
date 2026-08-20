@@ -63,6 +63,16 @@ skindex.pack=Pack:
 skindex.noSkins=Sin Skins en este Pack
 skindex.renameTitle=Renombrar Skin
 skindex.newPackTitle=Nuevo Paquete de Skins
+skindex.emptyPack=(Sin skins - Haz clic en Importar)
+skindex.model=Modelo
+skindex.model.normal=Normal
+skindex.model.slim=Slim
+skindex.view=Vista
+skindex.view.body=Cuerpo
+skindex.view.head=Cabeza
+skindex.autoRotate=Rotación: Auto
+skindex.manualRotate=Rotación: Fijada
+gui.confirm=Confirmar
 
 gui.done=Confirmar
 gui.cancel=Cancelar

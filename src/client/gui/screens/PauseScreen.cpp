@@ -61,7 +61,7 @@ void PauseScreen::init() {
 	bQuit = new Button(2, I18n::get("menu.returnToMenu"));
 	bQuitAndSaveLocally = new Button(3, I18n::get("menu.quitAndSaveLocally"));
 	bServerVisibility = new Button(4, I18n::get("menu.serverVisible"));
-	bDressingRoom = new Button(6, I18n::get("skindex.title"));
+	bDressingRoom = new Button(6, I18n::get("menu.skindex"));
 
 	buttons.push_back(bContinue);
 	buttons.push_back(bOptions);
