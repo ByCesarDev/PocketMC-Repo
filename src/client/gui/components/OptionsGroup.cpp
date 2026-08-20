@@ -178,14 +178,16 @@ void OptionsGroup::createKey(OptionId optId, Minecraft* minecraft) {
 }
 
 void OptionsGroup::mouseClicked(Minecraft* minecraft, int x, int y, int buttonNum) {
+	int adjustedY = y + scrollOffset;
 	for(std::vector<GuiElement*>::iterator it = children.begin(); it != children.end(); ++it) {
-		(*it)->mouseClicked(minecraft, x, y, buttonNum);
+		(*it)->mouseClicked(minecraft, x, adjustedY, buttonNum);
 	}
 }
 
 void OptionsGroup::mouseReleased(Minecraft* minecraft, int x, int y, int buttonNum) {
+	int adjustedY = y + scrollOffset;
 	for(std::vector<GuiElement*>::iterator it = children.begin(); it != children.end(); ++it) {
-		(*it)->mouseReleased(minecraft, x, y, buttonNum);
+		(*it)->mouseReleased(minecraft, x, adjustedY, buttonNum);
 	}
 }
 

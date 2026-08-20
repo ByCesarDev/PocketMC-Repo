@@ -695,6 +695,9 @@ public class MainActivity extends Activity {
 
     public void playMusicTrack(String path, float volume) {
     	try {
+			if (path.startsWith("data/")) {
+				path = path.substring(5);
+			}
     		stopMusicTrack();
     		mMediaPlayer = new android.media.MediaPlayer();
     		android.content.res.AssetFileDescriptor afd = getAssets().openFd(path);
