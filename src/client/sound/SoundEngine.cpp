@@ -57,7 +57,8 @@ SoundEngine::SoundEngine( float maxDistance )
 	currentFadeTicks(0),
 	fadeTicksMax(100),
 	isFadingOut(false),
-	fadeOutTicks(100)
+	fadeOutTicks(100),
+	zeroVolumeTimer(0)
 {
 
 }
@@ -259,11 +260,12 @@ void SoundEngine::playRandomMusicTrack() {
 	std::string trackPath = resolveMusicPath(rawPath);
 	float volume = options ? options->getProgressValue(OPTIONS_MUSIC_VOLUME) : 1.0f;
 
-	// Reset Fade-In/Out states
+	// Reset Fade-In/Out states and zero volume timer
 	fadeTicksMax = 100; // 5 seconds fade (100 ticks @ 20tps)
 	currentFadeTicks = 0;
 	isFadingOut = false;
 	fadeOutTicks = fadeTicksMax;
+	zeroVolumeTimer = 0;
 
 #ifdef _WIN32
 	stopBackgroundMusic();
@@ -321,6 +323,7 @@ void SoundEngine::stopBackgroundMusic() {
 	isMusicPlaying = false;
 	isFadingOut = false;
 	musicTrackGraceTicks = 0;
+	zeroVolumeTimer = 0;
 }
 
 void SoundEngine::setMusicVolume(float volume) {
@@ -361,10 +364,17 @@ void SoundEngine::updateMusic() {
 
 	if (targetVol <= 0.001f) {
 		if (isMusicPlaying) {
-			stopBackgroundMusic();
+			setMusicVolume(0.0f);
+			zeroVolumeTimer++;
+			if (zeroVolumeTimer > 600) { // 30 seconds at 0 volume before stopping
+				stopBackgroundMusic();
+				LOGI("[SoundEngine] Music volume remained at 0 for 30s. Stopping track.\n");
+			}
 		}
 		return;
 	}
+
+	zeroVolumeTimer = 0;
 
 	if (isMusicPlaying) {
 		// 1. Handle Fade-Out

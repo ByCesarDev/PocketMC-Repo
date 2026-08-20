@@ -51,6 +51,7 @@ class SoundEngine
 	int fadeTicksMax;
 	bool isFadingOut;
 	int fadeOutTicks;
+	int zeroVolumeTimer;
 
 	void updateMusic();
 	void playRandomMusicTrack();
