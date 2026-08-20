@@ -83,6 +83,7 @@ LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/client/gui/components/*
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/client/gui/screens/*.cpp)
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/client/gui/screens/crafting/*.cpp)
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/client/gui/screens/touch/*.cpp)
+LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/client/gui/panoramas/*.cpp)
 
 # ---- Model ----
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/client/model/*.cpp)

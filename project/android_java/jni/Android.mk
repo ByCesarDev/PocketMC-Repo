@@ -57,6 +57,8 @@ LOCAL_SRC_FILES := ../../../src/main.cpp \
 ../../../src/client/gui/screens/touch/TouchSelectWorldScreen.cpp \
 ../../../src/client/gui/screens/touch/TouchStartMenuScreen.cpp \
 ../../../src/client/gui/screens/UploadPhotoScreen.cpp \
+../../../src/client/gui/screens/PanoramaSelectScreen.cpp \
+../../../src/client/gui/panoramas/PanoramaRegistry.cpp \
 ../../../src/client/gui/screens/crafting/PaneCraftingScreen.cpp \
 ../../../src/client/gui/screens/crafting/WorkbenchScreen.cpp \
 ../../../src/client/model/ChickenModel.cpp \

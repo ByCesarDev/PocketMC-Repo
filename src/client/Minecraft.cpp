@@ -25,6 +25,7 @@
 //#include "../network/Packet.h"
 #include "../world/entity/player/Inventory.h"
 #include "../world/level/tile/Tile.h"
+#include "../world/level/tile/LeafTile.h"
 #include "../world/level/storage/LevelStorageSource.h"
 #include "../world/level/storage/LevelStorage.h"
 #include "player/input/KeyboardInput.h"
