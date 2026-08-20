@@ -112,30 +112,43 @@ void SkindexScreen::ensureSkinsDir() {
 	createFolderIfNotExists("games/com.mojang/skins");
 }
 
-static bool isBedrockPack(const std::string& dirPath) {
-	std::string skinsJsonPath = dirPath + "/skins.json";
-	std::ifstream file(skinsJsonPath);
-	return file.good();
+static std::string readAssetFileContent(Minecraft* minecraft, const std::string& path) {
+	std::ifstream file(path.c_str());
+	if (file.good()) {
+		return std::string((std::istreambuf_iterator<char>(file)),
+		                      std::istreambuf_iterator<char>());
+	}
+	if (minecraft && minecraft->platform()) {
+		BinaryBlob blob = minecraft->platform()->readAssetFile(path);
+		if (blob.data != nullptr && blob.size > 0) {
+			std::string res((char*)blob.data, blob.size);
+			return res;
+		}
+	}
+	return "";
 }
 
-static bool readBedrockSkins(const std::string& dirPath, SkinPack& pack) {
-	std::string manifestPath = dirPath + "/manifest.json";
-	std::ifstream manifestFile(manifestPath);
-	if (manifestFile.good()) {
-		std::string mContent((std::istreambuf_iterator<char>(manifestFile)),
-		                      std::istreambuf_iterator<char>());
-		manifestFile.close();
-		
-		size_t headerPos = mContent.find("\"header\"");
-		size_t namePos = mContent.find("\"name\"", headerPos != std::string::npos ? headerPos : 0);
+static bool isBedrockPack(Minecraft* minecraft, const std::string& dirPath) {
+	std::string skinsJsonPath = dirPath + "/skins.json";
+	std::ifstream file(skinsJsonPath.c_str());
+	if (file.good()) return true;
+	std::string content = readAssetFileContent(minecraft, skinsJsonPath);
+	return !content.empty();
+}
+
+static bool readBedrockSkins(Minecraft* minecraft, const std::string& dirPath, SkinPack& pack) {
+	std::string manifestContent = readAssetFileContent(minecraft, dirPath + "/manifest.json");
+	if (!manifestContent.empty()) {
+		size_t headerPos = manifestContent.find("\"header\"");
+		size_t namePos = manifestContent.find("\"name\"", headerPos != std::string::npos ? headerPos : 0);
 		if (namePos != std::string::npos) {
-			size_t colon = mContent.find(":", namePos);
+			size_t colon = manifestContent.find(":", namePos);
 			if (colon != std::string::npos) {
-				size_t q1 = mContent.find("\"", colon);
+				size_t q1 = manifestContent.find("\"", colon);
 				if (q1 != std::string::npos) {
-					size_t q2 = mContent.find("\"", q1 + 1);
+					size_t q2 = manifestContent.find("\"", q1 + 1);
 					if (q2 != std::string::npos) {
-						pack.displayName = mContent.substr(q1 + 1, q2 - q1 - 1);
+						pack.displayName = manifestContent.substr(q1 + 1, q2 - q1 - 1);
 					}
 				}
 			}
@@ -145,13 +158,8 @@ static bool readBedrockSkins(const std::string& dirPath, SkinPack& pack) {
 		pack.displayName = pack.name;
 	}
 
-	std::string skinsJsonPath = dirPath + "/skins.json";
-	std::ifstream file(skinsJsonPath);
-	if (!file.good()) return false;
-	
-	std::string content((std::istreambuf_iterator<char>(file)), 
-	                  std::istreambuf_iterator<char>());
-	file.close();
+	std::string content = readAssetFileContent(minecraft, dirPath + "/skins.json");
+	if (content.empty()) return false;
 
 	size_t skinsArrayPos = content.find("\"skins\"");
 	if (skinsArrayPos == std::string::npos) return false;
@@ -222,13 +230,8 @@ static bool readBedrockSkins(const std::string& dirPath, SkinPack& pack) {
 		pos = endObj + 1;
 	}
 
-	std::string langPath = dirPath + "/texts/en_US.lang";
-	std::ifstream langFile(langPath);
-	if (langFile.good()) {
-		std::string langContent((std::istreambuf_iterator<char>(langFile)),
-		                       std::istreambuf_iterator<char>());
-		langFile.close();
-		
+	std::string langContent = readAssetFileContent(minecraft, dirPath + "/texts/en_US.lang");
+	if (!langContent.empty()) {
 		for (size_t i = 0; i < pack.skinDisplayNames.size(); ++i) {
 			std::string key = pack.skinDisplayNames[i];
 			key.erase(std::remove(key.begin(), key.end(), ' '), key.end());
@@ -247,6 +250,22 @@ static bool readBedrockSkins(const std::string& dirPath, SkinPack& pack) {
 	return !pack.skins.empty();
 }
 
+static const std::vector<std::string> g_internalPacks = {
+	"Default",
+	"Backroom_Entity_4_Skins",
+	"Best_MEME_Skin_+67",
+	"Dark_Neeko_5_Skins",
+	"Fashion_PVP_Skins_10_Skins",
+	"GroxSkinpack",
+	"Jujutsu Anime V2",
+	"Kakashi",
+	"Neon_Pulse_13_Skins",
+	"Star vs the forces of evil",
+	"The Corrputed V1",
+	"Trendy Fashion Teens - v1.3",
+	"Ultimate-SpiderMan-Skinpack"
+};
+
 void SkindexScreen::scanSkins() {
 	skinPacks.clear();
 	ensureSkinsDir();
@@ -258,6 +277,9 @@ void SkindexScreen::scanSkins() {
 		DWORD attrib = GetFileAttributesA(dataPath.c_str());
 		return (attrib != INVALID_FILE_ATTRIBUTES && (attrib & FILE_ATTRIBUTE_DIRECTORY));
 #else
+		for (const auto& p : g_internalPacks) {
+			if (p == packName) return true;
+		}
 		std::string dataPath = "data/images/skins/" + packName;
 		DIR* dir = opendir(dataPath.c_str());
 		if (dir) {
@@ -283,8 +305,8 @@ void SkindexScreen::scanSkins() {
 					
 					std::string fullDirPath = "data/images/skins/" + dirName;
 					
-					if (isBedrockPack(fullDirPath)) {
-						readBedrockSkins(fullDirPath, pack);
+					if (isBedrockPack(minecraft, fullDirPath)) {
+						readBedrockSkins(minecraft, fullDirPath, pack);
 					} else {
 						std::string searchPath = "data\\images\\skins\\" + dirName + "\\*.png";
 						WIN32_FIND_DATAA findFileData;
@@ -319,8 +341,8 @@ void SkindexScreen::scanSkins() {
 				pack.name = dirName;
 				pack.isInternal = true;
 				
-				if (isBedrockPack(fullDirPath)) {
-					readBedrockSkins(fullDirPath, pack);
+				if (isBedrockPack(minecraft, fullDirPath)) {
+					readBedrockSkins(minecraft, fullDirPath, pack);
 				} else {
 					DIR* subDir = opendir(fullDirPath.c_str());
 					if (subDir != NULL) {
@@ -340,6 +362,20 @@ void SkindexScreen::scanSkins() {
 			}
 		}
 		closedir(dirData);
+	} else {
+		// Fallback for Android APK assets
+		for (const auto& dirName : g_internalPacks) {
+			std::string fullDirPath = "data/images/skins/" + dirName;
+			SkinPack pack;
+			pack.name = dirName;
+			pack.isInternal = true;
+			if (isBedrockPack(minecraft, fullDirPath)) {
+				readBedrockSkins(minecraft, fullDirPath, pack);
+			}
+			if (!pack.skins.empty()) {
+				skinPacks.push_back(pack);
+			}
+		}
 	}
 #endif
 
@@ -359,8 +395,8 @@ void SkindexScreen::scanSkins() {
 					
 					std::string fullDirPath = "games/com.mojang/skins/" + dirName;
 					
-					if (isBedrockPack(fullDirPath)) {
-						readBedrockSkins(fullDirPath, pack);
+					if (isBedrockPack(minecraft, fullDirPath)) {
+						readBedrockSkins(minecraft, fullDirPath, pack);
 					} else {
 						std::string searchPath = "games\\com.mojang\\skins\\" + dirName + "\\*.png";
 						WIN32_FIND_DATAA findFileData;
@@ -395,8 +431,8 @@ void SkindexScreen::scanSkins() {
 				pack.name = dirName;
 				pack.isInternal = false;
 				
-				if (isBedrockPack(fullDirPath)) {
-					readBedrockSkins(fullDirPath, pack);
+				if (isBedrockPack(minecraft, fullDirPath)) {
+					readBedrockSkins(minecraft, fullDirPath, pack);
 				} else {
 					DIR* subDir = opendir(fullDirPath.c_str());
 					if (subDir != NULL) {

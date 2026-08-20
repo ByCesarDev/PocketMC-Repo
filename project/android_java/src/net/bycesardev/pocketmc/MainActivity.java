@@ -363,7 +363,15 @@ public class MainActivity extends Activity {
                 }
             }
             if (inputStream == null) {
-                inputStream = getAssets().open(filename);
+                String assetPath = filename;
+                if (assetPath.startsWith("data/")) {
+                    assetPath = assetPath.substring(5);
+                }
+                try {
+                    inputStream = getAssets().open(assetPath);
+                } catch (Exception ex) {
+                    inputStream = getAssets().open(filename);
+                }
             }
         } catch (Exception e) {
             System.err.println("getImageData: Could not open image " + filename);
@@ -389,7 +397,26 @@ public class MainActivity extends Activity {
 
     	BufferedInputStream bis;
     	try {
-        	InputStream is = assets.open(filename);
+        	InputStream is = null;
+            if (filename.startsWith("games/") || filename.startsWith("/storage/") || filename.contains("games/com.mojang/skins/")) {
+                java.io.File f = new java.io.File(android.os.Environment.getExternalStorageDirectory(), filename);
+                if (f.exists()) is = new java.io.FileInputStream(f);
+                else {
+                    f = new java.io.File(filename);
+                    if (f.exists()) is = new java.io.FileInputStream(f);
+                }
+            }
+            if (is == null) {
+                String assetPath = filename;
+                if (assetPath.startsWith("data/")) {
+                    assetPath = assetPath.substring(5);
+                }
+                try {
+                    is = assets.open(assetPath);
+                } catch (Exception ex) {
+                    is = assets.open(filename);
+                }
+            }
         	bis = new BufferedInputStream(is);
         } catch (IOException e) {
         	e.printStackTrace();
@@ -662,6 +689,54 @@ public class MainActivity extends Activity {
 	private SoundPlayer _soundPlayer;
     public void playSound(String s, float volume, float rate) {
     	_soundPlayer.play(s, volume, rate);
+    }
+
+	private android.media.MediaPlayer mMediaPlayer;
+
+    public void playMusicTrack(String path, float volume) {
+    	try {
+    		stopMusicTrack();
+    		mMediaPlayer = new android.media.MediaPlayer();
+    		android.content.res.AssetFileDescriptor afd = getAssets().openFd(path);
+    		mMediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+    		afd.close();
+    		mMediaPlayer.setVolume(volume, volume);
+    		mMediaPlayer.prepare();
+    		mMediaPlayer.start();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+
+    public void setMusicVolumeTrack(float volume) {
+    	if (mMediaPlayer != null) {
+    		try {
+    			mMediaPlayer.setVolume(volume, volume);
+    		} catch (Exception e) {}
+    	}
+    }
+
+    public void stopMusicTrack() {
+    	if (mMediaPlayer != null) {
+    		try {
+    			if (mMediaPlayer.isPlaying()) {
+    				mMediaPlayer.stop();
+    			}
+    			mMediaPlayer.release();
+    		} catch (Exception e) {}
+    		mMediaPlayer = null;
+    	}
+    }
+
+    public boolean isMusicTrackPlaying() {
+    	if (mMediaPlayer != null) {
+    		try {
+    			return mMediaPlayer.isPlaying();
+    		} catch (Exception e) {
+    			return false;
+    		}
+    	}
+    	return false;
     }
 
     private AlertDialog mDialog;

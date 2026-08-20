@@ -17,6 +17,7 @@ class OptionsItem: public GuiElementContainer
 public:
 	OptionsItem(OptionId optionId, std::string label, GuiElement* element);
 	virtual void render(Minecraft* minecraft, int xm, int ym);
+	virtual bool pointInside(int xm, int ym);
 	void setupPositions();
 
 private:

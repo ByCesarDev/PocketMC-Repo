@@ -4,6 +4,43 @@
 #include "../../world/entity/Mob.h"
 
 
+#include <vector>
+#include <string>
+#include <fstream>
+#include <cmath>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <mfplay.h>
+#pragma comment(lib, "mfplay.lib")
+
+static IMFPMediaPlayer* g_pMFPlayer = NULL;
+
+static void cleanupMFPlayer() {
+	if (g_pMFPlayer) {
+		g_pMFPlayer->Stop();
+		g_pMFPlayer->Release();
+		g_pMFPlayer = NULL;
+	}
+}
+#endif
+
+static const std::vector<std::string> g_musicTracks = {
+	"data/sound/music/C418 - Blind Spots.m4a",
+	"data/sound/music/C418 - Clark.m4a",
+	"data/sound/music/C418 - Danny.m4a",
+	"data/sound/music/C418 - Dry Hands.m4a",
+	"data/sound/music/C418 - Haggstrom.m4a",
+	"data/sound/music/C418 - Key.m4a",
+	"data/sound/music/C418 - Living Mice.m4a",
+	"data/sound/music/C418 - Mice on Venus.m4a",
+	"data/sound/music/C418 - Minecraft.m4a",
+	"data/sound/music/C418 - Oxygene.m4a",
+	"data/sound/music/C418 - Subwoofer Lullaby.m4a",
+	"data/sound/music/C418 - Sweden.m4a",
+	"data/sound/music/C418 - Wet Hands.m4a"
+};
+
 SoundEngine::SoundEngine( float maxDistance )
 :	idCounter(0),
 	mc(0),
@@ -11,7 +48,16 @@ SoundEngine::SoundEngine( float maxDistance )
 	_y(0),
 	_z(0),
 	_yRot(0),
-	_invMaxDistance(1.0f / maxDistance)
+	_invMaxDistance(1.0f / maxDistance),
+	isMusicPlaying(false),
+	musicDelayTimer(40),
+	musicTrackGraceTicks(0),
+	lastTrackIndex(-1),
+	lastMusicVolume(1.0f),
+	currentFadeTicks(0),
+	fadeTicksMax(100),
+	isFadingOut(false),
+	fadeOutTicks(100)
 {
 
 }
@@ -164,10 +210,207 @@ void SoundEngine::updateOptions()
 void SoundEngine::destroy()
 {
 	//if (loaded) soundSystem.cleanup();
+#ifdef _WIN32
+	cleanupMFPlayer();
+#endif
+}
+
+static std::string resolveMusicPath(const std::string& relPath) {
+	{
+		std::ifstream f(relPath.c_str());
+		if (f.good()) return relPath;
+	}
+	{
+		std::string p2 = "../" + relPath;
+		std::ifstream f(p2.c_str());
+		if (f.good()) return p2;
+	}
+	{
+		std::string p3 = "../../" + relPath;
+		std::ifstream f(p3.c_str());
+		if (f.good()) return p3;
+	}
+	return relPath;
+}
+
+void SoundEngine::playRandomMusicTrack() {
+	if (g_musicTracks.empty()) {
+		LOGI("[SoundEngine] Error: g_musicTracks is empty!\n");
+		return;
+	}
+
+	int nextTrackIndex = 0;
+	if (lastTrackIndex == -1) {
+		// First track is ALWAYS C418 - Sweden.m4a
+		for (size_t i = 0; i < g_musicTracks.size(); ++i) {
+			if (g_musicTracks[i].find("Sweden") != std::string::npos) {
+				nextTrackIndex = (int)i;
+				break;
+			}
+		}
+	} else if (g_musicTracks.size() > 1) {
+		do {
+			nextTrackIndex = random.nextInt((int)g_musicTracks.size());
+		} while (nextTrackIndex == lastTrackIndex);
+	}
+	lastTrackIndex = nextTrackIndex;
+
+	std::string rawPath = g_musicTracks[nextTrackIndex];
+	std::string trackPath = resolveMusicPath(rawPath);
+	float volume = options ? options->getProgressValue(OPTIONS_MUSIC_VOLUME) : 1.0f;
+
+	// Reset Fade-In/Out states
+	fadeTicksMax = 100; // 5 seconds fade (100 ticks @ 20tps)
+	currentFadeTicks = 0;
+	isFadingOut = false;
+	fadeOutTicks = fadeTicksMax;
+
+#ifdef _WIN32
+	stopBackgroundMusic();
+
+	std::string winPath = trackPath;
+	std::replace(winPath.begin(), winPath.end(), '/', '\\');
+	char absPath[MAX_PATH] = {0};
+	if (GetFullPathNameA(winPath.c_str(), MAX_PATH, absPath, NULL) != 0) {
+		winPath = absPath;
+	}
+
+	int wlen = MultiByteToWideChar(CP_UTF8, 0, winPath.c_str(), -1, NULL, 0);
+	std::wstring wpath(wlen, 0);
+	MultiByteToWideChar(CP_UTF8, 0, winPath.c_str(), -1, &wpath[0], wlen);
+
+	HRESULT hr = MFPCreateMediaPlayer(wpath.c_str(), FALSE, 0, NULL, NULL, &g_pMFPlayer);
+	if (SUCCEEDED(hr) && g_pMFPlayer) {
+		setMusicVolume(0.0f); // Start at 0 volume for Fade-In
+		hr = g_pMFPlayer->Play();
+		if (SUCCEEDED(hr)) {
+			isMusicPlaying = true;
+			musicTrackGraceTicks = 100;
+			LOGI("[SoundEngine] Playing background music with 5s Fade-In (MediaFoundation): %s\n", winPath.c_str());
+		} else {
+			LOGI("[SoundEngine] MediaFoundation Play failed: 0x%08x\n", (unsigned int)hr);
+			stopBackgroundMusic();
+		}
+	} else {
+		LOGI("[SoundEngine] MediaFoundation MFPCreateMediaPlayer failed for '%s' (0x%08x)\n", winPath.c_str(), (unsigned int)hr);
+		stopBackgroundMusic();
+	}
+#else
+	if (mc && mc->platform()) {
+		mc->platform()->playMusicTrack(trackPath, 0.0f);
+		isMusicPlaying = true;
+		musicTrackGraceTicks = 100;
+		LOGI("[SoundEngine] Playing background music with 5s Fade-In (Platform): %s\n", trackPath.c_str());
+	} else {
+		isMusicPlaying = false;
+	}
+#endif
+}
+
+void SoundEngine::stopBackgroundMusic() {
+#ifdef _WIN32
+	cleanupMFPlayer();
+#else
+	if (mc && mc->platform()) {
+		mc->platform()->stopMusicTrack();
+	}
+#endif
+	if (isMusicPlaying) {
+		LOGI("[SoundEngine] Stopped background music.\n");
+	}
+	isMusicPlaying = false;
+	isFadingOut = false;
+	musicTrackGraceTicks = 0;
+}
+
+void SoundEngine::setMusicVolume(float volume) {
+	lastMusicVolume = volume;
+#ifdef _WIN32
+	if (g_pMFPlayer) {
+		g_pMFPlayer->SetVolume(volume);
+	}
+#else
+	if (mc && mc->platform()) {
+		mc->platform()->setMusicVolumeTrack(volume);
+	}
+#endif
+}
+
+bool SoundEngine::isMusicTrackPlaying() {
+#ifdef _WIN32
+	if (!g_pMFPlayer) return false;
+	MFP_MEDIAPLAYER_STATE state = MFP_MEDIAPLAYER_STATE_EMPTY;
+	if (SUCCEEDED(g_pMFPlayer->GetState(&state))) {
+		return (state == MFP_MEDIAPLAYER_STATE_PLAYING || 
+		        state == MFP_MEDIAPLAYER_STATE_PAUSED || 
+		        (state != MFP_MEDIAPLAYER_STATE_STOPPED && state != MFP_MEDIAPLAYER_STATE_EMPTY));
+	}
+	return false;
+#else
+	if (mc && mc->platform()) {
+		return mc->platform()->isMusicTrackPlaying();
+	}
+	return false;
+#endif
+}
+
+void SoundEngine::updateMusic() {
+	if (!options) return;
+
+	float targetVol = options->getProgressValue(OPTIONS_MUSIC_VOLUME);
+
+	if (targetVol <= 0.001f) {
+		if (isMusicPlaying) {
+			stopBackgroundMusic();
+		}
+		return;
+	}
+
+	if (isMusicPlaying) {
+		// 1. Handle Fade-Out
+		if (isFadingOut) {
+			if (fadeOutTicks > 0) {
+				fadeOutTicks--;
+				float factor = (float)fadeOutTicks / (float)fadeTicksMax;
+				setMusicVolume(targetVol * factor);
+			} else {
+				stopBackgroundMusic();
+				musicDelayTimer = random.nextInt(400) + 200;
+				LOGI("[SoundEngine] Track finished (Fade-Out 5s complete). Next track in %d seconds...\n", musicDelayTimer / 20);
+			}
+			return;
+		}
+
+		// 2. Handle Fade-In
+		if (currentFadeTicks < fadeTicksMax) {
+			currentFadeTicks++;
+			float factor = (float)currentFadeTicks / (float)fadeTicksMax;
+			setMusicVolume(targetVol * factor);
+		} else if (std::abs(targetVol - lastMusicVolume) > 0.01f) {
+			setMusicVolume(targetVol);
+		}
+
+		// 3. Track Completion Check
+		if (musicTrackGraceTicks > 0) {
+			musicTrackGraceTicks--;
+		} else if (!isMusicTrackPlaying()) {
+			isFadingOut = true;
+			fadeOutTicks = fadeTicksMax;
+			LOGI("[SoundEngine] Starting 5s Fade-Out for track completion...\n");
+		}
+	} else {
+		if (musicDelayTimer > 0) {
+			musicDelayTimer--;
+		} else {
+			playRandomMusicTrack();
+		}
+	}
 }
 
 void SoundEngine::update( Mob* player, float a )
 {
+	updateMusic();
+
 	if (/*!loaded || */options->getProgressValue(OPTIONS_SOUND_VOLUME) == 0) return;
 	if (player == NULL) return;
 

@@ -184,7 +184,26 @@ public class MainActivity extends NativeActivity {
 
     	BufferedInputStream bis;
     	try {
-        	InputStream is = assets.open(filename);
+        	InputStream is = null;
+            if (filename.startsWith("games/") || filename.startsWith("/storage/") || filename.contains("games/com.mojang/skins/")) {
+                java.io.File f = new java.io.File(android.os.Environment.getExternalStorageDirectory(), filename);
+                if (f.exists()) is = new java.io.FileInputStream(f);
+                else {
+                    f = new java.io.File(filename);
+                    if (f.exists()) is = new java.io.FileInputStream(f);
+                }
+            }
+            if (is == null) {
+                String assetPath = filename;
+                if (assetPath.startsWith("data/")) {
+                    assetPath = assetPath.substring(5);
+                }
+                try {
+                    is = assets.open(assetPath);
+                } catch (Exception ex) {
+                    is = assets.open(filename);
+                }
+            }
         	bis = new BufferedInputStream(is);
         } catch (IOException e) {
         	e.printStackTrace();
@@ -210,24 +229,34 @@ public class MainActivity extends NativeActivity {
     }
     
     public int[] getImageData(String filename) {
-    	AssetManager assets = getAssets();
-
-        try {
-        	/*String[] filenames = */assets.list("images");
-        } catch (IOException e) {
-        	System.err.println("getImageData: Could not list directory");
-        	return null;
-        }
-
         InputStream inputStream = null;
         try {
-        	inputStream = assets.open(filename);
-        } catch (IOException e) {
-        	System.err.println("getImageData: Could not open image " + filename);
-        	return null;
+            if (filename.startsWith("games/") || filename.startsWith("/storage/") || filename.contains("games/com.mojang/skins/")) {
+                java.io.File f = new java.io.File(android.os.Environment.getExternalStorageDirectory(), filename);
+                if (f.exists()) inputStream = new java.io.FileInputStream(f);
+                else {
+                    f = new java.io.File(filename);
+                    if (f.exists()) inputStream = new java.io.FileInputStream(f);
+                }
+            }
+            if (inputStream == null) {
+                String assetPath = filename;
+                if (assetPath.startsWith("data/")) {
+                    assetPath = assetPath.substring(5);
+                }
+                try {
+                    inputStream = getAssets().open(assetPath);
+                } catch (Exception ex) {
+                    inputStream = getAssets().open(filename);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("getImageData: Could not open image " + filename);
+            return null;
         }
 
         Bitmap bm = BitmapFactory.decodeStream(inputStream);
+        if (bm == null) return null;
         int w = bm.getWidth();
         int h = bm.getHeight();
 
@@ -235,6 +264,7 @@ public class MainActivity extends NativeActivity {
         pixels[0] = w;
         pixels[1] = h;
         bm.getPixels(pixels, 2, w, 0, 0, w, h);
+        bm.recycle();
 
         return pixels;
     }
@@ -495,6 +525,54 @@ public class MainActivity extends NativeActivity {
 
     	nativeUnregisterThis();
     	super.onDestroy();
+    }
+
+	private android.media.MediaPlayer mMediaPlayer;
+
+    public void playMusicTrack(String path, float volume) {
+    	try {
+    		stopMusicTrack();
+    		mMediaPlayer = new android.media.MediaPlayer();
+    		android.content.res.AssetFileDescriptor afd = getAssets().openFd(path);
+    		mMediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+    		afd.close();
+    		mMediaPlayer.setVolume(volume, volume);
+    		mMediaPlayer.prepare();
+    		mMediaPlayer.start();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+
+    public void setMusicVolumeTrack(float volume) {
+    	if (mMediaPlayer != null) {
+    		try {
+    			mMediaPlayer.setVolume(volume, volume);
+    		} catch (Exception e) {}
+    	}
+    }
+
+    public void stopMusicTrack() {
+    	if (mMediaPlayer != null) {
+    		try {
+    			if (mMediaPlayer.isPlaying()) {
+    				mMediaPlayer.stop();
+    			}
+    			mMediaPlayer.release();
+    		} catch (Exception e) {}
+    		mMediaPlayer = null;
+    	}
+    }
+
+    public boolean isMusicTrackPlaying() {
+    	if (mMediaPlayer != null) {
+    		try {
+    			return mMediaPlayer.isPlaying();
+    		} catch (Exception e) {
+    			return false;
+    		}
+    	}
+    	return false;
     }
 
     protected boolean isDemo() { return false; }

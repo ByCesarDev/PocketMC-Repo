@@ -74,6 +74,10 @@ public:
 	virtual TextureData loadTextureFromMemory(const unsigned char* data, size_t size) { return TextureData(); }
 
     virtual void playSound(const std::string& fn, float volume, float pitch) {}
+	virtual void playMusicTrack(const std::string& path, float volume) {}
+	virtual void setMusicVolumeTrack(float volume) {}
+	virtual void stopMusicTrack() {}
+	virtual bool isMusicTrackPlaying() { return false; }
 	
 	virtual void hideCursor(bool hide) {}
 

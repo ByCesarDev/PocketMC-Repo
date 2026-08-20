@@ -19,6 +19,13 @@ void OptionsItem::setupPositions() {
 	height = currentHeight;
 }
 
+bool OptionsItem::pointInside(int xm, int ym) {
+	for (auto child : children) {
+		if (child->pointInside(xm, ym)) return true;
+	}
+	return false;
+}
+
 void OptionsItem::render( Minecraft* minecraft, int xm, int ym ) {
 	std::vector<int> oldYs;
 	for(auto child : children) oldYs.push_back(child->y);

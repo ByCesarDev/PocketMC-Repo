@@ -49,6 +49,10 @@ void Slider::tick(Minecraft* minecraft) {
 		
 		minecraft->screen->toGUICoordinate(xm, ym);
 
+		if (!Mouse::isButtonDown(MouseAction::ACTION_LEFT)) {
+			m_mouseDownOnElement = false;
+		}
+
 		if(m_mouseDownOnElement) {
 			m_percentage = float(xm - x) / float(width);
 			m_percentage = Mth::clamp(m_percentage, 0.0f, 1.0f);

@@ -45,9 +45,18 @@ void OptionsGroup::render( Minecraft* minecraft, int xm, int ym ) {
 				lastDragY = ym;
 			}
 		} else if (xm >= x && xm <= x + width && ym >= y && ym <= y + height) {
-			isDragging = true;
-			lastDragY = ym;
-			dragInertia = 0.0f;
+			bool clickedChild = false;
+			for (auto child : children) {
+				if (child->pointInside(xm, ym)) {
+					clickedChild = true;
+					break;
+				}
+			}
+			if (!clickedChild) {
+				isDragging = true;
+				lastDragY = ym;
+				dragInertia = 0.0f;
+			}
 		}
 	} else {
 		if (isDragging) {
@@ -171,17 +180,14 @@ void OptionsGroup::createKey(OptionId optId, Minecraft* minecraft) {
 }
 
 void OptionsGroup::mouseClicked(Minecraft* minecraft, int x, int y, int buttonNum) {
-	// translate click Y into content coordinates
-	int translatedY = y + scrollOffset;
 	for(std::vector<GuiElement*>::iterator it = children.begin(); it != children.end(); ++it) {
-		(*it)->mouseClicked(minecraft, x, translatedY, buttonNum);
+		(*it)->mouseClicked(minecraft, x, y, buttonNum);
 	}
 }
 
 void OptionsGroup::mouseReleased(Minecraft* minecraft, int x, int y, int buttonNum) {
-	int translatedY = y + scrollOffset;
 	for(std::vector<GuiElement*>::iterator it = children.begin(); it != children.end(); ++it) {
-		(*it)->mouseReleased(minecraft, x, translatedY, buttonNum);
+		(*it)->mouseReleased(minecraft, x, y, buttonNum);
 	}
 }
 

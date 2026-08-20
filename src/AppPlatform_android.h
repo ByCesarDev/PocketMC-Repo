@@ -152,6 +152,11 @@ public:
 		// custom helper to launch external URLs
 		_methodOpenURL = env->GetMethodID(_activityClass, "openURL", "(Ljava/lang/String;)V");
 
+		_methodPlayMusicTrack = env->GetMethodID(_activityClass, "playMusicTrack", "(Ljava/lang/String;F)V");
+		_methodSetMusicVolumeTrack = env->GetMethodID(_activityClass, "setMusicVolumeTrack", "(F)V");
+		_methodStopMusicTrack = env->GetMethodID(_activityClass, "stopMusicTrack", "()V");
+		_methodIsMusicTrackPlaying = env->GetMethodID(_activityClass, "isMusicTrackPlaying", "()Z");
+
 		_classWindow = (jclass)env->NewGlobalRef(env->FindClass("android/view/Window"));
 		_classContext = (jclass)env->NewGlobalRef(env->FindClass("android/content/Context"));
 		_classView = (jclass)env->NewGlobalRef(env->FindClass( "android/view/View"));
@@ -357,6 +362,36 @@ public:
         env->CallVoidMethod(instance, _methodPlaySound, env->NewStringUTF(filename.c_str()), volume, pitch);
         //w.stop();
         //w.printEvery(1, "playSound-java");
+    }
+
+    virtual void playMusicTrack(const std::string& path, float volume) override {
+        if (!_isInited || !_methodPlayMusicTrack) return;
+        JVMAttacher ta(_vm);
+        JNIEnv* env = ta.getEnv();
+        jstring jpath = env->NewStringUTF(path.c_str());
+        env->CallVoidMethod(instance, _methodPlayMusicTrack, jpath, volume);
+        env->DeleteLocalRef(jpath);
+    }
+
+    virtual void setMusicVolumeTrack(float volume) override {
+        if (!_isInited || !_methodSetMusicVolumeTrack) return;
+        JVMAttacher ta(_vm);
+        JNIEnv* env = ta.getEnv();
+        env->CallVoidMethod(instance, _methodSetMusicVolumeTrack, volume);
+    }
+
+    virtual void stopMusicTrack() override {
+        if (!_isInited || !_methodStopMusicTrack) return;
+        JVMAttacher ta(_vm);
+        JNIEnv* env = ta.getEnv();
+        env->CallVoidMethod(instance, _methodStopMusicTrack);
+    }
+
+    virtual bool isMusicTrackPlaying() override {
+        if (!_isInited || !_methodIsMusicTrackPlaying) return false;
+        JVMAttacher ta(_vm);
+        JNIEnv* env = ta.getEnv();
+        return env->CallBooleanMethod(instance, _methodIsMusicTrackPlaying);
     }
 
     virtual void uploadPlatformDependentData(int id, void* data) {
@@ -628,6 +663,11 @@ private:
 
 	jmethodID _methodGetPlatformStringVar;
 	jmethodID _methodOpenURL; // new JNI method for launching browser
+
+	jmethodID _methodPlayMusicTrack;
+	jmethodID _methodSetMusicVolumeTrack;
+	jmethodID _methodStopMusicTrack;
+	jmethodID _methodIsMusicTrackPlaying;
 
 	jclass _classWindow;
 	jclass _classContext;

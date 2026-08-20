@@ -40,6 +40,24 @@ class SoundEngine
     float _yRot;
 	float _invMaxDistance;
 
+	// Background Music Manager & Fade Control
+	bool isMusicPlaying;
+	int musicDelayTimer;
+	int musicTrackGraceTicks;
+	int lastTrackIndex;
+	float lastMusicVolume;
+
+	int currentFadeTicks;
+	int fadeTicksMax;
+	bool isFadingOut;
+	int fadeOutTicks;
+
+	void updateMusic();
+	void playRandomMusicTrack();
+	void stopBackgroundMusic();
+	void setMusicVolume(float volume);
+	bool isMusicTrackPlaying();
+
 public:
 	SoundEngine(float maxDistance);
 
