@@ -69,17 +69,17 @@ bool PlayerRenderer::isModernPlayerSkin(Mob* mob) {
 }
 
 static bool isSlimPlayerSkin(Mob* mob, EntityRenderDispatcher* dispatcher) {
+	if (dispatcher && dispatcher->options) {
+		std::string skinModelOpt = dispatcher->options->getStringValue(OPTIONS_SKIN_MODEL);
+		if (!skinModelOpt.empty()) {
+			return skinModelOpt == "slim";
+		}
+	}
 	std::string tex = mob->getTexture();
 	std::string lowerTex = tex;
 	std::transform(lowerTex.begin(), lowerTex.end(), lowerTex.begin(), ::tolower);
 	if (lowerTex.find("cesar") != std::string::npos || lowerTex.find("alex") != std::string::npos || lowerTex.find("slim") != std::string::npos) {
 		return true;
-	}
-	if (lowerTex.find("steve") != std::string::npos) {
-		return false;
-	}
-	if (dispatcher && dispatcher->options) {
-		return dispatcher->options->getStringValue(OPTIONS_SKIN_MODEL) == "slim";
 	}
 	return false;
 }
@@ -93,10 +93,8 @@ void PlayerRenderer::renderName( Mob* mob, float x, float y, float z ){
 
 void PlayerRenderer::render(Entity* mob_, float x, float y, float z, float rot, float a) {
 	Mob* mob = (Mob*) mob_;
-	HumanoidModel* desired = playerModel32;
-	if (isModernPlayerSkin(mob)) {
-		desired = isSlimPlayerSkin(mob, entityRenderDispatcher) ? playerModelSlim : playerModel64;
-	}
+	bool isSlim = isSlimPlayerSkin(mob, entityRenderDispatcher);
+	HumanoidModel* desired = isSlim ? playerModelSlim : (isModernPlayerSkin(mob) ? playerModel64 : playerModel32);
 	if (model != desired || humanoidModel != desired) {
 		model = desired;
 		humanoidModel = desired;

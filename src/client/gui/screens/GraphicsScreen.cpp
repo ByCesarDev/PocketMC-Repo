@@ -3,8 +3,9 @@
 #include "../../Options.h"
 #include "../../renderer/LevelRenderer.h"
 #include "locale/I18n.h"
+#include "PanoramaSelectScreen.h"
 
-GraphicsScreen::GraphicsScreen() : group(nullptr) {}
+GraphicsScreen::GraphicsScreen() : btnDone(nullptr), btnPanorama(nullptr), group(nullptr) {}
 GraphicsScreen::~GraphicsScreen() { delete group; }
 
 void GraphicsScreen::init() {
@@ -12,8 +13,11 @@ void GraphicsScreen::init() {
     buttons.clear();
     if (group) { delete group; group = nullptr; }
 
-    btnDone = new Button(0, 0, 0, 200, 20, I18n::get("gui.done"));
+    btnPanorama = new Button(1, 0, 0, 150, 20, I18n::get("options.panorama"));
+    btnDone = new Button(0, 0, 0, 150, 20, I18n::get("gui.done"));
+    buttons.push_back(btnPanorama);
     buttons.push_back(btnDone);
+
     group = new OptionsGroup("options.videoTitle");
     group->addOptionItem(OPTIONS_FOV, minecraft);
     group->addOptionItem(OPTIONS_FANCY_GRAPHICS, minecraft);
@@ -32,9 +36,17 @@ void GraphicsScreen::init() {
 }
 
 void GraphicsScreen::setupPositions() {
+    int subW = std::min((width - 30) / 2, 150);
+    if (subW < 100) subW = 100;
+
+    if (btnPanorama) {
+        btnPanorama->width = subW;
+        btnPanorama->x = width / 2 - subW - 5;
+        btnPanorama->y = height - 28;
+    }
     if (btnDone) {
-        btnDone->width = std::min(200, width - 20);
-        btnDone->x = width / 2 - btnDone->width / 2;
+        btnDone->width = subW;
+        btnDone->x = width / 2 + 5;
         btnDone->y = height - 28;
     }
     if (group) {
@@ -49,6 +61,8 @@ void GraphicsScreen::setupPositions() {
 void GraphicsScreen::buttonClicked(Button* button) {
     if (button->id == 0) {
         minecraft->popScreen();
+    } else if (button->id == 1) {
+        minecraft->pushScreen(new PanoramaSelectScreen());
     }
 }
 
@@ -91,7 +105,4 @@ void GraphicsScreen::tick() {
 
 void GraphicsScreen::removed() {
     minecraft->options.save();
-    if (minecraft->level && minecraft->levelRenderer) {
-        minecraft->levelRenderer->allChanged();
-    }
 }

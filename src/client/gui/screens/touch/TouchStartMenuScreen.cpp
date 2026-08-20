@@ -270,7 +270,8 @@ void StartMenuScreen::render( int xm, int ym, float a )
 		float headPitch = 0.0f;
 
 		glColor4f2(1.0f, 1.0f, 1.0f, 1.0f);
-		HumanoidModel skinModel(0.0f, 0.0f, skinW, skinH);
+		bool isSlim = (minecraft && minecraft->options.getStringValue(OPTIONS_SKIN_MODEL) == "slim");
+		HumanoidModel skinModel(0.0f, 0.0f, skinW, skinH, isSlim);
 		skinModel.render(nullptr, 0, 0, 0, headYaw, headPitch, 0.0625f);
 		glPopMatrix();
 		glDisable2(GL_DEPTH_TEST);

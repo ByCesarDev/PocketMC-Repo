@@ -1348,6 +1348,10 @@ void Minecraft::init()
 
 	options.load();
 
+	bool fancy = options.getBooleanValue(OPTIONS_FANCY_GRAPHICS);
+	if (Tile::leaves) Tile::leaves->setFancy(fancy);
+	if (Tile::leaves_carried) Tile::leaves_carried->setFancy(fancy);
+
 	// Load saved language
 	int langIndex = options.getIntValue(OPTIONS_LANGUAGE);
 	const char* languages[] = {"en_US", "es_ES"};

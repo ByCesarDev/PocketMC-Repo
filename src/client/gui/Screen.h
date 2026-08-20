@@ -43,6 +43,8 @@ public:
     virtual void renderDirtBackground(int vo);
     virtual void renderPanorama(int ticks, float a);
     static float getPanoramaTime();
+    static void setOverridePanoramaPath(const std::string& path);
+    static std::string s_overridePanoramaPath;
 	// query
 	virtual bool renderGameBehind();
 	virtual bool hasClippingArea(IntRectangle& out);

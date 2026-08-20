@@ -19,5 +19,6 @@ public:
 	virtual void removed();
 private:
     Button* btnDone;
+    Button* btnPanorama;
     OptionsGroup* group;
 };

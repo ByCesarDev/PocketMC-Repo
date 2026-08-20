@@ -192,6 +192,12 @@ void Screen::renderDirtBackground( int vo )
 	glDisable2(GL_BLEND);
 }
 
+std::string Screen::s_overridePanoramaPath = "";
+
+void Screen::setOverridePanoramaPath(const std::string& path) {
+	s_overridePanoramaPath = path;
+}
+
 void Screen::renderPanorama(int ticks, float a)
 {
 	GuiShader::unbind();
@@ -219,15 +225,26 @@ void Screen::renderPanorama(int ticks, float a)
 	glRotatef(15.0f, 1.0f, 0.0f, 0.0f);
 	glRotatef((ticks + a) * 0.1f, 0.0f, 1.0f, 0.0f);
 
+	std::string panPath = s_overridePanoramaPath;
+	if (panPath.empty() && minecraft) {
+		panPath = minecraft->options.getStringValue(OPTIONS_PANORAMA_PATH);
+	}
+	if (panPath.empty()) {
+		panPath = "gui/panorama/";
+	}
+	if (panPath.back() != '/' && panPath.back() != '\\') {
+		panPath += "/";
+	}
+
 	for (int i = 0; i < 6; i++) {
-		minecraft->textures->loadAndBindTexture("gui/panorama/panorama_" + std::to_string(i) + ".png");
+		minecraft->textures->loadAndBindTexture(panPath + "panorama_" + std::to_string(i) + ".png");
 
 		glPushMatrix();
 		if (i == 1) glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
 		if (i == 2) glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
 		if (i == 3) glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-		if (i == 4) glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-		if (i == 5) glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+		if (i == 4) glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+		if (i == 5) glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
 
 		t.begin();
 		t.vertexUV(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f);

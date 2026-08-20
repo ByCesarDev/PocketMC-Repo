@@ -237,6 +237,7 @@ file(GLOB CLIENT_SOURCES
     "${PROJECT_ROOT}/src/client/gui/*.cpp"
     "${PROJECT_ROOT}/src/client/gui/components/*.cpp"
     "${PROJECT_ROOT}/src/client/gui/screens/*.cpp"
+    "${PROJECT_ROOT}/src/client/gui/panoramas/*.cpp"
     "${PROJECT_ROOT}/src/client/gui/screens/crafting/*.cpp"
     "${PROJECT_ROOT}/src/client/gui/screens/touch/*.cpp"
     # Added SkindexScreen

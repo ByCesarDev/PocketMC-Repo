@@ -364,6 +364,7 @@ void LevelRenderer::allChanged()
 
 	Tile::leaves->setFancy(fancy);
 	Tile::leaves_carried->setFancy(fancy);
+	isCloudMeshGenerated = false;
 	lastViewDistance = mc->options.getIntValue(OPTIONS_VIEW_DISTANCE);
 
 	int dist = (512 >> 3) << (3 - lastViewDistance);
@@ -1441,17 +1442,22 @@ void LevelRenderer::generateCloudMesh(float cr, float cg, float cb) {
 			float y0 = 0.0f;
 			float y1 = cHeight;
 
-			addQuad(x0,y1,z1, x1,y1,z1, x1,y1,z0, x0,y1,z0, topColor);
-			addQuad(x0,y0,z0, x1,y0,z0, x1,y0,z1, x0,y0,z1, bottomColor);
+			bool isFancy = mc->options.getBooleanValue(OPTIONS_FANCY_GRAPHICS);
+			if (isFancy) {
+				addQuad(x0,y1,z1, x1,y1,z1, x1,y1,z0, x0,y1,z0, topColor);
+				addQuad(x0,y0,z0, x1,y0,z0, x1,y0,z1, x0,y0,z1, bottomColor);
 
-			if (getAlpha(cx - step, cz) < 10)
-				addQuad(x0,y0,z1, x0,y1,z1, x0,y1,z0, x0,y0,z0, sideColor);
-			if (getAlpha(cx + step, cz) < 10)
-				addQuad(x1,y0,z0, x1,y1,z0, x1,y1,z1, x1,y0,z1, sideColor);
-			if (getAlpha(cx, cz - step) < 10)
-				addQuad(x0,y0,z0, x0,y1,z0, x1,y1,z0, x1,y0,z0, sideColor);
-			if (getAlpha(cx, cz + step) < 10)
-				addQuad(x1,y0,z1, x1,y1,z1, x0,y1,z1, x0,y0,z1, sideColor);
+				if (getAlpha(cx - step, cz) < 10)
+					addQuad(x0,y0,z1, x0,y1,z1, x0,y1,z0, x0,y0,z0, sideColor);
+				if (getAlpha(cx + step, cz) < 10)
+					addQuad(x1,y0,z0, x1,y1,z0, x1,y1,z1, x1,y0,z1, sideColor);
+				if (getAlpha(cx, cz - step) < 10)
+					addQuad(x0,y0,z0, x0,y1,z0, x1,y1,z0, x1,y0,z0, sideColor);
+				if (getAlpha(cx, cz + step) < 10)
+					addQuad(x1,y0,z1, x1,y1,z1, x0,y1,z1, x0,y0,z1, sideColor);
+			} else {
+				addQuad(x0,y0,z0, x1,y0,z0, x1,y0,z1, x0,y0,z1, bottomColor);
+			}
 		}
 	}
 

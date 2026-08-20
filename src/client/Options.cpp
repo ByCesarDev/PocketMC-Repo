@@ -58,7 +58,7 @@ OptionBool vsync("vsync", true);
 OptionFloat fovOpt("fov", 70.f, 70.f, 110.f);
 OptionFloat brightnessOpt("gamma", 0.f, 0.f, 1.f);
 
-OptionBool fancyGraphics("fancyGraphics", true);
+OptionBool fancyGraphics("fancyGraphics", false);
 OptionBool viewBobbing("viewBobbing", true);
 OptionBool ambientOcclusion("ao", true);
 OptionBool smoothLighting(OptionStrings::Graphics_SmoothLightning, true);
@@ -184,6 +184,7 @@ OptionFloat flashIntensity("flashIntensity", 1.0f, 0.0f, 2.0f);
 OptionBool hideLightning("hideLightning", false);
 OptionBool monochromeLogo("monochromeLogo", false);
 OptionFloat panoramaSpeed("panoramaSpeed", 1.0f, 0.0f, 2.0f);
+OptionString panoramaPath("panoramaPath", "gui/panorama/");
 OptionBool hideSplashTexts("hideSplashTexts", false);
 OptionBool narratorShortcut("narratorShortcut", false);
 OptionBool spinWithMinecarts("spinWithMinecarts", true);
@@ -357,6 +358,7 @@ void Options::initTable() {
     m_options[OPTIONS_HIDE_LIGHTNING] = &hideLightning;
     m_options[OPTIONS_MONOCHROME_LOGO] = &monochromeLogo;
     m_options[OPTIONS_PANORAMA_SPEED] = &panoramaSpeed;
+    m_options[OPTIONS_PANORAMA_PATH] = &panoramaPath;
     m_options[OPTIONS_HIDE_SPLASH_TEXTS] = &hideSplashTexts;
     m_options[OPTIONS_NARRATOR_SHORTCUT] = &narratorShortcut;
     m_options[OPTIONS_SPIN_WITH_MINECARTS] = &spinWithMinecarts;

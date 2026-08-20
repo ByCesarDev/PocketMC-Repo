@@ -16,8 +16,10 @@ public:
 	ScrolledSelectionList(Minecraft* _minecraft, int _width, int _height, int _y0, int _y1, int _itemHeight);
 
 	void setDimensions(int _width, int _height, int _y0, int _y1);
+	void setXBounds(float _x0, float _x1);
 
 	virtual void setRenderSelection(bool _renderSelection);
+	void setRenderEdgeShadows(bool _renderEdgeShadows);
 protected:
 	void setRenderHeader(bool _renderHeader, int _headerHeight);
 
@@ -40,6 +42,7 @@ public:
 	virtual void capYPosition();
 
 	virtual void render(int xm, int ym, float a);
+	virtual void mouseWheel(int dx, int dy, int xm, int ym);
 	virtual void renderHoleBackground(float y0, float y1, int a0, int a1);
 	void renderDirtBackground();
 protected:
@@ -48,7 +51,6 @@ protected:
 	float y0;
 	float y1;
 	int itemHeight;
-private:
 	int width;
 	int height;
 	float x1;
@@ -66,6 +68,7 @@ private:
 	bool renderSelection;
 	bool doRenderHeader;
 	int headerHeight;
+	bool renderEdgeShadows;
 };
 
 #endif /*NET_MINECRAFT_CLIENT_GUI_COMPONENTS__ScrolledSelectionList_H__*/

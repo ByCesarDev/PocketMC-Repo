@@ -23,6 +23,7 @@ ScrolledSelectionList::ScrolledSelectionList( Minecraft* _minecraft, int _width,
 	renderSelection(true),
 	doRenderHeader(false),
 	headerHeight(0),
+	renderEdgeShadows(false),
 	dragState(DRAG_OUTSIDE),
 	yDrag(0.0f),
 	yo(0.0f),
@@ -35,12 +36,24 @@ void ScrolledSelectionList::setDimensions(int _width, int _height, int _y0, int 
 	height = _height;
 	y0 = (float)_y0;
 	y1 = (float)_y1;
-	x1 = (float)_width;
+	if (x1 == 0.0f || x1 == width) {
+		x1 = (float)_width;
+	}
+}
+
+void ScrolledSelectionList::setXBounds(float _x0, float _x1) {
+	x0 = _x0;
+	x1 = _x1;
 }
 
 void ScrolledSelectionList::setRenderSelection( bool _renderSelection )
 {
 	renderSelection = _renderSelection;
+}
+
+void ScrolledSelectionList::setRenderEdgeShadows( bool _renderEdgeShadows )
+{
+	renderEdgeShadows = _renderEdgeShadows;
 }
 
 void ScrolledSelectionList::setRenderHeader( bool _renderHeader, int _headerHeight )
@@ -77,6 +90,12 @@ void ScrolledSelectionList::capYPosition()
 	if (max < 0) max /= 2;
 	if (yo < 0) yo = 0;
 	if (yo > max) yo = max;
+}
+
+void ScrolledSelectionList::mouseWheel(int dx, int dy, int xm, int ym)
+{
+	yo -= (float)dy * 16.0f;
+	capYPosition();
 }
 
 void ScrolledSelectionList::render( int xm, int ym, float a )
@@ -157,6 +176,19 @@ void ScrolledSelectionList::render( int xm, int ym, float a )
 		renderHeader(rowX, rowBaseY, t);
 	}
 
+	// Enable Scissor test to clip items scrolling outside view bounds [x0, y0, x1, y1]
+	bool useScissor = (x1 > x0 && y1 > y0);
+	if (useScissor) {
+		glEnable2(GL_SCISSOR_TEST);
+		int clipX = (int)(x0 * Gui::GuiScale);
+		int clipY = (int)((height - y1) * Gui::GuiScale);
+		int clipW = (int)((x1 - x0) * Gui::GuiScale);
+		int clipH = (int)((y1 - y0) * Gui::GuiScale);
+		if (clipW > 0 && clipH > 0) {
+			glScissor(clipX, clipY, clipW, clipH);
+		}
+	}
+
 	for (int i = 0; i < itemCount; i++) {
 
 		float y = (float)(rowBaseY + (i) * itemHeight + headerHeight);
@@ -192,6 +224,10 @@ void ScrolledSelectionList::render( int xm, int ym, float a )
 
 	}
 
+	if (useScissor) {
+		glDisable2(GL_SCISSOR_TEST);
+	}
+
 	glDisable2(GL_DEPTH_TEST);
 
 
@@ -200,30 +236,32 @@ void ScrolledSelectionList::render( int xm, int ym, float a )
 	renderHoleBackground(0, y0, 255, 255);
 	renderHoleBackground(y1, (float)height, 255, 255);
 
-	glEnable2(GL_BLEND);
-	glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable2(GL_ALPHA_TEST);
-	glShadeModel2(GL_SMOOTH);
+	if (renderEdgeShadows) {
+		glEnable2(GL_BLEND);
+		glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable2(GL_ALPHA_TEST);
+		glShadeModel2(GL_SMOOTH);
 
-	glDisable2(GL_TEXTURE_2D);
+		glDisable2(GL_TEXTURE_2D);
 
-	t.begin();
-	t.color(0x000000, 0);
-	t.vertexUV(x0, y0 + d, 0, 0, 1);
-	t.vertexUV(x1, y0 + d, 0, 1, 1);
-	t.color(0x000000, 255);
-	t.vertexUV(x1, y0, 0, 1, 0);
-	t.vertexUV(x0, y0, 0, 0, 0);
-	t.draw();
+		t.begin();
+		t.color(0x000000, 0);
+		t.vertexUV(x0, y0 + d, 0, 0, 1);
+		t.vertexUV(x1, y0 + d, 0, 1, 1);
+		t.color(0x000000, 255);
+		t.vertexUV(x1, y0, 0, 1, 0);
+		t.vertexUV(x0, y0, 0, 0, 0);
+		t.draw();
 
-	t.begin();
-	t.color(0x000000, 255);
-	t.vertexUV(x0, y1, 0, 0, 1);
-	t.vertexUV(x1, y1, 0, 1, 1);
-	t.color(0x000000, 0);
-	t.vertexUV(x1, y1 - d, 0, 1, 0);
-	t.vertexUV(x0, y1 - d, 0, 0, 0);
-	t.draw();
+		t.begin();
+		t.color(0x000000, 255);
+		t.vertexUV(x0, y1, 0, 0, 1);
+		t.vertexUV(x1, y1, 0, 1, 1);
+		t.color(0x000000, 0);
+		t.vertexUV(x1, y1 - d, 0, 1, 0);
+		t.vertexUV(x0, y1 - d, 0, 0, 0);
+		t.draw();
+	}
 
 	// 		{
 	// 			float max = getMaxPosition() - (y1 - y0 - 4);
