@@ -1,0 +1,24 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "Grox Skinpack",
+    "description": "Created By: BedrockForge",
+    "version": [
+      1,
+      0,
+      0
+    ],
+    "uuid": "e8c8bd93-40e4-4827-bbe4-2cb8cbff48cf"
+  },
+  "modules": [
+    {
+      "type": "skin_pack",
+      "uuid": "8ffd5d2b-99fd-4835-a9a0-c351f05aca56",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}

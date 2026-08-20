@@ -1,0 +1,24 @@
+{
+  "skins": [
+    {
+      "localization_name": "s_Horror1",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "s_Horror1.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "s_Horror2",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "s_Horror2.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "s_Horror3",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "s_Horror3.png",
+      "type": "free"
+    }
+  ],
+  "serialize_name": "TheCorrupted",
+  "localization_name": "TheCorrupted"
+}

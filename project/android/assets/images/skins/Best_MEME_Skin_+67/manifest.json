@@ -1,0 +1,23 @@
+{
+  "format_version": 1,
+  "header": {
+    "uuid": "d8ff6d06-63f0-446a-9793-7f42341dbf9b",
+    "name": "Best MEME Skin +67",
+    "version": [
+      1,
+      81,
+      0
+    ]
+  },
+  "modules": [
+    {
+      "type": "skin_pack",
+      "uuid": "fe4a681e-a777-452e-bf72-4ded66b15c2c",
+      "version": [
+        1,
+        81,
+        0
+      ]
+    }
+  ]
+}

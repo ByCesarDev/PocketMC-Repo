@@ -1,0 +1,24 @@
+{
+  "serialize_name": "default_skins",
+  "localization_name": "default_skins",
+  "skins": [
+    {
+      "localization_name": "steve",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "steve.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "cesar",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "cesar.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "cesar_white",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "cesarWhite.png",
+      "type": "free"
+    }
+  ]
+}

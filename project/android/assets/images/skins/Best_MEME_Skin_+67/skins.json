@@ -1,0 +1,522 @@
+{
+  "serialize_name": "best_meme_skin_+67",
+  "localization_name": "Best MEME Skin +67",
+  "skins": [
+    {
+      "localization_name": "meme (3)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme (3).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme-animation",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme-animation.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme (2)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme (2).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme-maid-sherk",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme-maid-sherk.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme (1)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme (1).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "la-roca-meme",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "la-roca-meme.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "meme.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "ernoch-meme",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "ernoch-meme.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "giga-cha-meme",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "giga-cha-meme.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme-foda",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme-foda.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "funny-meme",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "funny-meme.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme-perro",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme-perro.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "sonic-meme",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "sonic-meme.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "huggy-wuggy-poppy-playtime",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "huggy-wuggy-poppy-playtime.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "zombie-skins",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "zombie-skins.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skins-mineacraft",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "skins-mineacraft.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "naruto-uzumakivs-madara",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "naruto-uzumakivs-madara.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "minecraft-skins",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "minecraft-skins.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "halo-spartan",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "halo-spartan.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "american-psycho (1)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "american-psycho (1).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "patrick-bateman-in-raincoat",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "patrick-bateman-in-raincoat.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "american-psycho",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "american-psycho.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "sigma (3)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "sigma (3).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "sigma (2)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "sigma (2).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "capivara-sigma",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "capivara-sigma.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "sigma (1)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "sigma (1).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "sigma",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "sigma.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin-sigma",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "skin-sigma.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "wojak",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "wojak.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "pink-wojak",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "pink-wojak.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "trollface (2)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "trollface (2).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "trollface (1)",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "trollface (1).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "trollface-20",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "trollface-20.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "trollface",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "trollface.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "holy-skibidi-toilet",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "holy-skibidi-toilet.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skibidi-toilet",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "skibidi-toilet.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "zombie-herobrine",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "zombie-herobrine.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "herobrine",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "herobrine.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "five-nights-at-freddy-2",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "five-nights-at-freddy-2.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "five-nights-at-freddys-withered-foxy",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "five-nights-at-freddys-withered-foxy.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "sonichu",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "sonichu.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "sonichu-20",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "sonichu-20.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme (5)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme (5).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "doge-meme",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "doge-meme.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "pepo-calvo",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "pepo-calvo.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "pepo-the-chmk",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "pepo-the-chmk.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "boca-juniors",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "boca-juniors.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "boca",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "boca.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "carpincho-de-boca",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "carpincho-de-boca.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "cj-gta-sa-old-version",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "cj-gta-sa-old-version.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "peruano",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "peruano.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "perro-comunista-peruano",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "perro-comunista-peruano.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "cheetos-peruano",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "cheetos-peruano.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "aldeano-peruano",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "aldeano-peruano.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "villager-funny (1)",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "villager-funny (1).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "funny-villager",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "funny-villager.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "funny (3)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "funny (3).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "funny (2)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "funny (2).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "funny (1)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "funny (1).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "maxy-the-fox",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "maxy-the-fox.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "sonic-jr",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "sonic-jr.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "family-man-funny-guy",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "family-man-funny-guy.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "funny-spiderman",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "funny-spiderman.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "steve-funny",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "steve-funny.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "funny",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "funny.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "sunkympeg",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "sunkympeg.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "barbaarian-on-the-clash-of-clans",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "barbaarian-on-the-clash-of-clans.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "the-special-pvp-derp",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "the-special-pvp-derp.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "funny-skin",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "funny-skin.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "cool-and-funny",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "cool-and-funny.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "capivara-kawaii",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "capivara-kawaii.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "alex-is-funny-eh",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "alex-is-funny-eh.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "villager-funny",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "villager-funny.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "derp-steve-funny",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "derp-steve-funny.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "tung-tung-tung-tung-tung-tung-tung-tung-sahur",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "tung-tung-tung-tung-tung-tung-tung-tung-sahur.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "creeper-skin",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "creeper-skin.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "kermit-frog-froggy-sapo-meme-sapo-do-meme",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "kermit-frog-froggy-sapo-meme-sapo-do-meme.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "big-meme-skin",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "big-meme-skin.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme (4)",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme (4).png",
+      "type": "free"
+    },
+    {
+      "localization_name": "muscle-magikarp",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "muscle-magikarp.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme-chick",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme-chick.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme-steve",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme-steve.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "dank-memes",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "dank-memes.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "meme-fox",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "meme-fox.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "doing-some-memes",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "doing-some-memes.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "perro-meme-aka-d-o-g-e",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "perro-meme-aka-d-o-g-e.png",
+      "type": "free"
+    }
+  ]
+}

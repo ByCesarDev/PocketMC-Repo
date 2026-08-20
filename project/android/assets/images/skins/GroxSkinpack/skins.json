@@ -1,0 +1,18 @@
+{
+  "serialize_name": "groxskinpack",
+  "localization_name": "groxskinpack",
+  "skins": [
+    {
+      "localization_name": "skin1",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "skin1.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin2",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "skin2.png",
+      "type": "free"
+    }
+  ]
+}

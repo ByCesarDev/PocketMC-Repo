@@ -1,0 +1,23 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "Neon Pulse 13 Skins FIXED",
+    "uuid": "be5e4168-a558-4ced-bdac-4e585e18cc68",
+    "version": [
+      1,
+      0,
+      0
+    ]
+  },
+  "modules": [
+    {
+      "type": "skin_pack",
+      "uuid": "79e338dd-996b-48e0-be00-ef800f5a44ea",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "serialize_name": "backroom_entity_5a584eb2",
+  "localization_name": "backroom_entity_5a584eb2",
+  "skins": [
+    {
+      "localization_name": "backroom_entity_1",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "backroom_entity_1.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "backroom_entity_2",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "backroom_entity_2.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "backroom_entity_3",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "backroom_entity_3.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "backroom_entity_4",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "backroom_entity_4.png",
+      "type": "free"
+    }
+  ]
+}

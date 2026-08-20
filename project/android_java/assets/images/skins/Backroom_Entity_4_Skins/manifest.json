@@ -1,0 +1,23 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "Backroom Entity",
+    "uuid": "32182ee6-cbfc-4de9-b3df-7ec4edd1b599",
+    "version": [
+      1,
+      0,
+      0
+    ]
+  },
+  "modules": [
+    {
+      "type": "skin_pack",
+      "uuid": "eb3f9eb2-591c-4593-a136-e2327ea29299",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}

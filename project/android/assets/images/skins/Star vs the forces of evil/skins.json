@@ -1,0 +1,18 @@
+{
+  "serialize_name": "star_vs_forces_of_evil",
+  "localization_name": "star_vs_forces_of_evil",
+  "skins": [
+    {
+      "localization_name": "star_butterfly",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Star butterfly.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "starfan13",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Starfan13.png",
+      "type": "free"
+    }
+  ]
+}

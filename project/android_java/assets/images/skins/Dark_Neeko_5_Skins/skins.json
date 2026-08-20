@@ -1,0 +1,36 @@
+{
+  "serialize_name": "dark_neeko_b9da6aa4",
+  "localization_name": "dark_neeko_b9da6aa4",
+  "skins": [
+    {
+      "localization_name": "dark_neeko_1",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "dark_neeko_1.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "dark_neeko_2",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "dark_neeko_2.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "dark_neeko_3",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "dark_neeko_3.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "dark_neeko_4",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "dark_neeko_4.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "dark_neeko_5",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "dark_neeko_5.png",
+      "type": "free"
+    }
+  ]
+}

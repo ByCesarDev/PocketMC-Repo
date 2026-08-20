@@ -1,0 +1,114 @@
+{
+  "skins": [
+    {
+      "localization_name": "Tim_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Tim_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Maria_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Maria_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Max_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Max_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Sarah_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Sarah_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Ava_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Ava_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Bella_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Bella_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Chloe_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Chloe_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Jennifer_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Jennifer_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Leslie_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Leslie_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Tom_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Tom_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Sandra_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Sandra_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Eric_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Eric_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Kevin_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Kevin_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Adam_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Adam_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Brad_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Brad_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Zoe_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Zoe_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Rachel_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Rachel_alex.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "Dean_alex",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "Dean_alex.png",
+      "type": "free"
+    }
+  ],
+  "serialize_name": "TrendyFashionTeens",
+  "localization_name": "TrendyFashionTeens"
+}

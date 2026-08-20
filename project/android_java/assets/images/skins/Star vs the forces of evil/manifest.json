@@ -1,0 +1,23 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "Star vs the Forces of Evil",
+    "uuid": "star-vs-forces-of-evil-uuid-001",
+    "version": [
+      1,
+      0,
+      0
+    ]
+  },
+  "modules": [
+    {
+      "type": "skin_pack",
+      "uuid": "star-vs-forces-of-evil-module-uuid-001",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}

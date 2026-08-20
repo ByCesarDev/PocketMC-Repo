@@ -1,0 +1,23 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "Dark Neeko",
+    "uuid": "e1d9faba-34ee-4555-8731-36817482247c",
+    "version": [
+      1,
+      0,
+      0
+    ]
+  },
+  "modules": [
+    {
+      "type": "skin_pack",
+      "uuid": "010bcef1-1d63-45ea-b13e-c23650180625",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}

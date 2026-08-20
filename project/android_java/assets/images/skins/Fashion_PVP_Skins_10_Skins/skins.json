@@ -1,0 +1,66 @@
+{
+  "serialize_name": "fashion_pvp_10_731d977f1a",
+  "localization_name": "fashion_pvp_10_731d977f1a",
+  "skins": [
+    {
+      "localization_name": "skin_1",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "fashion_pvp_skin_1.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_2",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "fashion_pvp_skin_2.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_3",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "fashion_pvp_skin_3.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_4",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "fashion_pvp_skin_4.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_5",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "fashion_pvp_skin_5.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_6",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "fashion_pvp_skin_6.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_7",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "fashion_pvp_skin_7.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_8",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "fashion_pvp_skin_8.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_9",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "fashion_pvp_skin_9.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_10",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "fashion_pvp_skin_10.png",
+      "type": "free"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "Jujutsu Anime",
+    "description": "by MCP Studios",
+    "version": [1, 0, 0],
+    "uuid": "115cd812-2f7e-44e5-82db-d491db6b2442"
+  },
+  "modules": [
+    {
+      "version": [1, 0, 0],
+      "type": "skin_pack",
+      "uuid": "ea8e11c3-dbea-409b-abc0-23a6f0b881c6"
+    }
+  ],
+  "metadata" : {
+      "authors" : [ "MCP Studios" ]
+  }
+}

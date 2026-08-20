@@ -1,0 +1,24 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "Ultimate Spider-Man Skinpack",
+    "description": "Created By: BedrockForge",
+    "version": [
+      1,
+      0,
+      0
+    ],
+    "uuid": "585f0fc9-7db1-4b65-8ddb-ac50e7edd97a"
+  },
+  "modules": [
+    {
+      "type": "skin_pack",
+      "uuid": "fab61da6-f17c-40d2-a18b-5761f014992b",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}
