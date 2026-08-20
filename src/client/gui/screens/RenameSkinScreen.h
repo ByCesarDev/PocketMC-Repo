@@ -10,7 +10,7 @@ class RenameSkinScreen : public Screen
 {
 	typedef Screen super;
 public:
-	RenameSkinScreen(const std::string& skinPath);
+	RenameSkinScreen(const std::string& skinPath, int packIndex = -1, int skinIndex = -1);
 	virtual ~RenameSkinScreen();
 	
 	virtual void init() override;
@@ -28,6 +28,8 @@ private:
 	Button _btnCancel;
 	TextBox tName;
 	std::string _skinPath;
+	int _packIndex;
+	int _skinIndex;
 };
 
 #endif

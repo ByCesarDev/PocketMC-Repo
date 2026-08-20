@@ -72,6 +72,10 @@ skindex.view.body=Body
 skindex.view.head=Head
 skindex.autoRotate=Auto Rotate: On
 skindex.manualRotate=Auto Rotate: Off
+skindex.confirmDeleteSkinTitle=Delete Skin?
+skindex.confirmDeleteSkinMsg=Are you sure you want to delete this skin?
+skindex.confirmDeletePackTitle=Delete Pack?
+skindex.confirmDeletePackMsg=Are you sure you want to delete this pack?
 gui.confirm=Confirm
 
 gui.done=Done

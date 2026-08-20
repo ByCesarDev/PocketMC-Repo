@@ -1,0 +1,19 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "The Corrupted",
+    "description": "by MCPower Studios",
+    "version": [1, 0, 0],
+    "uuid": "c1426dc8-a483-441c-ad13-ce5529204780"
+  },
+  "modules": [
+    {
+      "version": [1, 0, 0],
+      "type": "skin_pack",
+      "uuid": "d854648c-a309-457d-9e15-a0babea07100"
+    }
+  ],
+  "metadata" : {
+      "authors" : [ "MCPower Studios" ]
+  }
+}

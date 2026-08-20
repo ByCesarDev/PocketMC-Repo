@@ -1,0 +1,42 @@
+{
+  "skins": [
+    {
+      "localization_name": "a_Anime1",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "a_Anime1.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "a_Anime2",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "a_Anime2.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "a_Anime3",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "a_Anime3.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "a_Anime4",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "a_Anime4.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "a_Anime5",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "a_Anime5.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "a_Anime6",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "a_Anime6.png",
+      "type": "free"
+    }
+  ],
+  "serialize_name": "JujutsuAnime",
+  "localization_name": "JujutsuAnime"
+}

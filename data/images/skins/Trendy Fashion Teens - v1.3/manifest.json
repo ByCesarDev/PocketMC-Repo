@@ -1,0 +1,19 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "TrendyFashionTeens",
+    "description": "pack.description",
+    "version": [1, 0, 0],
+    "uuid": "8851745a-a1c2-4e6a-b885-baeb01356279"
+  },
+  "modules": [
+    {
+      "version": [1, 0, 0],
+      "type": "skin_pack",
+      "uuid": "fd236122-d58d-4ffb-a351-ec5038b6e573"
+    }
+  ],
+  "metadata" : {
+      "authors" : [ "FALL Studios & TryzzMC" ]
+  }
+}

@@ -70,10 +70,12 @@ bool PlayerRenderer::isModernPlayerSkin(Mob* mob) {
 
 static bool isSlimPlayerSkin(Mob* mob, EntityRenderDispatcher* dispatcher) {
 	std::string tex = mob->getTexture();
-	if (tex.find("cesar.png") != std::string::npos || tex.find("cesar malo.png") != std::string::npos) {
+	std::string lowerTex = tex;
+	std::transform(lowerTex.begin(), lowerTex.end(), lowerTex.begin(), ::tolower);
+	if (lowerTex.find("cesar") != std::string::npos || lowerTex.find("alex") != std::string::npos || lowerTex.find("slim") != std::string::npos) {
 		return true;
 	}
-	if (tex.find("steve.png") != std::string::npos) {
+	if (lowerTex.find("steve") != std::string::npos) {
 		return false;
 	}
 	if (dispatcher && dispatcher->options) {

@@ -1,0 +1,84 @@
+{
+  "serialize_name": "neon_pulse_fixed_ca98178ffd",
+  "localization_name": "neon_pulse_fixed_ca98178ffd",
+  "skins": [
+    {
+      "localization_name": "skin_1",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "neon_pulse_skin_1.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_2",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "neon_pulse_skin_2.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_3",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "neon_pulse_skin_3.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_4",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "neon_pulse_skin_4.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_5",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "neon_pulse_skin_5.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_6",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "neon_pulse_skin_6.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_7",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "neon_pulse_skin_7.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_8",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "neon_pulse_skin_8.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_9",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "neon_pulse_skin_9.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_10",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "neon_pulse_skin_10.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_11",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "neon_pulse_skin_11.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_12",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "neon_pulse_skin_12.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "skin_13",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "neon_pulse_skin_13.png",
+      "type": "free"
+    }
+  ]
+}

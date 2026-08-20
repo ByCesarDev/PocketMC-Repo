@@ -1,4 +1,4 @@
-﻿#include "NewPackScreen.h"
+#include "NewPackScreen.h"
 #include "SkindexScreen.h"
 #include "../../Minecraft.h"
 #include "../Font.h"
@@ -67,6 +67,21 @@ void NewPackScreen::removed() {
     minecraft->platform()->hideKeyboard();
 }
 
+#include <fstream>
+#include <cstdlib>
+#include <cstdio>
+
+static std::string generateSimpleUUID() {
+    char uuidStr[37];
+    snprintf(uuidStr, sizeof(uuidStr), "%04x%04x-%04x-%04x-%04x-%04x%04x%04x",
+        rand() % 0x10000, rand() % 0x10000,
+        rand() % 0x10000,
+        (rand() % 0x1000) | 0x4000,
+        (rand() % 0x4000) | 0x8000,
+        rand() % 0x10000, rand() % 0x10000, rand() % 0x10000);
+    return std::string(uuidStr);
+}
+
 void NewPackScreen::buttonClicked(Button* button) {
     if (button == &_btnCancel) {
         minecraft->setScreen(new SkindexScreen());
@@ -87,7 +102,41 @@ void NewPackScreen::buttonClicked(Button* button) {
             createFolderIfNotExists("games");
             createFolderIfNotExists("games/com.mojang");
             createFolderIfNotExists("games/com.mojang/skins");
-            createFolderIfNotExists(("games/com.mojang/skins/" + newName).c_str());
+            std::string packDir = "games/com.mojang/skins/" + newName;
+            createFolderIfNotExists(packDir.c_str());
+
+            // 1. Generate manifest.json
+            std::ofstream manifestFile(packDir + "/manifest.json");
+            if (manifestFile.is_open()) {
+                manifestFile << "{\n"
+                             << "  \"format_version\": 1,\n"
+                             << "  \"header\": {\n"
+                             << "    \"name\": \"" << newName << "\",\n"
+                             << "    \"description\": \"Custom Skin Pack\",\n"
+                             << "    \"version\": [1, 0, 0],\n"
+                             << "    \"uuid\": \"" << generateSimpleUUID() << "\"\n"
+                             << "  },\n"
+                             << "  \"modules\": [\n"
+                             << "    {\n"
+                             << "      \"type\": \"skin_pack\",\n"
+                             << "      \"uuid\": \"" << generateSimpleUUID() << "\",\n"
+                             << "      \"version\": [1, 0, 0]\n"
+                             << "    }\n"
+                             << "  ]\n"
+                             << "}\n";
+                manifestFile.close();
+            }
+
+            // 2. Generate skins.json
+            std::ofstream skinsFile(packDir + "/skins.json");
+            if (skinsFile.is_open()) {
+                skinsFile << "{\n"
+                          << "  \"serialize_name\": \"" << newName << "\",\n"
+                          << "  \"localization_name\": \"" << newName << "\",\n"
+                          << "  \"skins\": []\n"
+                          << "}\n";
+                skinsFile.close();
+            }
         }
         minecraft->setScreen(new SkindexScreen());
     }

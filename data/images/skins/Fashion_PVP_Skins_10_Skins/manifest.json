@@ -1,0 +1,23 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "Fashion PVP Skins 10",
+    "uuid": "87667884-e49b-49ae-99d8-11bcf011e4dd",
+    "version": [
+      1,
+      0,
+      0
+    ]
+  },
+  "modules": [
+    {
+      "type": "skin_pack",
+      "uuid": "451b8dbd-5e9a-4ede-b9e2-c3267c758bdf",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}

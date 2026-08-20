@@ -1,0 +1,23 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "Default Skins",
+    "uuid": "default-skins-uuid-001",
+    "version": [
+      1,
+      0,
+      0
+    ]
+  },
+  "modules": [
+    {
+      "type": "skin_pack",
+      "uuid": "default-skins-module-uuid-001",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}

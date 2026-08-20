@@ -72,6 +72,10 @@ skindex.view.body=Cuerpo
 skindex.view.head=Cabeza
 skindex.autoRotate=Rotación: Auto
 skindex.manualRotate=Rotación: Fijada
+skindex.confirmDeleteSkinTitle=¿Eliminar Skin?
+skindex.confirmDeleteSkinMsg=¿Seguro que deseas eliminar esta skin?
+skindex.confirmDeletePackTitle=¿Eliminar Paquete?
+skindex.confirmDeletePackMsg=¿Seguro que deseas eliminar este paquete?
 gui.confirm=Confirmar
 
 gui.done=Confirmar
