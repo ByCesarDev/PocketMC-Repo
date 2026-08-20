@@ -8,13 +8,13 @@ GraphicsScreen::GraphicsScreen() : group(nullptr) {}
 GraphicsScreen::~GraphicsScreen() { delete group; }
 
 void GraphicsScreen::init() {
-    btnDone = new Button(0, width / 2 - 100, height - 30, 200, 20, I18n::get("gui.done"));
+    for (auto b : buttons) delete b;
+    buttons.clear();
+    if (group) { delete group; group = nullptr; }
+
+    btnDone = new Button(0, 0, 0, 200, 20, I18n::get("gui.done"));
     buttons.push_back(btnDone);
     group = new OptionsGroup("options.videoTitle");
-    group->x = width / 2 - 150;
-    group->y = 40;
-    group->width = 300;
-    group->height = height - 80;
     group->addOptionItem(OPTIONS_FOV, minecraft);
     group->addOptionItem(OPTIONS_FANCY_GRAPHICS, minecraft);
     group->addOptionItem(OPTIONS_VIEW_DISTANCE, minecraft);
@@ -27,7 +27,23 @@ void GraphicsScreen::init() {
     group->addOptionItem(OPTIONS_ANAGLYPH_3D, minecraft);
     group->addOptionItem(OPTIONS_RENDER_DEBUG, minecraft);
     group->addOptionItem(OPTIONS_SHOW_VIGNETTE, minecraft);
-    group->setupPositions();
+    
+    setupPositions();
+}
+
+void GraphicsScreen::setupPositions() {
+    if (btnDone) {
+        btnDone->width = std::min(200, width - 20);
+        btnDone->x = width / 2 - btnDone->width / 2;
+        btnDone->y = height - 28;
+    }
+    if (group) {
+        group->width = std::min(width - 20, 360);
+        group->x = width / 2 - group->width / 2;
+        group->y = 35;
+        group->height = height - 70;
+        group->setupPositions();
+    }
 }
 
 void GraphicsScreen::buttonClicked(Button* button) {

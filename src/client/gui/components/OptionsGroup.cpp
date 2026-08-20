@@ -21,17 +21,15 @@ void OptionsGroup::setupPositions() {
 	// First we write the header and then we add the items
 	int curY = y + 18;
 	for(std::vector<GuiElement*>::iterator it = children.begin(); it != children.end(); ++it) {
-		(*it)->width = width - 5;
+		(*it)->width = width - 15;
 		
 		(*it)->y = curY;
-		(*it)->x = x + 10;
+		(*it)->x = x + 5;
 		(*it)->setupPositions();
 		curY += (*it)->height + 3;
 	}
 	// total content height (including header area)
 	contentHeight = curY - y;
-	// keep visible height as the current height (set from parent)
-	// don't override 'height' here because parent defines the visible area
 }
 
 void OptionsGroup::render( Minecraft* minecraft, int xm, int ym ) {

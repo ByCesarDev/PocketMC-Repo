@@ -1,4 +1,4 @@
-﻿#include "MouseSettingsScreen.h"
+#include "MouseSettingsScreen.h"
 #include "../../Minecraft.h"
 #include "../../Options.h"
 #include "locale/I18n.h"
@@ -7,18 +7,35 @@ MouseSettingsScreen::MouseSettingsScreen() : group(nullptr) {}
 MouseSettingsScreen::~MouseSettingsScreen() { delete group; }
 
 void MouseSettingsScreen::init() {
-    btnDone = new Button(0, width / 2 - 100, height - 30, 200, 20, I18n::get("gui.done"));
+    for (auto b : buttons) delete b;
+    buttons.clear();
+    if (group) { delete group; group = nullptr; }
+
+    btnDone = new Button(0, 0, 0, 200, 20, I18n::get("gui.done"));
     buttons.push_back(btnDone);
+
     group = new OptionsGroup("options.mouse_settings.title");
-    group->x = width / 2 - 150;
-    group->y = 40;
-    group->width = 300;
-    group->height = height - 80;
     group->addOptionItem(OPTIONS_SENSITIVITY, minecraft);
     group->addOptionItem(OPTIONS_WHEEL_SENSITIVITY, minecraft);
     group->addOptionItem(OPTIONS_INVERT_Y_MOUSE, minecraft);
     group->addOptionItem(OPTIONS_INVERT_X_MOUSE, minecraft);
-    group->setupPositions();
+    
+    setupPositions();
+}
+
+void MouseSettingsScreen::setupPositions() {
+    if (btnDone) {
+        btnDone->width = std::min(200, width - 20);
+        btnDone->x = width / 2 - btnDone->width / 2;
+        btnDone->y = height - 28;
+    }
+    if (group) {
+        group->width = std::min(width - 20, 360);
+        group->x = width / 2 - group->width / 2;
+        group->y = 35;
+        group->height = height - 70;
+        group->setupPositions();
+    }
 }
 
 void MouseSettingsScreen::buttonClicked(Button* button) {

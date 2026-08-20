@@ -7,6 +7,7 @@ public:
     ChatSettingsScreen();
     virtual ~ChatSettingsScreen();
     virtual void init();
+    virtual void setupPositions();
     virtual void buttonClicked(Button* button);
     virtual void render(int xm, int ym, float a);
     virtual void mouseClicked(int x, int y, int buttonNum);

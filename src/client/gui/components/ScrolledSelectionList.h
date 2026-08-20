@@ -15,6 +15,8 @@ class ScrolledSelectionList : public GuiComponent
 public:
 	ScrolledSelectionList(Minecraft* _minecraft, int _width, int _height, int _y0, int _y1, int _itemHeight);
 
+	void setDimensions(int _width, int _height, int _y0, int _y1);
+
 	virtual void setRenderSelection(bool _renderSelection);
 protected:
 	void setRenderHeader(bool _renderHeader, int _headerHeight);

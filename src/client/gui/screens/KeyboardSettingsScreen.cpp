@@ -7,17 +7,34 @@ KeyboardSettingsScreen::KeyboardSettingsScreen() : group(nullptr) {}
 KeyboardSettingsScreen::~KeyboardSettingsScreen() { delete group; }
 
 void KeyboardSettingsScreen::init() {
-    btnDone = new Button(0, width / 2 - 100, height - 30, 200, 20, I18n::get("gui.done"));
+    for (auto b : buttons) delete b;
+    buttons.clear();
+    if (group) { delete group; group = nullptr; }
+
+    btnDone = new Button(0, 0, 0, 200, 20, I18n::get("gui.done"));
     buttons.push_back(btnDone);
+
     group = new OptionsGroup("options.keyboard_settings.title");
-    group->x = width / 2 - 150;
-    group->y = 40;
-    group->width = 300;
-    group->height = height - 80;
     for (int i = OPTIONS_KEY_FORWARD; i <= OPTIONS_KEY_USE; i++) {
         group->addOptionItem((OptionId)i, minecraft);
     }
-    group->setupPositions();
+    
+    setupPositions();
+}
+
+void KeyboardSettingsScreen::setupPositions() {
+    if (btnDone) {
+        btnDone->width = std::min(200, width - 20);
+        btnDone->x = width / 2 - btnDone->width / 2;
+        btnDone->y = height - 28;
+    }
+    if (group) {
+        group->width = std::min(width - 20, 360);
+        group->x = width / 2 - group->width / 2;
+        group->y = 35;
+        group->height = height - 70;
+        group->setupPositions();
+    }
 }
 
 void KeyboardSettingsScreen::buttonClicked(Button* button) {

@@ -72,11 +72,11 @@ protected:
             color = 0x55FF55; // Selected color (greenish)
             
             // Draw selection box outline like PC
-            fill(x - 2, y - 2, x + 220 + 2, y + h + 2, 0x80FFFFFF);
-            fill(x - 1, y - 1, x + 220 + 1, y + h + 1, 0xFF000000);
+            fill(x - 2, y - 2, x + 216 + 2, y + h + 2, 0x80FFFFFF);
+            fill(x - 1, y - 1, x + 216 + 1, y + h + 1, 0xFF000000);
         }
         
-        parent->drawCenteredString(minecraft->font, text, x + 110, y + 2, color);
+        parent->drawCenteredString(minecraft->font, text, x + 108, y + 2, color);
     }
 
     virtual void renderBackground() {
@@ -85,20 +85,45 @@ protected:
     }
 };
 
-LanguageScreen::LanguageScreen() : languageList(nullptr) {}
+LanguageScreen::LanguageScreen() : btnDone(nullptr), btnFont(nullptr), languageList(nullptr) {}
 LanguageScreen::~LanguageScreen() { 
     delete languageList; 
 }
 
 void LanguageScreen::init() {
-    btnDone = new Button(0, width / 2 + 5, height - 30, 150, 20, I18n::get("gui.done"));
-    buttons.push_back(btnDone);
-    
-    Button* btnFont = new Button(1, width / 2 - 155, height - 30, 150, 20, I18n::get("options.fontSettings"));
-    btnFont->active = false;
-    buttons.push_back(btnFont);
+    for (auto b : buttons) delete b;
+    buttons.clear();
 
+    btnDone = new Button(0, 0, 0, 150, 20, I18n::get("gui.done"));
+    btnFont = new Button(1, 0, 0, 150, 20, I18n::get("options.fontSettings"));
+    btnFont->active = false;
+
+    buttons.push_back(btnFont);
+    buttons.push_back(btnDone);
+
+    if (languageList) { delete languageList; languageList = nullptr; }
     languageList = new LanguageSelectionList(this, minecraft, width, height, 32, height - 50, 18);
+
+    setupPositions();
+}
+
+void LanguageScreen::setupPositions() {
+    int subW = std::min((width - 30) / 2, 150);
+    if (subW < 100) subW = 100;
+
+    if (btnFont) {
+        btnFont->width = subW;
+        btnFont->x = width / 2 - subW - 5;
+        btnFont->y = height - 30;
+    }
+    if (btnDone) {
+        btnDone->width = subW;
+        btnDone->x = width / 2 + 5;
+        btnDone->y = height - 30;
+    }
+    if (languageList) {
+        languageList->setDimensions(width, height, 32, height - 50);
+    }
 }
 
 void LanguageScreen::buttonClicked(Button* button) {
@@ -110,8 +135,11 @@ void LanguageScreen::buttonClicked(Button* button) {
 void LanguageScreen::render(int xm, int ym, float a) {
     if (languageList) languageList->render(xm, ym, a);
     
-    drawCenteredString(font, I18n::get("options.language"), width / 2, 10, 0xffffff);
-    drawCenteredString(font, "(" + I18n::get("options.languageWarning") + ")", width / 2, height - 45, 0x808080);
+    std::string titleStr = I18n::get("options.language");
+    font->draw(titleStr, (float)(width / 2 - font->width(titleStr) / 2), 10.0f, 0xffffff, false);
+
+    std::string warnStr = "(" + I18n::get("options.languageWarning") + ")";
+    font->draw(warnStr, (float)(width / 2 - font->width(warnStr) / 2), (float)(height - 45), 0x808080, false);
     
     Screen::render(xm, ym, a);
 }

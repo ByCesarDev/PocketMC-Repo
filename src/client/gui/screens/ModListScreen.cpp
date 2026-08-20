@@ -36,12 +36,15 @@ ModListScreen::ModListScreen()
 
 void ModListScreen::init()
 {
+    buttons.clear();
+    tabButtons.clear();
     mods = ModRegistry::scanMods(minecraft->externalStoragePath);
     if (selected >= (int)mods.size()) selected = mods.empty() ? -1 : 0;
     buttons.push_back(&bOpenFolder);
     buttons.push_back(&bDone);
     tabButtons.push_back(&bOpenFolder);
     tabButtons.push_back(&bDone);
+    setupPositions();
 }
 
 void ModListScreen::setupPositions()
