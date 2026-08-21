@@ -491,7 +491,7 @@ TMP_ASSETS_DIR="$(mktemp -d)"
 mkdir -p "$TMP_ASSETS_DIR/assets"
 cp -r "$DATA_DIR/." "$TMP_ASSETS_DIR/assets/"
 pushd "$TMP_ASSETS_DIR" >/dev/null
-"$JAR_CMD" uf "$APK_UNSIGNED" assets
+"$JAR_CMD" uf0 "$APK_UNSIGNED" assets
 popd >/dev/null
 rm -rf "$TMP_ASSETS_DIR"
 

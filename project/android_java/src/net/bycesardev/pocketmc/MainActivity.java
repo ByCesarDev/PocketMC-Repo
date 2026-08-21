@@ -700,9 +700,29 @@ public class MainActivity extends Activity {
 			}
     		stopMusicTrack();
     		mMediaPlayer = new android.media.MediaPlayer();
-    		android.content.res.AssetFileDescriptor afd = getAssets().openFd(path);
-    		mMediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-    		afd.close();
+			try {
+				android.content.res.AssetFileDescriptor afd = getAssets().openFd(path);
+				mMediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+				afd.close();
+			} catch (Exception e) {
+				android.util.Log.w("PocketMC", "Failed to open FD for " + path + " (probably compressed). Using cache fallback...");
+				java.io.File tempFile = new java.io.File(getCacheDir(), "temp_music.m4a");
+				java.io.InputStream in = null;
+				java.io.FileOutputStream out = null;
+				try {
+					in = getAssets().open(path);
+					out = new java.io.FileOutputStream(tempFile);
+					byte[] buffer = new byte[8192];
+					int len;
+					while ((len = in.read(buffer)) > 0) {
+						out.write(buffer, 0, len);
+					}
+					mMediaPlayer.setDataSource(tempFile.getAbsolutePath());
+				} finally {
+					if (in != null) in.close();
+					if (out != null) out.close();
+				}
+			}
     		mMediaPlayer.setVolume(volume, volume);
     		mMediaPlayer.prepare();
     		mMediaPlayer.start();
