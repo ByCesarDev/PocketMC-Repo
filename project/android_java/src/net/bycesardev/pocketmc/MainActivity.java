@@ -263,6 +263,17 @@ public class MainActivity extends Activity {
     	return super.onTouchEvent(e);
     }
 
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if ((event.getSource() & android.view.InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            if (event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
+                _touchEvents.add(MotionEvent.obtainNoHistory(event));
+                return true;
+            }
+        }
+        return super.onGenericMotionEvent(event);
+    }
+
     public void handleTouchEvent(MotionEvent e) {
     	//printMemUsage(this);
     	
@@ -296,6 +307,7 @@ public class MainActivity extends Activity {
 			nativeMouseUp(pointerId, 1, x, y);
 			break;
     	}
+		case MotionEvent.ACTION_HOVER_MOVE:
 		case MotionEvent.ACTION_MOVE: {
     		int pcount = e.getPointerCount();
     		for (int i = 0; i < pcount; ++i) {

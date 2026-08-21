@@ -60,7 +60,7 @@ Gui::Gui(Minecraft* minecraft)
 	_currentDropSlot(-1),
 	MAX_MESSAGE_WIDTH(240),
 	itemNameOverlayTime(2),
-	_openInventorySlot(minecraft->useTouchscreen() ? 1 : 0)
+	_openInventorySlot(0)
 {
 	glGenBuffers2(1, &_inventoryRc.vboId);
 	glGenBuffers2(1, &rcFeedbackInner.vboId);
@@ -175,6 +175,16 @@ int Gui::getSlotIdAt(int x, int y) {
 }
 
 bool Gui::isInside(int x, int y) {
+	if (minecraft->useTouchscreen()) {
+		int clickX = (int)(x * InvGuiScale);
+		int clickY = (int)(y * InvGuiScale);
+		int xBase, yBase;
+		getSlotPos(0, xBase, yBase);
+		if (clickX >= xBase + 180 && clickX <= xBase + 200 &&
+			clickY >= yBase && clickY <= yBase + 22) {
+			return true;
+		}
+	}
 	return getSlotIdAt(x, y) != -1;
 }
 
@@ -190,7 +200,8 @@ void Gui::flashSlot(int slotId) {
 void Gui::getSlotPos(int slot, int& posX, int& posY) {
 	int screenWidth = (int)(minecraft->width * InvGuiScale);
 	int screenHeight = (int)(minecraft->height * InvGuiScale);
-	posX = screenWidth / 2 - getNumSlots() * 10 + slot * 20, 
+	int slotsCount = minecraft->useTouchscreen() ? 10 : getNumSlots();
+	posX = screenWidth / 2 - slotsCount * 10 + slot * 20;
 	posY = screenHeight - 22;
 }
 
@@ -209,17 +220,26 @@ RectangleArea Gui::getRectangleArea(int extendSide) {
 }
 
 void Gui::handleClick(int button, int x, int y) {
+	if (minecraft->useTouchscreen()) {
+		int clickX = (int)(x * InvGuiScale);
+		int clickY = (int)(y * InvGuiScale);
+		int xBase, yBase;
+		getSlotPos(0, xBase, yBase);
+		if (clickX >= xBase + 180 && clickX <= xBase + 200 &&
+			clickY >= yBase && clickY <= yBase + 22) {
+			if (button == MouseAction::ACTION_LEFT) {
+				minecraft->setScreen(new ArmorScreen());
+				return;
+			}
+		}
+	}
+
 	int slot = getSlotIdAt(x, y);
 	if (slot == -1) return;
 
 	if (button == MouseAction::ACTION_LEFT) {
-		const int openInventorySlot = _openInventorySlot != 0 ? 1 : 0;
-		if (openInventorySlot && slot == (getNumSlots()-1)) {
-			minecraft->setScreen(new ArmorScreen());
-		} else {
-			minecraft->player->inventory->selectSlot(slot);
-			itemNameOverlayTime = 0;
-		}
+		minecraft->player->inventory->selectSlot(slot);
+		itemNameOverlayTime = 0;
 		return;
 	}
 
@@ -523,28 +543,7 @@ void Gui::onConfigChanged( const Config& c ) {
 	}
 	rcFeedbackInner = t.end(true, rcFeedbackInner.vboId);
 
-	if (c.minecraft->useTouchscreen()) {
-		// I'll bump this up to 6.
-		int num = 6; // without "..." dots
-		if (!c.minecraft->options.getBooleanValue(OPTIONS_IS_JOY_TOUCH_AREA) && c.width > 480) {
-			while (num < Inventory::MAX_SELECTION_SIZE - 1) {
-				int x0, x1, y;
-				getSlotPos(0, x0, y);
-				getSlotPos(num, x1, y);
-				int width = x1 - x0;
-				float leftoverPixels = c.width - c.guiScale*width;
-				if (c.pixelCalc.pixelsToMillimeters(leftoverPixels) < 80)
-					break;
-				num++;
-			}
-		}
-		_numSlots = num;
-#if defined(__APPLE__)
-		_numSlots = Mth::Min(7, _numSlots);
-#endif
-	} else {
-		_numSlots = Inventory::MAX_SELECTION_SIZE; // Xperia Play
-	}
+	_numSlots = Inventory::MAX_SELECTION_SIZE;
 	MAX_MESSAGE_WIDTH = c.guiWidth;
 }
 
@@ -640,10 +639,10 @@ void Gui::renderProgressIndicator( const bool isTouchInterface, const int screen
 	bool isFirstPerson = (minecraft->options.getIntValue(OPTIONS_THIRD_PERSON_VIEW) == 0);
 	if (isFirstPerson && (!isTouchInterface || minecraft->options.getBooleanValue(OPTIONS_IS_JOY_TOUCH_AREA) 
 	|| (bowEquipped && itemInUse)) && !minecraft->options.getBooleanValue(OPTIONS_HIDEGUI)) {
-		minecraft->textures->loadAndBindTexture("gui/icons.png");
+		minecraft->textures->loadAndBindTexture("gui/crosshair.png");
 		glEnable(GL_BLEND);
 		glBlendFunc2(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR);
-		blit(screenWidth/2 - 8, screenHeight/2 - 8, 0, 0, 16, 16);
+		blit(screenWidth/2 - 8, screenHeight/2 - 8, 0, 0, 16, 16, 256, 256);
 		glDisable(GL_BLEND);
 	} else if(!bowEquipped) {
 		const float tprogress = minecraft->gameMode->destroyProgress;
@@ -1159,21 +1158,27 @@ void Gui::renderChatMessages( const int screenHeight, unsigned int max, bool isC
 }
 
 void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
-	glColor4f2(1, 1, 1, .5);
-	minecraft->textures->loadAndBindTexture("gui/gui.png");
-
+	glColor4f2(1, 1, 1, 1.0f);
+	
 	// Ensure the toolbar (background + slots) is drawn on top of other UI
 	glDisable2(GL_DEPTH_TEST);
+	glEnable2(GL_BLEND);
+	glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	Inventory* inventory = minecraft->player->inventory;
 
 	int xBase, yBase;
 	getSlotPos(0, xBase, yBase);
 	const float baseItemX = (float)xBase + 3;
-	const int slotsWidth = 20 * getNumSlots();
-	// Left + right side of the selection bar
-	blit(xBase, yBase, 0, 0, slotsWidth, 22);
-	blit(xBase + slotsWidth, yBase, 180, 0, 2, 22);
+
+	// Render the new hotbar background
+	if (minecraft->useTouchscreen()) {
+		minecraft->textures->loadAndBindTexture("gui/hotbar-android.png");
+		blit(xBase, yBase, 0, 0, 202, 22, 256, 256);
+	} else {
+		minecraft->textures->loadAndBindTexture("gui/hotbar.png");
+		blit(xBase, yBase, 0, 0, 182, 22, 256, 256);
+	}
 
 	if (_currentDropSlot >= 0 && inventory->getItem(_currentDropSlot)) {
 		int x = xBase + 3 +  _currentDropSlot * 20;
@@ -1185,7 +1190,10 @@ void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
 		}
 		fill(x, ySlot+16-yy, x+16, ySlot+16, color);
 	}
-	blit(xBase-1 + 20*inventory->selected, yBase - 1, 0, 22, 24, 22);
+
+	// Render selection overlay
+	minecraft->textures->loadAndBindTexture("gui/selected-hotbar.png");
+	blit(xBase-1 + 20*inventory->selected, yBase, 0, 0, 24, 22, 256, 256);
 	glColor4f2(1, 1, 1, 1);
 
 	// Flash a slot background
@@ -1261,5 +1269,14 @@ void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
 	t.endOverrideAndDraw();
 
 	glPopMatrix2();
+
+	if (minecraft->useTouchscreen()) {
+		glColor4f2(1, 1, 1, 1);
+		minecraft->textures->loadAndBindTexture("gui/inventory_menu_button.png");
+		// Draw ... icon centered inside the 10th slot (at xBase + 180, width 20, height 22)
+		// Aspect ratio of ... is 14x5. Center it: X = xBase + 180 + (20-14)/2 = xBase + 183. Move 1px right: xBase + 184. Y = yBase + (22-5)/2 = yBase + 8.
+		blit(xBase + 184, yBase + 8, 0, 0, 14, 5, 256, 256);
+	}
+	glDisable2(GL_BLEND);
 }
 

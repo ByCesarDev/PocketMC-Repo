@@ -22,6 +22,7 @@ void ControlsScreen::init() {
     buttons.push_back(btnKeyboard);
 
     group = new OptionsGroup("options.controls");
+    group->addOptionItem(OPTIONS_USE_TOUCHSCREEN, minecraft);
     group->addOptionItem(OPTIONS_AUTOJUMP, minecraft);
     group->addOptionItem(OPTIONS_ALLOW_SPRINT, minecraft);
     group->addOptionItem(OPTIONS_IS_LEFT_HANDED, minecraft);

@@ -219,10 +219,15 @@ static int broadcastData(int port, void* msg, int msgLen)
     return sendto(socketDesc, msg, msgLen, 0, (struct sockaddr*)&broadcastAddr, sizeof(broadcastAddr));
 }
 
+static int last_mouse_x = 0;
+static int last_mouse_y = 0;
+static bool first_mouse_move = true;
+
 static void mouseDown(int buttonId, int x, int y) {
     int msg[] = {buttonId, 0, x, y};
     //broadcastData(BroadcastPort, msg, sizeof(msg));
 
+    first_mouse_move = true;
     Mouse::feed(buttonId, 1, x, y);
 }
 
@@ -230,6 +235,7 @@ static void mouseUp(int buttonId, int x, int y) {
     int msg[] = {buttonId, 0, x, y};
     //broadcastData(BroadcastPort, msg, sizeof(msg));
 
+    first_mouse_move = true;
     Mouse::feed(buttonId, 0, x, y);
 }
 
@@ -237,7 +243,17 @@ static void mouseMove(int x, int y) {
     int msg[] = {0, 0, x, y};
     //broadcastData(BroadcastPort, msg, sizeof(msg));
 
-    Mouse::feed(0, 0, x, y);
+    int dx = 0;
+    int dy = 0;
+    if (!first_mouse_move) {
+        dx = x - last_mouse_x;
+        dy = y - last_mouse_y;
+    }
+    first_mouse_move = false;
+    last_mouse_x = x;
+    last_mouse_y = y;
+
+    Mouse::feed(0, 0, x, y, dx, dy);
 }
 
 static void pointerDown(int pointerId, int x, int y) {
@@ -325,6 +341,12 @@ handle_xperia_input( struct android_app* app, AInputEvent* event )
     }
 }
 static int convertAndroidKeyCodeToWindowsKeyCode(int keyCode) {
+    if (keyCode >= 29 && keyCode <= 54) {
+        return keyCode - 29 + 'A'; // A-Z
+    }
+    if (keyCode >= 7 && keyCode <= 16) {
+        return keyCode - 7 + '0'; // 0-9
+    }
 	switch(keyCode) {
         /*
 	case 29: return Keyboard::KEY_A;
@@ -356,8 +378,14 @@ static int convertAndroidKeyCodeToWindowsKeyCode(int keyCode) {
 		*/
 		case 67: return Keyboard::KEY_BACKSPACE;
 		case 66: return Keyboard::KEY_RETURN;
-//		case 62: return Keyboard::KEY_SPACE;
-		default: return 0;
+		case 62: return Keyboard::KEY_SPACE;
+		case 61: return Keyboard::KEY_TAB;
+		case 111: return Keyboard::KEY_ESCAPE;
+		case 59:
+		case 60: return Keyboard::KEY_LSHIFT;
+		case 113:
+		case 114: return Keyboard::KEY_LEFT_CTRL;
+		default: return keyCode;
 	}
 }
 static
@@ -450,6 +478,7 @@ handle_touch_input( struct android_app* app, AInputEvent* event )
             mouseUp(1, x, y);
             Multitouch::feed(1, 0, x, y, pointerId);
             break;
+        case 7: // AMOTION_EVENT_ACTION_HOVER_MOVE
         case AMOTION_EVENT_ACTION_MOVE:
     		int pcount = AMotionEvent_getPointerCount(event);
     		for (int i = 0; i < pcount; ++i) {

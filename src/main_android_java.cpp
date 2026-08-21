@@ -235,15 +235,22 @@ Java_net_bycesardev_pocketmc_GLRenderer_nativeUpdate(JNIEnv* env, jclass cls) {
 //
 // helper to convert Android keycodes to our internal Keyboard constants
 static int androidKeyToInternal(int androidKey) {
+    if (androidKey >= 29 && androidKey <= 54) {
+        return androidKey - 29 + 'A'; // Maps AKEYCODE_A (29) .. AKEYCODE_Z (54) to 'A' (65) .. 'Z' (90)
+    }
+    if (androidKey >= 7 && androidKey <= 16) {
+        return androidKey - 7 + '0'; // Maps AKEYCODE_0 (7) .. AKEYCODE_9 (16) to '0' (48) .. '9' (57)
+    }
     switch(androidKey) {
-        case AKEYCODE_DEL: return Keyboard::KEY_BACKSPACE;
-        case AKEYCODE_ENTER:
-            return Keyboard::KEY_RETURN;
-#if __ANDROID_API__ >= 28
-        case AKEYCODE_NUMPAD_ENTER:
-            return Keyboard::KEY_RETURN;
-#endif
-        // letters are delivered via nativeTextChar so no need to map here
+        case 67: return Keyboard::KEY_BACKSPACE; // AKEYCODE_DEL
+        case 66: return Keyboard::KEY_RETURN;    // AKEYCODE_ENTER
+        case 62: return Keyboard::KEY_SPACE;     // AKEYCODE_SPACE
+        case 61: return Keyboard::KEY_TAB;       // AKEYCODE_TAB
+        case 111: return Keyboard::KEY_ESCAPE;   // AKEYCODE_ESCAPE
+        case 59:
+        case 60: return Keyboard::KEY_LSHIFT;    // AKEYCODE_SHIFT_LEFT / RIGHT
+        case 113:
+        case 114: return Keyboard::KEY_LEFT_CTRL; // AKEYCODE_CTRL_LEFT / RIGHT
         default:
             return androidKey; // fall back to raw code
     }

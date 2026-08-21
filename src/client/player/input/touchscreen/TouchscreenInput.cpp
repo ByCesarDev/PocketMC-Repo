@@ -179,30 +179,18 @@ void TouchscreenInput_TestFps::onConfigChanged(const Config& c) {
 
 void TouchscreenInput_TestFps::setKey(int key, bool state)
 {
-	#ifdef WIN32
-		//LOGI("key: %d, %d\n", key, state);
+	int id = -1;
 
-		int id = -1;
-		// theres no keyUp etc???
-		//if (key == _options->keyUp.key) id = KEY_UP;
-		//if (key == _options->keyDown.key) id = KEY_DOWN;
-		//if (key == _options->keyLeft.key) id = KEY_LEFT;
-		//if (key == _options->keyRight.key) id = KEY_RIGHT;
-		//if (key == _options->keyJump.key) id = KEY_JUMP;
-		//if (key == _options->keySneak.key) id = KEY_SNEAK;
-		//if (key == _options->keyCraft.key) id = KEY_CRAFT;
-		//if (id >= 0) {
-		//	_keys[id] = state;
-		//}
+	if (key == _options->getIntValue(OPTIONS_KEY_FORWARD)) id = KEY_UP;
+	if (key == _options->getIntValue(OPTIONS_KEY_BACK)) id = KEY_DOWN;
+	if (key == _options->getIntValue(OPTIONS_KEY_LEFT)) id = KEY_LEFT;
+	if (key == _options->getIntValue(OPTIONS_KEY_RIGHT)) id = KEY_RIGHT;
+	if (key == _options->getIntValue(OPTIONS_KEY_JUMP)) id = KEY_JUMP;
+	if (key == _options->getIntValue(OPTIONS_KEY_SNEAK)) id = KEY_SNEAK;
 
-		if (key == _options->getIntValue(OPTIONS_KEY_FORWARD)) id = KEY_UP;
-		if (key == _options->getIntValue(OPTIONS_KEY_BACK)) id = KEY_DOWN;
-		if (key == _options->getIntValue(OPTIONS_KEY_LEFT)) id = KEY_LEFT;
-		if (key == _options->getIntValue(OPTIONS_KEY_RIGHT)) id = KEY_RIGHT;
-		if (key == _options->getIntValue(OPTIONS_KEY_JUMP)) id = KEY_JUMP;
-		if (key == _options->getIntValue(OPTIONS_KEY_SNEAK)) id = KEY_SNEAK;
-		//if (key == _options->getIntValue(OPTIONS_KEY_CRAFT)) id = KEY_CRAFT;
-	#endif
+	if (id >= 0) {
+		_keys[id] = state;
+	}
 }
 
 void TouchscreenInput_TestFps::releaseAllKeys()
@@ -212,10 +200,8 @@ void TouchscreenInput_TestFps::releaseAllKeys()
 
 	for (int i = 0; i<8; ++i)
 		_buttons[i] = false;
-#ifdef WIN32
 	for (int i = 0; i<NumKeys; ++i)
 		_keys[i] = false;
-#endif
 	_pressedJump = false;
 	_allowHeightChange = false;
 }
@@ -360,7 +346,6 @@ void TouchscreenInput_TestFps::tick( Player* player )
 	}
 	_renderFlightImage = player->abilities.flying;
 
-#ifdef WIN32
 	if (_keys[KEY_UP]) ya++;
 	if (_keys[KEY_DOWN]) ya--;
 	if (_keys[KEY_LEFT]) xa++;
@@ -369,7 +354,6 @@ void TouchscreenInput_TestFps::tick( Player* player )
 	//sneaking = _keys[KEY_SNEAK];
 	if (_keys[KEY_CRAFT])
 		player->startCrafting((int)player->x, (int)player->y, (int)player->z, Recipe::SIZE_2X2);
-#endif
 
 	if (sneaking) {
 		xa *= 0.3f;
@@ -393,6 +377,18 @@ static void drawRectangleArea(Tesselator& t, RectangleArea* a, int ux, int vy, f
 	t.vertexUV(x1, y1, 0, uu+sz,vv+sz);
 	t.vertexUV(x1, y0, 0, uu+sz,vv);
 	t.vertexUV(x0, y0, 0, uu,	vv);
+}
+
+static void drawRectangleAreaStandalone(Tesselator& t, RectangleArea* a) {
+	const float x0 = a->_x0 * Gui::InvGuiScale;
+	const float x1 = a->_x1 * Gui::InvGuiScale;
+	const float y0 = a->_y0 * Gui::InvGuiScale;
+	const float y1 = a->_y1 * Gui::InvGuiScale;
+
+	t.vertexUV(x0, y1, 0, 0.0f, 1.0f);
+	t.vertexUV(x1, y1, 0, 1.0f, 1.0f);
+	t.vertexUV(x1, y0, 0, 1.0f, 0.0f);
+	t.vertexUV(x0, y0, 0, 0.0f, 0.0f);
 }
 
 static void drawPolygonArea(Tesselator& t, PolygonArea* a, int x, int y) {
@@ -520,14 +516,27 @@ void TouchscreenInput_TestFps::rebuild() {
 	}
 	
 	if (!_minecraft->screen) {
+		t.draw(); // Finish D-pad
+
+		t.begin();
+		_minecraft->textures->loadAndBindTexture("gui/chat_button.png");
 		t.colorABGR(0xFFFFFFFF);
-		// if (isButtonDown(AREA_PAUSE))  t.colorABGR(cPressedPause);
-		// else						   t.colorABGR(cReleasedPause);
-		
-		// Draw chat, third-person and pause icons centered at top
-		drawRectangleArea(t, aChat,  200, 82, 18.0f);
-		drawRectangleArea(t, aThird, 200,100, 18.0f);
-		drawRectangleArea(t, aPause, 200, 64, 18.0f);
+		drawRectangleAreaStandalone(t, aChat);
+		t.draw();
+
+		t.begin();
+		_minecraft->textures->loadAndBindTexture("gui/f5_button.png");
+		t.colorABGR(0xFFFFFFFF);
+		drawRectangleAreaStandalone(t, aThird);
+		t.draw();
+
+		t.begin();
+		_minecraft->textures->loadAndBindTexture("gui/pause_button.png");
+		t.colorABGR(0xFFFFFFFF);
+		drawRectangleAreaStandalone(t, aPause);
+		t.draw();
+
+		t.begin(); // Re-begin so that the final t.draw() at the end of rebuild() doesn't fail
 	}
 //t.end(true, _bufferId);
 	//return;

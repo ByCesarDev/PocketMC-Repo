@@ -47,10 +47,15 @@ struct ENGINE
     struct AppContext  appContext;
 };
 
+static int last_mouse_x = 0;
+static int last_mouse_y = 0;
+static bool first_mouse_move = true;
+
 static void mouseDown(int buttonId, int x, int y) {
     int msg[] = {buttonId, 0, x, y};
     //broadcastData(BroadcastPort, msg, sizeof(msg));
 
+    first_mouse_move = true;
     Mouse::feed(buttonId, 1, x, y);
 }
 
@@ -58,6 +63,7 @@ static void mouseUp(int buttonId, int x, int y) {
     int msg[] = {buttonId, 0, x, y};
     //broadcastData(BroadcastPort, msg, sizeof(msg));
 
+    first_mouse_move = true;
     Mouse::feed(buttonId, 0, x, y);
 }
 
@@ -65,7 +71,17 @@ static void mouseMove(int x, int y) {
     int msg[] = {0, 0, x, y};
     //broadcastData(BroadcastPort, msg, sizeof(msg));
 
-    Mouse::feed(0, 0, x, y);
+    int dx = 0;
+    int dy = 0;
+    if (!first_mouse_move) {
+        dx = x - last_mouse_x;
+        dy = y - last_mouse_y;
+    }
+    first_mouse_move = false;
+    last_mouse_x = x;
+    last_mouse_y = y;
+
+    Mouse::feed(0, 0, x, y, dx, dy);
 }
 
 #if 0

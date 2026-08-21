@@ -719,7 +719,6 @@ void Minecraft::tickInput() {
 				Inventory* v = player->inventory;
 
 				int numSlots = gui.getNumSlots();
-				if (!useTouchscreen()) numSlots--;
 
 				int slot = (v->selected - e.dy + numSlots) % numSlots;
 				v->selectSlot(slot);
@@ -1303,6 +1302,7 @@ bool Minecraft::useTouchscreen() {
 #ifdef RPI
 	return false;
 #endif
+	// return true;
 	return options.getBooleanValue(OPTIONS_USE_TOUCHSCREEN) && !_supportsNonTouchscreen;
 }
 bool Minecraft::supportNonTouchScreen() {
@@ -1465,17 +1465,10 @@ void Minecraft::_reloadInput() {
 	if (useTouchHolder) {
 		inputHolder = new TouchInputHolder(this, &options);
 	} else {
-		#if defined(ANDROID) || defined(__APPLE__) 
-			inputHolder = new CustomInputHolder(
-				new XperiaPlayInput(&options),
-				new ControllerTurnInput(2, ControllerTurnInput::MODE_DELTA),
-				new IBuildInput());
-		#else
-			inputHolder = new CustomInputHolder(
-				new KeyboardInput(&options),
-				new MouseTurnInput(MouseTurnInput::MODE_DELTA, width/2, height/2),
-				new MouseBuildInput());
-		#endif
+		inputHolder = new CustomInputHolder(
+			new KeyboardInput(&options),
+			new MouseTurnInput(MouseTurnInput::MODE_DELTA, width/2, height/2),
+			new MouseBuildInput());
 	}
 
 	mouseHandler.setTurnInput(inputHolder->getTurnInput());

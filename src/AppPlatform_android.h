@@ -413,7 +413,22 @@ public:
         JVMAttacher ta(_vm);
         JNIEnv* env = ta.getEnv();
 
-        std::string path = textureFolder ? "images/" + filename : filename;
+        std::string checkFilename = filename;
+        for (char& c : checkFilename) {
+            if (c == '\\') c = '/';
+        }
+
+        std::string path = filename;
+        if (textureFolder) {
+            if (checkFilename.rfind("games/", 0) != 0 && checkFilename.rfind("data/", 0) != 0) {
+                path = "images/" + filename;
+            }
+        }
+
+        for (char& c : path) {
+            if (c == '\\') c = '/';
+        }
+
         jintArray arr = (jintArray)env->CallObjectMethod(
             instance, _getImageData, env->NewStringUTF(path.c_str()));
 

@@ -67,7 +67,7 @@
             android:title="@string/mmoptions_ctrl_usetouchscreen_title"
             android:summary=""
             android:defaultValue="true"
-            android:enabled="false"
+            android:enabled="true"
             />
         <CheckBoxPreference
             android:key="ctrl_usetouchjoypad"

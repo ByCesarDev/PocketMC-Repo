@@ -63,11 +63,21 @@ public:
 		}
 
 		std::string filename = filename_;
+		std::string checkFilename = filename_;
+		for (char& c : checkFilename) {
+			if (c == '\\') c = '/';
+		}
+
 		if (textureFolder) {
-			if (filename_.rfind("games/", 0) != 0 && filename_.rfind("data/", 0) != 0) {
+			if (checkFilename.rfind("games/", 0) != 0 && checkFilename.rfind("data/", 0) != 0) {
 				filename = "data/images/" + filename_;
 			}
 		}
+
+		for (char& c : filename) {
+			if (c == '\\') c = '/';
+		}
+
 		std::ifstream source(filename.c_str(), std::ios::binary);
 		if (!source) {
 			LOGI("Couldn't find file: %s\n", filename.c_str());
