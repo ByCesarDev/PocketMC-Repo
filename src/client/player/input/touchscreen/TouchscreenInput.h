@@ -3,6 +3,8 @@
 
 //package net.minecraft.client.player;
 
+#include <string>
+#include <cstddef>
 #include "../IMoveInput.h"
 #include "../../../gui/GuiComponent.h"
 #include "TouchAreaModel.h"
@@ -67,13 +69,16 @@ private:
 	RectangleArea* aJump;
 	RectangleArea* aUpLeft;
 	RectangleArea* aUpRight;
+	RectangleArea* aFlyDown;
+	RectangleArea* aSneak;
+	RectangleArea* aFlightToggle;
 	bool _pauseIsDown;
 
 	RenderChunk _render;
 	bool _allowHeightChange;
 	float _sneakTapTime;
 
-	bool _buttons[8];
+	bool _buttons[16];
 	bool isButtonDown(int areaId);
 	void rebuild();
 };

@@ -18,17 +18,19 @@ static const int AREA_DPAD_N = 100;
 static const int AREA_DPAD_S = 101;
 static const int AREA_DPAD_W = 102;
 static const int AREA_DPAD_E = 103;
-static const int AREA_DPAD_C = 104;
+static const int AREA_DPAD_C = 104; // Jump / Fly Up
 static const int AREA_PAUSE = 105;
 static const int AREA_CHAT = 106;
 static const int AREA_THIRD = 107;
+static const int AREA_SNEAK = 108; // Shift / Sneak in middle of D-pad
+static const int AREA_FLY_DOWN = 109; // Fly Down
+static const int AREA_FLIGHT_TOGGLE = 110; // Flight toggle on right side
 
 static int cPressed = 0;
 static int cReleased = 0;
 static int cDiscreet = 0;
 static int cPressedPause = 0;
 static int cReleasedPause = 0;
-//static const int AREA_DPAD_N_JUMP = 105;
 
 //
 // TouchscreenInput_TestFps
@@ -125,15 +127,10 @@ void TouchscreenInput_TestFps::onConfigChanged(const Config& c) {
 	_model.addArea(AREA_MOVE, new RectangleArea(0, 0, w*0.3f, h-32));
 	*/
 
-	// Code for "D-pad with jump in center"
-	float Bw = w * 0.11f;//0.08f;
-	float Bh = Bw;//0.15f;
-    
-    // If too large (like playing on Tablet)
-    PixelCalc& pc = _minecraft->pixelCalc;
-    if (pc.pixelsToMillimeters(Bw) > 200) { //14
-        Bw = Bh = pc.millimetersToPixels(200); //14
-    }
+	// Code for "D-pad with shift in center"
+	float Bw = w * 0.08f;
+	float Bh = Bw;
+
 	// temp data
 	float xx;
 	float yy;
@@ -141,7 +138,7 @@ void TouchscreenInput_TestFps::onConfigChanged(const Config& c) {
 	const float BaseY = -8 + h - 3.0f * Bh;
 	const float BaseX = _options->getBooleanValue(OPTIONS_IS_LEFT_HANDED)? -8 + w - 3 * Bw
 											:	8 + 0;
-	// Setup the bounding rectangle
+	// Setup the bounding rectangle for D-pad (keeping standard size for touch/drag calculation)
 	_boundingRectangle = RectangleArea(BaseX, BaseY, BaseX + 3 * Bw, BaseY + 3 * Bh);
 
 	xx = BaseX + Bw; yy = BaseY;
@@ -151,8 +148,9 @@ void TouchscreenInput_TestFps::onConfigChanged(const Config& c) {
 	xx = BaseX + 2 * Bw;
 	aUpRight = new RectangleArea(xx, yy, xx+Bw, yy+Bh);
 
+	// Center of D-pad: Shift / Sneak button
 	xx = BaseX + Bw; yy = BaseY + Bh;
-	_model.addArea(AREA_DPAD_C, aJump = new RectangleArea(xx, yy, xx+Bw, yy+Bh));
+	_model.addArea(AREA_SNEAK, aSneak = new RectangleArea(xx, yy, xx+Bw, yy+Bh));
 
 	xx = BaseX + Bw; yy = BaseY + 2 * Bh;
 	_model.addArea(AREA_DPAD_S, aDown = new RectangleArea(xx, yy, xx+Bw, yy+Bh));
@@ -163,7 +161,24 @@ void TouchscreenInput_TestFps::onConfigChanged(const Config& c) {
 	xx = BaseX + 2 * Bw; yy = BaseY + Bh;
 	_model.addArea(AREA_DPAD_E, aRight = new RectangleArea(xx, yy, xx+Bw, yy+Bh));
 
-    float maxPixels = _minecraft->pixelCalc.millimetersToPixels(10);
+	// Right stack positioning with matching margin as Shift button from the left (8.0f + Bw)
+	const float BaseX_Right = _options->getBooleanValue(OPTIONS_IS_LEFT_HANDED) ? 8.0f + Bw : w - 8.0f - 2.0f * Bw;
+	const float BaseY_Right = BaseY;
+
+	// 1. Jump / Fly Up (Default to middle height BaseY_Right + Bh when walking to align with Shift)
+	xx = BaseX_Right; yy = BaseY_Right + Bh;
+	_model.addArea(AREA_DPAD_C, aJump = new RectangleArea(xx, yy, xx+Bw, yy+Bh));
+
+	// 2. Flight Toggle (Middle button on the right when flying)
+	xx = BaseX_Right; yy = BaseY_Right + Bh;
+	_model.addArea(AREA_FLIGHT_TOGGLE, aFlightToggle = new RectangleArea(xx, yy, xx+Bw, yy+Bh));
+
+	// 3. Fly Down (Bottom button on the right when flying)
+	xx = BaseX_Right; yy = BaseY_Right + 2.0f * Bh;
+	_model.addArea(AREA_FLY_DOWN, aFlyDown = new RectangleArea(xx, yy, xx+Bw, yy+Bh));
+
+    PixelCalc& pc = _minecraft->pixelCalc;
+    float maxPixels = pc.millimetersToPixels(10);
     // float btnSize = Mth::Min(18 * Gui::GuiScale, maxPixels);
 	float btnSize = pc.millimetersToPixels(18 * Gui::GuiScale);
 	// Center the chat, pause and new third-person buttons at the top
@@ -198,7 +213,7 @@ void TouchscreenInput_TestFps::releaseAllKeys()
 	xa = 0;
 	ya = 0;
 
-	for (int i = 0; i<8; ++i)
+	for (int i = 0; i<16; ++i)
 		_buttons[i] = false;
 	for (int i = 0; i<NumKeys; ++i)
 		_keys[i] = false;
@@ -211,13 +226,13 @@ void TouchscreenInput_TestFps::tick( Player* player )
 	xa = 0;
 	ya = 0;
 	jumping = false;
+	wantUp = false;
+	wantDown = false;
 
-	//bool gotEvent = false;
 	bool heldJump = false;
 	bool tmpForward = false;
-	bool tmpNorthJump = false;
 
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < 16; ++i)
 		_buttons[i] = false;
 
 	const int* pointerIds;
@@ -227,7 +242,7 @@ void TouchscreenInput_TestFps::tick( Player* player )
 		int x = Multitouch::getX(p);
 		int y = Multitouch::getY(p);
 
-		if (_boundingRectangle.isInside((float)x, (float)y) && _forward && !isChangingFlightHeight)
+		if (_boundingRectangle.isInside((float)x, (float)y) && _forward)
 		{
 			float angle = Mth::PI + Mth::atan2(y - _boundingRectangle.centerY(), x - _boundingRectangle.centerX());
 			ya = Mth::sin(angle);
@@ -243,54 +258,30 @@ void TouchscreenInput_TestFps::tick( Player* player )
 
 		bool setButton = false;
 
-		if (Multitouch::isPressed(p))
-			_allowHeightChange = (areaId == AREA_DPAD_C);
-
         if (areaId == AREA_DPAD_C)
 		{
 			setButton = true;
 			heldJump = true;
-			// If we're in water or pressed down on the button: jump
 			if (player->isInWater()) {
 				jumping = true;
 			}
 			else if (Multitouch::isPressed(p)) {
 				jumping = true;
-			} // Or if we are walking forward, jump while going forward!
-			else if (_forward && !player->abilities.flying) {
-				areaId = AREA_DPAD_N;
-				tmpNorthJump = true;
-				//jumping = true;
-				ya += 1;
+			}
+			if (player->abilities.flying) {
+				wantUp = true;
 			}
 		}
-
-		if	(areaId == AREA_DPAD_N)
+		else if (areaId == AREA_DPAD_N)
 		{
 			setButton = true;
-			if (player->isInWater())
-				jumping = true;
-			else if (!isChangingFlightHeight)
-				tmpForward = true;
+			tmpForward = true;
 			ya += 1;
 		}
 		else if (areaId == AREA_DPAD_S && !_forward)
 		{
 			setButton = true;
             ya -= 1;
-			/*
-            if (Multitouch::isReleased(p)) {
-                float now = getTimeS();
-                if (now - _sneakTapTime < 0.4f) {
-                    ya += 1;
-                    sneaking = !sneaking;
-                    player->setSneaking(sneaking);
-                    _sneakTapTime = -1;
-                } else {
-                    _sneakTapTime = now;
-                }
-            }
-			*/
         }
 		else if (areaId == AREA_DPAD_W && !_forward)
 		{
@@ -301,6 +292,29 @@ void TouchscreenInput_TestFps::tick( Player* player )
 		{
 			setButton = true;
 			xa -= 1;
+		}
+		else if (areaId == AREA_SNEAK) {
+			setButton = true;
+			if (Multitouch::isPressed(p)) {
+				sneaking = !sneaking;
+				player->setSneaking(sneaking);
+			}
+		}
+		else if (areaId == AREA_FLIGHT_TOGGLE) {
+			setButton = true;
+			if (Multitouch::isPressed(p)) {
+				if (player->abilities.flying) {
+					player->abilities.flying = false;
+				} else if (player->abilities.mayfly && !player->onGround) {
+					player->abilities.flying = true;
+				}
+			}
+		}
+		else if (areaId == AREA_FLY_DOWN) {
+			setButton = true;
+			if (player->abilities.flying) {
+				wantDown = true;
+			}
 		}
 		else if (areaId == AREA_PAUSE) {
 			if (Multitouch::isReleased(p)) {
@@ -318,7 +332,6 @@ void TouchscreenInput_TestFps::tick( Player* player )
 		else if (areaId == AREA_THIRD) {
 			if (Multitouch::isReleased(p)) {
 				_minecraft->soundEngine->playUI("random.click", 1, 1);
-				// Toggle third person view like F5
 				_minecraft->options.toggle(OPTIONS_THIRD_PERSON_VIEW);
 			}
 		}
@@ -328,22 +341,7 @@ void TouchscreenInput_TestFps::tick( Player* player )
 
 	_forward = tmpForward;
 
-	// Only jump once at a time
-	if (tmpNorthJump) {
-		if (!_northJump)
-			jumping = true;
-		_northJump = true;
-	}
-	else _northJump = false;
-
-	isChangingFlightHeight = false;
-	wantUp   = isButtonDown(AREA_DPAD_N) && (_allowHeightChange & (_pressedJump | wantUp));
-	wantDown = isButtonDown(AREA_DPAD_S) && (_allowHeightChange & (_pressedJump | wantDown));
-	if (player->abilities.flying && (wantUp || wantDown || (heldJump && !_forward)))
-	{
-		isChangingFlightHeight = true;
-		ya = 0;
-	}
+	isChangingFlightHeight = player->abilities.flying && (wantUp || wantDown);
 	_renderFlightImage = player->abilities.flying;
 
 	if (_keys[KEY_UP]) ya++;
@@ -351,7 +349,10 @@ void TouchscreenInput_TestFps::tick( Player* player )
 	if (_keys[KEY_LEFT]) xa++;
 	if (_keys[KEY_RIGHT]) xa--;
 	if (_keys[KEY_JUMP]) jumping = true;
-	//sneaking = _keys[KEY_SNEAK];
+	if (_keys[KEY_SNEAK]) {
+		sneaking = !_keys[KEY_SNEAK];
+		player->setSneaking(sneaking);
+	}
 	if (_keys[KEY_CRAFT])
 		player->startCrafting((int)player->x, (int)player->y, (int)player->z, Recipe::SIZE_2X2);
 
@@ -359,7 +360,6 @@ void TouchscreenInput_TestFps::tick( Player* player )
 		xa *= 0.3f;
 		ya *= 0.3f;
 	}
-	//printf("\n>- %f %f\n", xa, ya);
 	_pressedJump = heldJump;
 }
 
@@ -447,102 +447,165 @@ void TouchscreenInput_TestFps::rebuild() {
         return;
     
 	Tesselator& t = Tesselator::instance;
-	//LOGI("instance is: %p, %p, %p, %p, %p FOR %d\n", &t, aLeft, aRight, aUp, aDown, aJump, _bufferId);
-	//t.setAccessMode(Tesselator::ACCESS_DYNAMIC);
-	t.begin();
+	bool northDiagonals = _forward && (_northJump || _forward);
 
-	const int imageU = 0;
-	const int imageV = 107;
-	const int imageSize = 26;
-
-	bool northDiagonals = !isChangingFlightHeight && (_northJump || _forward);
-
-	// render left button
-	if (northDiagonals || isChangingFlightHeight) t.colorABGR(cDiscreet);
-    else if (isButtonDown(AREA_DPAD_W)) t.colorABGR(cPressed);
-	else						   t.colorABGR(cReleased);
-	drawRectangleArea(t, aLeft, imageU + imageSize, imageV, (float)imageSize);
-
-	// render right button
-	if (northDiagonals || isChangingFlightHeight) t.colorABGR(cDiscreet);
-	else if (isButtonDown(AREA_DPAD_E)) t.colorABGR(cPressed);
-	else						   t.colorABGR(cReleased);
-	drawRectangleArea(t, aRight, imageU + imageSize * 3, imageV, (float)imageSize);
-
-	// render forward button
-	if (isButtonDown(AREA_DPAD_N)) t.colorABGR(cPressed);
-	else						   t.colorABGR(cReleased);
-	if (isChangingFlightHeight)
+	// 1. Left button (W)
 	{
-		drawRectangleArea(t, aUp, imageU + imageSize * 2, imageV + imageSize, (float)imageSize);
+		bool isPressed = isButtonDown(AREA_DPAD_W);
+		_minecraft->textures->loadAndBindTexture(isPressed ? "gui/move_left_button_press.png" : "gui/move_left_button.png");
+		t.begin();
+		t.colorABGR(isPressed ? cPressed : cReleased);
+		drawRectangleAreaStandalone(t, aLeft);
+		t.draw();
 	}
-	else
+
+	// 2. Right button (E)
 	{
-		drawRectangleArea(t, aUp, imageU, imageV, (float)imageSize);
+		bool isPressed = isButtonDown(AREA_DPAD_E);
+		_minecraft->textures->loadAndBindTexture(isPressed ? "gui/move_right_button_press.png" : "gui/move_right_button.png");
+		t.begin();
+		t.colorABGR(isPressed ? cPressed : cReleased);
+		drawRectangleAreaStandalone(t, aRight);
+		t.draw();
 	}
-	
-	// render diagonals, if available
+
+	// 3. Up button (N)
+	{
+		bool isPressed = isButtonDown(AREA_DPAD_N);
+		_minecraft->textures->loadAndBindTexture(isPressed ? "gui/move_up_button_press.png" : "gui/move_up_button.png");
+		t.begin();
+		t.colorABGR(isPressed ? cPressed : cReleased);
+		drawRectangleAreaStandalone(t, aUp);
+		t.draw();
+	}
+
+	// 4. Diagonals (NW / NE)
 	if (northDiagonals)
 	{
-		t.colorABGR(cReleased);
-		drawRectangleArea(t, aUpLeft, imageU, imageV + imageSize, (float)imageSize);
-		drawRectangleArea(t, aUpRight, imageU + imageSize, imageV + imageSize, (float)imageSize);
+		// Up-Left (NW)
+		{
+			bool isPressed = isButtonDown(AREA_DPAD_N) && isButtonDown(AREA_DPAD_W);
+			_minecraft->textures->loadAndBindTexture(isPressed ? "gui/move_up_left_press_button.png" : "gui/move_up_left_button.png");
+			t.begin();
+			t.colorABGR(isPressed ? cPressed : cReleased);
+			drawRectangleAreaStandalone(t, aUpLeft);
+			t.draw();
+		}
+
+		// Up-Right (NE)
+		{
+			bool isPressed = isButtonDown(AREA_DPAD_N) && isButtonDown(AREA_DPAD_E);
+			_minecraft->textures->loadAndBindTexture(isPressed ? "gui/move_up_right_press_button.png" : "gui/move_up_right_button.png");
+			t.begin();
+			t.colorABGR(isPressed ? cPressed : cReleased);
+			drawRectangleAreaStandalone(t, aUpRight);
+			t.draw();
+		}
 	}
 
-	// render backwards button
-	if (northDiagonals) t.colorABGR(cDiscreet);
-	else if (isButtonDown(AREA_DPAD_S)) t.colorABGR(cPressed);
-	else						   t.colorABGR(cReleased);
-	if (isChangingFlightHeight)
+	// 5. Down button (S)
 	{
-		drawRectangleArea(t, aDown, imageU + imageSize * 3, imageV + imageSize, (float)imageSize);
-	}
-	else
-	{
-		drawRectangleArea(t, aDown, imageU + imageSize * 2, imageV, (float)imageSize);
+		bool isPressed = isButtonDown(AREA_DPAD_S);
+		_minecraft->textures->loadAndBindTexture(isPressed ? "gui/move_down_button_press.png" : "gui/move_down_button.png");
+		t.begin();
+		t.colorABGR(isPressed ? cPressed : cReleased);
+		drawRectangleAreaStandalone(t, aDown);
+		t.draw();
 	}
 
-	// render jump / flight button
-	if (_renderFlightImage && northDiagonals) t.colorABGR(cDiscreet);
-	else if (isButtonDown(AREA_DPAD_C)) t.colorABGR(cPressed);
-	else						   t.colorABGR(cReleased);
+	// 6. Center D-pad button: Shift / Sneak
+	{
+		bool isPressed = isButtonDown(AREA_SNEAK);
+		_minecraft->textures->loadAndBindTexture(isPressed ? "gui/shift_press_button.png" : "gui/shift_button.png");
+		t.begin();
+		t.colorABGR(isPressed ? cPressed : cReleased);
+		drawRectangleAreaStandalone(t, aSneak);
+		t.draw();
+	}
+
+	// 7. Jump / Fly Up button (Aligned with Shift height when walking, top row when flying)
+	{
+		if (aJump && aLeft) {
+			float Bh = aLeft->_y1 - aLeft->_y0;
+			float BaseY = aUp ? aUp->_y0 : (aLeft->_y0 - Bh);
+			if (_renderFlightImage) {
+				aJump->_y0 = BaseY;
+				aJump->_y1 = BaseY + Bh;
+			} else {
+				aJump->_y0 = BaseY + Bh;
+				aJump->_y1 = BaseY + 2.0f * Bh;
+			}
+		}
+
+		bool isPressed = isButtonDown(AREA_DPAD_C);
+		std::string tex;
+		if (_renderFlightImage) {
+			tex = isPressed ? "gui/fly_up_button_press.png" : "gui/fly_up_button.png";
+		} else {
+			tex = isPressed ? "gui/jump_press_button.png" : "gui/jump_button.png";
+		}
+		_minecraft->textures->loadAndBindTexture(tex);
+		t.begin();
+		t.colorABGR(isPressed ? cPressed : cReleased);
+		drawRectangleAreaStandalone(t, aJump);
+		t.draw();
+	}
+
+	// 8. Flight Toggle button (Middle on the right) - Only visible when flying
 	if (_renderFlightImage)
 	{
-		drawRectangleArea(t, aJump, imageU + imageSize * 4, imageV + imageSize, (float)imageSize);
+		bool isPressed = isButtonDown(AREA_FLIGHT_TOGGLE);
+		_minecraft->textures->loadAndBindTexture(isPressed ? "gui/flight_press_button.png" : "gui/flight_button.png");
+		t.begin();
+		t.colorABGR(isPressed ? cPressed : cReleased);
+		drawRectangleAreaStandalone(t, aFlightToggle);
+		t.draw();
 	}
-	else
+
+	// 9. Fly Down button (Bottom on the right) - Only visible when flying
+	if (_renderFlightImage)
 	{
-		drawRectangleArea(t, aJump, imageU + imageSize * 4, imageV, (float)imageSize);
+		bool isPressed = isButtonDown(AREA_FLY_DOWN);
+		_minecraft->textures->loadAndBindTexture(isPressed ? "gui/fly_down_button_press.png" : "gui/fly_down_button.png");
+		t.begin();
+		t.colorABGR(isPressed ? cPressed : cReleased);
+		drawRectangleAreaStandalone(t, aFlyDown);
+		t.draw();
 	}
 	
 	if (!_minecraft->screen) {
-		t.draw(); // Finish D-pad
+		// Chat button
+		{
+			bool isPressed = isButtonDown(AREA_CHAT);
+			_minecraft->textures->loadAndBindTexture(isPressed ? "gui/chat_button_press.png" : "gui/chat_button.png");
+			t.begin();
+			t.colorABGR(0xFFFFFFFF);
+			drawRectangleAreaStandalone(t, aChat);
+			t.draw();
+		}
 
-		t.begin();
-		_minecraft->textures->loadAndBindTexture("gui/chat_button.png");
-		t.colorABGR(0xFFFFFFFF);
-		drawRectangleAreaStandalone(t, aChat);
-		t.draw();
+		// Third-person / F5 button
+		{
+			bool isPressed = isButtonDown(AREA_THIRD);
+			_minecraft->textures->loadAndBindTexture(isPressed ? "gui/f5_button_press.png" : "gui/f5_button.png");
+			t.begin();
+			t.colorABGR(0xFFFFFFFF);
+			drawRectangleAreaStandalone(t, aThird);
+			t.draw();
+		}
 
-		t.begin();
-		_minecraft->textures->loadAndBindTexture("gui/f5_button.png");
-		t.colorABGR(0xFFFFFFFF);
-		drawRectangleAreaStandalone(t, aThird);
-		t.draw();
-
-		t.begin();
-		_minecraft->textures->loadAndBindTexture("gui/pause_button.png");
-		t.colorABGR(0xFFFFFFFF);
-		drawRectangleAreaStandalone(t, aPause);
-		t.draw();
-
-		t.begin(); // Re-begin so that the final t.draw() at the end of rebuild() doesn't fail
+		// Pause button
+		{
+			bool isPressed = isButtonDown(AREA_PAUSE);
+			_minecraft->textures->loadAndBindTexture(isPressed ? "gui/pause_button_press.png" : "gui/pause_button.png");
+			t.begin();
+			t.colorABGR(0xFFFFFFFF);
+			drawRectangleAreaStandalone(t, aPause);
+			t.draw();
+		}
 	}
-//t.end(true, _bufferId);
-	//return;
 
+	t.begin(); // Re-begin so that the final t.draw() at the end of rebuild() doesn't fail
 	t.draw();
-	//RenderChunk _render = t.end(true, _bufferId);
-	//t.setAccessMode(Tesselator::ACCESS_STATIC);
 	//_bufferId = _render.vboId;
 }
