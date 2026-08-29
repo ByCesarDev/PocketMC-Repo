@@ -497,7 +497,7 @@ Tile::Tile( int id, int tex, const Material* material )
 
 /*protected*/
 Tile* Tile::setLightEmission(float f) {
-    Tile::lightEmission[id] = (int) (Level::MAX_BRIGHTNESS * f);
+    Tile::lightEmission[id] = (int) std::round(Level::MAX_BRIGHTNESS * f);
     return this;
 }
 
