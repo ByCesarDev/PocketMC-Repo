@@ -69,48 +69,35 @@ void InventoryPane::renderBatch( std::vector<GridItem>& items, float alpha )
 
 	Tesselator& t = Tesselator::instance;
 
+	mc->textures->loadAndBindTexture("gui/gui.png");
 	t.beginOverride();
 	t.colorABGR(0xffffffff);
 	for (unsigned int i = 0; i < items.size(); ++i) {
 		GridItem& item = items[i];
 		blit(item.xf, item.yf, 200, 46, (float)itemBbox.w, (float)itemBbox.h, 16, 16);
 	}
-	mc->textures->loadAndBindTexture("gui/gui.png");
 	t.endOverrideAndDraw();
 
 	GridItem* marked = NULL;
-	float mxx, myy;
+	float mxx = 0, myy = 0;
 
-	t.beginOverride();
 	for (unsigned int i = 0; i < items.size(); ++i) {
 		GridItem& item = items[i];
 		int j = item.id;
+		if (j < 0 || j >= (int)inventoryItems.size()) continue;
 		const ItemInstance* citem = inventoryItems[j];
-		if (!citem) continue;
+		if (!citem || citem->isNull()) continue;
 
-		bool allowed = true;
+		float xx = Gui::floorAlignToScreenPixel(item.xf + BorderPixels + 4);
+		float yy = Gui::floorAlignToScreenPixel(item.yf + BorderPixels + 4);
+		ItemRenderer::renderGuiItem(NULL, mc->textures, citem, xx, yy, 16, 16, false);
 
-		t.enableColor();
-		//#ifdef DEMO_MODE //@huge @attn
-		if (!screen->isAllowed(j)) { allowed = false; t.color( 64,  64,  64); }
-		else
-			//#endif
-			if (lastItemTicks > 0 && lastItemIndex == j) {
-				int gv = 255 - lastItemTicks * 15;
-				t.color(gv, gv, gv, (allowed && citem->count <= 0)?0x60:0xff);
-			} else {
-				t.color(255, 255, 255, (allowed && citem->count <= 0)?0x60:0xff);
-			}          
-			t.noColor();
-			float xx = Gui::floorAlignToScreenPixel(item.xf + BorderPixels + 4);
-			float yy = Gui::floorAlignToScreenPixel(item.yf + BorderPixels + 4);
-			ItemRenderer::renderGuiItem(NULL, mc->textures, citem, xx, yy, 16, 16, false);
-
-			if (j == markerIndex && markerShare >= 0)
-				marked = &item, mxx = xx, myy = yy;
-
+		if (j == markerIndex && markerShare >= 0) {
+			marked = &item;
+			mxx = xx;
+			myy = yy;
+		}
 	}
-	t.endOverrideAndDraw();
 
 	if (marked) {
 		glDisable2(GL_TEXTURE_2D);
@@ -122,33 +109,24 @@ void InventoryPane::renderBatch( std::vector<GridItem>& items, float alpha )
 		glEnable2(GL_TEXTURE_2D);
 	}
 
-
 	if (!mc->isCreativeMode()) {
-		const float ikText = Gui::InvGuiScale + Gui::InvGuiScale;
 		const float kText = 0.5f * Gui::GuiScale;
-		t.beginOverride();
-		t.scale2d(ikText, ikText);
 		for (unsigned int i = 0; i < items.size(); ++i) {
 			GridItem& item = items[i];
+			if (item.id < 0 || item.id >= (int)inventoryItems.size()) continue;
 			const ItemInstance* citem = inventoryItems[item.id];
-			if (!citem) continue;
-
-			char buf[64] = {0};
-			/*int c = */ Gui::itemCountItoa(buf, citem->count);
+			if (!citem || citem->isNull()) continue;
 
 			float tx = Gui::floorAlignToScreenPixel(kText * (item.xf + BorderPixels + 3));
 			float ty = Gui::floorAlignToScreenPixel(kText * (item.yf + BorderPixels + 3));
 			mc->gui.renderSlotText(citem, tx, ty, true, true);
 		}
-		t.resetScale();
-		glEnable2(GL_BLEND);
-		t.endOverrideAndDraw();
 	}
 
 	if (renderDecorations) {
-		t.beginOverride();
 		for (unsigned int i = 0; i < items.size(); ++i) {
 			GridItem& item = items[i];
+			if (item.id < 0 || item.id >= (int)inventoryItems.size()) continue;
 			const ItemInstance* citem = inventoryItems[item.id];
 			if (!citem || citem->isNull()) continue;
 
@@ -156,10 +134,6 @@ void InventoryPane::renderBatch( std::vector<GridItem>& items, float alpha )
 				ItemRenderer::renderGuiItemDecorations(citem, item.xf + 8, item.yf + 12);
 			}
 		}
-
-		glDisable2(GL_TEXTURE_2D);
-		t.endOverrideAndDraw();
-		glEnable2(GL_TEXTURE_2D);
 	}
 	glDisable2(GL_SCISSOR_TEST);
 	if (!mc->isCreativeMode()) {

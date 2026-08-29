@@ -158,6 +158,19 @@ void IngameBlockSelectionScreen::updateCreativeItems() {
 
 void IngameBlockSelectionScreen::init()
 {
+	delete _blockList;
+	_blockList = NULL;
+	for (unsigned int i = 0; i < _categoryButtons.size(); ++i) {
+		delete _categoryButtons[i];
+	}
+	_categoryButtons.clear();
+	buttons.clear();
+
+	delete guiBackground; guiBackground = NULL;
+	delete guiSlotCategory; guiSlotCategory = NULL;
+	delete guiSlotCategorySelected; guiSlotCategorySelected = NULL;
+	delete guiPaneFrame; guiPaneFrame = NULL;
+
 	Inventory* inventory = minecraft->player->inventory;
 
 	if (minecraft->isCreativeMode()) {
@@ -167,7 +180,6 @@ void IngameBlockSelectionScreen::init()
 		guiSlotCategorySelected = builder.createSymmetrical(IntRectangle(0, 32, 8, 8), 2, 2);
 		guiPaneFrame    = builder.createSymmetrical(IntRectangle(0, 20, 8, 8), 1, 2)->setExcluded(1 << 4);
 
-		_categoryButtons.clear();
 		for (int i = 0; i < numCategories; ++i) {
 			ImageButton* button = new CategoryButton(100 + i, (const ImageButton**)&selectedCategoryButton, guiSlotCategory, guiSlotCategorySelected);
 			_categoryButtons.push_back( button );
