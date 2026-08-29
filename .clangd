@@ -1,0 +1,36 @@
+CompileFlags:
+  Add:
+    - -std=c++14
+    - -DDesktop
+    - -DNOMINMAX
+    - -D_CRT_SECURE_NO_WARNINGS
+    - -DOPENGL_ES
+    - -DNO_EGL
+    - -DPLATFORM_DESKTOP
+    - -isystem
+    - "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.51.36231/include"
+    - -isystem
+    - "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/ucrt"
+    - -isystem
+    - "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/shared"
+    - -isystem
+    - "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um"
+    - -I
+    - "c:/Users/Usuario/Desktop/Proyectos/PocketMC/src"
+    - -I
+    - "c:/Users/Usuario/Desktop/Proyectos/PocketMC/glad/include"
+    - -I
+    - "c:/Users/Usuario/Desktop/Proyectos/PocketMC/misc/windows"
+    - -I
+    - "c:/Users/Usuario/Desktop/Proyectos/PocketMC/lib/include"
+  Remove:
+    - /TP
+    - /Zi
+    - /Ob0
+    - /Od
+    - /RTC1
+    - /FS
+    - /showIncludes
+    - /Fo*
+    - /Fd*
+    - -std:c++14
