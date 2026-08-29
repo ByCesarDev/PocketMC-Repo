@@ -80,6 +80,9 @@ private:
 	NinePatchLayer* guiSlotCategory;
 	NinePatchLayer* guiSlotCategorySelected;
 	NinePatchLayer* guiPaneFrame;
+
+	void updateCreativeItems();
+	std::vector<ItemInstance*> creativeItemsCache;
 };
 
 }

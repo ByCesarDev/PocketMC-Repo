@@ -115,6 +115,45 @@ IngameBlockSelectionScreen::~IngameBlockSelectionScreen()
 	delete guiSlotCategory;
 	delete guiSlotCategorySelected;
 	delete guiPaneFrame;
+
+	for (size_t i = 0; i < creativeItemsCache.size(); ++i) {
+		delete creativeItemsCache[i];
+	}
+	creativeItemsCache.clear();
+}
+
+void IngameBlockSelectionScreen::updateCreativeItems() {
+	for (size_t i = 0; i < creativeItemsCache.size(); ++i) {
+		delete creativeItemsCache[i];
+	}
+	creativeItemsCache.clear();
+
+	if (minecraft->isCreativeMode()) {
+		int targetMask = categoryBitmasks[currentCategory];
+
+		for (int i = 0; i < 256; ++i) {
+			if (Tile::tiles[i] != NULL) {
+				Item* it = Item::items[i];
+				int cat = it ? it->category : 1;
+				if (cat <= 0) cat = 8;
+				bool match = (targetMask == 8) ? (cat == 8 || cat >= 16) : (cat == targetMask);
+				if (match) {
+					creativeItemsCache.push_back(new ItemInstance(Tile::tiles[i], 1));
+				}
+			}
+		}
+		for (int i = 256; i < 512; ++i) {
+			if (Item::items[i] != NULL) {
+				Item* it = Item::items[i];
+				int cat = it->category;
+				if (cat <= 0) cat = 8;
+				bool match = (targetMask == 8) ? (cat == 8 || cat >= 16) : (cat == targetMask);
+				if (match) {
+					creativeItemsCache.push_back(new ItemInstance(Item::items[i], 1));
+				}
+			}
+		}
+	}
 }
 
 void IngameBlockSelectionScreen::init()
@@ -156,6 +195,7 @@ void IngameBlockSelectionScreen::init()
 		24 + By, realWidth, height-By-By-20-24);
 #endif
 
+	updateCreativeItems();
 	int countItems = getItems(NULL).size();
 
 	_blockList = new InventoryPane(this, minecraft, rect, width, BorderPixels, countItems, ItemSize, (int)BorderPixels);
@@ -288,43 +328,37 @@ void IngameBlockSelectionScreen::mouseWheel(int dx, int dy, int xm, int ym)
 bool IngameBlockSelectionScreen::addItem(const InventoryPane* pane, int itemId)
 {
 	Inventory* inventory = minecraft->player->inventory;
+	auto items = getItems(pane);
+	if (itemId < 0 || itemId >= (int)items.size() || items[itemId] == NULL)
+		return false;
 
-	int realInventoryIndex = -1;
+	const ItemInstance* selected = items[itemId];
+
 	if (minecraft->isCreativeMode()) {
-		int targetMask = categoryBitmasks[currentCategory];
-		int filteredIndex = 0;
-		for (int i = Inventory::MAX_SELECTION_SIZE; i < inventory->getContainerSize(); ++i) {
-			const ItemInstance* item = inventory->getItem(i);
-			if (item && !item->isNull()) {
-				Item* it = item->getItem();
-				if (it) {
-					int cat = it->category;
-					if (cat <= 0) cat = 8;
-					bool match = false;
-					if (targetMask == 8) {
-						match = (cat == 8 || cat == 16 || cat > 16);
-					} else {
-						match = (cat == targetMask);
-					}
-					if (match) {
-						if (filteredIndex == itemId) {
-							realInventoryIndex = i;
-							break;
-						}
-						filteredIndex++;
-					}
+		int targetSlot = inventory->selected;
+		ItemInstance* cur = inventory->getItem(targetSlot);
+		if (cur && !cur->isNull()) {
+			for (int i = 0; i < Inventory::MAX_SELECTION_SIZE; ++i) {
+				ItemInstance* slotItem = inventory->getItem(i);
+				if (!slotItem || slotItem->isNull()) {
+					targetSlot = i;
+					break;
 				}
 			}
 		}
+		int maxStack = 64;
+		if (Item::items[selected->id]) maxStack = Item::items[selected->id]->getMaxStackSize();
+		if (maxStack <= 0) maxStack = 64;
+
+		inventory->setItem(targetSlot, new ItemInstance(selected->id, maxStack, selected->getAuxValue()));
+		inventory->selectSlot(targetSlot);
 	} else {
-		realInventoryIndex = itemId + Inventory::MAX_SELECTION_SIZE;
+		int realInventoryIndex = itemId + Inventory::MAX_SELECTION_SIZE;
+		if (realInventoryIndex < inventory->getContainerSize() && inventory->getItem(realInventoryIndex)) {
+			inventory->moveToSelectionSlot(0, realInventoryIndex, true);
+			inventory->selectSlot(0);
+		}
 	}
-
-	if (realInventoryIndex == -1 || !inventory->getItem(realInventoryIndex))
-		return false;
-
-	inventory->moveToSelectionSlot(0, realInventoryIndex, true);
-	inventory->selectSlot(0);
 
 #ifdef __APPLE__
 	minecraft->soundEngine->playUI("random.pop", 0.3f, 0.3f);
@@ -428,6 +462,7 @@ void IngameBlockSelectionScreen::buttonClicked(Button* button) {
 			24 + By, realWidth, height-By-By-20-24);
 #endif
 
+		updateCreativeItems();
 		int countItems = getItems(NULL).size();
 		_blockList = new InventoryPane(this, minecraft, rect, width, BorderPixels, countItems, ItemSize, (int)BorderPixels);
 		_blockList->fillMarginX = realBx;
@@ -443,7 +478,7 @@ void IngameBlockSelectionScreen::buttonClicked(Button* button) {
 
 bool IngameBlockSelectionScreen::isAllowed( int slot )
 {
-	if (slot < 0 || slot >= getItems(NULL).size())
+	if (slot < 0 || slot >= (int)getItems(NULL).size())
 		return false;
 
 #ifdef DEMO_MODE
@@ -462,29 +497,15 @@ std::vector<const ItemInstance*> IngameBlockSelectionScreen::getItems( const Inv
 {
 	std::vector<const ItemInstance*> out;
 	if (minecraft->isCreativeMode()) {
-		int targetMask = categoryBitmasks[currentCategory];
-		for (int i = Inventory::MAX_SELECTION_SIZE; i < minecraft->player->inventory->getContainerSize(); ++i) {
-			const ItemInstance* item = minecraft->player->inventory->getItem(i);
-			if (item && !item->isNull()) {
-				Item* it = item->getItem();
-				if (it) {
-					int cat = it->category;
-					if (cat <= 0) cat = 8;
-					bool match = false;
-					if (targetMask == 8) {
-						match = (cat == 8 || cat == 16 || cat > 16);
-					} else {
-						match = (cat == targetMask);
-					}
-					if (match) {
-						out.push_back(item);
-					}
-				}
-			}
+		for (size_t i = 0; i < creativeItemsCache.size(); ++i) {
+			out.push_back(creativeItemsCache[i]);
 		}
 	} else {
-		for (int i = Inventory::MAX_SELECTION_SIZE; i < minecraft->player->inventory->getContainerSize(); ++i)
-			out.push_back(minecraft->player->inventory->getItem(i));
+		for (int i = Inventory::MAX_SELECTION_SIZE; i < minecraft->player->inventory->getContainerSize(); ++i) {
+			ItemInstance* item = minecraft->player->inventory->getItem(i);
+			if (item && !item->isNull())
+				out.push_back(item);
+		}
 	}
 	return out;
 }
