@@ -187,6 +187,9 @@ Minecraft::Minecraft() :
 #endif
 	_powerVr(false),
 	commandPort(4711),
+	_isCreativeMode(false),
+	_pendingRemovePlayer(NULL),
+	storageSource(NULL),
 	reserved_d1(0),reserved_d2(0),
 	reserved_f1(0),reserved_f2(0), options(this)
 {
