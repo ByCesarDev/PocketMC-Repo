@@ -4,8 +4,9 @@
 #include "../../renderer/LevelRenderer.h"
 #include "locale/I18n.h"
 #include "PanoramaSelectScreen.h"
+#include "UISettingsScreen.h"
 
-GraphicsScreen::GraphicsScreen() : btnDone(nullptr), btnPanorama(nullptr), group(nullptr) {}
+GraphicsScreen::GraphicsScreen() : btnDone(nullptr), btnPanorama(nullptr), btnUISettings(nullptr), group(nullptr) {}
 GraphicsScreen::~GraphicsScreen() { delete group; }
 
 void GraphicsScreen::init() {
@@ -14,8 +15,10 @@ void GraphicsScreen::init() {
     if (group) { delete group; group = nullptr; }
 
     btnPanorama = new Button(1, 0, 0, 150, 20, I18n::get("options.panorama"));
-    btnDone = new Button(0, 0, 0, 150, 20, I18n::get("gui.done"));
+    btnUISettings = new Button(2, 0, 0, 150, 20, I18n::get("options.uiSettings"));
+    btnDone = new Button(0, 0, 0, 200, 20, I18n::get("gui.done"));
     buttons.push_back(btnPanorama);
+    buttons.push_back(btnUISettings);
     buttons.push_back(btnDone);
 
     group = new OptionsGroup("options.videoTitle");
@@ -42,18 +45,24 @@ void GraphicsScreen::setupPositions() {
     if (btnPanorama) {
         btnPanorama->width = subW;
         btnPanorama->x = width / 2 - subW - 5;
-        btnPanorama->y = height - 28;
+        btnPanorama->y = height - 52;
+    }
+    if (btnUISettings) {
+        btnUISettings->width = subW;
+        btnUISettings->x = width / 2 + 5;
+        btnUISettings->y = height - 52;
     }
     if (btnDone) {
-        btnDone->width = subW;
-        btnDone->x = width / 2 + 5;
-        btnDone->y = height - 28;
+        int doneW = std::min(width - 40, 200);
+        btnDone->width = doneW;
+        btnDone->x = width / 2 - doneW / 2;
+        btnDone->y = height - 26;
     }
     if (group) {
         group->width = std::min(width - 20, 360);
         group->x = width / 2 - group->width / 2;
         group->y = 35;
-        group->height = height - 70;
+        group->height = height - 95;
         group->setupPositions();
     }
 }
@@ -63,6 +72,8 @@ void GraphicsScreen::buttonClicked(Button* button) {
         minecraft->popScreen();
     } else if (button->id == 1) {
         minecraft->pushScreen(new PanoramaSelectScreen());
+    } else if (button->id == 2) {
+        minecraft->pushScreen(new UISettingsScreen());
     }
 }
 

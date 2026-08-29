@@ -20,5 +20,6 @@ public:
 private:
     Button* btnDone;
     Button* btnPanorama;
+    Button* btnUISettings;
     OptionsGroup* group;
 };

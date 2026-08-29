@@ -157,21 +157,21 @@ void Gui::render(float a, bool mouseFree, int xMouse, int yMouse) {
 }
 
 int Gui::getSlotIdAt(int x, int y) {
-	int screenWidth = (int)(minecraft->width * InvGuiScale);
-	int screenHeight = (int)(minecraft->height * InvGuiScale);
 	x = (int)(x * InvGuiScale);
 	y = (int)(y * InvGuiScale);
 
-	if (y < (screenHeight - 16 - 3) || y > screenHeight)
+	int xBase, yBase;
+	getSlotPos(0, xBase, yBase);
+
+	if (y < yBase || y > yBase + 22)
 		return -1;
 
-	int xBase = 2 + screenWidth / 2 - getNumSlots() * 10;
 	int xRel  = (x - xBase);
 	if (xRel < 0)
 		return -1;
 
 	int slot = xRel / 20;
-	return (slot >= 0 && slot < getNumSlots())? slot : -1;
+	return (slot >= 0 && slot < getNumSlots()) ? slot : -1;
 }
 
 bool Gui::isInside(int x, int y) {
@@ -201,8 +201,14 @@ void Gui::getSlotPos(int slot, int& posX, int& posY) {
 	int screenWidth = (int)(minecraft->width * InvGuiScale);
 	int screenHeight = (int)(minecraft->height * InvGuiScale);
 	int slotsCount = minecraft->useTouchscreen() ? 10 : getNumSlots();
+
+	float safeRatio = minecraft->options.getProgressValue(OPTIONS_SAFE_AREA);
+	if (safeRatio < 0.5f) safeRatio = 0.5f;
+	if (safeRatio > 1.0f) safeRatio = 1.0f;
+	int safeMarginY = (int)((1.0f - safeRatio) * (screenHeight / 2.0f));
+
 	posX = screenWidth / 2 - slotsCount * 10 + slot * 20;
-	posY = screenHeight - 22;
+	posY = screenHeight - 22 - safeMarginY;
 }
 
 RectangleArea Gui::getRectangleArea(int extendSide) {
@@ -228,7 +234,15 @@ void Gui::handleClick(int button, int x, int y) {
 		if (clickX >= xBase + 180 && clickX <= xBase + 200 &&
 			clickY >= yBase && clickY <= yBase + 22) {
 			if (button == MouseAction::ACTION_LEFT) {
-				minecraft->setScreen(new ArmorScreen());
+				if (minecraft->options.getIntValue(OPTIONS_UI_PROFILE) == 1) {
+					if (minecraft->isCreativeMode()) {
+						minecraft->screenChooser.setScreen(SCREEN_BLOCKSELECTION);
+					} else {
+						minecraft->setScreen(new ArmorScreen());
+					}
+				} else {
+					minecraft->screenChooser.setScreen(SCREEN_UNIFIED_INVENTORY);
+				}
 				return;
 			}
 		}
@@ -325,7 +339,15 @@ void Gui::handleKeyPressed(int key)
 	}
 	else if (key == 100)
 	{
-		minecraft->screenChooser.setScreen(SCREEN_UNIFIED_INVENTORY);
+		if (minecraft->options.getIntValue(OPTIONS_UI_PROFILE) == 1) {
+			if (minecraft->isCreativeMode()) {
+				minecraft->screenChooser.setScreen(SCREEN_BLOCKSELECTION);
+			} else {
+				minecraft->setScreen(new ArmorScreen());
+			}
+		} else {
+			minecraft->screenChooser.setScreen(SCREEN_UNIFIED_INVENTORY);
+		}
 	}
 	else if (key == minecraft->options.getIntValue(OPTIONS_KEY_DROP)) 
 	{

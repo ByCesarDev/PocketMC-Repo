@@ -873,7 +873,15 @@ void Minecraft::tickInput() {
 			}
 
 			if (key == Keyboard::KEY_E) {
-				screenChooser.setScreen(SCREEN_UNIFIED_INVENTORY);
+				if (options.getIntValue(OPTIONS_UI_PROFILE) == 1) {
+					if (isCreativeMode()) {
+						screenChooser.setScreen(SCREEN_BLOCKSELECTION);
+					} else {
+						setScreen(new ArmorScreen());
+					}
+				} else {
+					screenChooser.setScreen(SCREEN_UNIFIED_INVENTORY);
+				}
 			}
 
 			if (!screen && key == Keyboard::KEY_T && level) {

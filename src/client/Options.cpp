@@ -190,6 +190,10 @@ OptionBool narratorShortcut("narratorShortcut", false);
 OptionBool spinWithMinecarts("spinWithMinecarts", true);
 OptionBool highContrastBorders("highContrastBorders", false);
 
+// UI Profile & Safe Area
+OptionInt uiProfile("uiProfile", 0, 0, 1);
+OptionFloat safeArea("safeArea", 1.0f, 0.5f, 1.0f);
+
 void Options::initTable() {
     m_options[OPTIONS_DIFFICULTY] = &difficulty;
     m_options[OPTIONS_HIDEGUI] = &hidegui;
@@ -363,6 +367,8 @@ void Options::initTable() {
     m_options[OPTIONS_NARRATOR_SHORTCUT] = &narratorShortcut;
     m_options[OPTIONS_SPIN_WITH_MINECARTS] = &spinWithMinecarts;
     m_options[OPTIONS_HIGH_CONTRAST_BORDERS] = &highContrastBorders;
+    m_options[OPTIONS_UI_PROFILE] = &uiProfile;
+    m_options[OPTIONS_SAFE_AREA] = &safeArea;
 }
 
 void Options::set(OptionId key, const std::string& value) {

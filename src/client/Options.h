@@ -190,6 +190,10 @@ enum OptionId {
     OPTIONS_SPIN_WITH_MINECARTS,
     OPTIONS_HIGH_CONTRAST_BORDERS,
 
+    // UI Profile & Safe Area
+    OPTIONS_UI_PROFILE,
+    OPTIONS_SAFE_AREA,
+
 	// Should be last!
 	OPTIONS_COUNT
 };
