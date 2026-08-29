@@ -88,13 +88,15 @@ private:
 
 UnifiedInventoryScreen::UnifiedInventoryScreen() :
     btnClose(4, ""),
+    btnModeDual(200),
+    btnModeSingle(201),
     btnArmor{BlankButton(0), BlankButton(1), BlankButton(2), BlankButton(3)},
     btnCraftingTable(10),
-    selectedCategoryButton(NULL),
-    currentCategory(0),
     searchBox(0, ""),
     catalogScrollY(0.0f),
     maxCatalogScrollY(0.0f),
+    currentCategory(0),
+    selectedCategoryButton(NULL),
     craftResultItem(NULL),
     carriedItem(NULL),
     guiLeftPanelBg(NULL),
@@ -105,7 +107,11 @@ UnifiedInventoryScreen::UnifiedInventoryScreen() :
     guiSlotCategory(NULL),
     guiSlotCategorySelected(NULL),
     guiDivider(NULL),
+    guiSrvInvBg(NULL),
+    guiTabSelected(NULL),
+    guiTabUnselected(NULL),
     isCreative(false),
+    isDualPane(true),
     player(NULL),
     selectedHotbarSlot(0)
 {
@@ -123,6 +129,9 @@ UnifiedInventoryScreen::~UnifiedInventoryScreen() {
     delete guiSlotCategory;
     delete guiSlotCategorySelected;
     delete guiDivider;
+    delete guiSrvInvBg;
+    delete guiTabSelected;
+    delete guiTabUnselected;
 
     for (size_t i = 0; i < categoryButtons.size(); ++i) {
         delete categoryButtons[i];
@@ -152,16 +161,6 @@ void UnifiedInventoryScreen::init() {
     player = minecraft->player;
     isCreative = minecraft->isCreativeMode();
 
-    ImageDef def;
-    def.name = "gui/spritesheet.png";
-    def.x = 0;
-    def.y = 1;
-    def.width = def.height = 18;
-    def.setSrc(IntRectangle(60, 0, 18, 18));
-    btnClose.setImageDef(def, true);
-    btnClose.scaleWhenPressed = false;
-    buttons.push_back(&btnClose);
-
     NinePatchFactory builder(minecraft->textures, "gui/spritesheet.png");
     guiLeftPanelBg          = builder.createSymmetrical(IntRectangle(0, 0, 16, 16), 4, 4);
     guiRightPanelBg         = builder.createSymmetrical(IntRectangle(0, 0, 16, 16), 4, 4);
@@ -172,20 +171,30 @@ void UnifiedInventoryScreen::init() {
     // Divider between the creative catalog panel and the survival/player panel
     NinePatchFactory divBuilder(minecraft->textures, "gui/inv_icons/divider_inv_bg.png");
     guiDivider = divBuilder.createSymmetrical(IntRectangle(0, 0, 4, 4), 1, 1);
-    if (isCreative) {
-        categoryButtons.clear();
-        for (int i = 0; i < NUM_CATEGORIES; ++i) {
-            ImageButton* button = new Touch::UnifiedCategoryButton(
-                100 + i,
-                (const ImageButton**)&selectedCategoryButton,
-                "gui/inv_icons/icon_bg_inv.png",
-                "gui/inv_icons/icon_select_inv.png",
-                minecraft->textures
-            );
-            categoryButtons.push_back(button);
-        }
-        selectedCategoryButton = categoryButtons[currentCategory];
+
+    // Header bar background on top of the survival inventory
+    NinePatchFactory srvBuilder(minecraft->textures, "gui/inv_icons/srv_inv_bg.png");
+    guiSrvInvBg = srvBuilder.createSymmetrical(IntRectangle(0, 0, 50, 11), 3, 3);
+
+    // Tab buttons background for header modes
+    NinePatchFactory tabBuilder(minecraft->textures, "gui/inv_icons/icon_bg_inv.png");
+    guiTabUnselected = tabBuilder.createSymmetrical(IntRectangle(0, 0, 16, 12), 2, 2);
+
+    NinePatchFactory selBuilder(minecraft->textures, "gui/inv_icons/icon_select_inv.png");
+    guiTabSelected = selBuilder.createSymmetrical(IntRectangle(0, 0, 16, 18), 2, 2);
+
+    categoryButtons.clear();
+    for (int i = 0; i < NUM_CATEGORIES; ++i) {
+        ImageButton* button = new Touch::UnifiedCategoryButton(
+            100 + i,
+            (const ImageButton**)&selectedCategoryButton,
+            "gui/inv_icons/icon_bg_inv.png",
+            "gui/inv_icons/icon_select_inv.png",
+            minecraft->textures
+        );
+        categoryButtons.push_back(button);
     }
+    selectedCategoryButton = categoryButtons[currentCategory];
 
     if (player && player->inventory) {
         selectedHotbarSlot = player->inventory->selected;
@@ -195,33 +204,18 @@ void UnifiedInventoryScreen::init() {
 }
 
 void UnifiedInventoryScreen::setupPositions() {
-    if (!isCreative) {
-        // Survival: Single centered floating panel (174 x 168 px)
-        int pW = 174;
-        int pH = 168;
-        rightPanelRect = IntRectangle((width - pW) / 2, (height - pH) / 2 + 10, pW, pH);
+    int pY = (height - 168) / 2 + 10;
 
-        btnClose.width = btnClose.height = 18;
-        btnClose.x = rightPanelRect.x + rightPanelRect.w - 18;
-        btnClose.y = rightPanelRect.y - 18;
-
-        if (guiRightPanelBg) {
-            guiRightPanelBg->setSize(static_cast<float>(rightPanelRect.w), static_cast<float>(rightPanelRect.h));
-        }
-    } else {
-        // Creative: Dual floating panels side by side, 4px gap
+    if (isDualPane) {
+        // Dual floating panels side by side, 4px gap (138 + 4 + 174 = 316px total)
         int totalW = 316;
         int startX = (width - totalW) / 2;
-        int pY = (height - 168) / 2 + 10;
 
         leftPanelRect = IntRectangle(startX, pY, 138, 168);
         rightPanelRect = IntRectangle(startX + 142, pY, 174, 168);
 
         if (guiLeftPanelBg) {
             guiLeftPanelBg->setSize(static_cast<float>(leftPanelRect.w), static_cast<float>(leftPanelRect.h));
-        }
-        if (guiRightPanelBg) {
-            guiRightPanelBg->setSize(static_cast<float>(rightPanelRect.w), static_cast<float>(rightPanelRect.h));
         }
 
         // Category tab buttons sitting right on top of left panel
@@ -255,11 +249,44 @@ void UnifiedInventoryScreen::setupPositions() {
         }
 
         catalogPaneRect = IntRectangle(leftPanelRect.x + 6, leftPanelRect.y + 18, 126, 144);
+    } else {
+        // Single Survival Panel centered (174 x 168 px)
+        int pW = 174;
+        int startX = (width - pW) / 2;
 
-        btnClose.width = btnClose.height = 18;
-        btnClose.x = rightPanelRect.x + rightPanelRect.w - 18;
-        btnClose.y = rightPanelRect.y - 18;
+        leftPanelRect = IntRectangle(0, 0, 0, 0);
+        rightPanelRect = IntRectangle(startX, pY, pW, 168);
+        catalogPaneRect = IntRectangle(0, 0, 0, 0);
     }
+
+    if (guiRightPanelBg) {
+        guiRightPanelBg->setSize(static_cast<float>(rightPanelRect.w), static_cast<float>(rightPanelRect.h));
+    }
+
+    // Top Header Bar aligned to the right of rightPanelRect (exact Bedrock margins)
+    int headerW = 72;
+    int headerH = 20;
+    headerBarRect = IntRectangle(rightPanelRect.x + rightPanelRect.w - headerW, rightPanelRect.y - headerH, headerW, headerH);
+    if (guiSrvInvBg) {
+        guiSrvInvBg->setSize(static_cast<float>(headerBarRect.w), static_cast<float>(headerBarRect.h));
+    }
+
+    // Mode Buttons inside Header Bar (23x16 px)
+    btnModeDual.x = headerBarRect.x + 3;
+    btnModeDual.y = headerBarRect.y + 3;
+    btnModeDual.width = 23;
+    btnModeDual.height = 16;
+
+    btnModeSingle.x = headerBarRect.x + 27;
+    btnModeSingle.y = headerBarRect.y + 3;
+    btnModeSingle.width = 23;
+    btnModeSingle.height = 16;
+
+    // Header Close Button on the right
+    btnClose.width = 12;
+    btnClose.height = 14;
+    btnClose.x = headerBarRect.x + headerBarRect.w - 18;
+    btnClose.y = headerBarRect.y + 4;
 
     // Armor Buttons (Top Left of Right Panel)
     int armorX = rightPanelRect.x + 6;
@@ -283,9 +310,7 @@ void UnifiedInventoryScreen::setupPositions() {
     btnCraftingTable.width = 88;
     btnCraftingTable.height = 72;
 
-
     updateItems();
-
 }
 
 void UnifiedInventoryScreen::tick() {
@@ -297,11 +322,10 @@ void UnifiedInventoryScreen::updateItems() {
     }
     catalogItems.clear();
 
-    if (isCreative) {
+    if (isDualPane) {
         int targetMask = categoryBitmasks[currentCategory];
         bool showAll = (targetMask == -1);
 
-        // Sort order for "Todos": iterate by category order then items
         int catOrder[4] = { ItemCategory::Structures, ItemCategory::Tools, ItemCategory::FoodArmor, ItemCategory::Decorations };
         int numCatOrder = showAll ? 4 : 1;
 
@@ -330,14 +354,13 @@ void UnifiedInventoryScreen::updateItems() {
             }
         }
 
-        // If showAll, also catch any items with Mechanisms or unknown categories
         if (showAll) {
             for (int i = 0; i < 256; ++i) {
                 if (Tile::tiles[i] != NULL) {
                     Item* it = Item::items[i];
                     int cat = it ? it->category : 1;
                     if (cat <= 0) cat = 8;
-                    if (cat >= 16) // Mechanisms and beyond
+                    if (cat >= 16)
                         catalogItems.push_back(new ItemInstance(Tile::tiles[i], 1));
                 }
             }
@@ -366,7 +389,7 @@ void UnifiedInventoryScreen::render(int xm, int ym, float a) {
     fill(0, 0, width, height, 0x80000000);
 
     // 2. Solid light-gray fill inside each container panel
-    if (isCreative) {
+    if (isDualPane) {
         fill(leftPanelRect.x, leftPanelRect.y, leftPanelRect.x + leftPanelRect.w, leftPanelRect.y + leftPanelRect.h, 0xFFC6C6C6);
     }
     fill(rightPanelRect.x, rightPanelRect.y, rightPanelRect.x + rightPanelRect.w, rightPanelRect.y + rightPanelRect.h, 0xFFC6C6C6);
@@ -380,7 +403,7 @@ void UnifiedInventoryScreen::render(int xm, int ym, float a) {
     minecraft->textures->loadAndBindTexture("gui/spritesheet.png");
 
     // 3a. Draw inactive category tabs BEHIND the left panel border
-    if (isCreative) {
+    if (isDualPane) {
         for (size_t c = 0; c < categoryButtons.size(); ++c) {
             if (categoryButtons[c] != selectedCategoryButton) {
                 categoryButtons[c]->render(minecraft, xm, ym);
@@ -388,7 +411,7 @@ void UnifiedInventoryScreen::render(int xm, int ym, float a) {
         }
     }
 
-    if (isCreative && guiLeftPanelBg) {
+    if (isDualPane && guiLeftPanelBg) {
         guiLeftPanelBg->draw(t, static_cast<float>(leftPanelRect.x), static_cast<float>(leftPanelRect.y));
     }
     if (guiRightPanelBg) {
@@ -396,30 +419,124 @@ void UnifiedInventoryScreen::render(int xm, int ym, float a) {
     }
 
     // 4. Draw divider image between creative catalog panel and player/survival panel
-    //    3px vertical margin so it's slightly shorter than both panels
-    if (isCreative && guiDivider) {
-        int divX = leftPanelRect.x + leftPanelRect.w;  // right edge of left panel
-        int divW = rightPanelRect.x - divX;             // gap between the two panels (4px)
+    if (isDualPane && guiDivider) {
+        int divX = leftPanelRect.x + leftPanelRect.w;
+        int divW = rightPanelRect.x - divX;
         int divY = leftPanelRect.y + 3;
         int divH = leftPanelRect.h - 6;
         guiDivider->setSize(static_cast<float>(divW), static_cast<float>(divH));
         guiDivider->draw(t, static_cast<float>(divX), static_cast<float>(divY));
     }
 
+    // 5. Draw Header Bar Background & Header Buttons (Dual, Single, Close)
+    if (guiSrvInvBg) {
+        guiSrvInvBg->draw(t, static_cast<float>(headerBarRect.x), static_cast<float>(headerBarRect.y));
+    }
+
+    // Mode Dual Button (recipe_book_icon.png with srv_inv_icon background)
+    {
+        float bx = static_cast<float>(btnModeDual.x);
+        float by = static_cast<float>(btnModeDual.y);
+        float bw = static_cast<float>(btnModeDual.width);
+        float bh = static_cast<float>(btnModeDual.height);
+
+        const char* bgPath = isDualPane ? "gui/inv_icons/srv_inv_icon_active.png" : "gui/inv_icons/srv_inv_icon.png";
+        minecraft->textures->loadAndBindTexture(bgPath);
+        glColor4f2(1, 1, 1, 1);
+        t.begin();
+        t.colorABGR(0xFFFFFFFF);
+        t.vertexUV(bx,      by + bh, 0, 0.0f, 1.0f);
+        t.vertexUV(bx + bw, by + bh, 0, 1.0f, 1.0f);
+        t.vertexUV(bx + bw, by,      0, 1.0f, 0.0f);
+        t.vertexUV(bx,      by,      0, 0.0f, 0.0f);
+        t.draw();
+
+        minecraft->textures->loadAndBindTexture("gui/inv_icons/recipe_book_icon.png");
+        glColor4f2(1, 1, 1, 1);
+        float iconW = 17.0f;
+        float iconH = 12.0f;
+        float ix = bx + (bw - iconW) / 2.0f;
+        float iy = by + (bh - iconH) / 2.0f;
+        t.begin();
+        t.colorABGR(0xFFFFFFFF);
+        t.vertexUV(ix,         iy + iconH, 0, 0.0f, 1.0f);
+        t.vertexUV(ix + iconW, iy + iconH, 0, 1.0f, 1.0f);
+        t.vertexUV(ix + iconW, iy,         0, 1.0f, 0.0f);
+        t.vertexUV(ix,         iy,         0, 0.0f, 0.0f);
+        t.draw();
+    }
+
+    // Mode Single Button (inventory_icon.png with srv_inv_icon background)
+    {
+        float bx = static_cast<float>(btnModeSingle.x);
+        float by = static_cast<float>(btnModeSingle.y);
+        float bw = static_cast<float>(btnModeSingle.width);
+        float bh = static_cast<float>(btnModeSingle.height);
+
+        const char* bgPath = (!isDualPane) ? "gui/inv_icons/srv_inv_icon_active.png" : "gui/inv_icons/srv_inv_icon.png";
+        minecraft->textures->loadAndBindTexture(bgPath);
+        glColor4f2(1, 1, 1, 1);
+        t.begin();
+        t.colorABGR(0xFFFFFFFF);
+        t.vertexUV(bx,      by + bh, 0, 0.0f, 1.0f);
+        t.vertexUV(bx + bw, by + bh, 0, 1.0f, 1.0f);
+        t.vertexUV(bx + bw, by,      0, 1.0f, 0.0f);
+        t.vertexUV(bx,      by,      0, 0.0f, 0.0f);
+        t.draw();
+
+        minecraft->textures->loadAndBindTexture("gui/inv_icons/inventory_icon.png");
+        glColor4f2(1, 1, 1, 1);
+        float iconW = 17.0f;
+        float iconH = 12.0f;
+        float ix = bx + (bw - iconW) / 2.0f;
+        float iy = by + (bh - iconH) / 2.0f;
+        t.begin();
+        t.colorABGR(0xFFFFFFFF);
+        t.vertexUV(ix,         iy + iconH, 0, 0.0f, 1.0f);
+        t.vertexUV(ix + iconW, iy + iconH, 0, 1.0f, 1.0f);
+        t.vertexUV(ix + iconW, iy,         0, 1.0f, 0.0f);
+        t.vertexUV(ix,         iy,         0, 0.0f, 0.0f);
+        t.draw();
+    }
+
+    // Close Button (close-btn.png / close_button_hover_light.png) - 7x7 icon matching Bedrock
+    {
+        float bx = static_cast<float>(btnClose.x);
+        float by = static_cast<float>(btnClose.y);
+        float bw = static_cast<float>(btnClose.width);
+        float bh = static_cast<float>(btnClose.height);
+
+        bool isCloseHovered = (xm >= btnClose.x && xm < btnClose.x + btnClose.width &&
+                               ym >= btnClose.y && ym < btnClose.y + btnClose.height);
+
+        const char* closeTex = isCloseHovered ? "gui/close_button_hover_light.png" : "gui/close-btn.png";
+        minecraft->textures->loadAndBindTexture(closeTex);
+        glColor4f2(1, 1, 1, 1);
+        float iconW = 7.0f;
+        float iconH = 7.0f;
+        float ix = bx + (bw - iconW) / 2.0f;
+        float iy = by + (bh - iconH) / 2.0f;
+        t.begin();
+        t.colorABGR(0xFFFFFFFF);
+        t.vertexUV(ix,         iy + iconH, 0, 0.0f, 1.0f);
+        t.vertexUV(ix + iconW, iy + iconH, 0, 1.0f, 1.0f);
+        t.vertexUV(ix + iconW, iy,         0, 1.0f, 0.0f);
+        t.vertexUV(ix,         iy,         0, 0.0f, 0.0f);
+        t.draw();
+    }
+
     glEnable2(GL_ALPHA_TEST);
 
-    if (isCreative) {
+    if (isDualPane) {
         renderLeftPanel(t, xm, ym, a);
     }
 
     renderRightPanel(t, xm, ym, a);
 
-    // 5. Draw active selected category tab ON TOP of the panel so it merges seamlessly into it
-    if (isCreative && selectedCategoryButton) {
+    // 6. Draw active selected category tab ON TOP of the left panel
+    if (isDualPane && selectedCategoryButton) {
         selectedCategoryButton->render(minecraft, xm, ym);
     }
-
-    btnClose.render(minecraft, xm, ym);
 
     renderHoverTooltip(xm, ym);
 
@@ -443,8 +560,16 @@ void UnifiedInventoryScreen::renderLeftPanel(Tesselator& t, int xm, int ym, floa
     fill(catalogPaneRect.x, catalogPaneRect.y, catalogPaneRect.x + catalogPaneRect.w, catalogPaneRect.y + catalogPaneRect.h, 0xFF5D5D5D);
 
     // Category title
-    const char* catNames[5] = { "Construccion", "Equipamiento", "Items", "Naturaleza", "Todos" };
-    minecraft->font->draw(catNames[currentCategory], static_cast<float>(leftPanelRect.x + 8), static_cast<float>(leftPanelRect.y + 6), 0x404040);
+    std::string catName;
+    switch (currentCategory) {
+        case 0: catName = I18n::get("itemGroup.construction"); break;
+        case 1: catName = I18n::get("itemGroup.equipment"); break;
+        case 2: catName = I18n::get("itemGroup.items"); break;
+        case 3: catName = I18n::get("itemGroup.nature"); break;
+        case 4: catName = I18n::get("itemGroup.all"); break;
+        default: catName = I18n::get("itemGroup.all"); break;
+    }
+    minecraft->font->draw(catName, static_cast<float>(leftPanelRect.x + 8), static_cast<float>(leftPanelRect.y + 6), 0x404040);
 
     SlotLocation hoveredLoc = SLOT_LOC_NONE;
     int hoveredIndex = -1;
@@ -499,10 +624,10 @@ void UnifiedInventoryScreen::renderRightPanel(Tesselator& t, int xm, int ym, flo
         drawSlotItemAt(t, i, player ? player->getArmor(i) : NULL, btnArmor[i].x, btnArmor[i].y, true, isHovered);
     }
 
-    // 3. Draw 2x2 Crafting Area ("Fabricar")
+    // 3. Draw 2x2 Crafting Area (I18n "gui.craft")
     int craftX = rightPanelRect.x + 80;
     int craftY = rightPanelRect.y + 6;
-    minecraft->font->draw("Fabricar", static_cast<float>(craftX), static_cast<float>(craftY), 0x404040);
+    minecraft->font->draw(I18n::get("gui.craft"), static_cast<float>(craftX), static_cast<float>(craftY), 0x404040);
 
     // 4 Craft Input Slots (contiguous 18px step)
     int craftSlotsY = craftY + 16;
@@ -788,8 +913,8 @@ bool UnifiedInventoryScreen::getSlotAt(int x, int y, SlotLocation& outLoc, int& 
         }
     }
 
-    // 6. Left Catalog Slots (Creative, contiguous 18px step)
-    if (isCreative) {
+    // 6. Left Catalog Slots (Creative / Recipe dual mode, contiguous 18px step)
+    if (isDualPane) {
         int startX = catalogPaneRect.x;
         int startY = catalogPaneRect.y;
         if (x >= catalogPaneRect.x && x < catalogPaneRect.x + catalogPaneRect.w &&
@@ -819,7 +944,37 @@ bool UnifiedInventoryScreen::getSlotAt(int x, int y, SlotLocation& outLoc, int& 
 void UnifiedInventoryScreen::mouseClicked(int x, int y, int buttonNum) {
     super::mouseClicked(x, y, buttonNum);
 
-    if (isCreative) {
+    if (btnClose.clicked(minecraft, x, y)) {
+        if (minecraft->soundEngine) {
+            minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+        }
+        minecraft->setScreen(NULL);
+        return;
+    }
+
+    if (btnModeDual.clicked(minecraft, x, y)) {
+        if (!isDualPane) {
+            if (minecraft->soundEngine) {
+                minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+            }
+            isDualPane = true;
+            setupPositions();
+        }
+        return;
+    }
+
+    if (btnModeSingle.clicked(minecraft, x, y)) {
+        if (isDualPane) {
+            if (minecraft->soundEngine) {
+                minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+            }
+            isDualPane = false;
+            setupPositions();
+        }
+        return;
+    }
+
+    if (isDualPane) {
         for (size_t c = 0; c < categoryButtons.size(); ++c) {
             if (categoryButtons[c]->clicked(minecraft, x, y)) {
                 if (minecraft->soundEngine) {
@@ -835,7 +990,7 @@ void UnifiedInventoryScreen::mouseClicked(int x, int y, int buttonNum) {
     int index;
     if (getSlotAt(x, y, loc, index)) {
         handleSlotInteraction(loc, index, buttonNum);
-    } else if (isCreative && carriedItem != NULL) {
+    } else if (isDualPane && carriedItem != NULL) {
         // Clicking anywhere in the creative left panel area with a carried item deletes it (Bedrock behavior)
         if (x >= leftPanelRect.x && x < leftPanelRect.x + leftPanelRect.w &&
             y >= leftPanelRect.y && y < leftPanelRect.y + leftPanelRect.h) {
@@ -1132,7 +1287,7 @@ void UnifiedInventoryScreen::mouseReleased(int x, int y, int buttonNum) {
 }
 
 void UnifiedInventoryScreen::mouseWheel(int dx, int dy, int xm, int ym) {
-    if (isCreative) {
+    if (isDualPane) {
         catalogScrollY -= dy * 18.0f;
         catalogScrollY = std::max(0.0f, std::min(catalogScrollY, maxCatalogScrollY));
     }

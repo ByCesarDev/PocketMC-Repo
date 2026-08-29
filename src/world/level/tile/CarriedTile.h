@@ -12,15 +12,17 @@ class CarriedTile: public Tile
 {
     typedef Tile super;
 public:
-    CarriedTile(int id, int texDefault, int texTop = -1)
-	:	super(id, tex, Material::dirt),
+    CarriedTile(int id, int texDefault, int texTop = -1, int texBottom = -1)
+	:	super(id, texDefault, Material::dirt),
 		texDefault(texDefault),
-		texTop(texTop >= 0? texTop : texDefault)
+		texTop(texTop >= 0 ? texTop : texDefault),
+		texBottom(texBottom >= 0 ? texBottom : (id == 253 ? 2 : texDefault))
 	{
     }
 
     int getTexture(int face, int data) {
         if (face == 1) return texTop;
+        if (face == 0) return texBottom;
         return texDefault;
     }
 
@@ -35,6 +37,7 @@ public:
 private:
     int texDefault;
     int texTop;
+    int texBottom;
 };
 
 #endif /*NET_MINECRAFT_WORLD_LEVEL_TILE__CarriedTile_H__*/

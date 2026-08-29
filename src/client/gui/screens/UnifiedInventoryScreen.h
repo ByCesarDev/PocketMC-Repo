@@ -72,7 +72,10 @@ private:
     void updateCraftingResult();
 
     bool isCreative;
+    bool isDualPane;
     ImageButton btnClose;
+    BlankButton btnModeDual;
+    BlankButton btnModeSingle;
 
     BlankButton btnArmor[NUM_ARMOR];
     BlankButton btnCraftingTable;
@@ -90,6 +93,7 @@ private:
     IntRectangle leftPanelRect;
     IntRectangle guiPlayerBgRect;
     IntRectangle catalogPaneRect;
+    IntRectangle headerBarRect;
 
     // Catalog items and scroll
     std::vector<ItemInstance*> catalogItems;
@@ -114,6 +118,9 @@ private:
     NinePatchLayer* guiSlotCategory;
     NinePatchLayer* guiSlotCategorySelected;
     NinePatchLayer* guiDivider;
+    NinePatchLayer* guiSrvInvBg;
+    NinePatchLayer* guiTabSelected;
+    NinePatchLayer* guiTabUnselected;
 
     Player* player;
     int selectedHotbarSlot;

@@ -283,7 +283,7 @@ void Screen::renderPanorama(int ticks, float a)
 
 bool Screen::isPauseScreen()
 {
-	return true;
+	return false;
 }
 
 bool Screen::isErrorScreen()

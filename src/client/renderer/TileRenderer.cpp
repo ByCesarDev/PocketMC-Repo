@@ -2743,14 +2743,27 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 		t.begin();
 		t.addOffset(-0.5f, -0.5f, -0.5f);
 
-		// Up / Down (bright)
-		t.color(0xff, 0xff, 0xff);
+		// Up face
+		if (tile == Tile::grass) {
+			t.color(0x79, 0xc0, 0x5a); // Grass green tint for top face
+		} else if (tile == ((Tile*)Tile::leaves)) {
+			t.color(0x48, 0xb5, 0x18);
+		} else {
+			t.color(0xff, 0xff, 0xff);
+		}
 		{
 			int texUp = tile->getTexture(1, data);
 			bool isAltUp = (texUp & Tile::TEXTURE_ALT_FLAG) != 0;
 			if (atlasFilter == -1 || (atlasFilter == 0 && !isAltUp) || (atlasFilter == 1 && isAltUp))
 				renderFaceUp(tile, 0, 0, 0, texUp & ~Tile::TEXTURE_ALT_FLAG);
+		}
 
+		// Down face
+		t.color(0xff, 0xff, 0xff);
+		if (tile == ((Tile*)Tile::leaves)) {
+			t.color(0x48, 0xb5, 0x18);
+		}
+		{
 			int texDown = tile->getTexture(0, data);
 			bool isAltDown = (texDown & Tile::TEXTURE_ALT_FLAG) != 0;
 			if (atlasFilter == -1 || (atlasFilter == 0 && !isAltDown) || (atlasFilter == 1 && isAltDown))
@@ -2758,7 +2771,11 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 		}
 
 		// North / South (mid)
-		t.color(0x80, 0x80, 0x80);
+		if (tile == ((Tile*)Tile::leaves)) {
+			t.color(0x36, 0x87, 0x12);
+		} else {
+			t.color(0x80, 0x80, 0x80);
+		}
 		{
 			int texNorth = tile->getTexture(2, data);
 			bool isAltNorth = (texNorth & Tile::TEXTURE_ALT_FLAG) != 0;
@@ -2772,7 +2789,11 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 		}
 
 		// East / West (dark)
-		t.color(0xbb, 0xbb, 0xbb);
+		if (tile == ((Tile*)Tile::leaves)) {
+			t.color(0x40, 0x9f, 0x15);
+		} else {
+			t.color(0xbb, 0xbb, 0xbb);
+		}
 		{
 			int texEast = tile->getTexture(5, data);
 			bool isAltEast = (texEast & Tile::TEXTURE_ALT_FLAG) != 0;

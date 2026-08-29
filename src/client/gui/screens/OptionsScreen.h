@@ -19,6 +19,7 @@ public:
 	virtual void removed();
     
     virtual void renderBackground();
+	virtual bool isPauseScreen() override { return true; }
 
 private:
 	Button* btnDone;

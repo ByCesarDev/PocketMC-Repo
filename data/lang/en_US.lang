@@ -33,6 +33,13 @@ gui.selectBlocks=Select blocks
 gui.done=Done
 gui.menu=Menu
 
+itemGroup.construction=Construction
+itemGroup.equipment=Equipment
+itemGroup.items=Items
+itemGroup.nature=Nature
+itemGroup.all=All
+itemGroup.search=Search
+
 selectWorld.header=Select world
 
 menu.singleplayer=Singleplayer

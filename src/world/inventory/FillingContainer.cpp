@@ -149,48 +149,28 @@ void FillingContainer::setItem( int slot, ItemInstance* item )
 	if (slot < 0 || slot >= numTotalSlots)
 		return;
 
-	if (slot < numLinkedSlots) {
-		int target = linkedSlots[slot].inventorySlot;
-		if (target < 0 || target >= numTotalSlots) {
-			target = slot;
-			linkedSlots[slot].inventorySlot = slot;
-		}
-		if (items[target]) {
-			if (item && !item->isNull()) *items[target] = *item;
-			else { delete items[target]; items[target] = NULL; }
-		} else {
-			items[target] = (item && !item->isNull()) ? new ItemInstance(*item) : NULL;
-		}
-		return;
-	}
-
-	if (ItemList* p = getSlotList(slot)) {
-		ItemList& pile = *p;
-		if (pile[slot]) {
-			if (item && !item->isNull()) *pile[slot] = *item;
-			else { delete pile[slot]; pile[slot] = NULL; }
-		} else {
-			pile[slot] = (item && !item->isNull()) ? new ItemInstance(*item) : NULL;
-		}
+	if (items[slot]) {
+		if (item && !item->isNull()) *items[slot] = *item;
+		else { delete items[slot]; items[slot] = NULL; }
+	} else {
+		items[slot] = (item && !item->isNull()) ? new ItemInstance(*item) : NULL;
 	}
 }
 
 ListTag* FillingContainer::save( ListTag* listTag )
 {
-	if (!_isCreative) {
-		for (int i = 0; i < (int)items.size(); i++) {
-			ItemInstance* item = items[i];
-			if (item != NULL && !item->isNull()) {
-				CompoundTag* tag = new CompoundTag();
-				tag->putByte("Slot", (char) i);
-                
-				if (item->count < 0) item->count = 0;
-				if (item->count > 255) item->count = 255;
+	for (int i = 0; i < (int)items.size(); i++) {
+		ItemInstance* item = items[i];
+		if (item != NULL && !item->isNull()) {
+			CompoundTag* tag = new CompoundTag();
+			tag->putByte("Slot", (char) i);
+            
+			if (item->count < 0) item->count = 0;
+			if (item->count > 255) item->count = 255;
 
-                ItemInstance iitem(*item);
-				iitem.save(tag);
-				listTag->add(tag);
-			}
+            ItemInstance iitem(*item);
+			iitem.save(tag);
+			listTag->add(tag);
 		}
 	}
 	return listTag;
@@ -198,9 +178,6 @@ ListTag* FillingContainer::save( ListTag* listTag )
 
 void FillingContainer::load( ListTag* inventoryList )
 {
-	if (_isCreative)
-		return;
-
 	clearInventory();
 
 	for (int i = inventoryList->size()-1; i >= 0; --i) {
@@ -233,13 +210,10 @@ int FillingContainer::getContainerSize() const
 
 ItemInstance* FillingContainer::getItem( int slot )
 {
-	if (slot < 0 || slot >= numTotalSlots)
+	if (slot < 0 || slot >= numTotalSlots || slot >= (int)items.size())
 		return NULL;
 
-	if (slot < numLinkedSlots)
-		return getLinked(slot);
-
-	return (*getSlotList(slot))[slot];
+	return items[slot];
 }
 
 std::string FillingContainer::getName() const
@@ -254,8 +228,6 @@ int FillingContainer::getMaxStackSize() const
 
 void FillingContainer::dropSlot( int slot, bool onlyClearContainer, bool randomly/*=false*/ )
 {
-	if (slot >= 0 && slot < numLinkedSlots)
-		slot = linkedSlots[slot].inventorySlot;
 	if (slot < 0 || slot >= (int)items.size()) return;
 
 	if (items[slot] && items[slot]->count) {
@@ -263,7 +235,6 @@ void FillingContainer::dropSlot( int slot, bool onlyClearContainer, bool randoml
 			doDrop(items[slot]->copy(), randomly);
 		items[slot]->count = 0;
 		release(slot);
-		compressLinkedSlotList(slot);
 	}
 }
 
@@ -419,18 +390,7 @@ void FillingContainer::clearSlot( int slot )
 	if (slot < 0 || slot >= numTotalSlots)
 		return;
 
-	if (slot < numLinkedSlots) {
-		int target = linkedSlots[slot].inventorySlot;
-		if (target >= 0 && target < numTotalSlots) {
-			release(target);
-		} else {
-			release(slot);
-		}
-	}
-	else {
-		release(slot);
-	}
-	compressLinkedSlotList(slot);
+	release(slot);
 }
 
 int FillingContainer::addItem(ItemInstance* item) {
@@ -493,34 +453,13 @@ bool FillingContainer::linkSlot(int selectionSlot, int inventorySlot, bool propa
 		return false;
 	if (inventorySlot < 0 || inventorySlot >= numTotalSlots)
 		return false;
-	if (inventorySlot == linkedSlots[selectionSlot].inventorySlot)
-		return false;
 
-	if (propagate) {
-		int i = 0;
-		for (; i < numLinkedSlots - 1; ++i)
-			if (linkedSlots[i].inventorySlot == inventorySlot) break;
-		for (; i > selectionSlot; --i) {
-			linkedSlots[i].inventorySlot = linkedSlots[i-1].inventorySlot;
-		}
-	}
 	linkedSlots[selectionSlot].inventorySlot = inventorySlot;
-
 	return true;
 }
 
 bool FillingContainer::linkEmptySlot( int inventorySlot )
 {
-	for (int i = 0; i < numLinkedSlots; ++i)
-		if (linkedSlots[i].inventorySlot == inventorySlot) return true;
-
-	for (int i = 0; i < numLinkedSlots; ++i) {
-		ItemInstance* item = getLinked(i);
-		if (!item) {
-			linkedSlots[i].inventorySlot = inventorySlot;
-			return true;
-		}
-	}
 	return false;
 }
 
@@ -535,11 +474,8 @@ void FillingContainer::doDrop( ItemInstance* item, bool randomly )
 
 ItemInstance* FillingContainer::getLinked( int slot )
 {
-	if (slot < numLinkedSlots && slot >= 0) {
-		int i = linkedSlots[slot].inventorySlot;
-		if (i >= 0 && i < numTotalSlots && i < (int)items.size()) {
-			return items[i];
-		}
+	if (slot >= 0 && slot < (int)items.size()) {
+		return items[slot];
 	}
 	return NULL;
 }

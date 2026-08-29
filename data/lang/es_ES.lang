@@ -33,6 +33,13 @@ gui.selectBlocks=Seleccionar bloques
 gui.done=Hecho
 gui.menu=Menú
 
+itemGroup.construction=Construcción
+itemGroup.equipment=Equipamiento
+itemGroup.items=Objetos
+itemGroup.nature=Naturaleza
+itemGroup.all=Todos
+itemGroup.search=Buscar
+
 selectWorld.header=Seleccionar mundo
 
 menu.singleplayer=Un jugador

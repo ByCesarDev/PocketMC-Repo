@@ -707,43 +707,40 @@ void Gui::renderHearts() {
 	int oh = minecraft->player->lastHealth;
 	random.setSeed(tickCount * 312871);
 
-	int screenWidth = (int)(minecraft->width * InvGuiScale);
-	int screenHeight = (int)(minecraft->height * InvGuiScale);
-
-	int ySlot = screenHeight - 16 - 3; // hotbar baseline
+	int xBase, yBase;
+	getSlotPos(0, xBase, yBase);
 
 	const int heartsCount = Player::MAX_HEALTH / 2;
-	const int heartsWidth = heartsCount * 8; // 8 px per heart slot
-	const int armorCount = heartsCount; // assume same count for layout
-	const int armorWidth = armorCount * 8;
-
 	int armor = minecraft->player->getArmorValue();
 
-	// If no armor equipped, center hearts only; otherwise center hearts+armor block
-	int xx;
-	if (armor == 0) {
-		xx = screenWidth / 2 - heartsWidth / 2 - 1;
-	} else {
-		xx = screenWidth / 2 - (heartsWidth + armorWidth) / 2 - 1;
-	}
+	int xx = xBase;
+	int heartsY = yBase - 10;
+	int armorY = heartsY - 10;
 
-	for (int i = 0; i < heartsCount; i++) {
-		int yo = ySlot - 12; // place hearts a bit closer to the hotbar
-		int ip2 = i + i + 1;
+	// 1. Render Armor icons directly ABOVE the health hearts (one row higher)
+	if (armor > 0) {
+		for (int i = 0; i < heartsCount; i++) {
+			int xo = xx + i * 8;
+			int yo = armorY;
+			int ip2 = i + i + 1;
 
-		if (armor > 0) {
-			int xo = xx + heartsWidth + i * 8 + 4;
 			if (ip2 < armor) blit(xo, yo, 16 + 2 * 9, 9 * 1, 9, 9);
 			else if (ip2 == armor) blit(xo, yo, 16 + 4 * 9, 9 * 1, 9, 9);
 			else if (ip2 > armor) blit(xo, yo, 16 + 0 * 9, 9 * 1, 9, 9);
 		}
+	}
 
-		int bg = 0;
-		if (blink) bg = 1;
+	// 2. Render Health (Hearts) directly above the hotbar on the left
+	for (int i = 0; i < heartsCount; i++) {
 		int xo = xx + i * 8;
+		int yo = heartsY;
+		int ip2 = i + i + 1;
+
 		if (h <= 4) {
 			yo = yo + random.nextInt(2) - 1;
 		}
+
+		int bg = blink ? 1 : 0;
 		blit(xo, yo, 16 + bg * 9, 9 * 0, 9, 9);
 		if (blink) {
 			if (ip2 < oh) blit(xo, yo, 16 + 6 * 9, 9 * 0, 9, 9);
@@ -756,29 +753,16 @@ void Gui::renderHearts() {
 
 void Gui::renderBubbles() {
 	if (minecraft->player->isUnderLiquid(Material::water)) {
-		int screenWidth = (int)(minecraft->width * InvGuiScale);
-		int screenHeight = (int)(minecraft->height * InvGuiScale);
-		int ySlot = screenHeight - 16 - 3; // hotbar baseline
+		int xBase, yBase;
+		getSlotPos(0, xBase, yBase);
 
-		const int heartsCount = Player::MAX_HEALTH / 2;
-		const int heartsWidth = heartsCount * 8;
-		const int armorCount = heartsCount;
-		const int armorWidth = armorCount * 8;
-
-		int armor = minecraft->player->getArmorValue();
-		int xx;
-		if (armor == 0) {
-			xx = screenWidth / 2 - heartsWidth / 2 - 1;
-		} else {
-			xx = screenWidth / 2 - (heartsWidth + armorWidth) / 2 - 1;
-		}
-		int heartsY = ySlot - 12; // same vertical offset as hearts
-		int yo = heartsY - 12; // put bubbles above hearts
+		int hotbarWidth = minecraft->useTouchscreen() ? 202 : 182;
+		int yo = yBase - 10;
 
 		int count = (int) std::ceil((minecraft->player->airSupply - 2) * 10.0f / Player::TOTAL_AIR_SUPPLY);
 		int extra = (int) std::ceil((minecraft->player->airSupply) * 10.0f / Player::TOTAL_AIR_SUPPLY) - count;
 		for (int i = 0; i < count + extra; i++) {
-			int xo =  i * 8 + xx;
+			int xo = (xBase + hotbarWidth - 9) - i * 8;
 			if (i < count) blit(xo, yo, 16, 9 * 2, 9, 9);
 			else blit(xo, yo, 16 + 9, 9 * 2, 9, 9);
 		}

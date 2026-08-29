@@ -26,6 +26,7 @@
 #include "../world/entity/player/Inventory.h"
 #include "../world/level/tile/Tile.h"
 #include "../world/level/tile/LeafTile.h"
+#include "../world/level/tile/StoneSlabTile.h"
 #include "../world/level/storage/LevelStorageSource.h"
 #include "../world/level/storage/LevelStorage.h"
 #include "player/input/KeyboardInput.h"
@@ -739,41 +740,95 @@ void Minecraft::tickInput() {
 		}
 		*/
 
-		if (Mouse::getEventButton() == MouseAction::ACTION_MIDDLE && Mouse::getEventButtonState()) {
+		if (e.action == MouseAction::ACTION_MIDDLE && e.data == MouseAction::DATA_DOWN) {
 			if (hitResult.type == HitResultType::TILE) {
 				int tileId = level->getTile(hitResult.x, hitResult.y, hitResult.z);
 				int data = level->getData(hitResult.x, hitResult.y, hitResult.z);
-				if (tileId > 0) {
-					int invSlot = player->inventory->getSlot(tileId, data);
-					if (invSlot < 0) {
-						invSlot = player->inventory->getSlot(tileId);
+				if (tileId > 0 && player && player->inventory) {
+					// 1. Resolve proper Item/Tile ID & Aux Value for Pick Block
+					int pickId = tileId;
+					int pickAux = 0;
+
+					Tile* tile = Tile::tiles[tileId];
+					if (tile) {
+						if (tile == Tile::redStoneOre_lit) pickId = Tile::redStoneOre ? Tile::redStoneOre->id : tileId;
+						else if (tile == Tile::furnace_lit) pickId = Tile::furnace ? Tile::furnace->id : tileId;
+						else if (tile == Tile::reeds) pickId = Item::reeds ? Item::reeds->id : tileId;
+						else if (tile == Tile::crops) pickId = Item::seeds_wheat ? Item::seeds_wheat->id : tileId;
+						else if (tile == Tile::sign) pickId = Item::sign ? Item::sign->id : tileId;
+						else if (tile == Tile::door_wood) pickId = Item::door_wood ? Item::door_wood->id : tileId;
+						else if (tile == Tile::door_iron) pickId = Item::door_iron ? Item::door_iron->id : tileId;
+						else if (tile == Tile::stoneSlab) pickId = Tile::stoneSlabHalf ? Tile::stoneSlabHalf->id : tileId;
+
+						if (tile == Tile::cloth) pickAux = data;
+						else if (tile == Tile::treeTrunk || tile == Tile::sapling || tile == Tile::leaves || tile == Tile::sandStone || tile == Tile::quartzBlock) pickAux = data & 3;
+						else if (tile == Tile::stoneSlabHalf || tile == Tile::stoneSlab) pickAux = data & StoneSlabTile::TYPE_MASK;
+						else if (tile == Tile::stoneBrickSmooth) pickAux = data & 3;
 					}
-					if (invSlot >= 0) {
-						bool inHotbar = false;
-						for (int i = 0; i < player->inventory->numLinkedSlots; ++i) {
-							if (player->inventory->linkedSlots[i].inventorySlot == invSlot) {
-								player->inventory->selectSlot(i);
-								inHotbar = true;
+
+					// 2. Check if already in Hotbar (slots 0..8)
+					int hotbarSlot = -1;
+					for (int i = 0; i < Inventory::MAX_SELECTION_SIZE; ++i) {
+						ItemInstance* item = player->inventory->getItem(i);
+						if (item && item->id == pickId && (!item->isStackedByData() || item->getAuxValue() == pickAux)) {
+							hotbarSlot = i;
+							break;
+						}
+					}
+
+					if (hotbarSlot >= 0) {
+						// Already in hotbar: select that slot!
+						player->inventory->selectSlot(hotbarSlot);
+					} else {
+						// Check if in main inventory (slots 9..35)
+						int invSlot = -1;
+						for (int i = Inventory::MAX_SELECTION_SIZE; i < player->inventory->getContainerSize(); ++i) {
+							ItemInstance* item = player->inventory->getItem(i);
+							if (item && item->id == pickId && (!item->isStackedByData() || item->getAuxValue() == pickAux)) {
+								invSlot = i;
 								break;
 							}
 						}
-						if (!inHotbar) {
+
+						if (invSlot >= 0) {
+							// Found in inventory!
 							int targetSlot = player->inventory->selected;
-							ItemInstance* currentLinked = player->inventory->getLinked(targetSlot);
-							if (currentLinked && !currentLinked->isNull()) {
-								for (int i = 0; i < player->inventory->numLinkedSlots; ++i) {
-									ItemInstance* linkedItem = player->inventory->getLinked(i);
-									if (!linkedItem || linkedItem->isNull()) {
+							ItemInstance* currentHotbar = player->inventory->getItem(targetSlot);
+							// If current slot is not empty, look for an empty hotbar slot
+							if (currentHotbar && !currentHotbar->isNull()) {
+								for (int i = 0; i < Inventory::MAX_SELECTION_SIZE; ++i) {
+									ItemInstance* slotItem = player->inventory->getItem(i);
+									if (!slotItem || slotItem->isNull()) {
 										targetSlot = i;
 										break;
 									}
 								}
 							}
-							player->inventory->linkSlot(targetSlot, invSlot, false);
+							// Swap or move item from inventory to hotbar
+							player->inventory->swapSlots(targetSlot, invSlot);
+							player->inventory->selectSlot(targetSlot);
+						} else if (gameMode && gameMode->isCreativeType()) {
+							// In Creative: create a full stack in the current or empty hotbar slot
+							int targetSlot = player->inventory->selected;
+							ItemInstance* currentHotbar = player->inventory->getItem(targetSlot);
+							if (currentHotbar && !currentHotbar->isNull()) {
+								for (int i = 0; i < Inventory::MAX_SELECTION_SIZE; ++i) {
+									ItemInstance* slotItem = player->inventory->getItem(i);
+									if (!slotItem || slotItem->isNull()) {
+										targetSlot = i;
+										break;
+									}
+								}
+							}
+							int maxStack = 64;
+							if (Item::items[pickId]) maxStack = Item::items[pickId]->getMaxStackSize();
+							if (maxStack <= 0) maxStack = 64;
+
+							player->inventory->setItem(targetSlot, new ItemInstance(pickId, maxStack, pickAux));
 							player->inventory->selectSlot(targetSlot);
 						}
-						gui.resetItemNameOverlay();
 					}
+					gui.resetItemNameOverlay();
 				}
 			}
 		}

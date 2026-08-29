@@ -20,6 +20,7 @@ public:
 
 	void tick();
 	void render(int xm, int ym, float a);
+	virtual bool isPauseScreen() override { return true; }
 protected:
     void buttonClicked(Button* button);
 private:
