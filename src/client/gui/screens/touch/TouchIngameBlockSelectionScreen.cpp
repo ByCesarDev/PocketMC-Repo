@@ -307,16 +307,11 @@ int IngameBlockSelectionScreen::getSlotHeight() {
 }
 
 void IngameBlockSelectionScreen::mouseClicked(int x, int y, int buttonNum) {
-	_pendingClose = _blockList->_clickArea->isInside((float)x, (float)y);
-	if (!_pendingClose)
-		super::mouseClicked(x, y, buttonNum);
+	super::mouseClicked(x, y, buttonNum);
 }
 
 void IngameBlockSelectionScreen::mouseReleased(int x, int y, int buttonNum) {
-	if (_pendingClose && _blockList->_clickArea->isInside((float)x, (float)y))
-		minecraft->setScreen(NULL);
-	else
-		super::mouseReleased(x, y, buttonNum);
+	super::mouseReleased(x, y, buttonNum);
 }
 
 void IngameBlockSelectionScreen::mouseWheel(int dx, int dy, int xm, int ym)
@@ -362,7 +357,8 @@ bool IngameBlockSelectionScreen::addItem(const InventoryPane* pane, int itemId)
 		if (Item::items[selected->id]) maxStack = Item::items[selected->id]->getMaxStackSize();
 		if (maxStack <= 0) maxStack = 64;
 
-		inventory->setItem(targetSlot, new ItemInstance(selected->id, maxStack, selected->getAuxValue()));
+		ItemInstance inst(selected->id, maxStack, selected->getAuxValue());
+		inventory->setItem(targetSlot, &inst);
 		inventory->selectSlot(targetSlot);
 	} else {
 		int realInventoryIndex = itemId + Inventory::MAX_SELECTION_SIZE;

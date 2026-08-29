@@ -389,23 +389,16 @@ void Screen::mouseClicked( int x, int y, int buttonNum )
 
 void Screen::mouseReleased( int x, int y, int buttonNum )
 {
-	//LOGI("b_id: %d, (%p), text: %s\n", buttonNum, clickedButton, clickedButton?clickedButton->msg.c_str():"<null>");
 	if (!clickedButton || buttonNum != MouseAction::ACTION_LEFT) return;
 
-#if 1
-//#if defined(ANDROID) || defined(__APPLE__) //if (minecraft->isTouchscreen()) {
-		for (unsigned int i = 0; i < buttons.size(); ++i) {
-			Button* button = buttons[i];
-			if (clickedButton == button && button->clicked(minecraft, x, y)) {
-				buttonClicked(button);
-				minecraft->soundEngine->playUI("random.click", 1, 1);
-				clickedButton->released(x, y);
-			}
-		}
-# else //	} else {
-		clickedButton->released(x, y);
-#endif // }
+	Button* button = clickedButton;
 	clickedButton = NULL;
+	button->released(x, y);
+
+	if (button->clicked(minecraft, x, y)) {
+		minecraft->soundEngine->playUI("random.click", 1, 1);
+		buttonClicked(button);
+	}
 }
 
 bool Screen::renderGameBehind() {
