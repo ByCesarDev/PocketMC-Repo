@@ -98,7 +98,8 @@ protected:
             if (x1 > 16) x1 = 16;
 
             if (y0 < 1) y0 = 1;
-            if (y1 > 120) y1 = 120;
+            int maxY = (level && level->dimension && level->dimension->id == -1) ? 100 : 120;
+            if (y1 > maxY) y1 = maxY;
 
             if (z0 < 0) z0 = 0;
             if (z1 > 16) z1 = 16;

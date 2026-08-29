@@ -179,10 +179,10 @@ void RandomLevelSource::buildSurfaces(int xOffs, int zOffs, unsigned char* block
             char material = isNether ? (char) Tile::netherrack->id : b->material;
 
             for (int y = 127; y >= 0; y--) {
-                int offs = (z * 16 + x) * 128 + y;
+                int offs = (x * 16 + z) * 128 + y;
 
                 bool floorBedrock = (y <= 0 + random.nextInt(5));
-                bool ceilingBedrock = (isNether && (y >= 127 - random.nextInt(5)));
+                bool ceilingBedrock = (isNether && (y == 127 || (y >= 123 && y >= 127 - random.nextInt(5))));
                 float nx = (float)(xOffs * 16 + x);
                 float nz = (float)(zOffs * 16 + z);
                 float wave = Mth::sin(nx * 0.15f) * 4.0f + Mth::cos(nz * 0.15f) * 4.0f + Mth::sin((nx + nz) * 0.05f) * 2.0f;
