@@ -137,7 +137,9 @@ void Gui::render(float a, bool mouseFree, int xMouse, int yMouse) {
 	} else {
 		chatScrollOffset = 0;
 	}
-	renderChatMessages(screenHeight, max, isChatting, font);
+	if (minecraft->screen == NULL || isChatting) {
+		renderChatMessages(screenHeight, max, isChatting, font);
+	}
 #if !defined(RPI)
 	renderOnSelectItemNameText(screenWidth, font, ySlot);
 #endif
@@ -655,6 +657,7 @@ float Gui::cubeSmoothStep(float percentage, float min, float max) {
 }
 
 void Gui::renderProgressIndicator( const bool isTouchInterface, const int screenWidth, const int screenHeight, float a ) {
+	if (minecraft->screen != NULL) return;
 	ItemInstance* currentItem = minecraft->player->inventory->getSelected();
 	bool bowEquipped = currentItem != NULL ? currentItem->getItem() == Item::bow : false;
 	bool itemInUse = currentItem != NULL ? currentItem->getItem() == minecraft->player->getUseItem()->getItem() : false;

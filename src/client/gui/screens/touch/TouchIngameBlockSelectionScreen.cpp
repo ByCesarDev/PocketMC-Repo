@@ -417,7 +417,10 @@ void IngameBlockSelectionScreen::render( int xm, int ym, float a )
 	// Draw hotbar on top of the inventory
 	if (minecraft->isCreativeMode() && !minecraft->options.getBooleanValue(OPTIONS_HIDEGUI)) {
 		minecraft->gameRenderer->setupGuiScreen(false);
-		minecraft->gui.render(a, true, xm, ym);
+		int screenWidth = (int)(minecraft->width * Gui::InvGuiScale);
+		int screenHeight = (int)(minecraft->height * Gui::InvGuiScale);
+		int ySlot = screenHeight - 16 - 3;
+		minecraft->gui.renderToolBar(a, ySlot, screenWidth);
 	}
 
 	glEnable2(GL_DEPTH_TEST);

@@ -17,6 +17,7 @@ class Screen: public GuiComponent
 {
 public:
 	Screen();
+	virtual ~Screen();
 
     virtual void render(int xm, int ym, float a);
     void renderTooltip(const std::string& text, int xm, int ym);

@@ -22,6 +22,10 @@ Screen::Screen()
 {
 }
 
+Screen::~Screen()
+{
+}
+
 void Screen::render( int xm, int ym, float a )
 {
 	for (unsigned int i = 0; i < buttons.size(); i++) {
