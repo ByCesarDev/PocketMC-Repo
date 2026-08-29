@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -39,12 +39,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\lib\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\src;..\..\lib_projects\raknet\jni\RaknetSources;..\..\lib\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\..\lib\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\lib\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <IncludePath>..\..\src;..\..\lib_projects\raknet\jni\RaknetSources;..\..\lib\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\..\lib\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
     <CodeAnalysisRuleSet>ExtendedCorrectnessRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -103,6 +103,8 @@
     <ClCompile Include="..\..\src\client\gui\screens\ConfirmScreen.cpp" />
     <ClCompile Include="..\..\src\client\gui\screens\DeathScreen.cpp" />
     <ClCompile Include="..\..\src\client\gui\screens\IngameBlockSelectionScreen.cpp" />
+    <ClCompile Include="..\..\src\client\gui\screens\ArmorScreen.cpp" />
+    <ClCompile Include="..\..\src\client\gui\screens\UnifiedInventoryScreen.cpp" />
     <ClCompile Include="..\..\src\client\gui\screens\JoinGameScreen.cpp" />
     <ClCompile Include="..\..\src\client\gui\screens\OptionsScreen.cpp" />
     <ClCompile Include="..\..\src\client\gui\screens\PauseScreen.cpp" />

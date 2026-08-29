@@ -281,8 +281,8 @@ void ItemRenderer::renderGuiItemCorrect(Font* font, Textures* textures, const It
 
 		// reuse 'tile' determined above
 		glPushMatrix2();
-		glTranslatef2((GLfloat)(x - 2), (GLfloat)(y + 3), -8);
-		glScalef2(10.0f, 10.0f, 10.0f);
+		glTranslatef2((GLfloat)(x - 1), (GLfloat)(y + 3), -8);
+		glScalef2(9.0f, 9.0f, 9.0f);
 		glTranslatef2(1.0f, 0.5f, 0.0f);
 		// Invert X rotation to match GUI coordinate orientation (fix top/bottom inversion)
 		glRotatef2(-(ff + 180.0f + 30.0f), 1, 0, 0);
@@ -327,10 +327,7 @@ void ItemRenderer::renderGuiItemCorrect(Font* font, Textures* textures, const It
 			textures->loadAndBindTexture("gui/items.png");
 		}
 		if (depthWasEnabled) glDisable2(GL_DEPTH_TEST);
-		//Tesselator& t = Tesselator::instance;
-		//t.scale2d(Gui::InvGuiScale, Gui::InvGuiScale);
-		blit((float)x, (float)y, (float)(item->getIcon() % 16 * 16), (float)(item->getIcon() / 16 * 16), 16, 16);
-		//t.resetScale();
+		blit((float)x + 2.0f, (float)y + 2.0f, (float)(item->getIcon() % 16 * 16), (float)(item->getIcon() / 16 * 16), 12.0f, 12.0f);
 		if (depthWasEnabled) glEnable2(GL_DEPTH_TEST);
 	}
 	if (cullWasEnabled)
@@ -342,12 +339,13 @@ void ItemRenderer::blit(float x, float y, float sx, float sy, float w, float h) 
 	float blitOffset = 0;
 	const float us = 1 / 256.0f;
 	const float vs = 1 / 256.0f;
+	const float sw = 16.0f;
+	const float sh = 16.0f;
 	Tesselator& t = Tesselator::instance;
 	t.begin();
-	t.vertexUV(x, y + h, blitOffset, sx * us, (sy + h) * vs);
-	t.vertexUV(x + w, y + h, blitOffset, (sx + w) * us, (sy + h) * vs);
-	t.vertexUV(x + w, y, blitOffset, (sx + w) * us, sy * vs);
-	t.vertexUV(x, y, blitOffset, sx * us, sy * vs);
-	//t.end();
+	t.vertexUV(x,     y + h, blitOffset, sx * us,        (sy + sh) * vs);
+	t.vertexUV(x + w, y + h, blitOffset, (sx + sw) * us, (sy + sh) * vs);
+	t.vertexUV(x + w, y,     blitOffset, (sx + sw) * us, sy * vs);
+	t.vertexUV(x,     y,     blitOffset, sx * us,        sy * vs);
 	t.draw();
 }

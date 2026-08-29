@@ -328,6 +328,10 @@ list(APPEND CLIENT_SOURCES "src/world/entity/monster/PigZombieBrute.cpp")
 list(APPEND SERVER_SOURCES "src/world/item/BucketItem.cpp")
 list(APPEND CLIENT_SOURCES "src/world/item/BucketItem.cpp")
 
+# Screens
+list(APPEND CLIENT_SOURCES "src/client/gui/screens/UnifiedInventoryScreen.cpp")
+list(APPEND CLIENT_SOURCES "src/client/gui/screens/ArmorScreen.cpp")
+
 if (${PLATFORM} STREQUAL "Desktop")
     list(APPEND CLIENT_SOURCES glad/src/glad.c)
 endif()

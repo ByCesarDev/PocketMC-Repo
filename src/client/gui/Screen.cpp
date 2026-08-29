@@ -1,6 +1,7 @@
 #include "Screen.h"
 #include "components/Button.h"
 #include "components/TextBox.h"
+#include "components/NinePatch.h"
 #include "../Minecraft.h"
 #include "../renderer/Tesselator.h"
 #include "../renderer/gles.h"
@@ -47,28 +48,40 @@ void Screen::renderTooltip(const std::string& text, int xm, int ym) {
 	int ty = ym - 12;
 
 	if (tx + w > width) {
-		tx = xm - w - 12;
+		tx = xm - w - 8;
 	}
-	if (ty < 0) {
-		ty = ym + 12;
+	if (ty < 4) {
+		ty = ym + 14;
 	}
 	if (ty + h > height) {
-		ty = height - h;
+		ty = height - h - 4;
 	}
 
 	glDisable2(GL_DEPTH_TEST);
 	glEnable2(GL_BLEND);
 	glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	minecraft->textures->loadAndBindTexture("gui/gui.png");
-	glColor4f2(1, 1, 1, 1);
+	// Render effect_background.png as a 9-patch to preserve exact transparent rounded corners without distortion
+	static NinePatchLayer* s_tooltipPatch = NULL;
+	static Textures* s_lastTextures = NULL;
+	if (!s_tooltipPatch || s_lastTextures != minecraft->textures) {
+		delete s_tooltipPatch;
+		s_lastTextures = minecraft->textures;
+		NinePatchFactory builder(minecraft->textures, "gui/effect_background.png");
+		s_tooltipPatch = builder.createSymmetrical(IntRectangle(0, 0, 120, 32), 6, 6);
+	}
 
-	int v = 66; // standard button texture
-	blit(tx, ty, 0, v, w / 2, h, 0, 20);
-	blit(tx + w / 2, ty, 200 - w / 2, v, w - w / 2, h, 0, 20);
+	if (s_tooltipPatch) {
+		Tesselator& t = Tesselator::instance;
+		glColor4f2(1, 1, 1, 1);
+		t.colorABGR(0xFFFFFFFF);
+		s_tooltipPatch->setSize(static_cast<float>(w), static_cast<float>(h));
+		s_tooltipPatch->draw(t, static_cast<float>(tx), static_cast<float>(ty));
+	}
 
-	// Draw the text inside the tooltip
-	drawString(font, text, tx + 6, ty + (h - 8) / 2, 0xffffffff);
+	// Draw text with shadow centered vertically inside the 9-patch frame
+	drawString(font, text, tx + 6, ty + (h - 8) / 2, 0xFFFFFFFF);
+
 	glDisable2(GL_BLEND);
 	glEnable2(GL_DEPTH_TEST);
 }

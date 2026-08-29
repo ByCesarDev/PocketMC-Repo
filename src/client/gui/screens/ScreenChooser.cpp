@@ -6,6 +6,7 @@
 #include "RenameMPLevelScreen.h"
 #include "ConsoleScreen.h"
 #include "IngameBlockSelectionScreen.h"
+#include "UnifiedInventoryScreen.h"
 #include "JoinByIPScreen.h"
 #include "touch/TouchStartMenuScreen.h"
 #include "touch/TouchSelectWorldScreen.h"
@@ -33,6 +34,7 @@ Screen* ScreenChooser::createScreen( ScreenId id )
 		case SCREEN_PAUSE:	         screen = new PauseScreen(false); break;
 		case SCREEN_PAUSEPREV:	     screen = new PauseScreen(true);	 break;
 		case SCREEN_BLOCKSELECTION:	 screen = new Touch::IngameBlockSelectionScreen();	break;
+		case SCREEN_UNIFIED_INVENTORY: screen = new UnifiedInventoryScreen(); break;
 		case SCREEN_JOINBYIP:        screen = new JoinByIPScreen(); break;
 		case SCREEN_CONSOLE:		 screen = new ConsoleScreen(); break;
 		case SCREEN_NONE:
@@ -48,6 +50,7 @@ Screen* ScreenChooser::createScreen( ScreenId id )
 		case SCREEN_PAUSE:	         screen = new PauseScreen(false); break;
 		case SCREEN_PAUSEPREV:	     screen = new PauseScreen(true);	 break;
 		case SCREEN_BLOCKSELECTION:	 screen = new Touch::IngameBlockSelectionScreen();	break;
+		case SCREEN_UNIFIED_INVENTORY: screen = new UnifiedInventoryScreen(); break;
 		case SCREEN_JOINBYIP:        screen = new JoinByIPScreen(); break;
 		case SCREEN_CONSOLE:		 screen = new ConsoleScreen(); break;
 		case SCREEN_NONE:

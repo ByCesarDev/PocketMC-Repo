@@ -49,6 +49,7 @@
 #include "gui/screens/DeathScreen.h"
 #include "gui/screens/FurnaceScreen.h"
 #include "gui/screens/ArmorScreen.h"
+#include "gui/screens/UnifiedInventoryScreen.h"
 #include "renderer/tileentity/TileEntityRenderDispatcher.h"
 #include "renderer/ptexture/DynamicTexture.h"
 #include "renderer/GameRenderer.h"
@@ -817,11 +818,7 @@ void Minecraft::tickInput() {
 			}
 
 			if (key == Keyboard::KEY_E) {
-				if (isCreativeMode()) {
-					screenChooser.setScreen(SCREEN_BLOCKSELECTION);
-				} else {
-					setScreen(new ArmorScreen());
-				}
+				screenChooser.setScreen(SCREEN_UNIFIED_INVENTORY);
 			}
 
 			if (!screen && key == Keyboard::KEY_T && level) {
@@ -1302,8 +1299,8 @@ bool Minecraft::useTouchscreen() {
 #ifdef RPI
 	return false;
 #endif
-	return true;
-	// return options.getBooleanValue(OPTIONS_USE_TOUCHSCREEN) && !_supportsNonTouchscreen;
+	// return true;
+	return options.getBooleanValue(OPTIONS_USE_TOUCHSCREEN) && !_supportsNonTouchscreen;
 }
 bool Minecraft::supportNonTouchScreen() {
 	return _supportsNonTouchscreen;

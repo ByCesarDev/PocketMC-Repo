@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -1182,6 +1182,9 @@
       <Filter>Source Files\world\level\tile</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\client\gui\screens\ArmorScreen.cpp">
+      <Filter>Source Files\client\gui\screens</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\client\gui\screens\UnifiedInventoryScreen.cpp">
       <Filter>Source Files\client\gui\screens</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\client\gui\screens\crafting\StonecutterScreen.cpp">

@@ -325,7 +325,7 @@ void Gui::handleKeyPressed(int key)
 	}
 	else if (key == 100)
 	{
-		minecraft->screenChooser.setScreen(SCREEN_BLOCKSELECTION);
+		minecraft->screenChooser.setScreen(SCREEN_UNIFIED_INVENTORY);
 	}
 	else if (key == minecraft->options.getIntValue(OPTIONS_KEY_DROP)) 
 	{

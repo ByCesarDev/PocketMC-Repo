@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug DEMO|Win32">
@@ -43,6 +43,7 @@
     <ClCompile Include="..\..\src\client\gui\GuiComponent.cpp" />
     <ClCompile Include="..\..\src\client\gui\Screen.cpp" />
     <ClCompile Include="..\..\src\client\gui\screens\ArmorScreen.cpp" />
+    <ClCompile Include="..\..\src\client\gui\screens\UnifiedInventoryScreen.cpp" />
     <ClCompile Include="..\..\src\client\gui\screens\ChatScreen.cpp" />
     <ClCompile Include="..\..\src\client\gui\screens\ChestScreen.cpp" />
     <ClCompile Include="..\..\src\client\gui\screens\ChooseLevelScreen.cpp" />
@@ -1053,17 +1054,17 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\lib\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\glad\include;..\..\src;..\..\lib_projects\raknet\jni\RaknetSources;..\..\lib\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\..\lib\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DEMO|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\lib\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\glad\include;..\..\src;..\..\lib_projects\raknet\jni\RaknetSources;..\..\lib\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\..\lib\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\lib\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <IncludePath>..\..\glad\include;..\..\src;..\..\lib_projects\raknet\jni\RaknetSources;..\..\lib\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\..\lib\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
