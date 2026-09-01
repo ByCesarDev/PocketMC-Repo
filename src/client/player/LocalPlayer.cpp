@@ -1,4 +1,5 @@
 #include "LocalPlayer.h"
+#include "AccountManager.h"
 #include "../Minecraft.h"
 #include "../../ErrorCodes.h"
 #include "../../world/entity/EntityEvent.h"
@@ -363,8 +364,10 @@ LocalPlayer::LocalPlayer(Minecraft* minecraft, Level* level, const std::string& 
 	_init();
 #ifndef STANDALONE_SERVER
 
-	if (minecraft->options.getStringValue(OPTIONS_USERNAME).size() != 0) {
-		this->name = minecraft->options.getStringValue(OPTIONS_USERNAME);
+	std::string localUname = minecraft->options.getStringValue(OPTIONS_USERNAME);
+	std::string activeName = AccountManager::getDisplayName(localUname);
+	if (!activeName.empty()) {
+		this->name = activeName;
 		std::string chosenSkin = minecraft->options.getStringValue(OPTIONS_SKIN);
 		
 		if (chosenSkin == "Default" || chosenSkin == "") {

@@ -6,6 +6,7 @@
 #include "../../../network/RakNetInstance.h"
 #include "../../../network/ServerSideNetworkHandler.h"
 #include "client/Options.h"
+#include "client/player/AccountManager.h"
 #include "client/gui/components/Button.h"
 #include "client/gui/screens/OptionsScreen.h"
 #include "client/gui/screens/SkindexScreen.h"
@@ -185,7 +186,8 @@ void PauseScreen::render(int xm, int ym, float a) {
 	if (centerY < modelHalfH + 16) centerY = modelHalfH + 16;
 
 	// Username label just above the model
-	std::string uname = minecraft->options.getStringValue(OPTIONS_USERNAME);
+	std::string localUname = minecraft->options.getStringValue(OPTIONS_USERNAME);
+	std::string uname = AccountManager::getDisplayName(localUname);
 	if (!uname.empty()) {
 		int textW = font->width(uname);
 		int labelY = centerY - modelHalfH - 12;

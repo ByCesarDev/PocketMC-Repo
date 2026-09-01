@@ -4,6 +4,8 @@
 #include "../OptionsScreen.h"
 #include "../PauseScreen.h"
 #include "../UsernameScreen.h"
+#include "../ProfileScreen.h"
+#include "../../../player/AccountManager.h"
 #include "../SkindexScreen.h"
 #include "../ModListScreen.h"
 
@@ -71,7 +73,8 @@ void StartMenuScreen::init()
 
 	std::string versionString = Common::getGameVersionString();
 
-	std::string _username = minecraft->options.getStringValue(OPTIONS_USERNAME);
+	std::string localUname = minecraft->options.getStringValue(OPTIONS_USERNAME);
+	std::string _username = AccountManager::getDisplayName(localUname);
 	if (_username.empty()) _username = "unknown";
 
 	username = _username;
@@ -247,7 +250,8 @@ void StartMenuScreen::render( int xm, int ym, float a )
 		int centerY = bSkindex.y - 45;
 
 		// Username label above the skin
-		std::string uname = minecraft->options.getStringValue(OPTIONS_USERNAME);
+		std::string localUname = minecraft->options.getStringValue(OPTIONS_USERNAME);
+		std::string uname = AccountManager::getDisplayName(localUname);
 		if (!uname.empty()) {
 			int textW = font->width(uname);
 			fill(centerX - textW / 2 - 3, centerY - 35 - 2, centerX + textW / 2 + 3, centerY - 35 + 10, 0x50000000);

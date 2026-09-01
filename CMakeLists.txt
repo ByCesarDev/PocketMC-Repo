@@ -145,6 +145,9 @@ file(GLOB SERVER_SOURCES
     "${PROJECT_ROOT}/src/client/gamemode/SurvivalMode.cpp"
 
     "${PROJECT_ROOT}/src/client/player/LocalPlayer.cpp"
+    "${PROJECT_ROOT}/src/client/player/AccountManager.cpp"
+    "${PROJECT_ROOT}/src/client/player/ApiClient.cpp"
+    "${PROJECT_ROOT}/src/client/player/ProfileManager.cpp"
     "${PROJECT_ROOT}/src/client/player/RemotePlayer.cpp"
     "${PROJECT_ROOT}/src/client/player/input/KeyboardInput.cpp"
 

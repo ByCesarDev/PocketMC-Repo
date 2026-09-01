@@ -10,6 +10,7 @@
 #include "RakNetInstance.h"
 #include "../client/Minecraft.h"
 #include "../client/player/LocalPlayer.h"
+#include "../client/player/AccountManager.h"
 #include "../client/gamemode/GameMode.h"
 #include "../raknet/RakPeerInterface.h"
 #include "../raknet/PacketPriority.h"
@@ -730,7 +731,9 @@ void ServerSideNetworkHandler::handle( const RakNet::RakNetGUID& source, SignUpd
 void ServerSideNetworkHandler::allowIncomingConnections( bool doAllow )
 {
 	if (doAllow) {
-		raknetInstance->announceServer(minecraft->options.getStringValue(OPTIONS_USERNAME));
+		std::string localUname = minecraft->options.getStringValue(OPTIONS_USERNAME);
+		std::string activeName = AccountManager::getDisplayName(localUname);
+		raknetInstance->announceServer(activeName);
 	} else {
 		raknetInstance->announceServer("");
 	}

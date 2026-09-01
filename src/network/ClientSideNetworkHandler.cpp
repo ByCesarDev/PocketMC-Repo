@@ -14,6 +14,7 @@
 #include "../client/gui/screens/DisconnectionScreen.h"
 #endif
 #include "../client/player/LocalPlayer.h"
+#include "../client/player/AccountManager.h"
 #include "../client/multiplayer/MultiPlayerLevel.h"
 #include "../client/player/input/KeyboardInput.h"
 #include "../client/sound/SoundEngine.h"
@@ -85,7 +86,9 @@ void ClientSideNetworkHandler::onConnect(const RakNet::RakNetGUID& hostGuid)
 	serverGuid = hostGuid;
 
 	clearChunksLoaded();
-	LoginPacket packet(minecraft->options.getStringValue(OPTIONS_USERNAME).c_str(), SharedConstants::NetworkProtocolVersion);
+	std::string localUname = minecraft->options.getStringValue(OPTIONS_USERNAME);
+	std::string activeName = AccountManager::getDisplayName(localUname);
+	LoginPacket packet(activeName.c_str(), SharedConstants::NetworkProtocolVersion);
 	raknetInstance->send(packet);
 }
 
@@ -157,7 +160,9 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, StartGam
 	level->isClientSide = true;
 
 	bool isCreative = (packet->gameType == GameType::Creative);
-	LocalPlayer* player = new LocalPlayer(minecraft, level, minecraft->options.getStringValue(OPTIONS_USERNAME), level->dimension->id, isCreative);
+	std::string localUname = minecraft->options.getStringValue(OPTIONS_USERNAME);
+	std::string activeName = AccountManager::getDisplayName(localUname);
+	LocalPlayer* player = new LocalPlayer(minecraft, level, activeName, level->dimension->id, isCreative);
 	player->owner = rakPeer->GetMyGUID();
 	player->entityId = packet->entityId;
 	player->moveTo(packet->x, packet->y, packet->z, player->yRot, player->xRot);

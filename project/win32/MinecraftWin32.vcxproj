@@ -92,7 +92,12 @@
     <ClCompile Include="..\..\src\client\player\input\KeyboardInput.cpp" />
     <ClCompile Include="..\..\src\client\player\input\touchscreen\TouchScreenInput.cpp" />
     <ClCompile Include="..\..\src\client\player\LocalPlayer.cpp" />
+    <ClCompile Include="..\..\src\client\player\AccountManager.cpp" />
+    <ClCompile Include="..\..\src\client\player\ApiClient.cpp" />
+    <ClCompile Include="..\..\src\client\player\ProfileManager.cpp" />
     <ClCompile Include="..\..\src\client\player\RemotePlayer.cpp" />
+    <ClCompile Include="..\..\src\client\gui\screens\ProfileScreen.cpp" />
+    <ClCompile Include="..\..\src\client\gui\screens\LinkAccountScreen.cpp" />
     <ClCompile Include="..\..\src\client\renderer\Chunk.cpp" />
     <ClCompile Include="..\..\src\client\renderer\culling\Frustum.cpp" />
     <ClCompile Include="..\..\src\client\renderer\EntityTileRenderer.cpp" />

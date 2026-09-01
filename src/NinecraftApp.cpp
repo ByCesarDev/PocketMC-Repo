@@ -1,4 +1,5 @@
 #include "NinecraftApp.h"
+#include "client/player/AccountManager.h"
 //#include <EGL/egl.h>
 
 #ifdef RPI
@@ -103,6 +104,9 @@ void NinecraftApp::init()
 		options.setOptionsFilePath(externalStoragePath);
 	}
 	Minecraft::init();
+
+	// Load saved account session (Fase 10-17)
+	AccountManager::init(externalStoragePath);
 
 #if !defined(DEMO_MODE) && !defined(APPLE_DEMO_PROMOTION) && !defined(NO_STORAGE)
 	storageSource = new ExternalFileLevelStorageSource(externalStoragePath, externalCacheStoragePath);

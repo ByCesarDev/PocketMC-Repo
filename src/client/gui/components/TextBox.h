@@ -39,6 +39,7 @@ public:
 
 	bool focused;
 	bool blink;
+	bool isPassword;
 };
 
 #endif /*NET_MINECRAFT_CLIENT_GUI_COMPONENTS__TextBox_H__*/

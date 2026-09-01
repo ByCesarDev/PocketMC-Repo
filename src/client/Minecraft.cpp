@@ -1,5 +1,6 @@
 #include "Minecraft.h"
 #include "Options.h"
+#include "player/AccountManager.h"
 #include "client/Options.h"
 #include "client/player/input/IBuildInput.h"
 #include "platform/input/Keyboard.h"
@@ -1581,7 +1582,9 @@ void Minecraft::hostMultiplayer(int port) {
     #ifdef STANDALONE_SERVER
         raknetInstance->host("Server", port, 16);
     #else
-        raknetInstance->host(options.getStringValue(OPTIONS_USERNAME), port);
+        std::string localUname = options.getStringValue(OPTIONS_USERNAME);
+        std::string activeName = AccountManager::getDisplayName(localUname);
+        raknetInstance->host(activeName, port);
     #endif
 #endif
 }
@@ -1654,7 +1657,9 @@ void Minecraft::_levelGenerated()
 
 	this->cameraTargetPlayer = player;
 
-	std::string serverName = options.getStringValue(OPTIONS_USERNAME) + " - " + level->getLevelData()->levelName;
+	std::string localUname = options.getStringValue(OPTIONS_USERNAME);
+	std::string activeName = AccountManager::getDisplayName(localUname);
+	std::string serverName = activeName + " - " + level->getLevelData()->levelName;
 
 	if (raknetInstance->isServer())
 		raknetInstance->announceServer(serverName);
