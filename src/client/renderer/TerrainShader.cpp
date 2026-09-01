@@ -51,8 +51,6 @@ bool TerrainShader::init()
     inited = instance.loadFromSource(defaultTerrainVert, defaultTerrainFrag);
     if (!inited) {
         LOGE("Failed to load embedded Terrain shaders!\n");
-    } else {
-        LOGI("TerrainShader initialized successfully.\n");
     }
     return inited;
 }

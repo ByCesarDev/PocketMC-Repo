@@ -16,7 +16,7 @@
 #include "../../../world/item/Item.h"
 
 /*static*/
-TileRenderer* ItemRenderer::tileRenderer = new TileRenderer();
+TileRenderer* ItemRenderer::tileRenderer = new TileRenderer(nullptr, nullptr);
 
 ItemRenderer::ItemRenderer()
 {
@@ -161,11 +161,6 @@ void ItemRenderer::renderGuiItem(Font* font, Textures* textures, const ItemInsta
 
 	Tesselator& t = Tesselator::instance;
 	const bool wasOverridden = t.isOverridden();
-	static int __ir_log_count = 0;
-	if (__ir_log_count < 5) {
-		__ir_log_count++;
-		LOGI("ItemRenderer::renderGuiItem id=%d icon=%d wasOverridden=%d x=%.1f y=%.1f w=%.1f h=%.1f", item->id, item->getIcon(), wasOverridden?1:0, x, y, w, h);
-	}
 	if (i < 0) {
 		if (wasOverridden)
 			t.endOverrideAndDraw();

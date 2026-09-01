@@ -8,6 +8,7 @@
 #include "../../world/entity/player/Player.h"
 #include "../../world/level/tile/LevelEvent.h"
 #include "../../world/level/tile/LeafTile.h"
+#include <windows.h>
 #include "../../client/particle/ParticleEngine.h"
 #include "../../client/particle/ParticleInclude.h"
 #include "../sound/SoundEngine.h"
@@ -71,8 +72,6 @@ LevelRenderer::LevelRenderer( Minecraft* mc)
 	numListsOrBuffers = maxChunksWidth * maxChunksWidth * (128/CHUNK_SIZE) * 6;
 	chunkBuffers = new GLuint[numListsOrBuffers];
 	glGenBuffers2(numListsOrBuffers, chunkBuffers);
-	LOGI("numBuffers: %d\n", numListsOrBuffers);
-	//for (int i = 0; i < numListsOrBuffers; ++i) printf("bufId %d: %d\t", i, chunkBuffers[i]);
 
 	glGenBuffers2(1, &skyBuffer);
 	glGenBuffers2(1, &starBuffer);
@@ -348,7 +347,7 @@ void LevelRenderer::setLevel( Level* level )
 	this->level = level;
 
 	delete tileRenderer;
-	tileRenderer = new TileRenderer(level);
+	tileRenderer = new TileRenderer(level, mc->textures);
 
 	if (level != NULL) {
 		level->addListener(this);
@@ -370,7 +369,6 @@ void LevelRenderer::allChanged()
 	int dist = (512 >> 3) << (3 - lastViewDistance);
 	if (lastViewDistance <= 2 && mc->isPowerVR())
 		dist = (int)((float)dist * 0.8f);
-	LOGI("last: %d, power: %d\n", lastViewDistance, mc->isPowerVR());
 
 	#if defined(RPI)
 		dist *= 0.6f;
@@ -384,7 +382,6 @@ void LevelRenderer::allChanged()
 	yChunks = (128 /  LevelRenderer::CHUNK_SIZE);
 	zChunks = (dist / LevelRenderer::CHUNK_SIZE) + 1;
 	chunksLength = xChunks * yChunks * zChunks;
-	LOGI("chunksLength: %d. Distance: %d\n", chunksLength, dist);
 
 	chunks = new Chunk*[chunksLength];
 	sortedChunks = new Chunk*[chunksLength];
@@ -405,7 +402,7 @@ void LevelRenderer::allChanged()
 		for (int y = 0; y < yChunks; y++) {
 			for (int z = 0; z < zChunks; z++) {
 				const int c = getLinearCoord(x, y, z);
-				Chunk* chunk = new Chunk(level, x * CHUNK_SIZE, y * CHUNK_SIZE, z * CHUNK_SIZE, CHUNK_SIZE, chunkLists + id, &chunkBuffers[id]);
+				Chunk* chunk = new Chunk(level, x * CHUNK_SIZE, y * CHUNK_SIZE, z * CHUNK_SIZE, CHUNK_SIZE, chunkLists + id, &chunkBuffers[id], mc->textures);
 
 				if (occlusionCheck) {
 					chunk->occlusion_id = 0;//occlusionCheckIds.get(count);
@@ -1470,7 +1467,6 @@ void LevelRenderer::generateCloudMesh(float cr, float cg, float cb) {
 	glBindBuffer2(GL_ARRAY_BUFFER, 0);
 
 	cloudRenderChunk = RenderChunk(vbo, (int)verts.size());
-	LOGI("Cloud mesh: %d vertices\n", (int)verts.size());
 }
 
 void LevelRenderer::renderClouds( float alpha ) {

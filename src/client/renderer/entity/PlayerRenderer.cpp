@@ -99,18 +99,6 @@ void PlayerRenderer::render(Entity* mob_, float x, float y, float z, float rot, 
 		model = desired;
 		humanoidModel = desired;
 	}
-	// Avoid spamming the log every frame: only log when texture/format changes for a player
-	static std::unordered_map<std::string, std::string> s_lastLog;
-	std::string playerName = ((Player*)mob)->name;
-	std::string cur = mob->getTexture() + ":" + std::to_string(humanoidModel->texWidth) + "x" + std::to_string(humanoidModel->texHeight) + (desired == playerModelSlim ? ":slim" : ":normal");
-	auto it = s_lastLog.find(playerName);
-	if (it == s_lastLog.end() || it->second != cur) {
-		LOGI("[PlayerRenderer] %s: skin=%s, modelTex=%dx%d, model=%s\n", 
-			playerName.c_str(), mob->getTexture().c_str(), 
-			humanoidModel->texWidth, humanoidModel->texHeight,
-			(desired == playerModelSlim ? "slim" : (desired == playerModel64 ? "64" : "32")));
-		s_lastLog[playerName] = cur;
-	}
 	HumanoidMobRenderer::render(mob_, x, y, z, rot, a);
 }
 

@@ -1,9 +1,9 @@
 #include "Textures.h"
 
 #include "TextureData.h"
+#include "BlockAtlasStitcher.h"
 #include "ptexture/DynamicTexture.h"
 #include "../Options.h"
-#include "../../platform/time.h"
 #include "../../AppPlatform.h"
 #include "../../util/StringUtils.h"
 
@@ -142,23 +142,33 @@ TextureId Textures::loadAndBindTexture( const std::string& resourceName )
 TextureId Textures::loadTexture( const std::string& resourceName, bool inTextureFolder /* = true */ )
 {
 	TextureMap::iterator it = idMap.find(resourceName);
-	if (it != idMap.end())
+	if (it != idMap.end()) {
 		return it->second;
+	}
 
 	bool isUrl = Util::startsWith(resourceName, "http://") || Util::startsWith(resourceName, "https://");
-	TextureData texdata = platform->loadTexture(resourceName, isUrl ? false : inTextureFolder);
+	
+	// Detectar si es ruta personalizada (empieza con "blocks/" o "data/")
+	bool isCustomPath = resourceName.find("blocks/") == 0 || resourceName.find("data/") == 0;
+	bool useTextureFolder = inTextureFolder && !isCustomPath;
+
+	TextureData texdata = platform->loadTexture(resourceName, isUrl ? false : useTextureFolder);
+	if (resourceName.find("terrain.png") != std::string::npos || resourceName.find("terrain2.png") != std::string::npos) {
+		BlockAtlasStitcher::stitchAtlas(resourceName, texdata, platform);
+	}
 	if (_isSkyBodyTexture(resourceName)) {
 		_applySkyBodyAlpha(resourceName, texdata);
 	}
-	if (texdata.data)
-		return assignTexture(resourceName, texdata);
-    else if (texdata.identifier != InvalidId) {
-        //LOGI("Adding id: %d for %s\n", texdata.identifier, resourceName.c_str());
+	if (texdata.data) {
+		TextureId newId = assignTexture(resourceName, texdata);
+		return newId;
+	}
+	else if (texdata.identifier != InvalidId) {
 		idMap.insert(std::make_pair(resourceName, texdata.identifier));
-    }
+		return texdata.identifier;
+	}
 	else {
 		idMap.insert(std::make_pair(resourceName, Textures::InvalidId));
-		//loadedImages.insert(std::make_pair(InvalidId, texdata));
 	}
 	return Textures::InvalidId;
 }

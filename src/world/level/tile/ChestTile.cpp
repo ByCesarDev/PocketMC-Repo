@@ -8,6 +8,12 @@ int ChestTile::getTexture(int face, int data) {
     // 0: Abajo, 1: Arriba
     if (face == 1 || face == 0) return 25; 
     
+    // Si data es 0 (por ejemplo en inventario/GUI), el frente por defecto es la cara 2 (Norte)
+    if (data == 0) {
+        if (face == 2) return 27;
+        return 26;
+    }
+
     // Si la cara coincide con la dirección guardada en 'data', ponemos el frente (cerradura)
     if (face == data) return 27; 
     

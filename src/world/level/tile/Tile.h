@@ -4,6 +4,8 @@
 //package net.minecraft.world.level.tile;
 
 #include <string>
+#include <map>
+#include <set>
 #include "../../phys/AABB.h"
 
 class Entity;
@@ -104,6 +106,29 @@ public:
     static const int SHAPE_FENCE_GATE = 21;
 	static const int SHAPE_ENTITYTILE_ANIMATED = 22;
 
+	// Enumeración de caras del bloque para material_instances
+	enum BlockFace {
+		FACE_DOWN = 0,
+		FACE_UP = 1,
+		FACE_NORTH = 2,
+		FACE_SOUTH = 3,
+		FACE_WEST = 4,
+		FACE_EAST = 5
+	};
+
+	// Estructura para material_instance
+	struct MaterialInstance {
+		std::string textureName;  // Nombre de textura separada
+		int textureIndex;         // Índice en atlas (fallback)
+		
+		MaterialInstance() : textureIndex(0) {}
+		MaterialInstance(const std::string& name, int index = 0) 
+			: textureName(name), textureIndex(index) {}
+		
+		bool usesSeparateTexture() const {
+			return !textureName.empty();
+		}
+	};
 
 	static const int NUM_BLOCK_TYPES = 256;
 
@@ -282,6 +307,8 @@ public:
 	static void teardownTiles();
     static void initExtraTiles();
 
+	static bool isTileAllowedInCreative(int id);
+
 	static int getOreVariant(int oreTileId, int replacedTileId);
 	static int transformToValidBlockId(int blockId);
 	static int transformToValidBlockId(int blockId, int x, int y, int z);
@@ -384,7 +411,102 @@ public:
 
     virtual void triggerEvent(Level* level, int x, int y, int z, int b0, int b1) {}
 
+	// Métodos para configuración de material_instances
+	Tile* setFaceTexture(BlockFace face, const std::string& textureName) {
+		int defaultIndex = this->getTexture((int)face, 0);
+		materialInstances[face] = MaterialInstance(textureName, defaultIndex);
+		useMaterialInstances = true;
+		return this;
+	}
+	
+	Tile* setFaceTexture(BlockFace face, const std::string& textureName, int atlasIndex) {
+		materialInstances[face] = MaterialInstance(textureName, atlasIndex);
+		useMaterialInstances = true;
+		return this;
+	}
+	
+	Tile* setFaceTexture(BlockFace face, int atlasIndex) {
+		materialInstances[face] = MaterialInstance("", atlasIndex);
+		useMaterialInstances = true;
+		return this;
+	}
+	
+	Tile* setSideTexture(const std::string& textureName, int atlasIndex = -1) {
+		if (atlasIndex >= 0) {
+			setFaceTexture(FACE_NORTH, textureName, atlasIndex);
+			setFaceTexture(FACE_SOUTH, textureName, atlasIndex);
+			setFaceTexture(FACE_WEST, textureName, atlasIndex);
+			setFaceTexture(FACE_EAST, textureName, atlasIndex);
+		} else {
+			setFaceTexture(FACE_NORTH, textureName);
+			setFaceTexture(FACE_SOUTH, textureName);
+			setFaceTexture(FACE_WEST, textureName);
+			setFaceTexture(FACE_EAST, textureName);
+		}
+		return this;
+	}
+	
+	Tile* setTopTexture(const std::string& textureName, int atlasIndex = -1) {
+		return atlasIndex >= 0 ? setFaceTexture(FACE_UP, textureName, atlasIndex) : setFaceTexture(FACE_UP, textureName);
+	}
+	
+	Tile* setBottomTexture(const std::string& textureName, int atlasIndex = -1) {
+		return atlasIndex >= 0 ? setFaceTexture(FACE_DOWN, textureName, atlasIndex) : setFaceTexture(FACE_DOWN, textureName);
+	}
+	
+	Tile* setSimplifiedTextures(const std::string& side, const std::string& top, const std::string& bottom) {
+		setSideTexture(side);
+		setTopTexture(top);
+		setBottomTexture(bottom);
+		return this;
+	}
+	
+	Tile* setAllFacesTexture(const std::string& textureName, int atlasIndex = -1) {
+		for (int i = 0; i <= 5; i++) {
+			if (atlasIndex >= 0) {
+				setFaceTexture((BlockFace)i, textureName, atlasIndex);
+			} else {
+				setFaceTexture((BlockFace)i, textureName);
+			}
+		}
+		return this;
+	}
+	
+	Tile* setAllFacesTexture(int atlasIndex) {
+		for (int i = 0; i <= 5; i++) {
+			setFaceTexture((BlockFace)i, atlasIndex);
+		}
+		return this;
+	}
+	
+	const MaterialInstance* getMaterialInstance(BlockFace face) const {
+		auto it = materialInstances.find(face);
+		if (it != materialInstances.end()) {
+			return &it->second;
+		}
+		return nullptr;
+	}
+	
+	bool hasMaterialInstances() const {
+		return useMaterialInstances;
+	}
+	
+	static BlockFace renderFaceToBlockFace(int renderFace) {
+		switch(renderFace) {
+			case 0: return FACE_DOWN;
+			case 1: return FACE_UP;
+			case 2: return FACE_NORTH;
+			case 3: return FACE_SOUTH;
+			case 4: return FACE_WEST;
+			case 5: return FACE_EAST;
+			default: return FACE_UP;
+		}
+	}
+
 protected:
+	std::map<BlockFace, MaterialInstance> materialInstances;
+	bool useMaterialInstances;
+
     virtual Tile* setSoundType(const SoundType& soundType);
 
     virtual Tile* setLightBlock(int i);

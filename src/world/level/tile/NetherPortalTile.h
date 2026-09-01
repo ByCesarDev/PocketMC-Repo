@@ -79,49 +79,36 @@ public:
     }
 
     void teleport(Level* level, Player* player) {
-        LOGI("[NetherPortalTile::teleport] Started. level=%p, player=%p, isClientSide=%d\n", level, player, level ? level->isClientSide : -1);
         if (level->isClientSide) return;
 
         bool inNether = (level->dimension && level->dimension->id == -1);
         int targetDimId = inNether ? Dimension::NORMAL_DAYCYCLE : -1;
-        LOGI("[NetherPortalTile::teleport] inNether=%d, targetDimId=%d\n", inNether, targetDimId);
 
 #ifndef STANDALONE_SERVER
         LocalPlayer* localPlayer = NULL;
         if (player->isLocalPlayer()) {
             localPlayer = static_cast<LocalPlayer*>(player);
         }
-        LOGI("[NetherPortalTile::teleport] localPlayer=%p\n", localPlayer);
         if (localPlayer) {
             Minecraft* mc = localPlayer->getMinecraft();
-            LOGI("[NetherPortalTile::teleport] Minecraft=%p\n", mc);
             if (mc) {
-                LOGI("[NetherPortalTile::teleport] screen before setScreen=%p, isGeneratingLevel=%d\n", mc->screen, mc->getIsGeneratingLevel());
                 mc->setIsGeneratingLevel(true);
                 mc->progressStagePercentage = -1;
                 mc->setProgressStageStatusId(1);
                 
                 ProgressScreen* newScreen = new ProgressScreen();
-                LOGI("[NetherPortalTile::teleport] Instantiated ProgressScreen=%p\n", newScreen);
                 mc->forceSetScreen(newScreen);
-                LOGI("[NetherPortalTile::teleport] screen after forceSetScreen=%p\n", mc->screen);
 
                 if (mc->gameRenderer) {
-                    LOGI("[NetherPortalTile::teleport] Calling gameRenderer->render(0.0f)\n");
                     mc->gameRenderer->render(0.0f);
-                    LOGI("[NetherPortalTile::teleport] gameRenderer->render(0.0f) finished\n");
-                } else {
-                    LOGI("[NetherPortalTile::teleport] WARNING: gameRenderer is NULL\n");
                 }
 #ifndef ANDROID
                 GLFWwindow* window = glfwGetCurrentContext();
                 if (window) {
-                    LOGI("[NetherPortalTile::teleport] Swapping GLFW buffers directly\n");
                     glfwSwapBuffers(window);
                 } else
 #endif
                 {
-                    LOGI("[NetherPortalTile::teleport] Swapping standard buffers\n");
                     mc->swapBuffers();
                 }
                 sleepMs(1000);
@@ -129,10 +116,8 @@ public:
         }
 #endif
 
-        LOGI("[NetherPortalTile::teleport] Calling level->changeDimension(%d)\n", targetDimId);
         // Switch the dimension (saves current world, loads new one)
         level->changeDimension(targetDimId);
-        LOGI("[NetherPortalTile::teleport] level->changeDimension finished\n");
 
         // Find if there is already a portal in the destination world
         int destX = 0, destY = 0, destZ = 0;

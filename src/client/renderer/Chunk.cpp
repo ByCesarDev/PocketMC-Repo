@@ -14,8 +14,9 @@
 //int* _layerChunks[3] = {0, 0, 0}; //Chunk::NumLayers];
 //int _layerChunkCount[3] = {0, 0, 0};
 
-Chunk::Chunk( Level* level_, int x, int y, int z, int size, int lists_, GLuint* ptrBuf/*= NULL*/)
+Chunk::Chunk( Level* level_, int x, int y, int z, int size, int lists_, GLuint* ptrBuf/*= NULL*/, Textures* textures_/*= NULL*/)
 :	level(level_),
+	textures(textures_),
 	visible(false),
 	compiled(false),
     _empty(true),
@@ -98,7 +99,7 @@ void Chunk::rebuild()
 
 	int r = 1;
 	Region region(level, x0 - r, y0 - r, z0 - r, x1 + r, y1 + r, z1 + r);
-	TileRenderer tileRenderer(&region);
+	TileRenderer tileRenderer(&region, textures);
 
 	bool doRenderLayer[NumLayers] = {true, false, false};
 	for (int l = 0; l < NumLayers; l++) {

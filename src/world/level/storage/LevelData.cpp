@@ -295,7 +295,6 @@ void LevelData::setSizeOnDisk( long sizeOnDisk )
 
 void LevelData::setLoadedPlayerTag( CompoundTag* playerTag )
 {
-	LOGI("set-p: %p (%p <- %p)\n", this, loadedPlayerTag, playerTag);
 	if (loadedPlayerTag) {
 		loadedPlayerTag->deleteChildren();
 		delete loadedPlayerTag;

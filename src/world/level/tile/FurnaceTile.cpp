@@ -46,7 +46,7 @@ int FurnaceTile::getTexture( int face )
 {
 	if (face == 1) return tex + 17;
 	if (face == 0) return tex + 17;
-	if (face == 3) return tex - 1;
+	if (face == 2) return tex - 1;
 	return tex;
 }
 
@@ -99,8 +99,6 @@ void FurnaceTile::setLit( bool lit, Level* level, int x, int y, int z )
 	noDrop = false;
 
 	level->setData(x, y, z, data);
-
-	LOGI("lit? %d @ %d, %d, %d\n", lit, x, y, z);
 
 	if (te != NULL) {
 		te->clearRemoved();

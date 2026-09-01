@@ -6,7 +6,7 @@
 
 FallingTileRenderer::FallingTileRenderer() {
     this->shadowRadius = 0.5f;
-    tileRenderer = new TileRenderer();
+    tileRenderer = new TileRenderer(nullptr, nullptr);
 }
 
 FallingTileRenderer::~FallingTileRenderer() {

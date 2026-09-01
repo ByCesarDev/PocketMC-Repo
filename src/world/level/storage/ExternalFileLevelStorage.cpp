@@ -234,9 +234,6 @@ bool ExternalFileLevelStorage::readLevelData(const std::string& directory, Level
 
 bool ExternalFileLevelStorage::writeLevelData(const std::string& datFileName, LevelData& levelData, const std::vector<Player*>* players)
 {
-	LOGI("Writing down level seed as: %ld\n", levelData.getSeed());
-	//return true;
-
 	// Write level info
 	FILE* file = fopen(datFileName.c_str(), "wb");
 	if (!file)
@@ -311,8 +308,6 @@ void ExternalFileLevelStorage::tick()
 {
 	tickCount++;
 	if ((tickCount % 1000) == 0 && level) {
-		LOGI("Saving level...\n");
-
 		// Note: With infinite world, we can't iterate over all chunks
 		// Instead, chunks are saved when they're unloaded or periodically
 		// This is a simplified version - full implementation would track dirty chunks
@@ -539,9 +534,6 @@ void ExternalFileLevelStorage::saveEntities( Level* level, LevelChunk* levelChun
 	}
 
 	base.deleteChildren();
-
-	float tt = getTimeS() - st;
-	LOGI("Time to save %d entities: %f s. Size: %d bytes\n", count, tt, numBytes);
 }
 
 void ExternalFileLevelStorage::loadEntities(Level* level, LevelChunk* chunk) {
@@ -602,7 +594,6 @@ void ExternalFileLevelStorage::loadEntities(Level* level, LevelChunk* chunk) {
 						
 						LevelChunk* chunk = level->getChunkAt(e->x, e->z);
 						if (chunk && !chunk->hasTileEntityAt(e)) {
-							LOGI("Adding TileEntity %d to %d, %d, %d\n", e->type, e->x, e->y, e->z);
 							chunk->addTileEntity(e);
 						} else {
 							if (!chunk)
@@ -620,7 +611,6 @@ void ExternalFileLevelStorage::loadEntities(Level* level, LevelChunk* chunk) {
 
 			delete[] buf;
 		}
-		LOGI("header: %s, version: %d, bytes: %d (remaining: %d)\n", header, version, numBytes, left);
 
 		//fread(stream.GetData(), 1, numBytes, fp);
 		fclose(fp);
@@ -658,8 +648,7 @@ int ExternalFileLevelStorage::savePendingUnsavedChunks( int maxCount ) {
 
 void ExternalFileLevelStorage::saveAll( Level* level, std::vector<LevelChunk*>& levelChunks ) {
     ChunkStorage::saveAll(level, levelChunks);
-	int numChunks = savePendingUnsavedChunks(-1);
-    LOGI("Saving %d additional chunks.\n", numChunks);
+	savePendingUnsavedChunks(-1);
 }
 
 #endif /*DEMO_MODE*/

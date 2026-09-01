@@ -272,7 +272,6 @@ void Minecraft::selectLevel( const std::string& levelId, const std::string& leve
 
 void Minecraft::setLevel(Level* level, const std::string& message /* ="" */, LocalPlayer* forceInsertPlayer /* = NULL */) {
 	cameraTargetPlayer = NULL;
-	LOGI("Seed is %ld\n", level->getSeed());
 
 	if (level != NULL) {
 		level->raknetInstance = raknetInstance;
@@ -364,7 +363,6 @@ void Minecraft::leaveGame(bool renameLevel /*=false*/)
 }
 
 void Minecraft::prepareLevel(const std::string& title) {
-	LOGI("status: 1\n");
 	progressStageStatusId = 1;
 
 	Stopwatch A, B, C, D;
@@ -418,7 +416,6 @@ void Minecraft::prepareLevel(const std::string& title) {
 	}
 	C.stop();
 
-	LOGI("status: 3\n");
 	progressStageStatusId = 3;
 	if (level->isNew()) {
 		level->setInitialSpawn(); // @note: should obviously be called from Level itself
@@ -432,17 +429,11 @@ void Minecraft::prepareLevel(const std::string& title) {
 
 	progressStagePercentage = -1;
 	progressStageStatusId = 2;
-	LOGI("status: 2\n");
 
 	D.start();
 	level->prepare();
 	D.stop();
 
-	A.print("Generate level: ");
-	L.print(" - light: ");
-	B.print(" - getTl: ");
-	C.print(" - clear: ");
-	D.print(" - prepr: ");
 	progressStageStatusId = 0;
 }
 
@@ -1207,12 +1198,10 @@ void Minecraft::gameLostFocus() {
 void Minecraft::forceSetScreen( Screen* screen )
 {
 #ifndef STANDALONE_SERVER
-	LOGI("[Minecraft::forceSetScreen] screen=%p, screenMutex=%d\n", screen, screenMutex);
 	bool oldMutex = screenMutex;
 	screenMutex = false;
 	setScreen(screen);
 	screenMutex = oldMutex;
-	LOGI("[Minecraft::forceSetScreen] Finished. Current screen=%p\n", this->screen);
 #endif
 }
 
@@ -1224,7 +1213,6 @@ void Minecraft::pushScreen( Screen* newScreen )
 	Multitouch::resetThisUpdate();
 
 	if (screenMutex) {
-		LOGI("[Minecraft::pushScreen] Deferring screen=%p because screenMutex=1\n", newScreen);
 		hasScheduledPushScreen = true;
 		scheduledPushScreen = newScreen;
 		return;
@@ -1253,7 +1241,6 @@ void Minecraft::popScreen()
 	Multitouch::resetThisUpdate();
 
 	if (screenMutex) {
-		LOGI("[Minecraft::popScreen] Deferring pop because screenMutex=1\n");
 		hasScheduledPopScreen = true;
 		return;
 	}
@@ -1283,29 +1270,24 @@ void Minecraft::popScreen()
 void Minecraft::setScreen( Screen* screen )
 {
 #ifndef	STANDALONE_SERVER
-	LOGI("[Minecraft::setScreen] screen=%p, screenMutex=%d\n", screen, screenMutex);
 	Mouse::reset();
 	Multitouch::reset();
 	Multitouch::resetThisUpdate();
 
 	if (screenMutex) {
-		LOGI("[Minecraft::setScreen] Deferring screen=%p because screenMutex=1\n", screen);
 		hasScheduledScreen = true;
 		scheduledScreen = screen;
 		return;
 	}
 
 	if (screen != NULL && screen->isErrorScreen()) {
-		LOGI("[Minecraft::setScreen] Ignored error screen %p\n", screen);
 		return;
 	}
 	if (screen == NULL && level == NULL) {
-		LOGI("[Minecraft::setScreen] Screen is NULL and level is NULL, creating start menu\n");
 		screen = screenChooser.createScreen(SCREEN_STARTMENU);
 	}
 
 	if (this->screen != NULL) {
-		LOGI("[Minecraft::setScreen] Deleting existing screen %p\n", this->screen);
 		this->screen->removed();
 		delete this->screen;
 	}
@@ -1321,16 +1303,13 @@ void Minecraft::setScreen( Screen* screen )
 		releaseMouse();
 		int screenWidth = (int)(width * Gui::InvGuiScale);
 		int screenHeight = (int)(height * Gui::InvGuiScale);
-		LOGI("[Minecraft::setScreen] Initializing screen %p (size: %dx%d)\n", screen, screenWidth, screenHeight);
 		screen->init(this, screenWidth, screenHeight);
 
 		if (screen->isInGameScreen() && level) {
-			LOGI("[Minecraft::setScreen] Saving level data...\n");
 			level->saveLevelData();
             level->saveGame();
         }
 	} else {
-		LOGI("[Minecraft::setScreen] Returning to game, unpausing\n");
 		pause = false;
 		grabMouse();
 	}
@@ -1377,8 +1356,6 @@ void Minecraft::init()
 	checkGlError("Init enter");
 
 	_supportsNonTouchscreen = !platform()->supportsTouchscreen();
-
-	LOGI("IS TOUCHSCREEN? %d\n", options.getBooleanValue(OPTIONS_USE_TOUCHSCREEN));
 
 	textures = new Textures(&options, platform());
 	textures->addDynamicTexture(new WaterTexture());
@@ -1508,8 +1485,6 @@ void Minecraft::reloadOptions() {
 		_reloadInput();
 
 	// user->name = options.username;
-
-	LOGI("Reloading-options\n");
 
 	useAmbientOcclusion =
 		options.getBooleanValue(OPTIONS_AMBIENT_OCCLUSION) ||

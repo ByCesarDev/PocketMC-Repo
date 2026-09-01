@@ -37,10 +37,6 @@ Tesselator::Tesselator( int size )
 	vaoIds = new GLuint[vboCounts];
 
 	_varray = new VERTEX[maxVertices];
-
-	char* a = (char*)&_varray[0];
-	char* b = (char*)&_varray[1];
-	LOGI("Vsize: %lu, %d\n", (unsigned long)sizeof(VERTEX), (int)(b - a));
 }
 
 Tesselator::~Tesselator()

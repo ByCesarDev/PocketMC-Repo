@@ -1,4 +1,4 @@
-﻿#include "ChestScreen.h"
+#include "ChestScreen.h"
 #include "touch/TouchStartMenuScreen.h"
 #include "../Screen.h"
 #include "../components/NinePatch.h"
@@ -473,9 +473,6 @@ void ChestScreen::setupPane()
 	chestPane = new Touch::InventoryPane(this, minecraft, rect, paneWidth, BorderPixels, chest->getContainerSize(), ItemSize, (int)BorderPixels);
 	chestPane->fillMarginX = 0;
 	chestPane->fillMarginY = 0;
-	LOGI("Creating new panes\n:"
-		"          Inventory %d %p\n"
-		"          Chest     %d %p\n", (int)inventoryItems.size(), inventoryPane, (int)chestItems.size(), chestPane);
 }
 
 void ChestScreen::drawSlotItemAt( Tesselator& t, const ItemInstance* item, int x, int y, bool selected)

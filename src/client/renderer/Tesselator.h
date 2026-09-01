@@ -83,6 +83,9 @@ public:
 	__inline bool isOverridden() {
 		return _voidBeginEnd;
 	}
+	__inline bool isTesselating() const {
+		return tesselating;
+	}
 	__inline RenderChunk endOverride(int bufferId) {
 		voidBeginAndEndCalls(false);
 		return end(true, bufferId);

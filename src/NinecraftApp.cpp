@@ -112,7 +112,6 @@ void NinecraftApp::init()
 	_running = false;
 
 #ifndef STANDALONE_SERVER
-	LOGI("This: %p\n", this);
 	screenChooser.setScreen(SCREEN_STARTMENU);
 
 	if (options.getBooleanValue(OPTIONS_FIRST_LAUNCH)) {

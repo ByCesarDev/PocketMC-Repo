@@ -333,7 +333,7 @@ void UnifiedInventoryScreen::updateItems() {
             int mask = showAll ? catOrder[ci] : targetMask;
 
             for (int i = 0; i < 256; ++i) {
-                if (Tile::tiles[i] != NULL) {
+                if (Tile::isTileAllowedInCreative(i)) {
                     Item* it = Item::items[i];
                     int cat = it ? it->category : 1;
                     if (cat <= 0) cat = 8;
@@ -356,7 +356,7 @@ void UnifiedInventoryScreen::updateItems() {
 
         if (showAll) {
             for (int i = 0; i < 256; ++i) {
-                if (Tile::tiles[i] != NULL) {
+                if (Tile::isTileAllowedInCreative(i)) {
                     Item* it = Item::items[i];
                     int cat = it ? it->category : 1;
                     if (cat <= 0) cat = 8;
@@ -768,10 +768,10 @@ void UnifiedInventoryScreen::drawSlotItemAt(Tesselator& t, int slot, const ItemI
         glColor4f2(1, 1, 1, 1);
         t.begin();
         t.colorABGR(0xFFFFFFFF);
-        t.vertexUV(xx,         yy + 19.0f, 0, 0.0f, 1.0f);
-        t.vertexUV(xx + 18.0f, yy + 19.0f, 0, 1.0f, 1.0f);
-        t.vertexUV(xx + 18.0f, yy + 1.0f,  0, 1.0f, 0.0f);
-        t.vertexUV(xx,         yy + 1.0f,  0, 0.0f, 0.0f);
+        t.vertexUV(xx,         yy + 17.0f, 0, 0.0f, 1.0f);
+        t.vertexUV(xx + 18.0f, yy + 17.0f, 0, 1.0f, 1.0f);
+        t.vertexUV(xx + 18.0f, yy,         0, 1.0f, 0.0f);
+        t.vertexUV(xx,         yy,         0, 0.0f, 0.0f);
         t.draw();
     }
 

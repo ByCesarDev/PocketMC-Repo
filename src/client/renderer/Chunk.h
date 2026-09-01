@@ -10,13 +10,14 @@ class Level;
 class Entity;
 class Culler;
 class Tesselator;
+class Textures;
 
 // @note: TileEntity stuff is stripped away
 class Chunk
 {
     static const int NumLayers = 3;
 public:
-    Chunk(Level* level_, int x, int y, int z, int size, int lists_, GLuint* ptrBuf = NULL);
+    Chunk(Level* level_, int x, int y, int z, int size, int lists_, GLuint* ptrBuf = NULL, Textures* textures_ = NULL);
 
     void setPos(int x, int y, int z);
 
@@ -47,6 +48,7 @@ private:
 	void translateToPos();
 public:
 	Level* level;
+	Textures* textures;
 
 	static int updates;// = 0;
 

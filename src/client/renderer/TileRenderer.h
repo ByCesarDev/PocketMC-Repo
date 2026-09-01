@@ -11,11 +11,12 @@ class StairTile;
 class LevelSource;
 class Material;
 class Minecraft;
+class Textures;
 
 class TileRenderer
 {
 public:
-    TileRenderer(LevelSource* level = 0);
+    TileRenderer(LevelSource* level = 0, Textures* textures = nullptr);
 
     void tesselateInWorld(Tile* tile, int x, int y, int z, int fixedTexture);
     bool tesselateInWorld(Tile* tt, int x, int y, int z);
@@ -61,6 +62,8 @@ public:
     void renderTile(Tile* tile, int data);
 	void renderGuiTile(Tile* tile, int data);
 
+	bool renderWithMaterialInstances(Tile* tile, int x, int y, int z, int data = 0);
+
 	static void setUseTint(bool value) {
        sideTinting = value;
     }
@@ -77,6 +80,7 @@ private:
     float getWaterHeight(int x, int y, int z, const Material* m);
 
     LevelSource* level;
+	Textures* textures;
 	int fixedTexture;
 	bool xFlipTexture;
 	bool noCulling;

@@ -39,9 +39,6 @@ RandomLevelSource::RandomLevelSource(Level* level, long seed, int version, bool 
 		waterDepths[i][j] = 0;
 
 	buffer = new float[MAX_BUFFER_SIZE];
-
-	Random randomCopy = random;
-	printf("random.get : %d\n", randomCopy.nextInt());
 }
 
 RandomLevelSource::~RandomLevelSource() {

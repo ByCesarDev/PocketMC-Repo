@@ -288,7 +288,6 @@ void SoundEngine::playRandomMusicTrack() {
 		if (SUCCEEDED(hr)) {
 			isMusicPlaying = true;
 			musicTrackGraceTicks = 100;
-			LOGI("[SoundEngine] Playing background music with 5s Fade-In (MediaFoundation): %s\n", winPath.c_str());
 		} else {
 			LOGI("[SoundEngine] MediaFoundation Play failed: 0x%08x\n", (unsigned int)hr);
 			stopBackgroundMusic();
@@ -302,7 +301,6 @@ void SoundEngine::playRandomMusicTrack() {
 		mc->platform()->playMusicTrack(trackPath, 0.0f);
 		isMusicPlaying = true;
 		musicTrackGraceTicks = 100;
-		LOGI("[SoundEngine] Playing background music with 5s Fade-In (Platform): %s\n", trackPath.c_str());
 	} else {
 		isMusicPlaying = false;
 	}

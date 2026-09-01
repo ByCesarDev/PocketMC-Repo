@@ -2,6 +2,8 @@
 #include "Chunk.h"
 #include "../Minecraft.h"
 #include "Tesselator.h"
+#include "Textures.h"
+#include <set>
 
 #include "../../world/level/LevelSource.h"
 #include "../../world/level/tile/Tile.h"
@@ -16,13 +18,13 @@
 #include "../../world/level/tile/FireTile.h"
 #include "../../world/Direction.h"
 #include "../../world/Facing.h"
-#include "tileentity/TileEntityRenderer.h"
 #include "EntityTileRenderer.h"
 
 bool TileRenderer::sideTinting = false;
 
-TileRenderer::TileRenderer(LevelSource* level /* = NULL */ )
+TileRenderer::TileRenderer(LevelSource* level /* = NULL */, Textures* textures /* = nullptr */ )
 	:	level(level),
+	textures(textures),
 	fixedTexture(-1),
 	xFlipTexture(false),
 	noCulling(false),
@@ -33,6 +35,7 @@ TileRenderer::TileRenderer(LevelSource* level /* = NULL */ )
 }
 
 bool TileRenderer::tesselateBlockInWorld(Tile* tt, int x, int y, int z) {
+	Tesselator& t = Tesselator::instance;
 	// Atlas filter: check if this block belongs to the current atlas pass
 	if (atlasFilter != -1) {
 		// Check all 6 face textures to determine which atlas this block uses
@@ -2770,11 +2773,11 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 				renderFaceDown(tile, 0, 0, 0, texDown & ~Tile::TEXTURE_ALT_FLAG);
 		}
 
-		// North / South (mid)
+		// North / South (Front-Left face: Medium-light)
 		if (tile == ((Tile*)Tile::leaves)) {
-			t.color(0x36, 0x87, 0x12);
+			t.color(0x3c, 0x9a, 0x14);
 		} else {
-			t.color(0x80, 0x80, 0x80);
+			t.color(0xd0, 0xd0, 0xd0);
 		}
 		{
 			int texNorth = tile->getTexture(2, data);
@@ -2788,11 +2791,11 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 				renderSouth(tile, 0, 0, 0, texSouth & ~Tile::TEXTURE_ALT_FLAG);
 		}
 
-		// East / West (dark)
+		// East / West (Front-Right face: Shadow)
 		if (tile == ((Tile*)Tile::leaves)) {
-			t.color(0x40, 0x9f, 0x15);
+			t.color(0x28, 0x6e, 0x0c);
 		} else {
-			t.color(0xbb, 0xbb, 0xbb);
+			t.color(0x80, 0x80, 0x80);
 		}
 		{
 			int texEast = tile->getTexture(5, data);
@@ -2829,13 +2832,13 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 		renderFaceDown(tile, 0, 0, 0, tile->getTexture(0));
 		renderFaceUp(tile, 0, 0, 0, tile->getTexture(1));
 
-		t.color(0x80, 0x80, 0x80);
+		t.color(0xd0, 0xd0, 0xd0);
 		t.addOffset(0, 0, s);
 		renderNorth(tile, 0, 0, 0, tile->getTexture(2));
 		t.addOffset(0, 0, -s-s);
 		renderSouth(tile, 0, 0, 0, tile->getTexture(3));
 
-		t.color(0xbb, 0xbb, 0xbb);
+		t.color(0x80, 0x80, 0x80);
 		t.addOffset(s, 0, s);
 		renderWest(tile, 0, 0, 0, tile->getTexture(4));
 		t.addOffset(-s-s, 0, 0);
@@ -2847,22 +2850,23 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 		t.offset(-0.5f, -0.5f, -0.5f);
 		t.begin();
 		for (int i = 0; i < 2; i++) {
-			if (i == 0) tile->setShape(0, 0, 0, 1, 1, 0.5f);
-			if (i == 1) tile->setShape(0, 0, 0.5f, 1, 0.5f, 1);
+			if (i == 0) tile->setShape(0, 0, 0, 1, 0.5f, 1);
+			if (i == 1) tile->setShape(0, 0.5f, 0.5f, 1, 1, 1);
 
 			t.color(0xff, 0xff, 0xff);
 			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0));
 			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1));
 
-			t.color(0x80, 0x80, 0x80);
+			t.color(0xd0, 0xd0, 0xd0);
 			renderNorth(tile, 0, 0, 0, tile->getTexture(2));
 			renderSouth(tile, 0, 0, 0, tile->getTexture(3));
 
-			t.color(0xbb, 0xbb, 0xbb);
+			t.color(0x80, 0x80, 0x80);
 			renderWest(tile, 0, 0, 0, tile->getTexture(4));
 			renderEast(tile, 0, 0, 0, tile->getTexture(5));
 		}
 		t.draw();
+		tile->setShape(0, 0, 0, 1, 1, 1);
 		t.offset(0, 0, 0);
 	}
 	else if (shape == Tile::SHAPE_FENCE) {
@@ -2881,11 +2885,11 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0));
 			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1));
 
-			t.color(0x80, 0x80, 0x80);
+			t.color(0xd0, 0xd0, 0xd0);
 			renderNorth(tile, 0, 0, 0, tile->getTexture(2));
 			renderSouth(tile, 0, 0, 0, tile->getTexture(3));
 
-			t.color(0xbb, 0xbb, 0xbb);
+			t.color(0x80, 0x80, 0x80);
 			renderWest(tile, 0, 0, 0, tile->getTexture(4));
 			renderEast(tile, 0, 0, 0, tile->getTexture(5));
 		}
@@ -2907,11 +2911,11 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 			renderFaceUp(tile, 0, 0, 0, tile->getTexture(0));
 			renderFaceDown(tile, 0, 0, 0, tile->getTexture(1));
 
-			t.color(0x80, 0x80, 0x80);
+			t.color(0xd0, 0xd0, 0xd0);
 			renderNorth(tile, 0, 0, 0, tile->getTexture(2));
 			renderSouth(tile, 0, 0, 0, tile->getTexture(3));
 
-			t.color(0xbb, 0xbb, 0xbb);
+			t.color(0x80, 0x80, 0x80);
 			renderWest(tile, 0, 0, 0, tile->getTexture(4));
 			renderEast(tile, 0, 0, 0, tile->getTexture(5));
 		}
@@ -3431,4 +3435,222 @@ void TileRenderer::tesselateRowTexture( Tile* tt, int data, float x, float y, fl
 	t.vertexUV(x0, y + 0, z1, u0, v1);
 	t.vertexUV(x1, y + 0, z1, u1, v1);
 	t.vertexUV(x1, y + 1, z1, u1, v0);
+}
+
+bool TileRenderer::renderWithMaterialInstances(Tile* tile, int x, int y, int z, int data) {
+	Tesselator& t = Tesselator::instance;
+	if (!textures) {
+		return false;
+	}
+
+	if (!tile->hasMaterialInstances()) {
+		return false;
+	}
+
+	bool inChunkPass = t.isTesselating();
+	if (!inChunkPass) {
+		tile->updateDefaultShape();
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+	}
+
+	bool changed = false;
+	float c10 = 0.5f;
+	float c11 = 1.0f;
+	float c2 = 0.8f;
+	float c3 = 0.6f;
+
+	int col = level ? tile->getColor(level, x, y, z) : 0xffffff;
+	float r = ((col >> 16) & 0xff) / 255.0f;
+	float g = ((col >> 8) & 0xff) / 255.0f;
+	float b = ((col) & 0xff) / 255.0f;
+
+	float centerBrightness = level ? tile->getBrightness(level, x, y, z) : 1.0f;
+
+	// Renderizar cada cara con su textura y culling correspondiente
+	for (int face = 0; face < 6; face++) {
+		bool shouldRender = false;
+		float br = 1.0f;
+		float cr = 1.0f, cg = 1.0f, cb = 1.0f;
+
+		switch (face) {
+			case 0: // DOWN
+				shouldRender = noCulling || !level || tile->shouldRenderFace(level, x, y - 1, z, 0);
+				if (shouldRender) {
+					br = level ? tile->getBrightness(level, x, y - 1, z) : 1.0f;
+					cr = r * c10 * br; cg = g * c10 * br; cb = b * c10 * br;
+				}
+				break;
+			case 1: // UP
+				shouldRender = noCulling || !level || tile->shouldRenderFace(level, x, y + 1, z, 1);
+				if (shouldRender) {
+					br = level ? tile->getBrightness(level, x, y + 1, z) : 1.0f;
+					if (tile->yy1 != 1 && !tile->material->isLiquid() && level) br = centerBrightness;
+					cr = r * c11 * br; cg = g * c11 * br; cb = b * c11 * br;
+				}
+				break;
+			case 2: // NORTH
+				shouldRender = noCulling || !level || tile->shouldRenderFace(level, x, y, z - 1, 2);
+				if (shouldRender) {
+					br = level ? tile->getBrightness(level, x, y, z - 1) : 1.0f;
+					if (tile->zz0 > 0 && level) br = centerBrightness;
+					cr = r * c2 * br; cg = g * c2 * br; cb = b * c2 * br;
+				}
+				break;
+			case 3: // SOUTH
+				shouldRender = noCulling || !level || tile->shouldRenderFace(level, x, y, z + 1, 3);
+				if (shouldRender) {
+					br = level ? tile->getBrightness(level, x, y, z + 1) : 1.0f;
+					if (tile->zz1 < 1 && level) br = centerBrightness;
+					cr = r * c2 * br; cg = g * c2 * br; cb = b * c2 * br;
+				}
+				break;
+			case 4: // WEST
+				shouldRender = noCulling || !level || tile->shouldRenderFace(level, x - 1, y, z, 4);
+				if (shouldRender) {
+					br = level ? tile->getBrightness(level, x - 1, y, z) : 1.0f;
+					if (tile->xx0 > 0 && level) br = centerBrightness;
+					cr = r * c3 * br; cg = g * c3 * br; cb = b * c3 * br;
+				}
+				break;
+			case 5: // EAST
+				shouldRender = noCulling || !level || tile->shouldRenderFace(level, x + 1, y, z, 5);
+				if (shouldRender) {
+					br = level ? tile->getBrightness(level, x + 1, y, z) : 1.0f;
+					if (tile->xx1 < 1 && level) br = centerBrightness;
+					cr = r * c3 * br; cg = g * c3 * br; cb = b * c3 * br;
+				}
+				break;
+		}
+
+		if (!shouldRender) continue;
+
+		t.color(cr, cg, cb);
+
+		Tile::BlockFace blockFace = Tile::renderFaceToBlockFace(face);
+		const Tile::MaterialInstance* matInst = tile->getMaterialInstance(blockFace);
+		
+		int textureIndex = 0;
+		bool useSeparateTexture = false;
+		
+		if (matInst && matInst->usesSeparateTexture()) {
+			std::string texturePath = "data/images/blocks/" + matInst->textureName + ".png";
+			TextureId texId = textures->loadTexture(texturePath, false);
+			if (texId != Textures::InvalidId) {
+				if (!inChunkPass) {
+					textures->bind(texId);
+				}
+			}
+			textureIndex = matInst->textureIndex > 0 ? matInst->textureIndex : tile->getTexture(face, data);
+			useSeparateTexture = true;
+		} else if (matInst) {
+			if (!inChunkPass) {
+				textures->loadAndBindTexture((matInst->textureIndex & Tile::TEXTURE_ALT_FLAG) ? "terrain2.png" : "terrain.png");
+			}
+			textureIndex = matInst->textureIndex > 0 ? matInst->textureIndex : tile->getTexture(face, data);
+			useSeparateTexture = false;
+		} else {
+			if (!inChunkPass) {
+				textures->loadAndBindTexture("terrain.png");
+			}
+			textureIndex = tile->getTexture(face, data);
+			useSeparateTexture = false;
+		}
+		
+		bool isAlt = (textureIndex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (inChunkPass && atlasFilter != -1) {
+			if (atlasFilter == 0 && isAlt) continue;
+			if (atlasFilter == 1 && !isAlt) continue;
+		}
+
+		float x0 = (float)x + tile->xx0;
+		float x1 = (float)x + tile->xx1;
+		float y0 = (float)y + tile->yy0;
+		float y1 = (float)y + tile->yy1;
+		float z0 = (float)z + tile->zz0;
+		float z1 = (float)z + tile->zz1;
+
+		if (inChunkPass || !useSeparateTexture) {
+			int cleanTex = textureIndex & ~Tile::TEXTURE_ALT_FLAG;
+			switch(face) {
+				case 0: // DOWN
+					t.normal(0.0f, -1.0f, 0.0f);
+					renderFaceDown(tile, (float)x, (float)y, (float)z, cleanTex);
+					break;
+				case 1: // UP
+					t.normal(0.0f, 1.0f, 0.0f);
+					renderFaceUp(tile, (float)x, (float)y, (float)z, cleanTex);
+					break;
+				case 2: // NORTH
+					t.normal(0.0f, 0.0f, -1.0f);
+					renderNorth(tile, (float)x, (float)y, (float)z, cleanTex);
+					break;
+				case 3: // SOUTH
+					t.normal(0.0f, 0.0f, 1.0f);
+					renderSouth(tile, (float)x, (float)y, (float)z, cleanTex);
+					break;
+				case 4: // WEST
+					t.normal(-1.0f, 0.0f, 0.0f);
+					renderWest(tile, (float)x, (float)y, (float)z, cleanTex);
+					break;
+				case 5: // EAST
+					t.normal(1.0f, 0.0f, 0.0f);
+					renderEast(tile, (float)x, (float)y, (float)z, cleanTex);
+					break;
+			}
+		} else {
+			switch(face) {
+				case 0: // DOWN
+					t.normal(0.0f, -1.0f, 0.0f);
+					t.vertexUV(x0, y0, z0, 0.0f, 0.0f);
+					t.vertexUV(x1, y0, z0, 1.0f, 0.0f);
+					t.vertexUV(x1, y0, z1, 1.0f, 1.0f);
+					t.vertexUV(x0, y0, z1, 0.0f, 1.0f);
+					break;
+				case 1: // UP
+					t.normal(0.0f, 1.0f, 0.0f);
+					t.vertexUV(x0, y1, z0, 0.0f, 0.0f);
+					t.vertexUV(x1, y1, z0, 1.0f, 0.0f);
+					t.vertexUV(x1, y1, z1, 1.0f, 1.0f);
+					t.vertexUV(x0, y1, z1, 0.0f, 1.0f);
+					break;
+				case 2: // NORTH
+					t.normal(0.0f, 0.0f, -1.0f);
+					t.vertexUV(x0, y0, z0, 0.0f, 0.0f);
+					t.vertexUV(x1, y0, z0, 1.0f, 0.0f);
+					t.vertexUV(x1, y1, z0, 1.0f, 1.0f);
+					t.vertexUV(x0, y1, z0, 0.0f, 1.0f);
+					break;
+				case 3: // SOUTH
+					t.normal(0.0f, 0.0f, 1.0f);
+					t.vertexUV(x0, y0, z1, 0.0f, 0.0f);
+					t.vertexUV(x1, y0, z1, 1.0f, 0.0f);
+					t.vertexUV(x1, y1, z1, 1.0f, 1.0f);
+					t.vertexUV(x0, y1, z1, 0.0f, 1.0f);
+					break;
+				case 4: // WEST
+					t.normal(-1.0f, 0.0f, 0.0f);
+					t.vertexUV(x0, y0, z0, 0.0f, 0.0f);
+					t.vertexUV(x0, y0, z1, 1.0f, 0.0f);
+					t.vertexUV(x0, y1, z1, 1.0f, 1.0f);
+					t.vertexUV(x0, y1, z0, 0.0f, 1.0f);
+					break;
+				case 5: // EAST
+					t.normal(1.0f, 0.0f, 0.0f);
+					t.vertexUV(x1, y0, z0, 0.0f, 0.0f);
+					t.vertexUV(x1, y0, z1, 1.0f, 0.0f);
+					t.vertexUV(x1, y1, z1, 1.0f, 1.0f);
+					t.vertexUV(x1, y1, z0, 0.0f, 1.0f);
+					break;
+			}
+		}
+		changed = true;
+	}
+
+	if (!inChunkPass) {
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+	}
+
+	return changed;
 }

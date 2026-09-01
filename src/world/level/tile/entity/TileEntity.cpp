@@ -71,7 +71,6 @@ void TileEntity::load( CompoundTag* tag )
 	x = tag->getInt("x");
 	y = tag->getInt("y");
 	z = tag->getInt("z");
-	LOGI("Loaded tile entity @ %d, %d, %d\n", x, y, z);
 }
 
 bool TileEntity::save( CompoundTag* tag )

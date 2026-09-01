@@ -52,8 +52,6 @@ bool GuiShader::init()
     inited = instance.loadFromSource(defaultGuiVert, defaultGuiFrag);
     if (!inited) {
         LOGE("Failed to load embedded GUI shaders!\n");
-    } else {
-        LOGI("GuiShader initialized successfully.\n");
     }
     return inited;
 }

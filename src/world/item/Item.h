@@ -213,7 +213,7 @@ public:
 	:	id(256 + id),
 		craftingRemainingItem(NULL),
 		maxStackSize(MAX_STACK_SIZE),
-		maxDamage(32),
+		maxDamage(0),
 		category(-1),
 		_handEquipped(false),
 		_isStackedByData(false)
