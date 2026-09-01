@@ -116,7 +116,20 @@ public:
 	virtual bool supportsTouchscreen();
 
 	virtual void openURL(const std::string& url) {
+#ifdef _WIN32
+		std::string urlCopy = url;
+		HANDLE hThread = CreateThread(NULL, 0, [](LPVOID param) -> DWORD {
+			std::string* pUrl = (std::string*)param;
+			CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+			ShellExecuteA(NULL, "open", pUrl->c_str(), NULL, NULL, SW_SHOWNORMAL);
+			CoUninitialize();
+			delete pUrl;
+			return 0;
+		}, new std::string(urlCopy), 0, NULL);
+		if (hThread) CloseHandle(hThread);
+#else
 		ShellExecuteA(NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+#endif
 	}
 
 private:

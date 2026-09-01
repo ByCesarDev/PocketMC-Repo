@@ -153,7 +153,16 @@ public:
 
 	virtual void openURL(const std::string& url) override {
 #ifdef _WIN32
-		ShellExecuteA(NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+		std::string urlCopy = url;
+		HANDLE hThread = CreateThread(NULL, 0, [](LPVOID param) -> DWORD {
+			std::string* pUrl = (std::string*)param;
+			CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+			ShellExecuteA(NULL, "open", pUrl->c_str(), NULL, NULL, SW_SHOWNORMAL);
+			CoUninitialize();
+			delete pUrl;
+			return 0;
+		}, new std::string(urlCopy), 0, NULL);
+		if (hThread) CloseHandle(hThread);
 #elif __linux__
 		std::string command = "xdg-open " + url;
 		system(command.c_str());
