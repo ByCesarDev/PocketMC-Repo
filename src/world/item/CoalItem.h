@@ -18,8 +18,8 @@ public:
     }
 
     /*@Override*/
-    std::string getDescriptionId(ItemInstance* instance) {
-        if (instance->getAuxValue() == CHAR_COAL) {
+    std::string getDescriptionId(const ItemInstance* instance) const {
+        if (instance && instance->getAuxValue() == CHAR_COAL) {
             return ICON_DESCRIPTION_PREFIX + "charcoal";
         }
         return ICON_DESCRIPTION_PREFIX + "coal";
