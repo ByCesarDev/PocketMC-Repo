@@ -1035,16 +1035,33 @@ void Gui::renderOnSelectItemNameText( const int screenWidth, Font* font, int ySl
 	if(itemNameOverlayTime < 1.0f) {
 		ItemInstance* item = minecraft->player->inventory->getSelected();
 		if(item != NULL) {
-			float x = float(screenWidth / 2 - font->width(item->getName()) / 2);
+			std::string name = item->getName();
+			float textWidth = (float)font->width(name);
+			float x = float(screenWidth / 2 - textWidth / 2);
 			float y = float(ySlot - 22);
 			int alpha = 255;
-			if(itemNameOverlayTime > 0.75) {
+			if(itemNameOverlayTime > 0.75f) {
 				float time = 0.25f - (itemNameOverlayTime - 0.75f);
-				float percentage = cubeSmoothStep(time *  4, 0.0f, 1.0f);
+				float percentage = cubeSmoothStep(time * 4, 0.0f, 1.0f);
 				alpha = int(percentage * 255);
 			}
-			if(alpha != 0)
-				font->drawShadow(item->getName(), x, y, 0x00ffffff + (alpha << 24));
+			if(alpha > 0) {
+				int bgAlpha = (alpha * 128) / 255;
+				if (bgAlpha > 0) {
+					int bgColor = (bgAlpha << 24) & 0xFF000000;
+					int boxLeft = (int)(x - 5.0f);
+					int boxRight = (int)(x + textWidth + 5.0f);
+					int boxTop = (int)(y - 3.0f);
+					int boxBottom = (int)(y + 11.0f);
+
+					// Rounded pill corners
+					fill(boxLeft + 1, boxTop, boxRight - 1, boxTop + 1, bgColor);
+					fill(boxLeft, boxTop + 1, boxRight, boxBottom - 1, bgColor);
+					fill(boxLeft + 1, boxBottom - 1, boxRight - 1, boxBottom, bgColor);
+				}
+
+				font->drawShadow(name, x, y, 0x00ffffff + (alpha << 24));
+			}
 		}
 	}
 }

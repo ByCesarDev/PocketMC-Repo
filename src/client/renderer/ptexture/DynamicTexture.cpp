@@ -314,3 +314,80 @@ void PortalTexture::tick() {
 
 	_frame++;
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// FireTexture – procedural heat/flame simulation (Minecraft Java / MCPE algorithm)
+// ──────────────────────────────────────────────────────────────────────────────
+FireTexture::FireTexture(int id)
+	:   super(((Tile*)Tile::fire)->tex + id * 16),
+	_tick(0),
+	_frame(0)
+{
+	current = new float[16*20];
+	next = new float[16*20];
+	heat = new float[16*20];
+	heata = new float[16*20];
+
+	for (int i = 0; i < 16*20; ++i) {
+		current[i] = 0;
+		next[i] = 0;
+		heat[i] = 0;
+		heata[i] = 0;
+	}
+}
+
+FireTexture::~FireTexture() {
+	delete[] current;
+	delete[] next;
+	delete[] heat;
+	delete[] heata;
+}
+
+void FireTexture::tick() {
+	for (int x = 0; x < 16; x++) {
+		for (int y = 0; y < 20; y++) {
+			int count = 18;
+			float pow = this->current[x + (y + 1) % 20 * 16] * (float)(count);
+			for (int xx = x - 1; xx <= x + 1; xx++) {
+				for (int yy = y; yy <= y + 1; yy++) {
+					if (xx >= 0 && yy >= 0 && xx < 16 && yy < 20) {
+						pow += this->current[xx + yy * 16];
+					}
+					count++;
+				}
+			}
+			this->next[x + y * 16] = pow / (float(count) * 1.06f);
+			if (y >= 19) {
+				this->next[x + y * 16] = float(Mth::random() * Mth::random() * Mth::random() * 4.0 + Mth::random() * 0.1f + 0.2f);
+			}
+		}
+	}
+
+	float* tmp = next;
+	next = current;
+	current = tmp;
+
+	for (int i = 0; i < 256; i++) {
+		float pow = this->current[i] * 1.8f;
+		if (pow > 1.0f) {
+			pow = 1.0f;
+		}
+		if (pow < 0.0f) {
+			pow = 0.0f;
+		}
+
+		int r = (int) (pow * 155.0f + 100.0f);
+		int g = (int)(pow * pow * 255.0f);
+		int b = (int)(pow * pow * pow * pow * pow * pow * pow * pow * pow * pow * 255.0f);
+		int a = 255;
+		if (pow < 0.5f) {
+			a = 0;
+		}
+
+		pixels[i * 4 + 0] = r;
+		pixels[i * 4 + 1] = g;
+		pixels[i * 4 + 2] = b;
+		pixels[i * 4 + 3] = a;
+	}
+}
+

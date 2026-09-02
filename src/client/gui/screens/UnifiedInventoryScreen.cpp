@@ -38,8 +38,6 @@ static const char* categoryIconPaths[5] = {
 };
 static const int categoryBitmasks[5] = { 1, 2, 4, 8, -1 };
 
-ItemInstance* UnifiedInventoryScreen::s_creativeExtraSlots[27] = { NULL };
-
 namespace Touch {
 class UnifiedCategoryButton : public ImageButton {
     typedef ImageButton super;
@@ -111,7 +109,7 @@ UnifiedInventoryScreen::UnifiedInventoryScreen() :
     guiTabSelected(NULL),
     guiTabUnselected(NULL),
     isCreative(false),
-    isDualPane(true),
+    isDualPane(false),
     player(NULL),
     selectedHotbarSlot(0)
 {
@@ -160,6 +158,7 @@ void UnifiedInventoryScreen::init() {
 
     player = minecraft->player;
     isCreative = minecraft->isCreativeMode();
+    isDualPane = isCreative;
 
     NinePatchFactory builder(minecraft->textures, "gui/spritesheet.png");
     guiLeftPanelBg          = builder.createSymmetrical(IntRectangle(0, 0, 16, 16), 4, 4);
@@ -205,6 +204,10 @@ void UnifiedInventoryScreen::init() {
 
 void UnifiedInventoryScreen::setupPositions() {
     int pY = (height - 168) / 2 + 10;
+
+    if (!isCreative) {
+        isDualPane = false;
+    }
 
     if (isDualPane) {
         // Dual floating panels side by side, 4px gap (138 + 4 + 174 = 316px total)
@@ -264,23 +267,28 @@ void UnifiedInventoryScreen::setupPositions() {
     }
 
     // Top Header Bar aligned to the right of rightPanelRect (exact Bedrock margins)
-    int headerW = 72;
+    int headerW = isCreative ? 72 : 24;
     int headerH = 20;
     headerBarRect = IntRectangle(rightPanelRect.x + rightPanelRect.w - headerW, rightPanelRect.y - headerH, headerW, headerH);
     if (guiSrvInvBg) {
         guiSrvInvBg->setSize(static_cast<float>(headerBarRect.w), static_cast<float>(headerBarRect.h));
     }
 
-    // Mode Buttons inside Header Bar (23x16 px)
-    btnModeDual.x = headerBarRect.x + 3;
-    btnModeDual.y = headerBarRect.y + 3;
-    btnModeDual.width = 23;
-    btnModeDual.height = 16;
+    if (isCreative) {
+        // Mode Buttons inside Header Bar (23x16 px)
+        btnModeDual.x = headerBarRect.x + 3;
+        btnModeDual.y = headerBarRect.y + 3;
+        btnModeDual.width = 23;
+        btnModeDual.height = 16;
 
-    btnModeSingle.x = headerBarRect.x + 27;
-    btnModeSingle.y = headerBarRect.y + 3;
-    btnModeSingle.width = 23;
-    btnModeSingle.height = 16;
+        btnModeSingle.x = headerBarRect.x + 27;
+        btnModeSingle.y = headerBarRect.y + 3;
+        btnModeSingle.width = 23;
+        btnModeSingle.height = 16;
+    } else {
+        btnModeDual.x = btnModeDual.y = btnModeDual.width = btnModeDual.height = 0;
+        btnModeSingle.x = btnModeSingle.y = btnModeSingle.width = btnModeSingle.height = 0;
+    }
 
     // Header Close Button on the right
     btnClose.width = 12;
@@ -322,7 +330,7 @@ void UnifiedInventoryScreen::updateItems() {
     }
     catalogItems.clear();
 
-    if (isDualPane) {
+    if (isCreative && isDualPane) {
         int targetMask = categoryBitmasks[currentCategory];
         bool showAll = (targetMask == -1);
 
@@ -433,70 +441,72 @@ void UnifiedInventoryScreen::render(int xm, int ym, float a) {
         guiSrvInvBg->draw(t, static_cast<float>(headerBarRect.x), static_cast<float>(headerBarRect.y));
     }
 
-    // Mode Dual Button (recipe_book_icon.png with srv_inv_icon background)
-    {
-        float bx = static_cast<float>(btnModeDual.x);
-        float by = static_cast<float>(btnModeDual.y);
-        float bw = static_cast<float>(btnModeDual.width);
-        float bh = static_cast<float>(btnModeDual.height);
+    if (isCreative) {
+        // Mode Dual Button (recipe_book_icon.png with srv_inv_icon background)
+        {
+            float bx = static_cast<float>(btnModeDual.x);
+            float by = static_cast<float>(btnModeDual.y);
+            float bw = static_cast<float>(btnModeDual.width);
+            float bh = static_cast<float>(btnModeDual.height);
 
-        const char* bgPath = isDualPane ? "gui/inv_icons/srv_inv_icon_active.png" : "gui/inv_icons/srv_inv_icon.png";
-        minecraft->textures->loadAndBindTexture(bgPath);
-        glColor4f2(1, 1, 1, 1);
-        t.begin();
-        t.colorABGR(0xFFFFFFFF);
-        t.vertexUV(bx,      by + bh, 0, 0.0f, 1.0f);
-        t.vertexUV(bx + bw, by + bh, 0, 1.0f, 1.0f);
-        t.vertexUV(bx + bw, by,      0, 1.0f, 0.0f);
-        t.vertexUV(bx,      by,      0, 0.0f, 0.0f);
-        t.draw();
+            const char* bgPath = isDualPane ? "gui/inv_icons/srv_inv_icon_active.png" : "gui/inv_icons/srv_inv_icon.png";
+            minecraft->textures->loadAndBindTexture(bgPath);
+            glColor4f2(1, 1, 1, 1);
+            t.begin();
+            t.colorABGR(0xFFFFFFFF);
+            t.vertexUV(bx,      by + bh, 0, 0.0f, 1.0f);
+            t.vertexUV(bx + bw, by + bh, 0, 1.0f, 1.0f);
+            t.vertexUV(bx + bw, by,      0, 1.0f, 0.0f);
+            t.vertexUV(bx,      by,      0, 0.0f, 0.0f);
+            t.draw();
 
-        minecraft->textures->loadAndBindTexture("gui/inv_icons/recipe_book_icon.png");
-        glColor4f2(1, 1, 1, 1);
-        float iconW = 17.0f;
-        float iconH = 12.0f;
-        float ix = bx + (bw - iconW) / 2.0f;
-        float iy = by + (bh - iconH) / 2.0f;
-        t.begin();
-        t.colorABGR(0xFFFFFFFF);
-        t.vertexUV(ix,         iy + iconH, 0, 0.0f, 1.0f);
-        t.vertexUV(ix + iconW, iy + iconH, 0, 1.0f, 1.0f);
-        t.vertexUV(ix + iconW, iy,         0, 1.0f, 0.0f);
-        t.vertexUV(ix,         iy,         0, 0.0f, 0.0f);
-        t.draw();
-    }
+            minecraft->textures->loadAndBindTexture("gui/inv_icons/recipe_book_icon.png");
+            glColor4f2(1, 1, 1, 1);
+            float iconW = 17.0f;
+            float iconH = 12.0f;
+            float ix = bx + (bw - iconW) / 2.0f;
+            float iy = by + (bh - iconH) / 2.0f;
+            t.begin();
+            t.colorABGR(0xFFFFFFFF);
+            t.vertexUV(ix,         iy + iconH, 0, 0.0f, 1.0f);
+            t.vertexUV(ix + iconW, iy + iconH, 0, 1.0f, 1.0f);
+            t.vertexUV(ix + iconW, iy,         0, 1.0f, 0.0f);
+            t.vertexUV(ix,         iy,         0, 0.0f, 0.0f);
+            t.draw();
+        }
 
-    // Mode Single Button (inventory_icon.png with srv_inv_icon background)
-    {
-        float bx = static_cast<float>(btnModeSingle.x);
-        float by = static_cast<float>(btnModeSingle.y);
-        float bw = static_cast<float>(btnModeSingle.width);
-        float bh = static_cast<float>(btnModeSingle.height);
+        // Mode Single Button (inventory_icon.png with srv_inv_icon background)
+        {
+            float bx = static_cast<float>(btnModeSingle.x);
+            float by = static_cast<float>(btnModeSingle.y);
+            float bw = static_cast<float>(btnModeSingle.width);
+            float bh = static_cast<float>(btnModeSingle.height);
 
-        const char* bgPath = (!isDualPane) ? "gui/inv_icons/srv_inv_icon_active.png" : "gui/inv_icons/srv_inv_icon.png";
-        minecraft->textures->loadAndBindTexture(bgPath);
-        glColor4f2(1, 1, 1, 1);
-        t.begin();
-        t.colorABGR(0xFFFFFFFF);
-        t.vertexUV(bx,      by + bh, 0, 0.0f, 1.0f);
-        t.vertexUV(bx + bw, by + bh, 0, 1.0f, 1.0f);
-        t.vertexUV(bx + bw, by,      0, 1.0f, 0.0f);
-        t.vertexUV(bx,      by,      0, 0.0f, 0.0f);
-        t.draw();
+            const char* bgPath = (!isDualPane) ? "gui/inv_icons/srv_inv_icon_active.png" : "gui/inv_icons/srv_inv_icon.png";
+            minecraft->textures->loadAndBindTexture(bgPath);
+            glColor4f2(1, 1, 1, 1);
+            t.begin();
+            t.colorABGR(0xFFFFFFFF);
+            t.vertexUV(bx,      by + bh, 0, 0.0f, 1.0f);
+            t.vertexUV(bx + bw, by + bh, 0, 1.0f, 1.0f);
+            t.vertexUV(bx + bw, by,      0, 1.0f, 0.0f);
+            t.vertexUV(bx,      by,      0, 0.0f, 0.0f);
+            t.draw();
 
-        minecraft->textures->loadAndBindTexture("gui/inv_icons/inventory_icon.png");
-        glColor4f2(1, 1, 1, 1);
-        float iconW = 17.0f;
-        float iconH = 12.0f;
-        float ix = bx + (bw - iconW) / 2.0f;
-        float iy = by + (bh - iconH) / 2.0f;
-        t.begin();
-        t.colorABGR(0xFFFFFFFF);
-        t.vertexUV(ix,         iy + iconH, 0, 0.0f, 1.0f);
-        t.vertexUV(ix + iconW, iy + iconH, 0, 1.0f, 1.0f);
-        t.vertexUV(ix + iconW, iy,         0, 1.0f, 0.0f);
-        t.vertexUV(ix,         iy,         0, 0.0f, 0.0f);
-        t.draw();
+            minecraft->textures->loadAndBindTexture("gui/inv_icons/inventory_icon.png");
+            glColor4f2(1, 1, 1, 1);
+            float iconW = 17.0f;
+            float iconH = 12.0f;
+            float ix = bx + (bw - iconW) / 2.0f;
+            float iy = by + (bh - iconH) / 2.0f;
+            t.begin();
+            t.colorABGR(0xFFFFFFFF);
+            t.vertexUV(ix,         iy + iconH, 0, 0.0f, 1.0f);
+            t.vertexUV(ix + iconW, iy + iconH, 0, 1.0f, 1.0f);
+            t.vertexUV(ix + iconW, iy,         0, 1.0f, 0.0f);
+            t.vertexUV(ix,         iy,         0, 0.0f, 0.0f);
+            t.draw();
+        }
     }
 
     // Close Button (close-btn.png / close_button_hover_light.png) - 7x7 icon matching Bedrock
@@ -659,13 +669,9 @@ void UnifiedInventoryScreen::renderRightPanel(Tesselator& t, int xm, int ym, flo
             int sy = invStartY + row * 18;
 
             const ItemInstance* item = NULL;
-            if (isCreative) {
-                item = s_creativeExtraSlots[slotIdx];
-            } else {
-                int realSlot = Inventory::MAX_SELECTION_SIZE + slotIdx;
-                if (player && player->inventory && realSlot < player->inventory->getContainerSize()) {
-                    item = player->inventory->getItem(realSlot);
-                }
+            int realSlot = Inventory::MAX_SELECTION_SIZE + slotIdx;
+            if (player && player->inventory && realSlot < player->inventory->getContainerSize()) {
+                item = player->inventory->getItem(realSlot);
             }
 
             bool isHovered = (hoveredLoc == SLOT_LOC_INVENTORY && hoveredIndex == slotIdx);
@@ -809,8 +815,7 @@ void UnifiedInventoryScreen::renderHoverTooltip(int xm, int ym) {
                 hovered = craftResultItem;
                 break;
             case SLOT_LOC_INVENTORY:
-                if (isCreative) hovered = s_creativeExtraSlots[index];
-                else if (player && player->inventory) {
+                if (player && player->inventory) {
                     int realSlot = Inventory::MAX_SELECTION_SIZE + index;
                     if (realSlot < player->inventory->getContainerSize())
                         hovered = player->inventory->getItem(realSlot);
@@ -914,7 +919,7 @@ bool UnifiedInventoryScreen::getSlotAt(int x, int y, SlotLocation& outLoc, int& 
     }
 
     // 6. Left Catalog Slots (Creative / Recipe dual mode, contiguous 18px step)
-    if (isDualPane) {
+    if (isCreative && isDualPane) {
         int startX = catalogPaneRect.x;
         int startY = catalogPaneRect.y;
         if (x >= catalogPaneRect.x && x < catalogPaneRect.x + catalogPaneRect.w &&
@@ -952,7 +957,7 @@ void UnifiedInventoryScreen::mouseClicked(int x, int y, int buttonNum) {
         return;
     }
 
-    if (btnModeDual.clicked(minecraft, x, y)) {
+    if (isCreative && btnModeDual.clicked(minecraft, x, y)) {
         if (!isDualPane) {
             if (minecraft->soundEngine) {
                 minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
@@ -963,7 +968,7 @@ void UnifiedInventoryScreen::mouseClicked(int x, int y, int buttonNum) {
         return;
     }
 
-    if (btnModeSingle.clicked(minecraft, x, y)) {
+    if (isCreative && btnModeSingle.clicked(minecraft, x, y)) {
         if (isDualPane) {
             if (minecraft->soundEngine) {
                 minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
@@ -974,7 +979,7 @@ void UnifiedInventoryScreen::mouseClicked(int x, int y, int buttonNum) {
         return;
     }
 
-    if (isDualPane) {
+    if (isCreative && isDualPane) {
         for (size_t c = 0; c < categoryButtons.size(); ++c) {
             if (categoryButtons[c]->clicked(minecraft, x, y)) {
                 if (minecraft->soundEngine) {
@@ -990,7 +995,7 @@ void UnifiedInventoryScreen::mouseClicked(int x, int y, int buttonNum) {
     int index;
     if (getSlotAt(x, y, loc, index)) {
         handleSlotInteraction(loc, index, buttonNum);
-    } else if (isDualPane && carriedItem != NULL) {
+    } else if (isCreative && isDualPane && carriedItem != NULL) {
         // Clicking anywhere in the creative left panel area with a carried item deletes it (Bedrock behavior)
         if (x >= leftPanelRect.x && x < leftPanelRect.x + leftPanelRect.w &&
             y >= leftPanelRect.y && y < leftPanelRect.y + leftPanelRect.h) {
@@ -1010,6 +1015,7 @@ void UnifiedInventoryScreen::handleSlotInteraction(SlotLocation loc, int index, 
 
     switch (loc) {
         case SLOT_LOC_CATALOG: {
+            if (!isCreative) break;
             if (carriedItem != NULL) {
                 // In Bedrock Creative: clicking catalog with item on cursor deletes/destroys it
                 delete carriedItem;
@@ -1068,75 +1074,38 @@ void UnifiedInventoryScreen::handleSlotInteraction(SlotLocation loc, int index, 
         }
 
         case SLOT_LOC_INVENTORY: {
-            if (isCreative) {
-                // Creative 27-slot persistent buffer
-                ItemInstance* invItem = s_creativeExtraSlots[index];
-                if (carriedItem == NULL) {
-                    if (invItem && !invItem->isNull()) {
-                        carriedItem = invItem;
-                        s_creativeExtraSlots[index] = NULL;
-                        playedSound = true;
-                    }
-                } else {
-                    if (invItem == NULL || invItem->isNull()) {
-                        s_creativeExtraSlots[index] = carriedItem;
-                        carriedItem = NULL;
-                        playedSound = true;
-                    } else if (invItem->id == carriedItem->id && invItem->getAuxValue() == carriedItem->getAuxValue() && invItem->isStackable()) {
-                        int space = invItem->getMaxStackSize() - invItem->count;
-                        if (space > 0) {
-                            int toAdd = std::min(space, carriedItem->count);
-                            invItem->count += toAdd;
-                            carriedItem->count -= toAdd;
-                            if (carriedItem->count <= 0) {
-                                delete carriedItem;
-                                carriedItem = NULL;
-                            }
-                            playedSound = true;
-                        }
-                    } else {
-                        // Swap
-                        ItemInstance* temp = s_creativeExtraSlots[index];
-                        s_creativeExtraSlots[index] = carriedItem;
-                        carriedItem = temp;
-                        playedSound = true;
-                    }
+            int realSlot = Inventory::MAX_SELECTION_SIZE + index;
+            ItemInstance* invItem = player->inventory->getItem(realSlot);
+
+            if (carriedItem == NULL) {
+                if (invItem && !invItem->isNull()) {
+                    carriedItem = new ItemInstance(*invItem);
+                    player->inventory->clearSlot(realSlot);
+                    playedSound = true;
                 }
             } else {
-                // Survival 27-slot real inventory
-                int realSlot = Inventory::MAX_SELECTION_SIZE + index;
-                ItemInstance* invItem = player->inventory->getItem(realSlot);
-
-                if (carriedItem == NULL) {
-                    if (invItem && !invItem->isNull()) {
-                        carriedItem = new ItemInstance(*invItem);
-                        player->inventory->clearSlot(realSlot);
+                if (invItem == NULL || invItem->isNull()) {
+                    player->inventory->setItem(realSlot, carriedItem);
+                    carriedItem = NULL;
+                    playedSound = true;
+                } else if (invItem->id == carriedItem->id && invItem->getAuxValue() == carriedItem->getAuxValue() && invItem->isStackable()) {
+                    int space = invItem->getMaxStackSize() - invItem->count;
+                    if (space > 0) {
+                        int toAdd = std::min(space, carriedItem->count);
+                        invItem->count += toAdd;
+                        carriedItem->count -= toAdd;
+                        if (carriedItem->count <= 0) {
+                            delete carriedItem;
+                            carriedItem = NULL;
+                        }
                         playedSound = true;
                     }
                 } else {
-                    if (invItem == NULL || invItem->isNull()) {
-                        player->inventory->setItem(realSlot, carriedItem);
-                        carriedItem = NULL;
-                        playedSound = true;
-                    } else if (invItem->id == carriedItem->id && invItem->getAuxValue() == carriedItem->getAuxValue() && invItem->isStackable()) {
-                        int space = invItem->getMaxStackSize() - invItem->count;
-                        if (space > 0) {
-                            int toAdd = std::min(space, carriedItem->count);
-                            invItem->count += toAdd;
-                            carriedItem->count -= toAdd;
-                            if (carriedItem->count <= 0) {
-                                delete carriedItem;
-                                carriedItem = NULL;
-                            }
-                            playedSound = true;
-                        }
-                    } else {
-                        // Swap
-                        ItemInstance* temp = new ItemInstance(*invItem);
-                        player->inventory->setItem(realSlot, carriedItem);
-                        carriedItem = temp;
-                        playedSound = true;
-                    }
+                    // Swap
+                    ItemInstance* temp = new ItemInstance(*invItem);
+                    player->inventory->setItem(realSlot, carriedItem);
+                    carriedItem = temp;
+                    playedSound = true;
                 }
             }
             break;
@@ -1287,7 +1256,7 @@ void UnifiedInventoryScreen::mouseReleased(int x, int y, int buttonNum) {
 }
 
 void UnifiedInventoryScreen::mouseWheel(int dx, int dy, int xm, int ym) {
-    if (isDualPane) {
+    if (isCreative && isDualPane) {
         catalogScrollY -= dy * 18.0f;
         catalogScrollY = std::max(0.0f, std::min(catalogScrollY, maxCatalogScrollY));
     }

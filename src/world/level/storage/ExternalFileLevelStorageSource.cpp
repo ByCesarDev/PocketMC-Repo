@@ -124,10 +124,16 @@ static std::string getUniqueLevelName(const LevelSummaryList& levels, const std:
 	for (unsigned int i = 0; i < levels.size(); ++i)
 		Set.insert(levels[i].id);
 
-	std::string s = level;
-	while ( Set.find(s) != Set.end() )
-		s += "-";
-	return s;
+	if (Set.find(level) == Set.end())
+		return level;
+
+	int count = 1;
+	while (true) {
+		std::string candidate = level + " (" + std::to_string(count) + ")";
+		if (Set.find(candidate) == Set.end())
+			return candidate;
+		count++;
+	}
 }
 
 void ExternalFileLevelStorageSource::renameLevel( const std::string& oldLevelId_, const std::string& newLevelName_ )

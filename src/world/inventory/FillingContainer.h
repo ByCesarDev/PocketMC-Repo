@@ -37,6 +37,7 @@ public:
 	void			clearSlot( int slot );
 	void			clearInventory();
 	void			clearInventoryWithDefault();
+	void			setCreativeMode(bool creativeMode) { _isCreative = creativeMode; }
 
 	ListTag*		save(ListTag* listTag);
 	void			load(ListTag* inventoryList);

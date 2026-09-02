@@ -202,7 +202,7 @@ public:
     bool containsLiquid(const AABB& box, const Material* material);
 
 	bool checkAndHandleWater(const AABB& box, const Material* material, Entity* e);
-    void extinguishFire(int x, int y, int z, int face);
+    bool extinguishFire(int x, int y, int z, int face);
 
 	//void addEntities(const EntityList& list);
 	//void removeEntities(const EntityList& list);

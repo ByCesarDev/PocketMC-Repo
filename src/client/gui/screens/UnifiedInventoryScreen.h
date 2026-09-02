@@ -100,9 +100,6 @@ private:
     float catalogScrollY;
     float maxCatalogScrollY;
 
-    // Persistent Creative 27-slot buffer across inventory openings
-    static ItemInstance* s_creativeExtraSlots[27];
-
     // 2x2 Crafting Grid slots
     ItemInstance* craftInputSlots[4];
     ItemInstance* craftResultItem;

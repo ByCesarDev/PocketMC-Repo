@@ -1929,7 +1929,7 @@ bool Level::isSolidRenderTile(int x, int y, int z) {
 	return tile->isSolidRender();
 }
 
-void Level::extinguishFire(int x, int y, int z, int face) {
+bool Level::extinguishFire(int x, int y, int z, int face) {
 	switch (face) {
 		case Facing::DOWN : y--; break;
 		case Facing::UP   : y++; break;
@@ -1940,9 +1940,11 @@ void Level::extinguishFire(int x, int y, int z, int face) {
 	}
 
     if (getTile(x, y, z) == ((Tile*)Tile::fire)->id) {
-        //playSound(x + 0.5f, y + 0.5f, z + 0.5f, "random.fizz", 0.5f, 2.6f + (random.nextFloat() - random.nextFloat()) * 0.8f);
+        playSound((float)x + 0.5f, (float)y + 0.5f, (float)z + 0.5f, "random.fizz", 0.5f, 2.6f + (random.nextFloat() - random.nextFloat()) * 0.8f);
         setTile(x, y, z, 0);
+        return true;
     }
+    return false;
 }
 //    String gatherStats() {
 //        return "All: " + this.entities.size();

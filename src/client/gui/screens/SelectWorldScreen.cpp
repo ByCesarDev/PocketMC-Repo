@@ -1,4 +1,4 @@
-﻿#include "SelectWorldScreen.h"
+#include "SelectWorldScreen.h"
 #include "StartMenuScreen.h"
 #include "ProgressScreen.h"
 #include "SimpleChooseLevelScreen.h"
@@ -383,10 +383,16 @@ std::string SelectWorldScreen::getUniqueLevelName(const std::string& base)
     for (const LevelSummary& l : levels)
         existing.insert(l.id);
 
-    std::string s = base;
-    while (existing.count(s))
-        s += "-";
-    return s;
+    if (existing.find(base) == existing.end())
+        return base;
+
+    int count = 1;
+    while (true) {
+        std::string candidate = base + " (" + std::to_string(count) + ")";
+        if (existing.find(candidate) == existing.end())
+            return candidate;
+        count++;
+    }
 }
 
 bool SelectWorldScreen::isInGameScreen() { return true; }

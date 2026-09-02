@@ -1127,8 +1127,11 @@ void Minecraft::handleBuildAction(BuildActionIntention* action) {
 			if (!oldTile)
 				return;
 
-			//LOGI("tile: %s - %d, %d, %d. b: %f - %f\n", oldTile->getDescriptionId().c_str(), x, y, z, oldTile->getBrightness(level, x, y, z), oldTile->getBrightness(level, x, y+1, z));
-            level->extinguishFire(x, y, z, hitResult.f);
+			// If there is fire on the targeted face, extinguish it and consume the click
+			if (level->extinguishFire(x, y, z, hitResult.f)) {
+				player->swing();
+				return;
+			}
 			
 			if (action->isFirstRemove()) {
 				gameMode->startDestroyBlock(x, y, z, hitResult.f);
@@ -1372,6 +1375,9 @@ void Minecraft::init()
 	LavaSideTexture* lavaFlow = new LavaSideTexture();
 	lavaFlow->loadSheet(platform());
 	textures->addDynamicTexture(lavaFlow);
+
+	textures->addDynamicTexture(new FireTexture(0));
+	textures->addDynamicTexture(new FireTexture(1));
 
 	PortalTexture* portalTex = new PortalTexture();
 	portalTex->loadSheet(platform());
@@ -1797,30 +1803,8 @@ void Minecraft::setIsCreativeMode(bool isCreative)
 	}
 #endif
 	if (player) {
-		// Recreamos el inventario para que reconozca el nuevo estado (isCreative)
-		// Esto soluciona el crash al vaciar slots y permite que aparezcan los bloques en creativo
-		if (player->inventory) {
-			std::vector<ItemInstance*> preservedHotbar;
-			for (int i = 0; i < 9; ++i) {
-				ItemInstance* item = player->inventory->getLinked(i);
-				if (item && !item->isNull()) {
-					preservedHotbar.push_back(new ItemInstance(*item));
-				} else {
-					preservedHotbar.push_back(NULL);
-				}
-			}
-
-			delete player->inventory;
-			player->inventory = new Inventory(player, isCreative);
-
-			for (int i = 0; i < 9; ++i) {
-				if (preservedHotbar[i]) {
-					player->inventory->setItem(9 + i, preservedHotbar[i]);
-					player->inventory->linkSlot(i, 9 + i, false);
-					delete preservedHotbar[i];
-				}
-			}
-		}
+		if (player->inventory)
+			player->inventory->setCreativeMode(isCreative);
 
 		gameMode->initAbilities(player->abilities);
 	}

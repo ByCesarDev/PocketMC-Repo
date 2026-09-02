@@ -96,4 +96,22 @@ public:
 	void loadSheet(AppPlatform* platform);
 };
 
+class FireTexture: public DynamicTexture
+{
+    typedef DynamicTexture super;
+    int _tick;
+	int _frame;
+
+	float* current;
+	float* next;
+	float* heat;
+	float* heata;
+
+public:
+    FireTexture(int id);
+	~FireTexture();
+
+    void tick() override;
+};
+
 #endif /*NET_MINECRAFT_CLIENT_RENDERER_PTEXTURE__DynamicTexture_H__*/
