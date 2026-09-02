@@ -20,14 +20,8 @@
 #endif
 
 ProfileScreen::ProfileScreen()
-:   _btnBack(1, "< Atras"),
+:   _btnBack(1, I18n::get("profile.back")),
     _btnClose(2, "X"),
-    _btnAction(3, "Vincular Cuenta PocketMC  >"),
-    _btnSignOut(4, "Cerrar sesion"),
-    _btnCopyId(5, "Copiar ID"),
-    _btnEditProfileWeb(6, "Editar perfil (Web)  >"),
-    _btnChangePasswordWeb(7, "Cambiar contrasena (Web)  >"),
-    _btnEditLocalName(8, "Editar nombre local  >"),
     _selectedTab(0),
     _copiedFeedbackTicks(0),
     _leftPanelX(0), _leftPanelY(0), _leftPanelW(0), _leftPanelH(0),
@@ -44,7 +38,7 @@ void ProfileScreen::init()
     buttons.clear();
     tabButtons.clear();
 
-    _btnBack.msg = "< Atras";
+    _btnBack.msg = I18n::get("profile.back");
     _btnClose.msg = "X";
 
     buttons.push_back(&_btnBack);
@@ -91,28 +85,18 @@ void ProfileScreen::setupPositions()
     _rightPanelY = contentY;
     _rightPanelW = width - _rightPanelX - margin;
     _rightPanelH = contentH;
-
-    // Right panel sub-cards sizing for Tab 0 (Resumen)
-    int secTopH = std::max(75, (int)(_rightPanelH * 0.38f));
-    int accountCardW = std::min(150, (int)(_rightPanelW * 0.44f));
-    int accountCardX = _rightPanelX + _rightPanelW - accountCardW - 8;
-    int accountCardY = _rightPanelY + 6;
-
-    _btnAction.width = accountCardW - 12;
-    _btnAction.height = 18;
-    _btnAction.x = accountCardX + 6;
-    _btnAction.y = accountCardY + secTopH - 26;
-
-    if (AccountManager::isOnline()) {
-        _btnAction.y = accountCardY + secTopH - 42;
-        _btnSignOut.width = accountCardW - 12;
-        _btnSignOut.height = 16;
-        _btnSignOut.x = accountCardX + 6;
-        _btnSignOut.y = accountCardY + secTopH - 22;
-    }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+void ProfileScreen::drawScaledString(const std::string& str, float x, float y, int color, float scale)
+{
+    glPushMatrix();
+    glTranslatef(x, y, 0.0f);
+    glScalef(scale, scale, 1.0f);
+    font->drawShadow(str, 0, 0, color);
+    glPopMatrix();
+}
 
 void ProfileScreen::copyToClipboard(const std::string& text)
 {
@@ -283,7 +267,7 @@ void ProfileScreen::drawNavTab(int x, int y, int w, int h, int index, const std:
     }
 
     int textX = x + 24;
-    int textY = y + 4;
+    int blockY = y + (h - 17) / 2;
 
     if (index == 0) {
         drawSkinFace(x + 5, y + (h - 14) / 2, 14);
@@ -291,8 +275,8 @@ void ProfileScreen::drawNavTab(int x, int y, int w, int h, int index, const std:
         drawIconTexture(iconPath, x + 6, y + (h - 12) / 2, 12, 12, isSelected ? 0xffffcc00 : 0xffcccccc);
     }
 
-    drawString(font, title, textX, textY, isSelected ? 0xffffcc00 : 0xffffffff);
-    drawString(font, subtitle, textX, textY + 11, isSelected ? 0xffb0a880 : 0xff707478);
+    drawString(font, title, textX, blockY, isSelected ? 0xffffcc00 : 0xffffffff);
+    drawScaledString(subtitle, (float)textX, (float)(blockY + 10), isSelected ? 0xffd4c890 : 0xff707478, 0.75f);
 }
 
 void ProfileScreen::drawInfoCard(int x, int y, int w, int h, const std::string& iconPath, const std::string& label, const std::string& val, int valColor)
@@ -301,12 +285,14 @@ void ProfileScreen::drawInfoCard(int x, int y, int w, int h, const std::string& 
 
     int iconSize = 14;
     if (!iconPath.empty()) {
-        drawIconTexture(iconPath, x + 6, y + (h - iconSize) / 2, iconSize, iconSize, 0xffffffff);
+        int iconY = y + (h - iconSize) / 2;
+        drawIconTexture(iconPath, x + 6, iconY, iconSize, iconSize, 0xffffffff);
     }
 
     int tx = x + (iconPath.empty() ? 8 : 24);
-    drawString(font, label, tx, y + 4, 0xff888888);
-    drawString(font, val, tx, y + 15, valColor);
+    int blockY = y + (h - 17) / 2;
+    drawScaledString(label, (float)tx, (float)blockY, 0xff888888, 0.75f);
+    drawString(font, val, tx, blockY + 8, valColor);
 }
 
 void ProfileScreen::drawActionCard(int x, int y, int w, int h, const std::string& iconPath, const std::string& title, const std::string& subtitle, int xm, int ym)
@@ -319,12 +305,14 @@ void ProfileScreen::drawActionCard(int x, int y, int w, int h, const std::string
 
     int iconSize = 14;
     if (!iconPath.empty()) {
-        drawIconTexture(iconPath, x + 8, y + (h - iconSize) / 2, iconSize, iconSize, hover ? 0xffffcc00 : 0xffffffff);
+        int iconY = y + (h - iconSize) / 2;
+        drawIconTexture(iconPath, x + 8, iconY, iconSize, iconSize, hover ? 0xffffcc00 : 0xffffffff);
     }
 
     int tx = x + (iconPath.empty() ? 10 : 26);
-    drawString(font, title, tx, y + 5, hover ? 0xffffcc00 : 0xffffffff);
-    drawString(font, subtitle, tx, y + 15, 0xff888888);
+    int blockY = y + (h - 17) / 2;
+    drawString(font, title, tx, blockY, hover ? 0xffffcc00 : 0xffffffff);
+    drawScaledString(subtitle, (float)tx, (float)(blockY + 9), 0xff888888, 0.75f);
 
     drawString(font, ">", x + w - 10, y + (h - 8) / 2, hover ? 0xffffcc00 : 0xff7e8288);
 }
@@ -343,8 +331,8 @@ void ProfileScreen::render(int xm, int ym, float a)
 
     // Top Bar
     int headerTextX = _btnBack.x + _btnBack.width + 10;
-    drawString(font, "Perfil", headerTextX, 5, 0xffffffff);
-    drawString(font, "Administra tu cuenta y tu identidad en PocketMC.", headerTextX, 16, 0xff888888);
+    drawString(font, I18n::get("profile.title"), headerTextX, 5, 0xffffffff);
+    drawScaledString(I18n::get("profile.subtitle"), (float)headerTextX, 16.0f, 0xff888888, 0.8f);
 
     // Right User Badge in Top Bar
     int badgeW = 92;
@@ -358,9 +346,9 @@ void ProfileScreen::render(int xm, int ym, float a)
     std::string shortDisp = activeDispName.size() > 8 ? activeDispName.substr(0, 7) + "." : activeDispName;
     drawString(font, shortDisp, badgeX + 20, badgeY + 2, 0xffffffff);
     if (isOnline) {
-        drawString(font, "Online", badgeX + 20, badgeY + 11, 0xff55ff55);
+        drawScaledString(I18n::get("profile.online"), (float)(badgeX + 20), (float)(badgeY + 11), 0xff55ff55, 0.8f);
     } else {
-        drawString(font, "Offline", badgeX + 20, badgeY + 11, 0xffff5555);
+        drawScaledString(I18n::get("profile.offline"), (float)(badgeX + 20), (float)(badgeY + 11), 0xffff5555, 0.8f);
     }
 
     // Left Navigation Panel (4 Tabs)
@@ -370,10 +358,10 @@ void ProfileScreen::render(int xm, int ym, float a)
     tabH = std::min(32, std::max(24, tabH));
     int tabY = _leftPanelY + 6;
 
-    drawNavTab(_leftPanelX + 4, tabY, _leftPanelW - 8, tabH, 0, "", "Resumen", "Informacion general", _selectedTab == 0, xm, ym);
-    drawNavTab(_leftPanelX + 4, tabY + tabH + 2, _leftPanelW - 8, tabH, 1, "gui/user/user_icon.png", "Cuenta", "Estado y tipo de cuenta", _selectedTab == 1, xm, ym);
-    drawNavTab(_leftPanelX + 4, tabY + (tabH + 2) * 2, _leftPanelW - 8, tabH, 2, "gui/user/user_icon.png", "Identidad", "Nombre y display name", _selectedTab == 2, xm, ym);
-    drawNavTab(_leftPanelX + 4, tabY + (tabH + 2) * 3, _leftPanelW - 8, tabH, 3, "gui/user/lock.png", "Seguridad", "Contrasena y sesion", _selectedTab == 3, xm, ym);
+    drawNavTab(_leftPanelX + 4, tabY, _leftPanelW - 8, tabH, 0, "", I18n::get("profile.tab.summary"), I18n::get("profile.tab.summary.desc"), _selectedTab == 0, xm, ym);
+    drawNavTab(_leftPanelX + 4, tabY + tabH + 2, _leftPanelW - 8, tabH, 1, "gui/user/user_icon.png", I18n::get("profile.tab.account"), I18n::get("profile.tab.account.desc"), _selectedTab == 1, xm, ym);
+    drawNavTab(_leftPanelX + 4, tabY + (tabH + 2) * 2, _leftPanelW - 8, tabH, 2, "gui/user/user_icon.png", I18n::get("profile.tab.identity"), I18n::get("profile.tab.identity.desc"), _selectedTab == 2, xm, ym);
+    drawNavTab(_leftPanelX + 4, tabY + (tabH + 2) * 3, _leftPanelW - 8, tabH, 3, "gui/user/lock.png", I18n::get("profile.tab.security"), I18n::get("profile.tab.security.desc"), _selectedTab == 3, xm, ym);
 
     // Right Content Area — Switch based on _selectedTab
     switch (_selectedTab) {
@@ -403,7 +391,7 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
     int contentH = _rightPanelH;
 
     int secTopH = std::max(75, (int)(contentH * 0.38f));
-    int secMidH = std::max(46, (int)(contentH * 0.24f));
+    int secMidH = std::max(40, (int)(contentH * 0.22f));
     int secBotH = contentH - secTopH - secMidH - pad * 2;
 
     int sec1Y = _rightPanelY;
@@ -412,11 +400,11 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
 
     // SECTION 1: TU PERFIL & CUENTA
     drawPanel(_rightPanelX, sec1Y, contentW, secTopH, 0xd815171a, 0xff2d3035);
-    drawString(font, "TU PERFIL", _rightPanelX + 8, sec1Y + 6, 0xffffcc00);
+    drawString(font, I18n::get("profile.yourProfile"), _rightPanelX + 8, sec1Y + 5, 0xffffcc00);
 
     int avatarBoxX = _rightPanelX + 8;
-    int avatarBoxY = sec1Y + 18;
-    int avatarSize = std::min(46, secTopH - 24);
+    int avatarBoxY = sec1Y + 16;
+    int avatarSize = std::min(48, secTopH - 22);
     drawPanel(avatarBoxX, avatarBoxY, avatarSize, avatarSize, 0xff101214, 0xff3a3c40);
     drawSkinBust(avatarBoxX + 2, avatarBoxY + 2, avatarSize - 4);
 
@@ -431,104 +419,102 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
         int tagH = 10;
         fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0x40ff0000);
         fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xffff4444);
+        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xffff4444);
         fill(profileInfoX, badgeTagY + tagH - 1, profileInfoX + tagW, badgeTagY + tagH, 0xffff4444);
-        fill(profileInfoX, badgeTagY, profileInfoX + 1, badgeTagY + tagH, 0xffff4444);
         fill(profileInfoX + tagW - 1, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xffff4444);
-        drawString(font, "OFFLINE", profileInfoX + 5, badgeTagY + 1, 0xffff5555);
+        drawScaledString(I18n::get("profile.offline"), (float)(profileInfoX + 4), (float)(badgeTagY + 2), 0xffff5555, 0.75f);
 
-        drawString(font, "Perfil local", profileInfoX, badgeTagY + 13, 0xffdddddd);
-        drawString(font, "Estas jugando sin una cuenta", profileInfoX, badgeTagY + 23, 0xff888888);
-        drawString(font, "de PocketMC vinculada.", profileInfoX, badgeTagY + 32, 0xff888888);
+        drawString(font, I18n::get("profile.localProfile"), profileInfoX, badgeTagY + 13, 0xffdddddd);
+        drawScaledString(I18n::get("profile.playingWithoutAccount"), (float)profileInfoX, (float)(badgeTagY + 23), 0xff888888, 0.75f);
+        drawScaledString(I18n::get("profile.playingWithoutAccountDesc"), (float)profileInfoX, (float)(badgeTagY + 31), 0xff888888, 0.75f);
     } else {
         int tagW = 42;
         int tagH = 10;
         fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0x4000ff00);
         fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xff55ff55);
-        fill(profileInfoX, badgeTagY + tagH - 1, profileInfoX + tagW, badgeTagY + tagH, 0xff55ff55);
         fill(profileInfoX, badgeTagY, profileInfoX + 1, badgeTagY + tagH, 0xff55ff55);
+        fill(profileInfoX, badgeTagY + tagH - 1, profileInfoX + tagW, badgeTagY + tagH, 0xff55ff55);
         fill(profileInfoX + tagW - 1, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xff55ff55);
-        drawString(font, "ONLINE", profileInfoX + 5, badgeTagY + 1, 0xff55ff55);
+        drawScaledString(I18n::get("profile.online"), (float)(profileInfoX + 4), (float)(badgeTagY + 2), 0xff55ff55, 0.75f);
 
         drawString(font, "@" + activeUname, profileInfoX, badgeTagY + 13, 0xffffcc00);
-        drawString(font, "Cuenta oficial PocketMC vinculada.", profileInfoX, badgeTagY + 23, 0xff888888);
+        drawScaledString(I18n::get("profile.officialAccountLinked"), (float)profileInfoX, (float)(badgeTagY + 23), 0xff888888, 0.75f);
     }
 
     // Right Sub-Card: CUENTA
-    int accountCardW = std::min(150, (int)(contentW * 0.44f));
-    int accountCardX = _rightPanelX + contentW - accountCardW - 8;
-    int accountCardY = sec1Y + 6;
-    int accountCardH = secTopH - 12;
+    int accountCardW = std::min(148, (int)(contentW * 0.44f));
+    int accountCardX = _rightPanelX + contentW - accountCardW - 6;
+    int accountCardY = sec1Y + 4;
+    int accountCardH = secTopH - 8;
     drawPanel(accountCardX, accountCardY, accountCardW, accountCardH, 0xe0101214, 0xff383b40);
 
-    drawString(font, "CUENTA", accountCardX + 8, accountCardY + 5, 0xffffcc00);
-    drawString(font, "Tipo de cuenta", accountCardX + 8, accountCardY + 16, 0xff888888);
-    drawString(font, isOnline ? ". Online" : ". Offline", accountCardX + 8, accountCardY + 25, isOnline ? 0xff55ff55 : 0xffff5555);
+    drawString(font, I18n::get("profile.account"), accountCardX + 8, accountCardY + 4, 0xffffcc00);
 
-    drawString(font, "Estado", accountCardX + 8, accountCardY + 36, 0xff888888);
-    drawString(font, isOnline ? ". Vinculada / Activa" : ". Sin vincular", accountCardX + 8, accountCardY + 45, isOnline ? 0xff55ff55 : 0xffffcc00);
+    drawScaledString(I18n::get("profile.accountType"), (float)(accountCardX + 8), (float)(accountCardY + 14), 0xff888888, 0.75f);
+    drawString(font, isOnline ? I18n::get("profile.online") : I18n::get("profile.offline"), accountCardX + 8, accountCardY + 22, isOnline ? 0xff55ff55 : 0xffff5555);
 
-    // Golden CTA Button
+    drawScaledString(I18n::get("profile.status"), (float)(accountCardX + 8), (float)(accountCardY + 32), 0xff888888, 0.75f);
+    drawString(font, isOnline ? I18n::get("profile.linkedActive") : I18n::get("profile.unlinked"), accountCardX + 8, accountCardY + 40, isOnline ? 0xff55ff55 : 0xffffcc00);
+
+    // Golden CTA Button only when Offline (fitted inside box without overflow)
     if (!isOnline) {
-        int bx = _btnAction.x, by = _btnAction.y, bw = _btnAction.width, bh = _btnAction.height;
+        int bx = accountCardX + 6;
+        int by = accountCardY + 50;
+        int bw = accountCardW - 12;
+        int bh = 14;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
         fill(bx, by, bx + bw, by + bh, bHover ? 0xfff0b020 : 0xffd99b16);
         fill(bx, by, bx + bw, by + 1, 0xfff5c542);
         fill(bx, by, bx + 1, by + bh, 0xfff5c542);
         fill(bx, by + bh - 1, bx + bw, by + bh, 0xff9e6c07);
         fill(bx + bw - 1, by, bx + bw, by + bh, 0xff9e6c07);
-        drawString(font, "Vincular Cuenta PocketMC", bx + 6, by + (bh - 8) / 2, 0xff1c1202);
-        drawString(font, ">", bx + bw - 10, by + (bh - 8) / 2, 0xff1c1202);
-    } else {
-        _btnAction.render(minecraft, xm, ym);
-        _btnSignOut.render(minecraft, xm, ym);
+        drawScaledString(I18n::get("profile.linkAccount"), (float)(bx + 4), (float)(by + 3), 0xff1c1202, 0.75f);
+        drawString(font, ">", bx + bw - 7, by + 3, 0xff1c1202);
     }
 
     // SECTION 2: INFORMACION
     drawPanel(_rightPanelX, sec2Y, contentW, secMidH, 0xd815171a, 0xff2d3035);
-    drawString(font, "INFORMACION", _rightPanelX + 8, sec2Y + 4, 0xffffcc00);
+    drawString(font, I18n::get("profile.info"), _rightPanelX + 8, sec2Y + 3, 0xffffcc00);
 
     int infoCardGap = 4;
-    int infoCardY = sec2Y + 15;
-    int infoCardH = secMidH - 20;
+    int infoCardY = sec2Y + 13;
+    int infoCardH = secMidH - 17;
     int infoCardW = (contentW - 16 - infoCardGap * 3) / 4;
 
-    drawInfoCard(_rightPanelX + 8, infoCardY, infoCardW, infoCardH, "gui/user/user_icon.png", "Nombre de usuario", isOnline ? "@" + activeUname : localUname, 0xffffcc00);
-    std::string pidVal = isOnline ? (id.playerId.size() > 10 ? id.playerId.substr(0, 9) + ".." : id.playerId) : "Modo local";
-    drawInfoCard(_rightPanelX + 8 + (infoCardW + infoCardGap), infoCardY, infoCardW, infoCardH, "gui/user/calendar.png", isOnline ? "PocketMC ID" : "Creado el", isOnline ? pidVal : "Modo local", 0xffffcc00);
-    drawInfoCard(_rightPanelX + 8 + (infoCardW + infoCardGap) * 2, infoCardY, infoCardW, infoCardH, "gui/user/smartphone.png", "Dispositivo", "Este dispositivo", 0xffffcc00);
-    drawInfoCard(_rightPanelX + 8 + (infoCardW + infoCardGap) * 3, infoCardY, infoCardW, infoCardH, "gui/user/control.png", "Modo de juego", isOnline ? "Online" : "Offline", 0xffffcc00);
+    drawInfoCard(_rightPanelX + 8, infoCardY, infoCardW, infoCardH, "gui/user/user_icon.png", I18n::get("profile.username"), isOnline ? "@" + activeUname : localUname, 0xffffcc00);
+    std::string pidVal = isOnline ? (id.playerId.size() > 10 ? id.playerId.substr(0, 9) + ".." : id.playerId) : I18n::get("profile.localMode");
+    drawInfoCard(_rightPanelX + 8 + (infoCardW + infoCardGap), infoCardY, infoCardW, infoCardH, "gui/user/calendar.png", isOnline ? I18n::get("profile.playerId") : I18n::get("profile.createdAt"), pidVal, 0xffffcc00);
+    drawInfoCard(_rightPanelX + 8 + (infoCardW + infoCardGap) * 2, infoCardY, infoCardW, infoCardH, "gui/user/smartphone.png", I18n::get("profile.device"), I18n::get("profile.thisDevice"), 0xffffcc00);
+    drawInfoCard(_rightPanelX + 8 + (infoCardW + infoCardGap) * 3, infoCardY, infoCardW, infoCardH, "gui/user/control.png", I18n::get("profile.gameMode"), isOnline ? I18n::get("profile.online") : I18n::get("profile.offline"), 0xffffcc00);
 
     // SECTION 3: ACCIONES RAPIDAS & NOTA
     drawPanel(_rightPanelX, sec3Y, contentW, secBotH, 0xd815171a, 0xff2d3035);
-    drawString(font, "ACCIONES RAPIDAS", _rightPanelX + 8, sec3Y + 4, 0xffffcc00);
+    drawString(font, I18n::get("profile.quickActions"), _rightPanelX + 8, sec3Y + 3, 0xffffcc00);
 
+    // Compact bottom notice pinned to the bottom
+    int noteH = 18;
+    int noteY = _rightPanelY + _rightPanelH - noteH - 3;
+    int noteX = _rightPanelX + 8;
+    int noteW = contentW - 16;
+    fill(noteX, noteY, noteX + noteW, noteY + noteH, 0x500f1c29);
+    fill(noteX, noteY, noteX + noteW, noteY + 1, 0xff1e3a5a);
+    fill(noteX, noteY + noteH - 1, noteX + noteW, noteY + noteH, 0xff1e3a5a);
+    fill(noteX, noteY, noteX + 1, noteY + noteH, 0xff1e3a5a);
+    fill(noteX + noteW - 1, noteY, noteX + noteW, noteY + noteH, 0xff1e3a5a);
+
+    drawString(font, "(i)", noteX + 5, noteY + (noteH - 8) / 2, 0xff38bdf8);
+    drawScaledString(I18n::get("profile.bottomNotice1"), (float)(noteX + 18), (float)(noteY + 2), 0xff88a0b8, 0.72f);
+    drawScaledString(I18n::get("profile.bottomNotice2"), (float)(noteX + 18), (float)(noteY + 9), 0xff88a0b8, 0.72f);
+
+    // Action cards situated between header and bottom notice
     int actionCardGap = 4;
-    int actionCardY = sec3Y + 15;
-    int actionCardH = std::min(26, secBotH / 2);
+    int actionCardY = sec3Y + 13;
+    int actionCardH = std::max(20, noteY - actionCardY - 3);
     int actionCardW = (contentW - 16 - actionCardGap * 2) / 3;
 
-    drawActionCard(_rightPanelX + 8, actionCardY, actionCardW, actionCardH, "gui/user/pencil_edit_icon.png", "Editar nombre local", "Cambia tu nombre de usuario offline.", xm, ym);
-    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap), actionCardY, actionCardW, actionCardH, "", "Exportar perfil", "Guarda una copia de tu perfil local.", xm, ym);
-    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap) * 2, actionCardY, actionCardW, actionCardH, "", "Borrar perfil local", "Eliminar este perfil de tu dispositivo.", xm, ym);
-
-    // Bottom note
-    int noteY = actionCardY + actionCardH + 4;
-    int noteH = secBotH - (noteY - sec3Y) - 4;
-    if (noteH >= 16) {
-        int noteX = _rightPanelX + 8;
-        int noteW = contentW - 16;
-        fill(noteX, noteY, noteX + noteW, noteY + noteH, 0x500f1c29);
-        fill(noteX, noteY, noteX + noteW, noteY + 1, 0xff1e3a5a);
-        fill(noteX, noteY + noteH - 1, noteX + noteW, noteY + noteH, 0xff1e3a5a);
-        fill(noteX, noteY, noteX + 1, noteY + noteH, 0xff1e3a5a);
-        fill(noteX + noteW - 1, noteY, noteX + noteW, noteY + noteH, 0xff1e3a5a);
-
-        drawString(font, "(i)", noteX + 6, noteY + (noteH - 8) / 2, 0xff38bdf8);
-        drawString(font, "Al vincular una cuenta PocketMC, obtendras tu ID unico y podras acceder a servicios online en el futuro.", noteX + 22, noteY + 3, 0xff88a0b8);
-        if (noteH >= 22) {
-            drawString(font, "Puedes seguir jugando sin una cuenta.", noteX + 22, noteY + 12, 0xff88a0b8);
-        }
-    }
+    drawActionCard(_rightPanelX + 8, actionCardY, actionCardW, actionCardH, "gui/user/pencil_edit_icon.png", I18n::get("profile.editLocalName"), I18n::get("profile.editLocalNameDesc"), xm, ym);
+    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap), actionCardY, actionCardW, actionCardH, "", I18n::get("profile.exportProfile"), I18n::get("profile.exportProfileDesc"), xm, ym);
+    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap) * 2, actionCardY, actionCardW, actionCardH, "", I18n::get("profile.deleteLocalProfile"), I18n::get("profile.deleteLocalProfileDesc"), xm, ym);
 }
 
 // ─── TAB 1: Cuenta ───────────────────────────────────────────────────────────
@@ -540,34 +526,34 @@ void ProfileScreen::renderTabCuenta(int xm, int ym)
 
     drawPanel(_rightPanelX, _rightPanelY, _rightPanelW, _rightPanelH, 0xd815171a, 0xff2d3035);
 
-    drawString(font, "CUENTA", _rightPanelX + 10, _rightPanelY + 8, 0xffffcc00);
-    drawString(font, "Estado y administracion de tu cuenta PocketMC.", _rightPanelX + 10, _rightPanelY + 20, 0xff888888);
+    drawString(font, I18n::get("profile.account"), _rightPanelX + 10, _rightPanelY + 8, 0xffffcc00);
+    drawScaledString(I18n::get("profile.account.desc"), (float)(_rightPanelX + 10), (float)(_rightPanelY + 20), 0xff888888, 0.8f);
 
     int cardX = _rightPanelX + 10;
-    int cardY = _rightPanelY + 36;
+    int cardY = _rightPanelY + 34;
     int cardW = _rightPanelW - 20;
-    int cardH = _rightPanelH - 46;
+    int cardH = _rightPanelH - 44;
 
     drawPanel(cardX, cardY, cardW, cardH, 0xe0101214, 0xff383b40);
 
     int lineY = cardY + 12;
 
-    drawString(font, "Tipo de cuenta", cardX + 12, lineY, 0xff888888);
-    drawString(font, isOnline ? ". Online" : ". Offline", cardX + 12, lineY + 11, isOnline ? 0xff55ff55 : 0xffff5555);
-    lineY += 28;
+    drawScaledString(I18n::get("profile.accountType"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+    drawString(font, isOnline ? I18n::get("profile.online") : I18n::get("profile.offline"), cardX + 12, lineY + 9, isOnline ? 0xff55ff55 : 0xffff5555);
+    lineY += 26;
 
-    drawString(font, "Estado de vinculacion", cardX + 12, lineY, 0xff888888);
-    drawString(font, isOnline ? ". Cuenta vinculada y activa" : ". Sin vincular (Perfil local)", cardX + 12, lineY + 11, isOnline ? 0xff55ff55 : 0xffffcc00);
-    lineY += 28;
+    drawScaledString(I18n::get("profile.status"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+    drawString(font, isOnline ? I18n::get("profile.linkedActive") : I18n::get("profile.unlinked"), cardX + 12, lineY + 9, isOnline ? 0xff55ff55 : 0xffffcc00);
+    lineY += 26;
 
     if (isOnline) {
-        drawString(font, "Correo electronico de la cuenta", cardX + 12, lineY, 0xff888888);
-        drawString(font, maskEmail("cuentas.oficial.cesardev@gmail.com"), cardX + 12, lineY + 11, 0xffffffff);
-        lineY += 28;
+        drawScaledString(I18n::get("profile.account.email"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+        drawString(font, maskEmail("cuentas.oficial.cesardev@gmail.com"), cardX + 12, lineY + 9, 0xffffffff);
+        lineY += 26;
 
-        drawString(font, "Miembro desde", cardX + 12, lineY, 0xff888888);
-        drawString(font, "Septiembre de 2026", cardX + 12, lineY + 11, 0xffcccccc);
-        lineY += 32;
+        drawScaledString(I18n::get("profile.account.memberSince"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+        drawString(font, I18n::get("profile.account.memberSinceVal"), cardX + 12, lineY + 9, 0xffcccccc);
+        lineY += 30;
 
         // Button Administrar cuenta (Web)
         int bw = 160, bh = 20;
@@ -578,7 +564,7 @@ void ProfileScreen::renderTabCuenta(int xm, int ym)
         fill(bx, by, bx + 1, by + bh, 0xfff5c542);
         fill(bx, by + bh - 1, bx + bw, by + bh, 0xff9e6c07);
         fill(bx + bw - 1, by, bx + bw, by + bh, 0xff9e6c07);
-        drawString(font, "Administrar cuenta (Web)  >", bx + 8, by + 6, 0xff1c1202);
+        drawString(font, I18n::get("profile.manageAccountWeb") + "  >", bx + 8, by + 6, 0xff1c1202);
 
         // Button Cerrar sesion
         int sbx = bx + bw + 10;
@@ -588,11 +574,11 @@ void ProfileScreen::renderTabCuenta(int xm, int ym)
         fill(sbx, by + bh - 1, sbx + 100, by + bh, 0xff555555);
         fill(sbx, by, sbx + 1, by + bh, 0xff555555);
         fill(sbx + 100 - 1, by, sbx + 100, by + bh, 0xff555555);
-        drawString(font, "Cerrar sesion", sbx + 14, by + 6, 0xffffffff);
+        drawString(font, I18n::get("profile.signOut"), sbx + 14, by + 6, 0xffffffff);
     } else {
-        drawString(font, "Estas usando un perfil local guardado unicamente en este dispositivo.", cardX + 12, lineY, 0xffaaaaaa);
-        drawString(font, "Puedes vincular una cuenta PocketMC cuando quieras para obtener tu ID global.", cardX + 12, lineY + 12, 0xff888888);
-        lineY += 36;
+        drawScaledString(I18n::get("profile.account.offlineDesc1"), (float)(cardX + 12), (float)lineY, 0xffaaaaaa, 0.8f);
+        drawScaledString(I18n::get("profile.account.offlineDesc2"), (float)(cardX + 12), (float)(lineY + 10), 0xff888888, 0.8f);
+        lineY += 32;
 
         int bw = 180, bh = 22;
         int bx = cardX + 12, by = lineY;
@@ -602,7 +588,7 @@ void ProfileScreen::renderTabCuenta(int xm, int ym)
         fill(bx, by, bx + 1, by + bh, 0xfff5c542);
         fill(bx, by + bh - 1, bx + bw, by + bh, 0xff9e6c07);
         fill(bx + bw - 1, by, bx + bw, by + bh, 0xff9e6c07);
-        drawString(font, "Vincular Cuenta PocketMC  >", bx + 10, by + 7, 0xff1c1202);
+        drawString(font, I18n::get("profile.linkAccount") + "  >", bx + 10, by + 7, 0xff1c1202);
     }
 }
 
@@ -618,29 +604,29 @@ void ProfileScreen::renderTabIdentidad(int xm, int ym)
 
     drawPanel(_rightPanelX, _rightPanelY, _rightPanelW, _rightPanelH, 0xd815171a, 0xff2d3035);
 
-    drawString(font, "IDENTIDAD", _rightPanelX + 10, _rightPanelY + 8, 0xffffcc00);
-    drawString(font, "Como te identificas dentro del juego y con otros jugadores.", _rightPanelX + 10, _rightPanelY + 20, 0xff888888);
+    drawString(font, I18n::get("profile.identity.title"), _rightPanelX + 10, _rightPanelY + 8, 0xffffcc00);
+    drawScaledString(I18n::get("profile.identity.subtitle"), (float)(_rightPanelX + 10), (float)(_rightPanelY + 20), 0xff888888, 0.8f);
 
     int cardX = _rightPanelX + 10;
-    int cardY = _rightPanelY + 36;
+    int cardY = _rightPanelY + 34;
     int cardW = _rightPanelW - 20;
-    int cardH = _rightPanelH - 46;
+    int cardH = _rightPanelH - 44;
 
     drawPanel(cardX, cardY, cardW, cardH, 0xe0101214, 0xff383b40);
 
     int lineY = cardY + 12;
 
     if (!isOnline) {
-        drawString(font, "Nombre de jugador local", cardX + 12, lineY, 0xff888888);
-        drawString(font, localUname, cardX + 12, lineY + 11, 0xffffffff);
-        lineY += 28;
+        drawScaledString(I18n::get("profile.identity.localName"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+        drawString(font, localUname, cardX + 12, lineY + 9, 0xffffffff);
+        lineY += 26;
 
-        drawString(font, "Tipo de identidad", cardX + 12, lineY, 0xff888888);
-        drawString(font, "Perfil local (Sin nombre de usuario online vinculado)", cardX + 12, lineY + 11, 0xffffaa55);
-        lineY += 28;
+        drawScaledString(I18n::get("profile.accountType"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+        drawString(font, I18n::get("profile.localProfile"), cardX + 12, lineY + 9, 0xffffaa55);
+        lineY += 26;
 
-        drawString(font, "Este nombre esta guardado unicamente en este dispositivo.", cardX + 12, lineY, 0xffaaaaaa);
-        lineY += 30;
+        drawScaledString(I18n::get("profile.identity.localDesc"), (float)(cardX + 12), (float)lineY, 0xffaaaaaa, 0.8f);
+        lineY += 28;
 
         int bw = 160, bh = 20;
         int bx = cardX + 12, by = lineY;
@@ -650,19 +636,19 @@ void ProfileScreen::renderTabIdentidad(int xm, int ym)
         fill(bx, by + bh - 1, bx + bw, by + bh, bHover ? 0xffffcc00 : 0xff555555);
         fill(bx, by, bx + 1, by + bh, bHover ? 0xffffcc00 : 0xff555555);
         fill(bx + bw - 1, by, bx + bw, by + bh, bHover ? 0xffffcc00 : 0xff555555);
-        drawString(font, "Editar nombre local  >", bx + 10, by + 6, bHover ? 0xffffcc00 : 0xffffffff);
+        drawString(font, I18n::get("profile.editLocalName") + "  >", bx + 10, by + 6, bHover ? 0xffffcc00 : 0xffffffff);
     } else {
-        drawString(font, "Nombre visible dentro del juego (Display Name)", cardX + 12, lineY, 0xff888888);
-        drawString(font, activeDispName, cardX + 12, lineY + 11, 0xffffffff);
+        drawScaledString(I18n::get("profile.identity.displayName"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+        drawString(font, activeDispName, cardX + 12, lineY + 9, 0xffffffff);
         lineY += 26;
 
-        drawString(font, "Nombre de usuario unico (@handle)", cardX + 12, lineY, 0xff888888);
-        drawString(font, "@" + activeUname, cardX + 12, lineY + 11, 0xffffcc00);
+        drawScaledString(I18n::get("profile.identity.uniqueUser"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+        drawString(font, "@" + activeUname, cardX + 12, lineY + 9, 0xffffcc00);
         lineY += 26;
 
-        drawString(font, "PocketMC Player ID (UUID permanente)", cardX + 12, lineY, 0xff888888);
-        drawString(font, id.playerId.empty() ? "No disponible" : id.playerId, cardX + 12, lineY + 11, 0xff55ff55);
-        lineY += 30;
+        drawScaledString(I18n::get("profile.identity.uuid"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+        drawString(font, id.playerId.empty() ? "No disponible" : id.playerId, cardX + 12, lineY + 9, 0xff55ff55);
+        lineY += 28;
 
         // Button Copiar ID
         int bw = 90, bh = 20;
@@ -673,7 +659,7 @@ void ProfileScreen::renderTabIdentidad(int xm, int ym)
         fill(bx, by + bh - 1, bx + bw, by + bh, 0xff555555);
         fill(bx, by, bx + 1, by + bh, 0xff555555);
         fill(bx + bw - 1, by, bx + bw, by + bh, 0xff555555);
-        drawString(font, _copiedFeedbackTicks > 0 ? "Copiado!" : "Copiar ID", bx + 14, by + 6, _copiedFeedbackTicks > 0 ? 0xff022315 : 0xffffffff);
+        drawString(font, _copiedFeedbackTicks > 0 ? I18n::get("profile.identity.copied") : I18n::get("profile.identity.copyId"), bx + 14, by + 6, _copiedFeedbackTicks > 0 ? 0xff022315 : 0xffffffff);
 
         // Button Editar perfil (Web)
         int ebx = bx + bw + 10;
@@ -684,7 +670,7 @@ void ProfileScreen::renderTabIdentidad(int xm, int ym)
         fill(ebx, by, ebx + 1, by + bh, 0xfff5c542);
         fill(ebx, by + bh - 1, ebx + ebw, by + bh, 0xff9e6c07);
         fill(ebx + ebw - 1, by, ebx + ebw, by + bh, 0xff9e6c07);
-        drawString(font, "Editar perfil (Web)  >", ebx + 10, by + 6, 0xff1c1202);
+        drawString(font, I18n::get("profile.identity.editWeb") + "  >", ebx + 10, by + 6, 0xff1c1202);
     }
 }
 
@@ -696,13 +682,13 @@ void ProfileScreen::renderTabSeguridad(int xm, int ym)
 
     drawPanel(_rightPanelX, _rightPanelY, _rightPanelW, _rightPanelH, 0xd815171a, 0xff2d3035);
 
-    drawString(font, "SEGURIDAD", _rightPanelX + 10, _rightPanelY + 8, 0xffffcc00);
-    drawString(font, "Opciones de autenticacion, contrasena y sesion.", _rightPanelX + 10, _rightPanelY + 20, 0xff888888);
+    drawString(font, I18n::get("profile.security.title"), _rightPanelX + 10, _rightPanelY + 8, 0xffffcc00);
+    drawScaledString(I18n::get("profile.security.subtitle"), (float)(_rightPanelX + 10), (float)(_rightPanelY + 20), 0xff888888, 0.8f);
 
     int cardX = _rightPanelX + 10;
-    int cardY = _rightPanelY + 36;
+    int cardY = _rightPanelY + 34;
     int cardW = _rightPanelW - 20;
-    int cardH = _rightPanelH - 46;
+    int cardH = _rightPanelH - 44;
 
     drawPanel(cardX, cardY, cardW, cardH, 0xe0101214, 0xff383b40);
 
@@ -710,12 +696,11 @@ void ProfileScreen::renderTabSeguridad(int xm, int ym)
 
     if (!isOnline) {
         drawIconTexture("gui/user/lock.png", cardX + 12, lineY, 16, 16, 0xffffcc00);
-        drawString(font, "No hay una cuenta PocketMC vinculada.", cardX + 34, lineY + 4, 0xffffffff);
+        drawString(font, I18n::get("profile.security.offlineNotice1"), cardX + 34, lineY + 4, 0xffffffff);
         lineY += 24;
 
-        drawString(font, "Vincula una cuenta PocketMC para acceder a las opciones de seguridad,", cardX + 12, lineY, 0xffaaaaaa);
-        drawString(font, "cambio de contrasena y administracion de sesiones activas.", cardX + 12, lineY + 12, 0xff888888);
-        lineY += 36;
+        drawScaledString(I18n::get("profile.security.offlineNotice2"), (float)(cardX + 12), (float)lineY, 0xffaaaaaa, 0.8f);
+        lineY += 32;
 
         int bw = 180, bh = 22;
         int bx = cardX + 12, by = lineY;
@@ -725,19 +710,19 @@ void ProfileScreen::renderTabSeguridad(int xm, int ym)
         fill(bx, by, bx + 1, by + bh, 0xfff5c542);
         fill(bx, by + bh - 1, bx + bw, by + bh, 0xff9e6c07);
         fill(bx + bw - 1, by, bx + bw, by + bh, 0xff9e6c07);
-        drawString(font, "Vincular Cuenta PocketMC  >", bx + 10, by + 7, 0xff1c1202);
+        drawString(font, I18n::get("profile.linkAccount") + "  >", bx + 10, by + 7, 0xff1c1202);
     } else {
-        drawString(font, "Sesion actual", cardX + 12, lineY, 0xff888888);
-        drawString(font, ". Activa en este dispositivo", cardX + 12, lineY + 11, 0xff55ff55);
-        lineY += 28;
+        drawScaledString(I18n::get("profile.security.activeSession"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+        drawString(font, I18n::get("profile.security.activeDevice"), cardX + 12, lineY + 9, 0xff55ff55);
+        lineY += 26;
 
-        drawString(font, "Ultima autenticacion", cardX + 12, lineY, 0xff888888);
-        drawString(font, "Hoy", cardX + 12, lineY + 11, 0xffffffff);
-        lineY += 28;
+        drawScaledString(I18n::get("profile.security.lastAuth"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+        drawString(font, I18n::get("profile.security.today"), cardX + 12, lineY + 9, 0xffffffff);
+        lineY += 26;
 
-        drawString(font, "Contrasena de la cuenta", cardX + 12, lineY, 0xff888888);
-        drawString(font, "************", cardX + 12, lineY + 11, 0xffaaaaaa);
-        lineY += 32;
+        drawScaledString(I18n::get("profile.security.password"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
+        drawString(font, "************", cardX + 12, lineY + 9, 0xffaaaaaa);
+        lineY += 30;
 
         // Button Cambiar contraseña (Web)
         int bw = 160, bh = 20;
@@ -748,7 +733,7 @@ void ProfileScreen::renderTabSeguridad(int xm, int ym)
         fill(bx, by + bh - 1, bx + bw, by + bh, bHover ? 0xffffcc00 : 0xff555555);
         fill(bx, by, bx + 1, by + bh, bHover ? 0xffffcc00 : 0xff555555);
         fill(bx + bw - 1, by, bx + bw, by + bh, bHover ? 0xffffcc00 : 0xff555555);
-        drawString(font, "Cambiar contrasena (Web)  >", bx + 8, by + 6, bHover ? 0xffffcc00 : 0xffffffff);
+        drawString(font, I18n::get("profile.security.changePasswordWeb") + "  >", bx + 8, by + 6, bHover ? 0xffffcc00 : 0xffffffff);
 
         // Button Cerrar sesion
         int sbx = bx + bw + 10;
@@ -758,7 +743,7 @@ void ProfileScreen::renderTabSeguridad(int xm, int ym)
         fill(sbx, by + bh - 1, sbx + 100, by + bh, 0xff555555);
         fill(sbx, by, sbx + 1, by + bh, 0xff555555);
         fill(sbx + 100 - 1, by, sbx + 100, by + bh, 0xff555555);
-        drawString(font, "Cerrar sesion", sbx + 14, by + 6, 0xffffffff);
+        drawString(font, I18n::get("profile.signOut"), sbx + 14, by + 6, 0xffffffff);
     }
 }
 
@@ -768,21 +753,6 @@ void ProfileScreen::buttonClicked(Button* button)
 {
     if (button == &_btnBack || button == &_btnClose) {
         minecraft->setScreen(new StartMenuScreen());
-        return;
-    }
-
-    if (button == &_btnAction) {
-        if (!AccountManager::isOnline()) {
-            minecraft->setScreen(new LinkAccountScreen());
-        } else {
-            minecraft->platform()->openURL("http://localhost:5173/pages/profile.html");
-        }
-        return;
-    }
-
-    if (button == &_btnSignOut) {
-        AccountManager::logout();
-        init();
         return;
     }
 }
@@ -810,10 +780,12 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
         if (_selectedTab == 0) {
             int pad = 4;
             int secTopH = std::max(75, (int)(_rightPanelH * 0.38f));
-            int secMidH = std::max(46, (int)(_rightPanelH * 0.24f));
+            int secMidH = std::max(40, (int)(_rightPanelH * 0.22f));
             int sec3Y = _rightPanelY + secTopH + pad + secMidH + pad;
-            int actionCardY = sec3Y + 15;
-            int actionCardH = std::min(26, (_rightPanelH - secTopH - secMidH - pad * 2) / 2);
+            int noteH = 18;
+            int noteY = _rightPanelY + _rightPanelH - noteH - 3;
+            int actionCardY = sec3Y + 13;
+            int actionCardH = std::max(20, noteY - actionCardY - 3);
             int actionCardW = (_rightPanelW - 16 - 8) / 3;
 
             // Card 1: Editar nombre local
@@ -825,7 +797,13 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
 
             // Gold Button click when Offline
             if (!isOnline) {
-                int bx = _btnAction.x, by = _btnAction.y, bw = _btnAction.width, bh = _btnAction.height;
+                int accountCardW = std::min(148, (int)(_rightPanelW * 0.44f));
+                int accountCardX = _rightPanelX + _rightPanelW - accountCardW - 6;
+                int accountCardY = _rightPanelY + 4;
+                int bx = accountCardX + 6;
+                int by = accountCardY + 50;
+                int bw = accountCardW - 12;
+                int bh = 14;
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
                     minecraft->setScreen(new LinkAccountScreen());
                     return;
@@ -836,9 +814,9 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
         // 3. Tab 1 (Cuenta) Interactions
         else if (_selectedTab == 1) {
             int cardX = _rightPanelX + 10;
-            int cardY = _rightPanelY + 36;
+            int cardY = _rightPanelY + 34;
             if (isOnline) {
-                int lineY = cardY + 12 + 28 * 4 + 4;
+                int lineY = cardY + 12 + 26 * 3 + 30;
                 int bx = cardX + 12, by = lineY, bw = 160, bh = 20;
                 // Administrar cuenta (Web)
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
@@ -853,7 +831,7 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
                     return;
                 }
             } else {
-                int lineY = cardY + 12 + 28 * 2 + 36;
+                int lineY = cardY + 12 + 26 * 2 + 32;
                 int bx = cardX + 12, by = lineY, bw = 180, bh = 22;
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
                     minecraft->setScreen(new LinkAccountScreen());
@@ -865,16 +843,16 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
         // 4. Tab 2 (Identidad) Interactions
         else if (_selectedTab == 2) {
             int cardX = _rightPanelX + 10;
-            int cardY = _rightPanelY + 36;
+            int cardY = _rightPanelY + 34;
             if (!isOnline) {
-                int lineY = cardY + 12 + 28 * 2 + 30;
+                int lineY = cardY + 12 + 26 * 2 + 28;
                 int bx = cardX + 12, by = lineY, bw = 160, bh = 20;
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
                     minecraft->setScreen(new UsernameScreen());
                     return;
                 }
             } else {
-                int lineY = cardY + 12 + 26 * 2 + 30;
+                int lineY = cardY + 12 + 26 * 2 + 28;
                 int bx = cardX + 12, by = lineY, bw = 90, bh = 20;
                 // Copiar ID
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
@@ -893,16 +871,16 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
         // 5. Tab 3 (Seguridad) Interactions
         else if (_selectedTab == 3) {
             int cardX = _rightPanelX + 10;
-            int cardY = _rightPanelY + 36;
+            int cardY = _rightPanelY + 34;
             if (!isOnline) {
-                int lineY = cardY + 14 + 24 + 36;
+                int lineY = cardY + 14 + 24 + 32;
                 int bx = cardX + 12, by = lineY, bw = 180, bh = 22;
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
                     minecraft->setScreen(new LinkAccountScreen());
                     return;
                 }
             } else {
-                int lineY = cardY + 14 + 28 * 2 + 32;
+                int lineY = cardY + 14 + 26 * 2 + 30;
                 int bx = cardX + 12, by = lineY, bw = 160, bh = 20;
                 // Cambiar contrasena (Web)
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {

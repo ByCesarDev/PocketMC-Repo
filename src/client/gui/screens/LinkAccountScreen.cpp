@@ -8,11 +8,11 @@
 #include "locale/I18n.h"
 
 LinkAccountScreen::LinkAccountScreen()
-:   _btnSignIn(1, "Sign In"),
-    _btnCreateAccount(2, "Create Account (Web)"),
+:   _btnSignIn(1, I18n::get("linkAccount.login")),
+    _btnCreateAccount(2, I18n::get("linkAccount.registerPrompt")),
     _btnBack(3, I18n::get("gui.cancel")),
-    tUsername(10, "Username"),
-    tPassword(11, "Password"),
+    tUsername(10, I18n::get("profile.username")),
+    tPassword(11, I18n::get("profile.security.password")),
     _isError(false)
 {
 }
@@ -26,6 +26,10 @@ void LinkAccountScreen::init()
     buttons.clear();
     tabButtons.clear();
     textBoxes.clear();
+
+    _btnSignIn.msg = I18n::get("linkAccount.login");
+    _btnCreateAccount.msg = I18n::get("linkAccount.registerPrompt");
+    _btnBack.msg = I18n::get("gui.cancel");
 
     buttons.push_back(&_btnSignIn);
     buttons.push_back(&_btnCreateAccount);
@@ -79,11 +83,11 @@ void LinkAccountScreen::render(int xm, int ym, float a)
     renderBackground();
 
     int centerX = width / 2;
-    drawCenteredString(font, "LINK POCKETMC ACCOUNT", centerX, height / 2 - 85, 0xffffffff);
-    drawCenteredString(font, "Sign in with your PocketMC Username", centerX, height / 2 - 70, 0xffaaaaaa);
+    drawCenteredString(font, I18n::get("linkAccount.title"), centerX, height / 2 - 85, 0xffffffff);
+    drawCenteredString(font, I18n::get("linkAccount.subtitle"), centerX, height / 2 - 70, 0xffaaaaaa);
 
-    drawString(font, "Username:", tUsername.x, tUsername.y - 10, 0xffdddddd);
-    drawString(font, "Password:", tPassword.x, tPassword.y - 10, 0xffdddddd);
+    drawString(font, I18n::get("linkAccount.username"), tUsername.x, tUsername.y - 10, 0xffdddddd);
+    drawString(font, I18n::get("linkAccount.password"), tPassword.x, tPassword.y - 10, 0xffdddddd);
 
     if (!_statusMsg.empty()) {
         int color = _isError ? 0xffff5555 : 0xff55ff55;
@@ -107,7 +111,7 @@ void LinkAccountScreen::buttonClicked(Button* button)
 
     if (button == &_btnSignIn) {
         if (tUsername.text.empty() || tPassword.text.empty()) {
-            _statusMsg = "Please enter username and password.";
+            _statusMsg = I18n::get("linkAccount.errorEmpty");
             _isError = true;
             return;
         }
@@ -121,7 +125,7 @@ void LinkAccountScreen::buttonClicked(Button* button)
         if (ok) {
             minecraft->setScreen(new ProfileScreen());
         } else {
-            _statusMsg = err.empty() ? "Login failed." : err;
+            _statusMsg = err.empty() ? I18n::get("linkAccount.error") : err;
             _isError = true;
         }
     }
