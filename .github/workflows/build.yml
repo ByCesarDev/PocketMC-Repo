@@ -20,6 +20,11 @@ jobs:
   build-windows:
     name: Build Windows
     runs-on: ubuntu-22.04
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request' ||
+      contains(github.event.head_commit.message, 'release') ||
+      contains(github.event.head_commit.message, 'devtest')
 
     steps:
       - uses: actions/checkout@v4
@@ -75,6 +80,11 @@ jobs:
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request' ||
+      contains(github.event.head_commit.message, 'release') ||
+      contains(github.event.head_commit.message, 'devtest')
 
     steps:
       - uses: actions/checkout@v4
@@ -121,6 +131,11 @@ jobs:
   build-android: # pray to god
     name: Build Android (${{ matrix.abi }})
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request' ||
+      contains(github.event.head_commit.message, 'release') ||
+      contains(github.event.head_commit.message, 'devtest')
 
     strategy:
       # keep going with the other ABI if one fails so you at least get something useful
