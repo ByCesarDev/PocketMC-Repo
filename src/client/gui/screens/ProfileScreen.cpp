@@ -362,7 +362,7 @@ void ProfileScreen::render(int xm, int ym, float a)
 
     drawNavTab(_leftPanelX + 4, tabY, _leftPanelW - 8, tabH, 0, "", I18n::get("profile.tab.summary"), I18n::get("profile.tab.summary.desc"), _selectedTab == 0, xm, ym);
     drawNavTab(_leftPanelX + 4, tabY + tabH + 2, _leftPanelW - 8, tabH, 1, "gui/user/user_icon.png", I18n::get("profile.tab.account"), I18n::get("profile.tab.account.desc"), _selectedTab == 1, xm, ym);
-    drawNavTab(_leftPanelX + 4, tabY + (tabH + 2) * 2, _leftPanelW - 8, tabH, 2, "gui/user/user_icon.png", I18n::get("profile.tab.identity"), I18n::get("profile.tab.identity.desc"), _selectedTab == 2, xm, ym);
+    drawNavTab(_leftPanelX + 4, tabY + (tabH + 2) * 2, _leftPanelW - 8, tabH, 2, "gui/user/tag.png", I18n::get("profile.tab.identity"), I18n::get("profile.tab.identity.desc"), _selectedTab == 2, xm, ym);
     drawNavTab(_leftPanelX + 4, tabY + (tabH + 2) * 3, _leftPanelW - 8, tabH, 3, "gui/user/lock.png", I18n::get("profile.tab.security"), I18n::get("profile.tab.security.desc"), _selectedTab == 3, xm, ym);
 
     // Right Content Area — Switch based on _selectedTab
