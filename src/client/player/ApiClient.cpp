@@ -21,8 +21,8 @@
 
 namespace ApiClient {
 
-// Default: dev local. Overridden by init() or env var.
-std::string baseUrl = "http://localhost:3000";
+// Default: Render production API. Overridden by init() or PMC_API_URL env var.
+std::string baseUrl = "https://pocketmc-api.onrender.com";
 
 void init(const std::string& url) {
     if (!url.empty()) {
@@ -38,123 +38,12 @@ void init(const std::string& url) {
 // ─── Internal helper: raw GET request with custom headers ───────────────────
 
 static bool rawGet(const std::string& fullUrl, const std::string& extraHeaders, std::string& outBody) {
-    // For HTTPS urls, delegate to HttpClient::download (handles WinHTTP/OpenSSL)
-    // For HTTP (localhost API) we do a raw socket request with custom headers
-    bool isHttps = (fullUrl.find("https://") == 0);
-
-    if (isHttps) {
-        // HttpClient::download doesn't support extra headers, so for HTTPS
-        // we fall back to the raw socket GET path which only works for http.
-        // TODO: Extend HttpClient for HTTPS GET+headers in the future.
-        LOGW("[ApiClient] HTTPS GET with headers not yet supported — falling back.\n");
-        std::vector<unsigned char> body;
-        if (HttpClient::download(fullUrl, body) && !body.empty()) {
-            outBody.assign(body.begin(), body.end());
-            return true;
-        }
-        return false;
+    std::vector<unsigned char> body;
+    if (HttpClient::get(fullUrl, body, extraHeaders)) {
+        outBody.assign(body.begin(), body.end());
+        return true;
     }
-
-    // Parse http://host:port/path
-    std::string url = fullUrl;
-    if (url.find("http://") == 0) url = url.substr(7);
-    std::string host;
-    int port = 80;
-    std::string path = "/";
-
-    size_t colonPos = url.find(':');
-    size_t slashPos = url.find('/');
-
-    if (colonPos != std::string::npos && (slashPos == std::string::npos || colonPos < slashPos)) {
-        host = url.substr(0, colonPos);
-        size_t end = (slashPos != std::string::npos) ? slashPos : url.size();
-        port = atoi(url.substr(colonPos + 1, end - colonPos - 1).c_str());
-        if (slashPos != std::string::npos) path = url.substr(slashPos);
-    } else {
-        if (slashPos != std::string::npos) {
-            host = url.substr(0, slashPos);
-            path = url.substr(slashPos);
-        } else {
-            host = url;
-        }
-    }
-
-    int socketFd = -1;
-
-#if defined(_WIN32)
-    WSADATA wsaData;
-    WSAStartup(MAKEWORD(2, 2), &wsaData);
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons((u_short)port);
-    addr.sin_addr.s_addr = inet_addr(host == "localhost" ? "127.0.0.1" : host.c_str());
-    socketFd = (int)socket(AF_INET, SOCK_STREAM, 0);
-    if (socketFd != INVALID_SOCKET) {
-        if (connect(socketFd, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
-            closesocket(socketFd);
-            socketFd = -1;
-        }
-    }
-#else
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = inet_addr(host == "localhost" ? "127.0.0.1" : host.c_str());
-    socketFd = socket(AF_INET, SOCK_STREAM, 0);
-    if (socketFd >= 0) {
-        if (connect(socketFd, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
-            close(socketFd);
-            socketFd = -1;
-        }
-    }
-#endif
-
-    if (socketFd < 0) {
-        LOGW("[ApiClient] rawGet: connect failed to %s:%d\n", host.c_str(), port);
-        return false;
-    }
-
-    std::string req;
-    req += "GET " + path + " HTTP/1.1\r\n";
-    req += "Host: " + host + "\r\n";
-    req += "User-Agent: MinecraftPE\r\n";
-    req += "Connection: close\r\n";
-    if (!extraHeaders.empty()) req += extraHeaders;
-    req += "\r\n";
-
-    send(socketFd, req.c_str(), (int)req.size(), 0);
-
-    char buf[4096];
-    std::vector<unsigned char> raw;
-    int n;
-    while ((n = recv(socketFd, buf, sizeof(buf), 0)) > 0) {
-        raw.insert(raw.end(), buf, buf + n);
-    }
-#if defined(_WIN32)
-    closesocket(socketFd);
-#else
-    close(socketFd);
-#endif
-
-    if (raw.empty()) return false;
-
-    const std::string delim = "\r\n\r\n";
-    auto it = std::search(raw.begin(), raw.end(), delim.begin(), delim.end());
-    if (it == raw.end()) return false;
-
-    size_t headerLen = it - raw.begin();
-    std::string headers(reinterpret_cast<const char*>(raw.data()), headerLen);
-
-    // Check 2xx
-    size_t sp1 = headers.find(' ');
-    if (sp1 == std::string::npos) return false;
-    size_t sp2 = headers.find(' ', sp1 + 1);
-    int status = atoi(headers.substr(sp1 + 1, sp2 - sp1 - 1).c_str());
-
-    size_t bodyStart = headerLen + delim.size();
-    outBody.assign(raw.begin() + bodyStart, raw.end());
-
-    return (status >= 200 && status < 300);
+    return false;
 }
 
 // ─── JSON value extractor (simple, no full parser needed) ───────────────────

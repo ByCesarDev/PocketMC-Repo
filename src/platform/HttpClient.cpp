@@ -549,6 +549,126 @@ bool download(const std::string& url, std::vector<unsigned char>& outBody) {
     return false;
 }
 
+bool get(const std::string& url, std::vector<unsigned char>& outBody, const std::string& extraHeaders) {
+    outBody.clear();
+
+    std::string urlToDownload = url;
+
+    for (int redirectCount = 0; redirectCount < 3; ++redirectCount) {
+        std::string urlScheme;
+        std::string urlHost;
+        std::string urlPath;
+        int urlPort = 0;
+
+        if (!parseUrl(urlToDownload, urlScheme, urlHost, urlPort, urlPath)) {
+            LOGW("[HttpClient::get] parseUrl failed for '%s'\n", urlToDownload.c_str());
+            return false;
+        }
+
+#if defined(_WIN32)
+        if (urlScheme == "https") {
+            HINTERNET session = WinHttpOpen(L"MinecraftPE/0.6.1", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+            if (!session) return false;
+
+            HINTERNET conn = WinHttpConnect(session, std::wstring(urlHost.begin(), urlHost.end()).c_str(), urlPort, 0);
+            if (!conn) { WinHttpCloseHandle(session); return false; }
+
+            HINTERNET req = WinHttpOpenRequest(conn, L"GET",
+                std::wstring(urlPath.begin(), urlPath.end()).c_str(),
+                NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
+            if (!req) { WinHttpCloseHandle(conn); WinHttpCloseHandle(session); return false; }
+
+            std::wstring wHeaders;
+            if (!extraHeaders.empty()) {
+                wHeaders = std::wstring(extraHeaders.begin(), extraHeaders.end());
+            }
+
+            BOOL sent = WinHttpSendRequest(req,
+                wHeaders.empty() ? WINHTTP_NO_ADDITIONAL_HEADERS : wHeaders.c_str(),
+                wHeaders.empty() ? 0 : (DWORD)-1L,
+                WINHTTP_NO_REQUEST_DATA, 0, 0, 0);
+
+            if (!sent || !WinHttpReceiveResponse(req, NULL)) {
+                WinHttpCloseHandle(req); WinHttpCloseHandle(conn); WinHttpCloseHandle(session);
+                return false;
+            }
+
+            DWORD bytesAvailable = 0;
+            while (WinHttpQueryDataAvailable(req, &bytesAvailable) && bytesAvailable > 0) {
+                std::vector<unsigned char> buf(bytesAvailable);
+                DWORD bytesRead = 0;
+                if (!WinHttpReadData(req, buf.data(), bytesAvailable, &bytesRead) || bytesRead == 0) break;
+                outBody.insert(outBody.end(), buf.begin(), buf.begin() + bytesRead);
+            }
+
+            WinHttpCloseHandle(req); WinHttpCloseHandle(conn); WinHttpCloseHandle(session);
+            return !outBody.empty();
+        }
+#endif
+
+        if (urlScheme != "http") {
+            LOGW("[HttpClient::get] unsupported scheme '%s'\n", urlScheme.c_str());
+            return false;
+        }
+
+        int socketFd = -1;
+        if (!resolveAndConnect(urlHost, urlPort, socketFd)) {
+            LOGW("[HttpClient::get] connect failed for %s:%d\n", urlHost.c_str(), urlPort);
+            return false;
+        }
+
+        std::string httpRequest;
+        httpRequest += "GET " + urlPath + " HTTP/1.1\r\n";
+        httpRequest += "Host: " + urlHost + "\r\n";
+        httpRequest += "User-Agent: MinecraftPE\r\n";
+        if (!extraHeaders.empty()) {
+            httpRequest += extraHeaders;
+        }
+        httpRequest += "Connection: close\r\n\r\n";
+
+        send(socketFd, httpRequest.c_str(), (int)httpRequest.size(), 0);
+
+        std::vector<unsigned char> rawResponse;
+        readAll(socketFd, rawResponse);
+
+#if defined(_WIN32)
+        closesocket(socketFd);
+#else
+        close(socketFd);
+#endif
+
+        if (rawResponse.empty()) return false;
+
+        const std::string headerDelimiter = "\r\n\r\n";
+        auto headerEndIt = std::search(rawResponse.begin(), rawResponse.end(), headerDelimiter.begin(), headerDelimiter.end());
+        if (headerEndIt == rawResponse.end()) return false;
+
+        size_t headerLength = headerEndIt - rawResponse.begin();
+        std::string headers(reinterpret_cast<const char*>(rawResponse.data()), headerLength);
+        size_t bodyStartIndex = headerLength + headerDelimiter.size();
+
+        int statusCode = 0;
+        if (!extractStatusCode(headers, statusCode)) return false;
+
+        if (statusCode == 301 || statusCode == 302 || statusCode == 307 || statusCode == 308) {
+            std::string location = getHeaderValue(headers, "Location");
+            if (location.empty()) return false;
+            urlToDownload = location;
+            continue;
+        }
+
+        if (statusCode != 200) {
+            LOGW("[HttpClient::get] HTTP status %d for %s\n", statusCode, urlToDownload.c_str());
+            return false;
+        }
+
+        outBody.assign(rawResponse.begin() + bodyStartIndex, rawResponse.end());
+        return true;
+    }
+
+    return false;
+}
+
 bool post(const std::string& url, const std::string& jsonBody, std::vector<unsigned char>& outBody, const std::string& extraHeaders) {
     outBody.clear();
 
