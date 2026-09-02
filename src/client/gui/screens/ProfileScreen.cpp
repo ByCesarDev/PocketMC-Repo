@@ -387,19 +387,25 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
     std::string activeUname = AccountManager::getUsername(localUname);
     std::string activeDispName = AccountManager::getDisplayName(localUname);
 
-    int pad = 4;
+    int pad = 5;
     int contentW = _rightPanelW;
     int contentH = _rightPanelH;
 
-    int secTopH = std::max(75, (int)(contentH * 0.38f));
-    int secMidH = std::max(40, (int)(contentH * 0.22f));
-    int secBotH = contentH - secTopH - secMidH - pad * 2;
+    // Bottom note calculation first
+    int noteH = 18;
+    int noteY = _rightPanelY + contentH - noteH - 3;
+    int noteX = _rightPanelX + 8;
+    int noteW = contentW - 16;
+
+    // Available height for Section 1 and Section 2:
+    int availH = (noteY - _rightPanelY) - pad * 2;
+    int secTopH = std::max(75, (int)(availH * 0.60f));
+    int secActionH = availH - secTopH;
 
     int sec1Y = _rightPanelY;
     int sec2Y = sec1Y + secTopH + pad;
-    int sec3Y = sec2Y + secMidH + pad;
 
-    // SECTION 1: TU PERFIL & CUENTA
+    // ── SECTION 1: TU PERFIL & CUENTA ──
     drawPanel(_rightPanelX, sec1Y, contentW, secTopH, 0xd815171a, 0xff2d3035);
     drawString(font, I18n::get("profile.yourProfile"), _rightPanelX + 8, sec1Y + 5, 0xffffcc00);
 
@@ -457,7 +463,7 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
     drawScaledString(I18n::get("profile.status"), (float)(accountCardX + 8), (float)(accountCardY + 32), 0xff888888, 0.75f);
     drawString(font, isOnline ? I18n::get("profile.linkedActive") : I18n::get("profile.unlinked"), accountCardX + 8, accountCardY + 40, isOnline ? 0xff55ff55 : 0xffffcc00);
 
-    // Golden CTA Button only when Offline (fitted inside box with soft shadow)
+    // Golden CTA Button only when Offline
     if (!isOnline) {
         int bx = accountCardX + 6;
         int by = accountCardY + 50;
@@ -467,30 +473,20 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
         drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.72f);
     }
 
-    // SECTION 2: INFORMACION
-    drawPanel(_rightPanelX, sec2Y, contentW, secMidH, 0xd815171a, 0xff2d3035);
-    drawString(font, I18n::get("profile.info"), _rightPanelX + 8, sec2Y + 3, 0xffffcc00);
+    // ── SECTION 2: ACCIONES RAPIDAS (Replaces Informacion) ──
+    drawPanel(_rightPanelX, sec2Y, contentW, secActionH, 0xd815171a, 0xff2d3035);
+    drawString(font, I18n::get("profile.quickActions"), _rightPanelX + 8, sec2Y + 4, 0xffffcc00);
 
-    int infoCardGap = 4;
-    int infoCardY = sec2Y + 13;
-    int infoCardH = secMidH - 17;
-    int infoCardW = (contentW - 16 - infoCardGap * 3) / 4;
+    int actionCardGap = 4;
+    int actionCardY = sec2Y + 15;
+    int actionCardH = secActionH - 20;
+    int actionCardW = (contentW - 16 - actionCardGap * 2) / 3;
 
-    drawInfoCard(_rightPanelX + 8, infoCardY, infoCardW, infoCardH, "gui/user/user_icon.png", I18n::get("profile.username"), isOnline ? "@" + activeUname : localUname, 0xffffcc00);
-    std::string pidVal = isOnline ? (id.playerId.size() > 10 ? id.playerId.substr(0, 9) + ".." : id.playerId) : I18n::get("profile.localMode");
-    drawInfoCard(_rightPanelX + 8 + (infoCardW + infoCardGap), infoCardY, infoCardW, infoCardH, "gui/user/calendar.png", isOnline ? I18n::get("profile.playerId") : I18n::get("profile.createdAt"), pidVal, 0xffffcc00);
-    drawInfoCard(_rightPanelX + 8 + (infoCardW + infoCardGap) * 2, infoCardY, infoCardW, infoCardH, "gui/user/smartphone.png", I18n::get("profile.device"), I18n::get("profile.thisDevice"), 0xffffcc00);
-    drawInfoCard(_rightPanelX + 8 + (infoCardW + infoCardGap) * 3, infoCardY, infoCardW, infoCardH, "gui/user/control.png", I18n::get("profile.gameMode"), isOnline ? I18n::get("profile.online") : I18n::get("profile.offline"), 0xffffcc00);
+    drawActionCard(_rightPanelX + 8, actionCardY, actionCardW, actionCardH, "gui/user/pencil_edit_icon.png", I18n::get("profile.editLocalName"), I18n::get("profile.editLocalNameDesc"), xm, ym);
+    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap), actionCardY, actionCardW, actionCardH, "", I18n::get("profile.exportProfile"), I18n::get("profile.exportProfileDesc"), xm, ym);
+    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap) * 2, actionCardY, actionCardW, actionCardH, "", I18n::get("profile.deleteLocalProfile"), I18n::get("profile.deleteLocalProfileDesc"), xm, ym);
 
-    // SECTION 3: ACCIONES RAPIDAS & NOTA
-    drawPanel(_rightPanelX, sec3Y, contentW, secBotH, 0xd815171a, 0xff2d3035);
-    drawString(font, I18n::get("profile.quickActions"), _rightPanelX + 8, sec3Y + 3, 0xffffcc00);
-
-    // Compact bottom notice pinned to the bottom
-    int noteH = 18;
-    int noteY = _rightPanelY + _rightPanelH - noteH - 3;
-    int noteX = _rightPanelX + 8;
-    int noteW = contentW - 16;
+    // ── Bottom Note Box ──
     fill(noteX, noteY, noteX + noteW, noteY + noteH, 0x500f1c29);
     fill(noteX, noteY, noteX + noteW, noteY + 1, 0xff1e3a5a);
     fill(noteX, noteY + noteH - 1, noteX + noteW, noteY + noteH, 0xff1e3a5a);
@@ -500,16 +496,6 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
     drawString(font, "(i)", noteX + 5, noteY + (noteH - 8) / 2, 0xff38bdf8);
     drawScaledString(I18n::get("profile.bottomNotice1"), (float)(noteX + 18), (float)(noteY + 2), 0xff88a0b8, 0.72f);
     drawScaledString(I18n::get("profile.bottomNotice2"), (float)(noteX + 18), (float)(noteY + 9), 0xff88a0b8, 0.72f);
-
-    // Action cards situated between header and bottom notice
-    int actionCardGap = 4;
-    int actionCardY = sec3Y + 13;
-    int actionCardH = std::max(20, noteY - actionCardY - 3);
-    int actionCardW = (contentW - 16 - actionCardGap * 2) / 3;
-
-    drawActionCard(_rightPanelX + 8, actionCardY, actionCardW, actionCardH, "gui/user/pencil_edit_icon.png", I18n::get("profile.editLocalName"), I18n::get("profile.editLocalNameDesc"), xm, ym);
-    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap), actionCardY, actionCardW, actionCardH, "", I18n::get("profile.exportProfile"), I18n::get("profile.exportProfileDesc"), xm, ym);
-    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap) * 2, actionCardY, actionCardW, actionCardH, "", I18n::get("profile.deleteLocalProfile"), I18n::get("profile.deleteLocalProfileDesc"), xm, ym);
 }
 
 // ─── TAB 1: Cuenta ───────────────────────────────────────────────────────────
@@ -753,15 +739,21 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
 
         // 2. Tab 0 (Resumen) Interactions
         if (_selectedTab == 0) {
-            int pad = 4;
-            int secTopH = std::max(75, (int)(_rightPanelH * 0.38f));
-            int secMidH = std::max(40, (int)(_rightPanelH * 0.22f));
-            int sec3Y = _rightPanelY + secTopH + pad + secMidH + pad;
+            int pad = 5;
+            int contentW = _rightPanelW;
+            int contentH = _rightPanelH;
+
             int noteH = 18;
-            int noteY = _rightPanelY + _rightPanelH - noteH - 3;
-            int actionCardY = sec3Y + 13;
-            int actionCardH = std::max(20, noteY - actionCardY - 3);
-            int actionCardW = (_rightPanelW - 16 - 8) / 3;
+            int noteY = _rightPanelY + contentH - noteH - 3;
+            int availH = (noteY - _rightPanelY) - pad * 2;
+            int secTopH = std::max(75, (int)(availH * 0.60f));
+            int secActionH = availH - secTopH;
+            int sec2Y = _rightPanelY + secTopH + pad;
+
+            int actionCardGap = 4;
+            int actionCardY = sec2Y + 15;
+            int actionCardH = secActionH - 20;
+            int actionCardW = (contentW - 16 - actionCardGap * 2) / 3;
 
             // Card 1: Editar nombre local
             if (x >= _rightPanelX + 8 && x <= _rightPanelX + 8 + actionCardW &&
@@ -772,8 +764,8 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
 
             // Gold Button click when Offline
             if (!isOnline) {
-                int accountCardW = std::min(148, (int)(_rightPanelW * 0.44f));
-                int accountCardX = _rightPanelX + _rightPanelW - accountCardW - 6;
+                int accountCardW = std::min(148, (int)(contentW * 0.44f));
+                int accountCardX = _rightPanelX + contentW - accountCardW - 6;
                 int accountCardY = _rightPanelY + 4;
                 int bx = accountCardX + 6;
                 int by = accountCardY + 50;
