@@ -327,18 +327,18 @@ void ProfileScreen::drawActionCard(int x, int y, int w, int h, const std::string
 
     drawPanel(x, y, w, h, bg, border);
 
-    int iconSize = 14;
+    int iconSize = 12;
     if (!iconPath.empty()) {
         int iconY = y + (h - iconSize) / 2;
-        drawIconTexture(iconPath, x + 8, iconY, iconSize, iconSize, hover ? 0xffffcc00 : 0xffffffff);
+        drawIconTexture(iconPath, x + 6, iconY, iconSize, iconSize, hover ? 0xffffcc00 : 0xffffffff);
     }
 
-    int tx = x + (iconPath.empty() ? 10 : 26);
-    int blockY = y + (h - 17) / 2;
+    int tx = x + (iconPath.empty() ? 6 : 22);
+    int blockY = y + (h - 16) / 2;
     drawString(font, title, tx, blockY, hover ? 0xffffcc00 : 0xffffffff);
-    drawScaledString(subtitle, (float)tx, (float)(blockY + 9), 0xff888888, 0.75f);
+    drawScaledString(subtitle, (float)tx, (float)(blockY + 9), 0xff888888, 0.68f);
 
-    drawString(font, ">", x + w - 10, y + (h - 8) / 2, hover ? 0xffffcc00 : 0xff7e8288);
+    drawString(font, ">", x + w - 8, y + (h - 8) / 2, hover ? 0xffffcc00 : 0xff7e8288);
 }
 
 // ─── Main Render ─────────────────────────────────────────────────────────────
@@ -387,36 +387,31 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
     std::string activeUname = AccountManager::getUsername(localUname);
     std::string activeDispName = AccountManager::getDisplayName(localUname);
 
-    int pad = 5;
     int contentW = _rightPanelW;
-    int contentH = _rightPanelH;
+    int gap = 6;
 
-    // Bottom note calculation first
+    int secTopH = 64;
+    int secActionH = 46;
     int noteH = 18;
-    int noteY = _rightPanelY + contentH - noteH - 3;
-    int noteX = _rightPanelX + 8;
-    int noteW = contentW - 16;
-
-    // Available height for Section 1 and Section 2:
-    int availH = (noteY - _rightPanelY) - pad * 2;
-    int secTopH = std::max(75, (int)(availH * 0.60f));
-    int secActionH = availH - secTopH;
 
     int sec1Y = _rightPanelY;
-    int sec2Y = sec1Y + secTopH + pad;
+    int sec2Y = sec1Y + secTopH + gap;
+    int noteY = sec2Y + secActionH + gap;
+    int noteX = _rightPanelX + 8;
+    int noteW = contentW - 16;
 
     // ── SECTION 1: TU PERFIL & CUENTA ──
     drawPanel(_rightPanelX, sec1Y, contentW, secTopH, 0xd815171a, 0xff2d3035);
     drawString(font, I18n::get("profile.yourProfile"), _rightPanelX + 8, sec1Y + 5, 0xffffcc00);
 
     int avatarBoxX = _rightPanelX + 8;
-    int avatarBoxY = sec1Y + 16;
-    int avatarSize = std::min(48, secTopH - 22);
+    int avatarBoxY = sec1Y + 14;
+    int avatarSize = 44;
     drawPanel(avatarBoxX, avatarBoxY, avatarSize, avatarSize, 0xff101214, 0xff3a3c40);
     drawSkinBust(avatarBoxX + 2, avatarBoxY + 2, avatarSize - 4);
 
     int profileInfoX = avatarBoxX + avatarSize + 8;
-    int profileInfoY = avatarBoxY + 1;
+    int profileInfoY = sec1Y + 13;
 
     drawString(font, activeDispName, profileInfoX, profileInfoY, 0xffffffff);
 
@@ -431,9 +426,8 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
         fill(profileInfoX + tagW - 1, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xffaa3333);
         drawScaledString(I18n::get("profile.offline"), (float)(profileInfoX + 4), (float)(badgeTagY + 2), 0xffff6666, 0.75f);
 
-        drawString(font, I18n::get("profile.localProfile"), profileInfoX, badgeTagY + 13, 0xffdddddd);
-        drawScaledString(I18n::get("profile.playingWithoutAccount"), (float)profileInfoX, (float)(badgeTagY + 23), 0xff888888, 0.75f);
-        drawScaledString(I18n::get("profile.playingWithoutAccountDesc"), (float)profileInfoX, (float)(badgeTagY + 31), 0xff888888, 0.75f);
+        drawString(font, I18n::get("profile.localProfile"), profileInfoX, badgeTagY + 12, 0xffdddddd);
+        drawScaledString(I18n::get("profile.playingWithoutAccount"), (float)profileInfoX, (float)(badgeTagY + 22), 0xff888888, 0.72f);
     } else {
         int tagW = 42;
         int tagH = 10;
@@ -444,8 +438,8 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
         fill(profileInfoX + tagW - 1, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xff33aa33);
         drawScaledString(I18n::get("profile.online"), (float)(profileInfoX + 4), (float)(badgeTagY + 2), 0xff55ff55, 0.75f);
 
-        drawString(font, "@" + activeUname, profileInfoX, badgeTagY + 13, 0xffffcc00);
-        drawScaledString(I18n::get("profile.officialAccountLinked"), (float)profileInfoX, (float)(badgeTagY + 23), 0xff888888, 0.75f);
+        drawString(font, "@" + activeUname, profileInfoX, badgeTagY + 12, 0xffffcc00);
+        drawScaledString(I18n::get("profile.officialAccountLinked"), (float)profileInfoX, (float)(badgeTagY + 22), 0xff888888, 0.72f);
     }
 
     // Right Sub-Card: CUENTA
@@ -457,29 +451,29 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
 
     drawString(font, I18n::get("profile.account"), accountCardX + 8, accountCardY + 4, 0xffffcc00);
 
-    drawScaledString(I18n::get("profile.accountType"), (float)(accountCardX + 8), (float)(accountCardY + 14), 0xff888888, 0.75f);
-    drawString(font, isOnline ? I18n::get("profile.online") : I18n::get("profile.offline"), accountCardX + 8, accountCardY + 22, isOnline ? 0xff55ff55 : 0xffff5555);
+    drawScaledString(I18n::get("profile.accountType"), (float)(accountCardX + 8), (float)(accountCardY + 14), 0xff888888, 0.72f);
+    drawString(font, isOnline ? I18n::get("profile.online") : I18n::get("profile.offline"), accountCardX + 8, accountCardY + 21, isOnline ? 0xff55ff55 : 0xffff5555);
 
-    drawScaledString(I18n::get("profile.status"), (float)(accountCardX + 8), (float)(accountCardY + 32), 0xff888888, 0.75f);
-    drawString(font, isOnline ? I18n::get("profile.linkedActive") : I18n::get("profile.unlinked"), accountCardX + 8, accountCardY + 40, isOnline ? 0xff55ff55 : 0xffffcc00);
+    drawScaledString(I18n::get("profile.status"), (float)(accountCardX + 8), (float)(accountCardY + 31), 0xff888888, 0.72f);
+    drawString(font, isOnline ? I18n::get("profile.linkedActive") : I18n::get("profile.unlinked"), accountCardX + 8, accountCardY + 38, isOnline ? 0xff55ff55 : 0xffffcc00);
 
     // Golden CTA Button only when Offline
     if (!isOnline) {
-        int bx = accountCardX + 6;
-        int by = accountCardY + 50;
-        int bw = accountCardW - 12;
-        int bh = 14;
+        int bx = accountCardX + 5;
+        int by = accountCardY + 40;
+        int bw = accountCardW - 10;
+        int bh = 13;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
-        drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.72f);
+        drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.68f);
     }
 
-    // ── SECTION 2: ACCIONES RAPIDAS (Replaces Informacion) ──
+    // ── SECTION 2: ACCIONES RAPIDAS ──
     drawPanel(_rightPanelX, sec2Y, contentW, secActionH, 0xd815171a, 0xff2d3035);
     drawString(font, I18n::get("profile.quickActions"), _rightPanelX + 8, sec2Y + 4, 0xffffcc00);
 
     int actionCardGap = 4;
-    int actionCardY = sec2Y + 15;
-    int actionCardH = secActionH - 20;
+    int actionCardY = sec2Y + 14;
+    int actionCardH = secActionH - 18;
     int actionCardW = (contentW - 16 - actionCardGap * 2) / 3;
 
     drawActionCard(_rightPanelX + 8, actionCardY, actionCardW, actionCardH, "gui/user/pencil_edit_icon.png", I18n::get("profile.editLocalName"), I18n::get("profile.editLocalNameDesc"), xm, ym);
@@ -494,8 +488,8 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
     fill(noteX + noteW - 1, noteY, noteX + noteW, noteY + noteH, 0xff1e3a5a);
 
     drawString(font, "(i)", noteX + 5, noteY + (noteH - 8) / 2, 0xff38bdf8);
-    drawScaledString(I18n::get("profile.bottomNotice1"), (float)(noteX + 18), (float)(noteY + 2), 0xff88a0b8, 0.72f);
-    drawScaledString(I18n::get("profile.bottomNotice2"), (float)(noteX + 18), (float)(noteY + 9), 0xff88a0b8, 0.72f);
+    drawScaledString(I18n::get("profile.bottomNotice1"), (float)(noteX + 18), (float)(noteY + 2), 0xff88a0b8, 0.70f);
+    drawScaledString(I18n::get("profile.bottomNotice2"), (float)(noteX + 18), (float)(noteY + 9), 0xff88a0b8, 0.70f);
 }
 
 // ─── TAB 1: Cuenta ───────────────────────────────────────────────────────────
@@ -513,53 +507,53 @@ void ProfileScreen::renderTabCuenta(int xm, int ym)
     int cardX = _rightPanelX + 10;
     int cardY = _rightPanelY + 34;
     int cardW = _rightPanelW - 20;
-    int cardH = _rightPanelH - 44;
+    int cardH = isOnline ? 120 : 92;
 
     drawPanel(cardX, cardY, cardW, cardH, 0xe0101214, 0xff383b40);
 
-    int lineY = cardY + 12;
+    int lineY = cardY + 10;
 
-    drawScaledString(I18n::get("profile.accountType"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-    drawString(font, isOnline ? I18n::get("profile.online") : I18n::get("profile.offline"), cardX + 12, lineY + 9, isOnline ? 0xff55ff55 : 0xffff5555);
-    lineY += 26;
+    drawScaledString(I18n::get("profile.accountType"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.75f);
+    drawString(font, isOnline ? I18n::get("profile.online") : I18n::get("profile.offline"), cardX + 12, lineY + 8, isOnline ? 0xff55ff55 : 0xffff5555);
+    lineY += 22;
 
-    drawScaledString(I18n::get("profile.status"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-    drawString(font, isOnline ? I18n::get("profile.linkedActive") : I18n::get("profile.unlinked"), cardX + 12, lineY + 9, isOnline ? 0xff55ff55 : 0xffffcc00);
-    lineY += 26;
+    drawScaledString(I18n::get("profile.status"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.75f);
+    drawString(font, isOnline ? I18n::get("profile.linkedActive") : I18n::get("profile.unlinked"), cardX + 12, lineY + 8, isOnline ? 0xff55ff55 : 0xffffcc00);
+    lineY += 22;
 
     if (isOnline) {
-        drawScaledString(I18n::get("profile.account.email"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-        drawString(font, maskEmail("cuentas.oficial.cesardev@gmail.com"), cardX + 12, lineY + 9, 0xffffffff);
-        lineY += 26;
+        drawScaledString(I18n::get("profile.account.email"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.75f);
+        drawString(font, maskEmail("cuentas.oficial.cesardev@gmail.com"), cardX + 12, lineY + 8, 0xffffffff);
+        lineY += 22;
 
-        drawScaledString(I18n::get("profile.account.memberSince"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-        drawString(font, I18n::get("profile.account.memberSinceVal"), cardX + 12, lineY + 9, 0xffcccccc);
-        lineY += 30;
+        drawScaledString(I18n::get("profile.account.memberSince"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.75f);
+        drawString(font, I18n::get("profile.account.memberSinceVal"), cardX + 12, lineY + 8, 0xffcccccc);
+        lineY += 24;
 
         // Button Administrar cuenta (Web)
-        int bw = 160, bh = 20;
+        int bw = 150, bh = 18;
         int bx = cardX + 12, by = lineY;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
-        drawGoldButton(bx, by, bw, bh, I18n::get("profile.manageAccountWeb"), bHover, 0.8f);
+        drawGoldButton(bx, by, bw, bh, I18n::get("profile.manageAccountWeb"), bHover, 0.75f);
 
         // Button Cerrar sesion
         int sbx = bx + bw + 10;
-        bool sHover = (xm >= sbx && xm <= sbx + 100 && ym >= by && ym <= by + bh);
-        fill(sbx, by, sbx + 100, by + bh, sHover ? 0x80ff4444 : 0x5033363a);
-        fill(sbx, by, sbx + 100, by + 1, 0xff555555);
-        fill(sbx, by + bh - 1, sbx + 100, by + bh, 0xff555555);
+        bool sHover = (xm >= sbx && xm <= sbx + 90 && ym >= by && ym <= by + bh);
+        fill(sbx, by, sbx + 90, by + bh, sHover ? 0x80ff4444 : 0x5033363a);
+        fill(sbx, by, sbx + 90, by + 1, 0xff555555);
+        fill(sbx, by + bh - 1, sbx + 90, by + bh, 0xff555555);
         fill(sbx, by, sbx + 1, by + bh, 0xff555555);
-        fill(sbx + 100 - 1, by, sbx + 100, by + bh, 0xff555555);
-        drawString(font, I18n::get("profile.signOut"), sbx + 14, by + 6, 0xffffffff);
+        fill(sbx + 90 - 1, by, sbx + 90, by + bh, 0xff555555);
+        drawString(font, I18n::get("profile.signOut"), sbx + 10, by + 5, 0xffffffff);
     } else {
-        drawScaledString(I18n::get("profile.account.offlineDesc1"), (float)(cardX + 12), (float)lineY, 0xffaaaaaa, 0.8f);
-        drawScaledString(I18n::get("profile.account.offlineDesc2"), (float)(cardX + 12), (float)(lineY + 10), 0xff888888, 0.8f);
-        lineY += 32;
+        drawScaledString(I18n::get("profile.account.offlineDesc1"), (float)(cardX + 12), (float)lineY, 0xffaaaaaa, 0.75f);
+        drawScaledString(I18n::get("profile.account.offlineDesc2"), (float)(cardX + 12), (float)(lineY + 9), 0xff888888, 0.75f);
+        lineY += 24;
 
-        int bw = 180, bh = 22;
+        int bw = 170, bh = 20;
         int bx = cardX + 12, by = lineY;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
-        drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.8f);
+        drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.75f);
     }
 }
 
@@ -581,25 +575,21 @@ void ProfileScreen::renderTabIdentidad(int xm, int ym)
     int cardX = _rightPanelX + 10;
     int cardY = _rightPanelY + 34;
     int cardW = _rightPanelW - 20;
-    int cardH = _rightPanelH - 44;
+    int cardH = isOnline ? 104 : 88;
 
     drawPanel(cardX, cardY, cardW, cardH, 0xe0101214, 0xff383b40);
 
-    int lineY = cardY + 12;
+    int lineY = cardY + 10;
 
     if (!isOnline) {
-        drawScaledString(I18n::get("profile.identity.localName"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-        drawString(font, localUname, cardX + 12, lineY + 9, 0xffffffff);
-        lineY += 26;
+        drawScaledString(I18n::get("profile.identity.localName"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.75f);
+        drawString(font, localUname, cardX + 12, lineY + 8, 0xffffffff);
+        lineY += 22;
 
-        drawScaledString(I18n::get("profile.accountType"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-        drawString(font, I18n::get("profile.localProfile"), cardX + 12, lineY + 9, 0xffffaa55);
-        lineY += 26;
+        drawScaledString(I18n::get("profile.identity.localDesc"), (float)(cardX + 12), (float)lineY, 0xffaaaaaa, 0.75f);
+        lineY += 22;
 
-        drawScaledString(I18n::get("profile.identity.localDesc"), (float)(cardX + 12), (float)lineY, 0xffaaaaaa, 0.8f);
-        lineY += 28;
-
-        int bw = 160, bh = 20;
+        int bw = 150, bh = 18;
         int bx = cardX + 12, by = lineY;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
         fill(bx, by, bx + bw, by + bh, bHover ? 0xff404448 : 0xff282a2e);
@@ -607,22 +597,22 @@ void ProfileScreen::renderTabIdentidad(int xm, int ym)
         fill(bx, by + bh - 1, bx + bw, by + bh, bHover ? 0xffffcc00 : 0xff555555);
         fill(bx, by, bx + 1, by + bh, bHover ? 0xffffcc00 : 0xff555555);
         fill(bx + bw - 1, by, bx + bw, by + bh, bHover ? 0xffffcc00 : 0xff555555);
-        drawString(font, I18n::get("profile.editLocalName") + "  >", bx + 10, by + 6, bHover ? 0xffffcc00 : 0xffffffff);
+        drawString(font, I18n::get("profile.editLocalName") + "  >", bx + 8, by + 5, bHover ? 0xffffcc00 : 0xffffffff);
     } else {
-        drawScaledString(I18n::get("profile.identity.displayName"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-        drawString(font, activeDispName, cardX + 12, lineY + 9, 0xffffffff);
-        lineY += 26;
+        drawScaledString(I18n::get("profile.identity.displayName"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.75f);
+        drawString(font, activeDispName, cardX + 12, lineY + 8, 0xffffffff);
+        lineY += 22;
 
-        drawScaledString(I18n::get("profile.identity.uniqueUser"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-        drawString(font, "@" + activeUname, cardX + 12, lineY + 9, 0xffffcc00);
-        lineY += 26;
+        drawScaledString(I18n::get("profile.identity.uniqueUser"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.75f);
+        drawString(font, "@" + activeUname, cardX + 12, lineY + 8, 0xffffcc00);
+        lineY += 22;
 
-        drawScaledString(I18n::get("profile.identity.uuid"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-        drawString(font, id.playerId.empty() ? "No disponible" : id.playerId, cardX + 12, lineY + 9, 0xff55ff55);
-        lineY += 28;
+        drawScaledString(I18n::get("profile.identity.uuid"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.75f);
+        drawString(font, id.playerId.empty() ? "No disponible" : id.playerId, cardX + 12, lineY + 8, 0xff55ff55);
+        lineY += 22;
 
         // Button Copiar ID
-        int bw = 90, bh = 20;
+        int bw = 85, bh = 18;
         int bx = cardX + 12, by = lineY;
         bool cHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
         fill(bx, by, bx + bw, by + bh, _copiedFeedbackTicks > 0 ? 0xff10b981 : (cHover ? 0xff404448 : 0xff282a2e));
@@ -630,13 +620,13 @@ void ProfileScreen::renderTabIdentidad(int xm, int ym)
         fill(bx, by + bh - 1, bx + bw, by + bh, 0xff555555);
         fill(bx, by, bx + 1, by + bh, 0xff555555);
         fill(bx + bw - 1, by, bx + bw, by + bh, 0xff555555);
-        drawString(font, _copiedFeedbackTicks > 0 ? I18n::get("profile.identity.copied") : I18n::get("profile.identity.copyId"), bx + 14, by + 6, _copiedFeedbackTicks > 0 ? 0xff022315 : 0xffffffff);
+        drawString(font, _copiedFeedbackTicks > 0 ? I18n::get("profile.identity.copied") : I18n::get("profile.identity.copyId"), bx + 10, by + 5, _copiedFeedbackTicks > 0 ? 0xff022315 : 0xffffffff);
 
         // Button Editar perfil (Web)
         int ebx = bx + bw + 10;
-        int ebw = 140;
+        int ebw = 135;
         bool eHover = (xm >= ebx && xm <= ebx + ebw && ym >= by && ym <= by + bh);
-        drawGoldButton(ebx, by, ebw, bh, I18n::get("profile.identity.editWeb"), eHover, 0.8f);
+        drawGoldButton(ebx, by, ebw, bh, I18n::get("profile.identity.editWeb"), eHover, 0.75f);
     }
 }
 
@@ -654,39 +644,39 @@ void ProfileScreen::renderTabSeguridad(int xm, int ym)
     int cardX = _rightPanelX + 10;
     int cardY = _rightPanelY + 34;
     int cardW = _rightPanelW - 20;
-    int cardH = _rightPanelH - 44;
+    int cardH = isOnline ? 104 : 76;
 
     drawPanel(cardX, cardY, cardW, cardH, 0xe0101214, 0xff383b40);
 
-    int lineY = cardY + 14;
+    int lineY = cardY + 12;
 
     if (!isOnline) {
-        drawIconTexture("gui/user/lock.png", cardX + 12, lineY, 16, 16, 0xffffcc00);
-        drawString(font, I18n::get("profile.security.offlineNotice1"), cardX + 34, lineY + 4, 0xffffffff);
-        lineY += 24;
+        drawIconTexture("gui/user/lock.png", cardX + 12, lineY, 14, 14, 0xffffcc00);
+        drawString(font, I18n::get("profile.security.offlineNotice1"), cardX + 30, lineY + 3, 0xffffffff);
+        lineY += 20;
 
-        drawScaledString(I18n::get("profile.security.offlineNotice2"), (float)(cardX + 12), (float)lineY, 0xffaaaaaa, 0.8f);
-        lineY += 32;
+        drawScaledString(I18n::get("profile.security.offlineNotice2"), (float)(cardX + 12), (float)lineY, 0xffaaaaaa, 0.72f);
+        lineY += 20;
 
-        int bw = 180, bh = 22;
+        int bw = 170, bh = 20;
         int bx = cardX + 12, by = lineY;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
-        drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.8f);
+        drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.75f);
     } else {
-        drawScaledString(I18n::get("profile.security.activeSession"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-        drawString(font, I18n::get("profile.security.activeDevice"), cardX + 12, lineY + 9, 0xff55ff55);
-        lineY += 26;
+        drawScaledString(I18n::get("profile.security.activeSession"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.75f);
+        drawString(font, I18n::get("profile.security.activeDevice"), cardX + 12, lineY + 8, 0xff55ff55);
+        lineY += 22;
 
-        drawScaledString(I18n::get("profile.security.lastAuth"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-        drawString(font, I18n::get("profile.security.today"), cardX + 12, lineY + 9, 0xffffffff);
-        lineY += 26;
+        drawScaledString(I18n::get("profile.security.lastAuth"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.75f);
+        drawString(font, I18n::get("profile.security.today"), cardX + 12, lineY + 8, 0xffffffff);
+        lineY += 22;
 
-        drawScaledString(I18n::get("profile.security.password"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
-        drawString(font, "************", cardX + 12, lineY + 9, 0xffaaaaaa);
-        lineY += 30;
+        drawScaledString(I18n::get("profile.security.password"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.75f);
+        drawString(font, "************", cardX + 12, lineY + 8, 0xffaaaaaa);
+        lineY += 24;
 
         // Button Cambiar contraseña (Web)
-        int bw = 160, bh = 20;
+        int bw = 150, bh = 18;
         int bx = cardX + 12, by = lineY;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
         fill(bx, by, bx + bw, by + bh, bHover ? 0xff404448 : 0xff282a2e);
@@ -694,17 +684,17 @@ void ProfileScreen::renderTabSeguridad(int xm, int ym)
         fill(bx, by + bh - 1, bx + bw, by + bh, bHover ? 0xffffcc00 : 0xff555555);
         fill(bx, by, bx + 1, by + bh, bHover ? 0xffffcc00 : 0xff555555);
         fill(bx + bw - 1, by, bx + bw, by + bh, bHover ? 0xffffcc00 : 0xff555555);
-        drawString(font, I18n::get("profile.security.changePasswordWeb") + "  >", bx + 8, by + 6, bHover ? 0xffffcc00 : 0xffffffff);
+        drawString(font, I18n::get("profile.security.changePasswordWeb") + "  >", bx + 8, by + 5, bHover ? 0xffffcc00 : 0xffffffff);
 
         // Button Cerrar sesion
         int sbx = bx + bw + 10;
-        bool sHover = (xm >= sbx && xm <= sbx + 100 && ym >= by && ym <= by + bh);
-        fill(sbx, by, sbx + 100, by + bh, sHover ? 0x80ff4444 : 0x5033363a);
-        fill(sbx, by, sbx + 100, by + 1, 0xff555555);
-        fill(sbx, by + bh - 1, sbx + 100, by + bh, 0xff555555);
+        bool sHover = (xm >= sbx && xm <= sbx + 90 && ym >= by && ym <= by + bh);
+        fill(sbx, by, sbx + 90, by + bh, sHover ? 0x80ff4444 : 0x5033363a);
+        fill(sbx, by, sbx + 90, by + 1, 0xff555555);
+        fill(sbx, by + bh - 1, sbx + 90, by + bh, 0xff555555);
         fill(sbx, by, sbx + 1, by + bh, 0xff555555);
-        fill(sbx + 100 - 1, by, sbx + 100, by + bh, 0xff555555);
-        drawString(font, I18n::get("profile.signOut"), sbx + 14, by + 6, 0xffffffff);
+        fill(sbx + 90 - 1, by, sbx + 90, by + bh, 0xff555555);
+        drawString(font, I18n::get("profile.signOut"), sbx + 10, by + 5, 0xffffffff);
     }
 }
 
@@ -739,20 +729,16 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
 
         // 2. Tab 0 (Resumen) Interactions
         if (_selectedTab == 0) {
-            int pad = 5;
             int contentW = _rightPanelW;
-            int contentH = _rightPanelH;
-
-            int noteH = 18;
-            int noteY = _rightPanelY + contentH - noteH - 3;
-            int availH = (noteY - _rightPanelY) - pad * 2;
-            int secTopH = std::max(75, (int)(availH * 0.60f));
-            int secActionH = availH - secTopH;
-            int sec2Y = _rightPanelY + secTopH + pad;
+            int gap = 6;
+            int secTopH = 64;
+            int secActionH = 46;
+            int sec1Y = _rightPanelY;
+            int sec2Y = sec1Y + secTopH + gap;
 
             int actionCardGap = 4;
-            int actionCardY = sec2Y + 15;
-            int actionCardH = secActionH - 20;
+            int actionCardY = sec2Y + 14;
+            int actionCardH = secActionH - 18;
             int actionCardW = (contentW - 16 - actionCardGap * 2) / 3;
 
             // Card 1: Editar nombre local
@@ -766,11 +752,11 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
             if (!isOnline) {
                 int accountCardW = std::min(148, (int)(contentW * 0.44f));
                 int accountCardX = _rightPanelX + contentW - accountCardW - 6;
-                int accountCardY = _rightPanelY + 4;
-                int bx = accountCardX + 6;
-                int by = accountCardY + 50;
-                int bw = accountCardW - 12;
-                int bh = 14;
+                int accountCardY = sec1Y + 4;
+                int bx = accountCardX + 5;
+                int by = accountCardY + 40;
+                int bw = accountCardW - 10;
+                int bh = 13;
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
                     minecraft->setScreen(new LinkAccountScreen());
                     return;
@@ -783,8 +769,8 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
             int cardX = _rightPanelX + 10;
             int cardY = _rightPanelY + 34;
             if (isOnline) {
-                int lineY = cardY + 12 + 26 * 3 + 30;
-                int bx = cardX + 12, by = lineY, bw = 160, bh = 20;
+                int lineY = cardY + 10 + 22 * 3 + 24;
+                int bx = cardX + 12, by = lineY, bw = 150, bh = 18;
                 // Administrar cuenta (Web)
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
                     minecraft->platform()->openURL("http://localhost:5173/pages/profile.html");
@@ -792,14 +778,14 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
                 }
                 // Cerrar sesion
                 int sbx = bx + bw + 10;
-                if (x >= sbx && x <= sbx + 100 && y >= by && y <= by + bh) {
+                if (x >= sbx && x <= sbx + 90 && y >= by && y <= by + bh) {
                     AccountManager::logout();
                     init();
                     return;
                 }
             } else {
-                int lineY = cardY + 12 + 26 * 2 + 32;
-                int bx = cardX + 12, by = lineY, bw = 180, bh = 22;
+                int lineY = cardY + 10 + 22 * 2 + 24;
+                int bx = cardX + 12, by = lineY, bw = 170, bh = 20;
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
                     minecraft->setScreen(new LinkAccountScreen());
                     return;
@@ -812,22 +798,22 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
             int cardX = _rightPanelX + 10;
             int cardY = _rightPanelY + 34;
             if (!isOnline) {
-                int lineY = cardY + 12 + 26 * 2 + 28;
-                int bx = cardX + 12, by = lineY, bw = 160, bh = 20;
+                int lineY = cardY + 10 + 22 * 2;
+                int bx = cardX + 12, by = lineY, bw = 150, bh = 18;
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
                     minecraft->setScreen(new UsernameScreen());
                     return;
                 }
             } else {
-                int lineY = cardY + 12 + 26 * 2 + 28;
-                int bx = cardX + 12, by = lineY, bw = 90, bh = 20;
+                int lineY = cardY + 10 + 22 * 3;
+                int bx = cardX + 12, by = lineY, bw = 85, bh = 18;
                 // Copiar ID
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
                     copyToClipboard(AccountManager::getIdentity().playerId);
                     return;
                 }
                 // Editar perfil (Web)
-                int ebx = bx + bw + 10, ebw = 140;
+                int ebx = bx + bw + 10, ebw = 135;
                 if (x >= ebx && x <= ebx + ebw && y >= by && y <= by + bh) {
                     minecraft->platform()->openURL("http://localhost:5173/pages/edit-profile.html");
                     return;
@@ -840,15 +826,15 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
             int cardX = _rightPanelX + 10;
             int cardY = _rightPanelY + 34;
             if (!isOnline) {
-                int lineY = cardY + 14 + 24 + 32;
-                int bx = cardX + 12, by = lineY, bw = 180, bh = 22;
+                int lineY = cardY + 12 + 20 * 2;
+                int bx = cardX + 12, by = lineY, bw = 170, bh = 20;
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
                     minecraft->setScreen(new LinkAccountScreen());
                     return;
                 }
             } else {
-                int lineY = cardY + 14 + 26 * 2 + 30;
-                int bx = cardX + 12, by = lineY, bw = 160, bh = 20;
+                int lineY = cardY + 12 + 22 * 2 + 24;
+                int bx = cardX + 12, by = lineY, bw = 150, bh = 18;
                 // Cambiar contrasena (Web)
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
                     minecraft->platform()->openURL("http://localhost:5173/pages/forgot-password.html");
@@ -856,7 +842,7 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
                 }
                 // Cerrar sesion
                 int sbx = bx + bw + 10;
-                if (x >= sbx && x <= sbx + 100 && y >= by && y <= by + bh) {
+                if (x >= sbx && x <= sbx + 90 && y >= by && y <= by + bh) {
                     AccountManager::logout();
                     init();
                     return;
