@@ -760,7 +760,7 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
                 int bx = cardX + 12, by = lineY, bw = 150, bh = 18;
                 // Administrar cuenta (Web)
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
-                    minecraft->platform()->openURL("http://localhost:5173/pages/profile.html");
+                    minecraft->platform()->openURL("https://bycesardev.github.io/pocketmc/pages/profile.html");
                     return;
                 }
                 // Cerrar sesion
@@ -802,7 +802,7 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
                 // Editar perfil (Web)
                 int ebx = bx + bw + 10, ebw = 135;
                 if (x >= ebx && x <= ebx + ebw && y >= by && y <= by + bh) {
-                    minecraft->platform()->openURL("http://localhost:5173/pages/edit-profile.html");
+                    minecraft->platform()->openURL("https://bycesardev.github.io/pocketmc/pages/edit-profile.html");
                     return;
                 }
             }
@@ -824,7 +824,7 @@ void ProfileScreen::mouseClicked(int x, int y, int buttonNum)
                 int bx = cardX + 12, by = lineY, bw = 150, bh = 18;
                 // Cambiar contrasena (Web)
                 if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
-                    minecraft->platform()->openURL("http://localhost:5173/pages/forgot-password.html");
+                    minecraft->platform()->openURL("https://bycesardev.github.io/pocketmc/pages/forgot-password.html");
                     return;
                 }
                 // Cerrar sesion

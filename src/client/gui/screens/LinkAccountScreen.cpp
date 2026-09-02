@@ -312,13 +312,13 @@ void LinkAccountScreen::mouseClicked(int x, int y, int buttonNum)
 
         // Forgot Password link
         if (x >= _fpX && x <= _fpX + _fpW && y >= _fpY && y <= _fpY + _fpH) {
-            minecraft->platform()->openURL("http://localhost:5173/pages/forgot-password.html");
+            minecraft->platform()->openURL("https://bycesardev.github.io/pocketmc/pages/forgot-password.html");
             return;
         }
 
         // Create Account button
         if (x >= _createBtnX && x <= _createBtnX + _createBtnW && y >= _createBtnY && y <= _createBtnY + _createBtnH) {
-            minecraft->platform()->openURL("http://localhost:5173/pages/register.html");
+            minecraft->platform()->openURL("https://bycesardev.github.io/pocketmc/pages/register.html");
             return;
         }
 
