@@ -196,15 +196,15 @@ void LinkAccountScreen::render(int xm, int ym, float a)
 
     // Eye Button
     bool eyeHover = (xm >= _eyeX && xm <= _eyeX + _eyeW && ym >= _eyeY && ym <= _eyeY + _eyeH);
-    drawPanel(_eyeX, _eyeY, _eyeW, _eyeH, eyeHover ? 0xff404448 : 0xff282a2e, eyeHover ? 0xffffcc00 : 0xff555555);
+    drawPanel(_eyeX, _eyeY, _eyeW, _eyeH, eyeHover ? 0x90282a2e : 0x60101214, eyeHover ? 0xffffcc00 : 0xff484c52);
     drawIconTexture(tPassword.isPassword ? "gui/user/eye.png" : "gui/user/eye_slash.png", _eyeX + 3, _eyeY + 3, 12, 12, 0xffffffff);
 
     // Remember Me Checkbox
-    fill(_cbX, _cbY, _cbX + _cbSize, _cbY + _cbSize, 0xff101214);
-    fill(_cbX, _cbY, _cbX + _cbSize, _cbY + 1, 0xff555555);
-    fill(_cbX, _cbY + _cbSize - 1, _cbX + _cbSize, _cbY + _cbSize, 0xff555555);
-    fill(_cbX, _cbY, _cbX + 1, _cbY + _cbSize, 0xff555555);
-    fill(_cbX + _cbSize - 1, _cbY, _cbX + _cbSize, _cbY + _cbSize, 0xff555555);
+    fill(_cbX, _cbY, _cbX + _cbSize, _cbY + _cbSize, 0x60101214);
+    fill(_cbX, _cbY, _cbX + _cbSize, _cbY + 1, 0xff484c52);
+    fill(_cbX, _cbY + _cbSize - 1, _cbX + _cbSize, _cbY + _cbSize, 0xff484c52);
+    fill(_cbX, _cbY, _cbX + 1, _cbY + _cbSize, 0xff484c52);
+    fill(_cbX + _cbSize - 1, _cbY, _cbX + _cbSize, _cbY + _cbSize, 0xff484c52);
     if (_rememberMe) {
         fill(_cbX + 2, _cbY + 2, _cbX + _cbSize - 2, _cbY + _cbSize - 2, 0xff55ff55);
     }
@@ -254,13 +254,14 @@ void LinkAccountScreen::render(int xm, int ym, float a)
 
     drawScaledString(I18n::get("linkAccount.termsNotice1"), (float)(noteX + 18), (float)(noteY + 3), 0xff88a0b8, 0.68f);
 
+    float spaceW = (float)font->width(" ") * 0.68f;
     float l2X = (float)(noteX + 18);
     float l2Y = (float)(noteY + 12);
     drawScaledString(I18n::get("linkAccount.termsNoticeTerms"), l2X, l2Y, 0xffffcc00, 0.68f);
-    l2X += font->width(I18n::get("linkAccount.termsNoticeTerms")) * 0.68f;
+    l2X += font->width(I18n::get("linkAccount.termsNoticeTerms")) * 0.68f + spaceW;
 
     drawScaledString(I18n::get("linkAccount.termsNoticeAnd"), l2X, l2Y, 0xff88a0b8, 0.68f);
-    l2X += font->width(I18n::get("linkAccount.termsNoticeAnd")) * 0.68f;
+    l2X += font->width(I18n::get("linkAccount.termsNoticeAnd")) * 0.68f + spaceW;
 
     drawScaledString(I18n::get("linkAccount.termsNoticePrivacy"), l2X, l2Y, 0xffffcc00, 0.68f);
 }

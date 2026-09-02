@@ -158,13 +158,10 @@ void TextBox::tick(Minecraft* minecraft) {
 }
 
 void TextBox::render(Minecraft* minecraft, int xm, int ym) {
-    // textbox like in beta 1.7.3
-    // change appearance when focused so the user can tell it's active
-    // active background darker gray with a subtle border
-    uint32_t bgColor = focused ? 0xffa0a0a0 : 0xffa0a0a0;
-    uint32_t borderColor = focused ? 0xC0000000 : 0xC0000000;
-    fill(x, y, x + width, y + height, bgColor);
-    fill(x + 1, y + 1, x + width - 1, y + height - 1, borderColor);
+    uint32_t borderColor = focused ? 0xffffffff : 0xff484c52;
+    uint32_t bgColor = focused ? 0x90101214 : 0x60101214;
+    fill(x, y, x + width, y + height, borderColor);
+    fill(x + 1, y + 1, x + width - 1, y + height - 1, bgColor);
 
     glEnable2(GL_SCISSOR_TEST);
     glScissor(
