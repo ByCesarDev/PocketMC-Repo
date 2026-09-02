@@ -1538,3 +1538,18 @@ linkAccount.termsNoticePrivacy=Politica de Privacidad.
 linkAccount.error=Usuario o contrasena incorrectos.
 linkAccount.errorEmpty=Por favor completa todos los campos.
 linkAccount.success=Cuenta vinculada con exito!
+
+# Username Screen
+username.title=Ingresa tu Nombre de Usuario
+username.subtitle=Elige tu nombre de usuario para empezar a jugar.
+username.cardTitle=INGRESA TU NOMBRE DE USUARIO
+username.label=Usuario
+username.desc1=Este nombre se usara para identificarte en el juego.
+username.desc2=Puedes cambiarlo luego en tu perfil.
+username.placeholder=Ingresa tu nombre de usuario
+username.ruleLength=De 3 a 16 caracteres de largo
+username.ruleChars=Puede contener letras, numeros y guiones bajos
+username.ruleStart=Debe comenzar con una letra
+username.continue=Continuar
+username.notice1=Este es un nombre de usuario local.
+username.notice2=Puedes vincular una cuenta PocketMC mas tarde.

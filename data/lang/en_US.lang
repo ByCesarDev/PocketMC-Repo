@@ -1540,3 +1540,18 @@ linkAccount.termsNoticePrivacy=Privacy Policy.
 linkAccount.error=Invalid username or password.
 linkAccount.errorEmpty=Please enter username and password.
 linkAccount.success=Account linked successfully!
+
+# Username Screen
+username.title=Enter Your Username
+username.subtitle=Choose your username to start playing.
+username.cardTitle=ENTER YOUR USERNAME
+username.label=Username
+username.desc1=This name will be used to identify you in-game.
+username.desc2=You can change it later in your profile.
+username.placeholder=Enter your username
+username.ruleLength=3 to 16 characters long
+username.ruleChars=Can contain letters, numbers and underscores
+username.ruleStart=Must start with a letter
+username.continue=Continue
+username.notice1=This is a local username.
+username.notice2=You can link a PocketMC account later.
