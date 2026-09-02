@@ -21,7 +21,6 @@
 
 ProfileScreen::ProfileScreen()
 :   _btnBack(1, I18n::get("profile.back")),
-    _btnClose(2, "X"),
     _selectedTab(0),
     _copiedFeedbackTicks(0),
     _leftPanelX(0), _leftPanelY(0), _leftPanelW(0), _leftPanelH(0),
@@ -39,12 +38,9 @@ void ProfileScreen::init()
     tabButtons.clear();
 
     _btnBack.msg = I18n::get("profile.back");
-    _btnClose.msg = "X";
 
     buttons.push_back(&_btnBack);
-    buttons.push_back(&_btnClose);
     tabButtons.push_back(&_btnBack);
-    tabButtons.push_back(&_btnClose);
 
     setupPositions();
 }
@@ -66,11 +62,6 @@ void ProfileScreen::setupPositions()
     _btnBack.y = 4;
     _btnBack.width = 46;
     _btnBack.height = 20;
-
-    _btnClose.x = width - margin - 20;
-    _btnClose.y = 4;
-    _btnClose.width = 20;
-    _btnClose.height = 20;
 
     // Panels layout
     int contentY = topBarH + 2;
@@ -357,32 +348,10 @@ void ProfileScreen::render(int xm, int ym, float a)
     renderBackground();
     fill(0, 0, width, height, 0x60000000);
 
-    const PlayerIdentity& id = AccountManager::getIdentity();
-    bool isOnline = AccountManager::isOnline();
-    std::string localUname = minecraft->options.getStringValue(OPTIONS_USERNAME);
-    std::string activeDispName = AccountManager::getDisplayName(localUname);
-
     // Top Bar
     int headerTextX = _btnBack.x + _btnBack.width + 10;
     drawString(font, I18n::get("profile.title"), headerTextX, 5, 0xffffffff);
     drawScaledString(I18n::get("profile.subtitle"), (float)headerTextX, 16.0f, 0xff888888, 0.8f);
-
-    // Right User Badge in Top Bar
-    int badgeW = 92;
-    int badgeH = 20;
-    int badgeX = _btnClose.x - badgeW - 6;
-    int badgeY = 4;
-    drawPanel(badgeX, badgeY, badgeW, badgeH, 0xa0141618, 0xff2e3034);
-
-    drawSkinFace(badgeX + 3, badgeY + 3, 14);
-
-    std::string shortDisp = activeDispName.size() > 8 ? activeDispName.substr(0, 7) + "." : activeDispName;
-    drawString(font, shortDisp, badgeX + 20, badgeY + 2, 0xffffffff);
-    if (isOnline) {
-        drawScaledString(I18n::get("profile.online"), (float)(badgeX + 20), (float)(badgeY + 11), 0xff55ff55, 0.8f);
-    } else {
-        drawScaledString(I18n::get("profile.offline"), (float)(badgeX + 20), (float)(badgeY + 11), 0xffff5555, 0.8f);
-    }
 
     // Left Navigation Panel (4 Tabs)
     drawPanel(_leftPanelX, _leftPanelY, _leftPanelW, _leftPanelH, 0xd8141618, 0xff282a2e);
@@ -406,7 +375,6 @@ void ProfileScreen::render(int xm, int ym, float a)
     }
 
     _btnBack.render(minecraft, xm, ym);
-    _btnClose.render(minecraft, xm, ym);
 }
 
 // ─── TAB 0: Resumen ──────────────────────────────────────────────────────────
@@ -450,12 +418,12 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
     if (!isOnline) {
         int tagW = 46;
         int tagH = 10;
-        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0x40ff0000);
-        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xffff4444);
-        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xffff4444);
-        fill(profileInfoX, badgeTagY + tagH - 1, profileInfoX + tagW, badgeTagY + tagH, 0xffff4444);
-        fill(profileInfoX + tagW - 1, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xffff4444);
-        drawScaledString(I18n::get("profile.offline"), (float)(profileInfoX + 4), (float)(badgeTagY + 2), 0xffff5555, 0.75f);
+        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0x25301010);
+        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xffaa3333);
+        fill(profileInfoX, badgeTagY + tagH - 1, profileInfoX + tagW, badgeTagY + tagH, 0xffaa3333);
+        fill(profileInfoX, badgeTagY, profileInfoX + 1, badgeTagY + tagH, 0xffaa3333);
+        fill(profileInfoX + tagW - 1, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xffaa3333);
+        drawScaledString(I18n::get("profile.offline"), (float)(profileInfoX + 4), (float)(badgeTagY + 2), 0xffff6666, 0.75f);
 
         drawString(font, I18n::get("profile.localProfile"), profileInfoX, badgeTagY + 13, 0xffdddddd);
         drawScaledString(I18n::get("profile.playingWithoutAccount"), (float)profileInfoX, (float)(badgeTagY + 23), 0xff888888, 0.75f);
@@ -463,11 +431,11 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
     } else {
         int tagW = 42;
         int tagH = 10;
-        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0x4000ff00);
-        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xff55ff55);
-        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xff55ff55);
-        fill(profileInfoX, badgeTagY + tagH - 1, profileInfoX + tagW, badgeTagY + tagH, 0xff55ff55);
-        fill(profileInfoX + tagW - 1, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xff55ff55);
+        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0x25103010);
+        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xff33aa33);
+        fill(profileInfoX, badgeTagY + tagH - 1, profileInfoX + tagW, badgeTagY + tagH, 0xff33aa33);
+        fill(profileInfoX, badgeTagY, profileInfoX + 1, badgeTagY + tagH, 0xff33aa33);
+        fill(profileInfoX + tagW - 1, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xff33aa33);
         drawScaledString(I18n::get("profile.online"), (float)(profileInfoX + 4), (float)(badgeTagY + 2), 0xff55ff55, 0.75f);
 
         drawString(font, "@" + activeUname, profileInfoX, badgeTagY + 13, 0xffffcc00);
@@ -758,7 +726,7 @@ void ProfileScreen::renderTabSeguridad(int xm, int ym)
 
 void ProfileScreen::buttonClicked(Button* button)
 {
-    if (button == &_btnBack || button == &_btnClose) {
+    if (button == &_btnBack) {
         minecraft->setScreen(new StartMenuScreen());
         return;
     }

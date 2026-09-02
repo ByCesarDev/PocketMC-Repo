@@ -9,7 +9,6 @@
 class ProfileScreen : public Screen {
 private:
     Button _btnBack;
-    Button _btnClose;
 
     int _selectedTab;               // 0 = Resumen, 1 = Cuenta, 2 = Identidad, 3 = Seguridad
     int _copiedFeedbackTicks;       // Visual countdown when ID copied
