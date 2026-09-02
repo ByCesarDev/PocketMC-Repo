@@ -6,6 +6,7 @@
 #include "../../SharedConstants.h"
 
 #include "ai/Sensing.h"
+#include "player/Player.h"
 
 
 PathfinderMob::PathfinderMob( Level* level )
@@ -74,7 +75,7 @@ void PathfinderMob::updateAi()
 		}
 	} else {
 		attackTarget = level->getEntity(attackTargetId);
-		if (!attackTarget || !attackTarget->isAlive()) {
+		if (!attackTarget || !attackTarget->isAlive() || (attackTarget->isPlayer() && (((Player*)attackTarget)->abilities.invulnerable || ((Player*)attackTarget)->abilities.instabuild))) {
 			attackTargetId = 0;
 			attackTarget = NULL;
 		} else {

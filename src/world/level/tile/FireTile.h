@@ -8,6 +8,7 @@
 #include "../Level.h"
 
 #include "Tile.h"
+#include "ClassicPortalTile.h"
 
 class FireTile: public Tile
 {
@@ -174,6 +175,11 @@ public:
     }
 
     void onPlace(Level* level, int x, int y, int z) {
+        if (level->getTile(x, y - 1, z) == Tile::obsidian->id && Tile::classicPortal != NULL) {
+            if (((ClassicPortalTile*)Tile::classicPortal)->trySpawnPortal(level, x, y, z))
+                return;
+        }
+
         if (!level->isSolidBlockingTile(x, y - 1, z) && !isValidFireLocation(level, x, y, z)) {
             level->setTile(x, y, z, 0);
             return;

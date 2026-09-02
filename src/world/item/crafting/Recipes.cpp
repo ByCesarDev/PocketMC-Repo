@@ -75,11 +75,11 @@ Recipes::Recipes()
 
 		definition('#', Item::stick));
 
-	//addShapedRecipe(ItemInstance(Tile::netherFence, 6), //
-	//	"###", //
-	//	"###", //
+	addShapedRecipe(ItemInstance(Tile::netherFence, 6), //
+		"###", //
+		"###", //
 
-	//	'#', Tile::netherBrick);
+		definition('#', Tile::netherBrick));
 
 	addShapedRecipe(ItemInstance(Tile::fenceGate, 1), //
 		"#W#", //
@@ -137,6 +137,15 @@ Recipes::Recipes()
 		"##", //
 
 		definition('#', Item::string));
+
+	if (Tile::netherWartBlock && Item::netherWart) {
+		addShapedRecipe(ItemInstance(Tile::netherWartBlock, 1), //
+			"###", //
+			"###", //
+			"###", //
+
+			definition('#', Item::netherWart));
+	}
 
 	addShapedRecipe(ItemInstance(Tile::tnt, 1), //
 		"X#X", //

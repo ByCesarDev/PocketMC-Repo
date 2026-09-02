@@ -271,15 +271,20 @@ public:
 	static Tile* netherReactor;
 	static Tile* glowingObsidian;
 	static Tile* netherPortal;
+	static Tile* classicPortal;
 
 	static Tile* stairs_stoneBrickSmooth;
 	static Tile* netherBrick;
+	static Tile* netherFence;
 	static Tile* netherrack;
 	static Tile* stairs_netherBricks;
 	static Tile* stairs_sandStone;
 	static Tile* quartzBlock;
 	static Tile* stairs_quartz;
 
+	static Tile* netherStalk;
+	static Tile* netherWartBlock;
+	static Tile* ancientDebris;
 	static Tile* netherQuartzOre;
 	static Tile* endStone;
 	static Tile* soulSand;
@@ -507,23 +512,21 @@ protected:
 	std::map<BlockFace, MaterialInstance> materialInstances;
 	bool useMaterialInstances;
 
-    virtual Tile* setSoundType(const SoundType& soundType);
-
-    virtual Tile* setLightBlock(int i);
-    virtual Tile* setLightEmission(float f);
-
-    virtual Tile* setExplodeable(float explosionResistance);
-    virtual Tile* setDestroyTime(float destroySpeed);
-
-    virtual void setTicking(bool tick);
-
-    /*** Returns the item instance's auxValue when a TileItem is spawned from this Tile. */
-    virtual int getSpawnResourcesAuxValue(int data);
-
-private:
+public:
 	Tile* init();
 	Tile* setCategory(int category);
+    virtual Tile* setSoundType(const SoundType& soundType);
+    virtual Tile* setLightBlock(int i);
+    virtual Tile* setLightEmission(float f);
+    virtual Tile* setExplodeable(float explosionResistance);
+    virtual Tile* setDestroyTime(float destroySpeed);
+    virtual void setTicking(bool tick);
 
+protected:
+	/*** Returns the item instance's auxValue when a TileItem is spawned from this Tile. */
+	virtual int getSpawnResourcesAuxValue(int data);
+
+private:
 	bool containsX(const Vec3& v);
 	bool containsY(const Vec3& v);
 	bool containsZ(const Vec3& v);

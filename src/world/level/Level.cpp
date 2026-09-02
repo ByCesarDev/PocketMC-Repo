@@ -182,6 +182,33 @@ Player* Level::getNearestPlayer(float x, float y, float z, float maxDist) {
 }
 
 /*public*/
+Player* Level::getNearestAttackablePlayer(Entity* source, float maxDist) {
+    return getNearestAttackablePlayer(source->x, source->y, source->z, maxDist);
+}
+
+/*public*/
+Player* Level::getNearestAttackablePlayer(float x, float y, float z, float maxDist) {
+    float maxDistSqr = maxDist * maxDist;
+    float best = -1;
+    Player* result = NULL;
+    for (unsigned int i = 0; i < players.size(); i++) {
+        Player* p = players[i];
+        if (p->removed) continue;
+        if (!p->isAlive()) continue;
+        if (p->abilities.invulnerable || p->abilities.instabuild) continue;
+        float dist = p->distanceToSqr(x, y, z);
+        float visibleDist = maxDist;
+        if (p->isSneaking())
+            visibleDist *= 0.8f;
+        if ((maxDist < 0 || dist < visibleDist * visibleDist) && (best == -1 || dist < best)) {
+            best = dist;
+            result = p;
+        }
+    }
+    return result;
+}
+
+/*public*/
 void Level::tick() {
 	if (!isClientSide && levelData.getSpawnMobs()) {
 		static int _mobSpawnTick = 0;
@@ -465,16 +492,133 @@ void Level::validateSpawn() {
     levelData.setZSpawn(zSpawn);
 }
 
+#ifndef STANDALONE_SERVER
+#include "../../client/player/LocalPlayer.h"
+#include "../../client/Minecraft.h"
+#include "../../client/gui/screens/ProgressScreen.h"
+#include "../../client/renderer/GameRenderer.h"
+#include "../../platform/time.h"
+#include "../../locale/I18n.h"
+#ifndef ANDROID
+#include <GLFW/glfw3.h>
+#endif
+#endif
+
 void Level::changeDimension(int dimId) {
 	if (dimension->id == dimId) return;
 
+	int currentDimId = dimension ? dimension->id : 0;
+	bool isCrossingToNether = (dimId == -1);
+	bool isCrossingToOverworld = (currentDimId == -1);
+	bool isNetherOverworldCrossing = isCrossingToNether || isCrossingToOverworld;
+
+#ifndef STANDALONE_SERVER
+	Minecraft* mc = nullptr;
+	for (Entity* e : entities) {
+		if (e && e->isPlayer() && static_cast<Player*>(e)->isLocalPlayer()) {
+			LocalPlayer* lp = static_cast<LocalPlayer*>(e);
+			mc = lp->getMinecraft();
+			break;
+		}
+	}
+
+	std::string bgTexture = "";
+	if (isNetherOverworldCrossing) {
+		bgTexture = "gui/bg32.png";
+	}
+
+	std::string dimTitle = "";
+	std::string statusSaving = "";
+	std::string statusBuilding = "";
+	std::string statusLoading = "";
+
+	if (isCrossingToNether) {
+		if (!I18n::get("progressScreen.dimension.nether.title", dimTitle)) {
+			dimTitle = "Entering the Nether";
+		}
+		if (!I18n::get("progressScreen.dimension.nether.saving", statusSaving)) {
+			statusSaving = "Saving chunks";
+		}
+		if (!I18n::get("progressScreen.dimension.nether.building", statusBuilding)) {
+			statusBuilding = "Building terrain";
+		}
+		if (!I18n::get("progressScreen.dimension.nether.loading", statusLoading)) {
+			statusLoading = "Loading dimension";
+		}
+	} else if (isCrossingToOverworld) {
+		if (!I18n::get("progressScreen.dimension.overworld.title", dimTitle)) {
+			dimTitle = "Leaving the Nether";
+		}
+		if (!I18n::get("progressScreen.dimension.overworld.saving", statusSaving)) {
+			statusSaving = "Saving chunks";
+		}
+		if (!I18n::get("progressScreen.dimension.overworld.building", statusBuilding)) {
+			statusBuilding = "Building terrain";
+		}
+		if (!I18n::get("progressScreen.dimension.overworld.loading", statusLoading)) {
+			statusLoading = "Loading dimension";
+		}
+	} else {
+		if (!I18n::get("progressScreen.dimension.generic.title", dimTitle)) {
+			dimTitle = "Changing dimension";
+		}
+		if (!I18n::get("progressScreen.dimension.generic.saving", statusSaving)) {
+			statusSaving = "Saving chunks";
+		}
+		if (!I18n::get("progressScreen.dimension.generic.building", statusBuilding)) {
+			statusBuilding = "Building terrain";
+		}
+		if (!I18n::get("progressScreen.dimension.generic.loading", statusLoading)) {
+			statusLoading = "Loading dimension";
+		}
+	}
+
+	ProgressScreen* progressScreen = nullptr;
+	auto updateProgress = [&](int percent, const std::string& statusMsg, int sleepDuration = 100) {
+		if (mc) {
+			mc->progressStagePercentage = percent;
+			if (progressScreen) {
+				progressScreen->setStatus(statusMsg);
+			}
+			if (mc->gameRenderer) {
+				mc->gameRenderer->render(0.0f);
+			}
+#if !defined(ANDROID) && !defined(STANDALONE_SERVER)
+			GLFWwindow* window = glfwGetCurrentContext();
+			if (window) {
+				glfwSwapBuffers(window);
+			} else {
+				mc->swapBuffers();
+			}
+#else
+			mc->swapBuffers();
+#endif
+			if (sleepDuration > 0) {
+				sleepMs(sleepDuration);
+			}
+		}
+	};
+
+	if (mc) {
+		mc->setIsGeneratingLevel(true);
+		mc->setProgressStageStatusId(1);
+		progressScreen = new ProgressScreen(dimTitle, statusSaving, bgTexture);
+		mc->forceSetScreen(progressScreen);
+		updateProgress(0, statusSaving, 200);
+	}
+#else
+	auto updateProgress = [](int, const std::string&, int = 0){};
+#endif
+
 	levelData.setDimension(dimId);
+	updateProgress(20, statusSaving, 150);
 
 	_chunkSource->saveAll(true);
 
 	if (levelStorage) {
 		levelStorage->saveGame(this);
 	}
+	updateProgress(40, statusBuilding, 150);
 
 	for (int i = (int)entities.size() - 1; i >= 0; i--) {
 		Entity* e = entities[i];
@@ -490,6 +634,7 @@ void Level::changeDimension(int dimId) {
 			delete e;
 		}
 	}
+	updateProgress(60, statusBuilding, 150);
 
 	Dimension* newDimension = Dimension::getNew(dimId);
 	if (!newDimension) return;
@@ -501,6 +646,7 @@ void Level::changeDimension(int dimId) {
 	dimension->init(this);
 
 	_chunkSource = createChunkSource();
+	updateProgress(80, statusLoading, 150);
 
 	if (levelStorage) {
 		levelStorage->loadEntities(this, NULL);
@@ -509,6 +655,14 @@ void Level::changeDimension(int dimId) {
 	for (unsigned int i = 0; i < _listeners.size(); i++) {
 		_listeners[i]->allChanged();
 	}
+	updateProgress(100, statusLoading, 200);
+
+#ifndef STANDALONE_SERVER
+	if (mc) {
+		mc->setIsGeneratingLevel(false);
+		mc->setScreen(NULL);
+	}
+#endif
 }
 
 int Level::getTopTile(int x, int z) {

@@ -192,7 +192,13 @@ static const std::vector<BlockAtlasStitcher::TextureMapping> s_mappings = {
     { "end_stone.png", 24, "terrain2.png" },
     { "soul_sand.png", 25, "terrain2.png" },
     { "fence_spruce.png", 4, "terrain2.png" },
-    { "fence_birch.png", 5, "terrain2.png" }
+    { "fence_birch.png", 5, "terrain2.png" },
+    { "nether_wart_stage_0.png", 26, "terrain2.png" },
+    { "nether_wart_stage_1.png", 27, "terrain2.png" },
+    { "nether_wart_stage_2.png", 28, "terrain2.png" },
+    { "nether_wart_block.png", 29, "terrain2.png" },
+    { "ancient_debris_side.png", 30, "terrain2.png" },
+    { "ancient_debris_top.png", 31, "terrain2.png" }
 };
 
 const std::vector<BlockAtlasStitcher::TextureMapping>& BlockAtlasStitcher::getTextureMappings() {

@@ -60,5 +60,7 @@
 #include "TntTile.h"
 #include "WebTile.h"
 #include "WorkbenchTile.h"
+#include "NetherStalkTile.h"
+#include "AncientDebrisTile.h"
 
 #endif /* TILE_INCLUDE_H__ */

@@ -18,6 +18,7 @@ Biome* Biome::desert		 = NULL;
 Biome* Biome::plains		 = NULL;
 Biome* Biome::iceDesert		 = NULL;
 Biome* Biome::tundra		 = NULL;
+Biome* Biome::hell			 = NULL;
 
 /*static*/
 Biome::MobList Biome::_emptyMobList;
@@ -119,8 +120,16 @@ void Biome::initBiomes() {
 	plains			= (new FlatBiome())->setColor(0xFFD910)->setName("Plains");
 	iceDesert		= (new FlatBiome())->setColor(0xFFED93)->clearMobs(true, false, false)->setName("Ice Desert")->setSnowCovered()->setLeafColor(0xC4D339);
 	tundra			= (new Biome())->setColor(0x57EBF9)->setName("Tundra")->setSnowCovered()->setLeafColor(0xC4D339);
-	
+	hell			= (new Biome())->setColor(0x330808)->clearMobs(true, true, true)->setName("Hell");
+	hell->_enemies.insert(hell->_enemies.end(), Biome::MobSpawnerData(MobTypes::PigZombie, 10, 1, 4));
+	hell->_enemies.insert(hell->_enemies.end(), Biome::MobSpawnerData(MobTypes::PigZombieBrute, 5, 1, 2));
+
 	recalc();
+
+	if (Tile::netherrack) {
+		hell->topMaterial = (char) Tile::netherrack->id;
+		hell->material = (char) Tile::netherrack->id;
+	}
 }
 /*static*/
 void Biome::teardownBiomes() {
@@ -135,6 +144,7 @@ void Biome::teardownBiomes() {
 	delete plains;			plains    = NULL;
 	delete iceDesert;		iceDesert = NULL;
 	delete tundra;			tundra	  = NULL;
+	delete hell;			hell      = NULL;
 }
 
 Feature* Biome::getTreeFeature( Random* random )

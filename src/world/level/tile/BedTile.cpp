@@ -42,20 +42,19 @@ bool BedTile::use(Level* level, int x, int y, int z, Player* player) {
 		data = level->getData(x, y, z);
 	}
 	if(!level->dimension->mayRespawn()) {
-		float xc = x + 0.5f;
-		float yc = y + 0.5f;
-		float zc = z + 0.5f;
+		float xc = (float)x + 0.5f;
+		float yc = (float)y + 0.5f;
+		float zc = (float)z + 0.5f;
 		level->setTile(x, y, z, 0);
 		int direction = DirectionalTile::getDirection(data);
-		x += HEAD_DIRECTION_OFFSETS[direction][0];
-		y += HEAD_DIRECTION_OFFSETS[direction][1];
-		if(level->getTile(x, y, z) == id) {
-			level->setTile(x, y, z, 0);
-			xc = (xc + x + 0.5f) / 2;
-			yc = (yc + y + 0.5f) / 2;
-			zc = (zc + z + 0.5f) / 2;
+		int footX = x - HEAD_DIRECTION_OFFSETS[direction][0];
+		int footZ = z - HEAD_DIRECTION_OFFSETS[direction][1];
+		if(level->getTile(footX, y, footZ) == id) {
+			level->setTile(footX, y, footZ, 0);
+			xc = (xc + (float)footX + 0.5f) / 2.0f;
+			zc = (zc + (float)footZ + 0.5f) / 2.0f;
 		}
-		level->explode(NULL, x + 0.5f, y + 0.5f, z + 0.5f, 5, true);
+		level->explode(NULL, xc, yc, zc, 5.0f, true);
 		return true;
 	}
 	if(isOccupied(data)) {

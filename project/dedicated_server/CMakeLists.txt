@@ -112,6 +112,7 @@ set(CompileFiles ../../src/main.cpp
 ../../src/world/level/dimension/Dimension.cpp
 ../../src/world/level/levelgen/CanyonFeature.cpp
 ../../src/world/level/levelgen/DungeonFeature.cpp
+../../src/world/level/levelgen/HellRandomLevelSource.cpp
 ../../src/world/level/levelgen/LargeCaveFeature.cpp
 ../../src/world/level/levelgen/LargeFeature.cpp
 ../../src/world/level/levelgen/RandomLevelSource.cpp
@@ -127,6 +128,7 @@ set(CompileFiles ../../src/main.cpp
 ../../src/world/level/storage/LevelData.cpp
 ../../src/world/level/storage/LevelStorageSource.cpp
 ../../src/world/level/storage/RegionFile.cpp
+../../src/world/level/tile/AncientDebrisTile.cpp
 ../../src/world/level/tile/BedTile.cpp
 ../../src/world/level/tile/ChestTile.cpp
 ../../src/world/level/tile/CropTile.cpp
@@ -140,6 +142,7 @@ set(CompileFiles ../../src/main.cpp
 ../../src/world/level/tile/Mushroom.cpp
 ../../src/world/level/tile/NetherReactor.cpp
 ../../src/world/level/tile/NetherReactorPattern.cpp
+../../src/world/level/tile/NetherStalkTile.cpp
 ../../src/world/level/tile/StairTile.cpp
 ../../src/world/level/tile/StemTile.cpp
 ../../src/world/level/tile/StoneSlabTile.cpp

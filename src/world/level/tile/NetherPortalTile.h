@@ -12,17 +12,6 @@
 #include <chrono>
 #include <map>
 
-#ifndef STANDALONE_SERVER
-#include "../../../client/Minecraft.h"
-#include "../../../client/player/LocalPlayer.h"
-#include "../../../client/gui/screens/ProgressScreen.h"
-#include "../../../client/renderer/GameRenderer.h"
-#include "../../../platform/time.h"
-#include "../../../platform/log.h"
-#ifndef ANDROID
-#include <GLFW/glfw3.h>
-#endif
-#endif
 
 class NetherPortalTile : public Tile {
 public:
@@ -84,39 +73,7 @@ public:
         bool inNether = (level->dimension && level->dimension->id == -1);
         int targetDimId = inNether ? Dimension::NORMAL_DAYCYCLE : -1;
 
-#ifndef STANDALONE_SERVER
-        LocalPlayer* localPlayer = NULL;
-        if (player->isLocalPlayer()) {
-            localPlayer = static_cast<LocalPlayer*>(player);
-        }
-        if (localPlayer) {
-            Minecraft* mc = localPlayer->getMinecraft();
-            if (mc) {
-                mc->setIsGeneratingLevel(true);
-                mc->progressStagePercentage = -1;
-                mc->setProgressStageStatusId(1);
-                
-                ProgressScreen* newScreen = new ProgressScreen();
-                mc->forceSetScreen(newScreen);
-
-                if (mc->gameRenderer) {
-                    mc->gameRenderer->render(0.0f);
-                }
-#ifndef ANDROID
-                GLFWwindow* window = glfwGetCurrentContext();
-                if (window) {
-                    glfwSwapBuffers(window);
-                } else
-#endif
-                {
-                    mc->swapBuffers();
-                }
-                sleepMs(1000);
-            }
-        }
-#endif
-
-        // Switch the dimension (saves current world, loads new one)
+        // Switch the dimension (saves current world, loads new one, manages ProgressScreen)
         level->changeDimension(targetDimId);
 
         // Find if there is already a portal in the destination world
@@ -162,12 +119,6 @@ public:
             // Teleport player on top of the portal block (2 blocks up)
             player->setPos((float)landingX + 0.5f, (float)safeY + 2.0f, (float)landingZ + 0.5f);
         }
-
-#ifndef STANDALONE_SERVER
-        if (localPlayer && localPlayer->getMinecraft()) {
-            localPlayer->getMinecraft()->setIsGeneratingLevel(false);
-        }
-#endif
     }
 
     bool use(Level* level, int x, int y, int z, Player* player) override {

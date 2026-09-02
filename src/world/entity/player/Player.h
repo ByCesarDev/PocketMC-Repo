@@ -59,6 +59,10 @@ public:
     void aiStep();
 	void travel(float xa, float ya);
 
+    void handleInsideClassicPortal();
+    void toggleClassicDimension(int dimId);
+
+
 	virtual float getWalkingSpeedModifier();
 
     void die(Entity* source);
@@ -199,6 +203,12 @@ private:
 
     ItemInstance armor[NUM_ARMOR];
 	//FishingHook fishing = NULL;
+
+	bool insideClassicPortal;
+	bool portalEntranceCooldown;
+	int portalTime;
+	int oPortalTime;
+	int changingDimensionDelay;
 };
 
 #endif /*NET_MINECRAFT_WORLD_ENTITY_PLAYER__Player_H__*/

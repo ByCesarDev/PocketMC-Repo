@@ -40,7 +40,12 @@ Player::Player(Level* level, bool isCreative)
 	respawnPosition(0, -1, 0),
 	allPlayersSleeping(false),
 	swimLean(0.0f),
-	swimLeanO(0.0f)
+	swimLeanO(0.0f),
+	insideClassicPortal(false),
+	portalEntranceCooldown(false),
+	portalTime(0),
+	oPortalTime(0),
+	changingDimensionDelay(0)
 {
 	canRemove = false;
 
@@ -502,6 +507,77 @@ void Player::aiStep() {
             }
         }
     }
+
+    oPortalTime = portalTime;
+    if (portalEntranceCooldown) {
+        portalTime = 0;
+        oPortalTime = 0;
+        if (!insideClassicPortal)
+            portalEntranceCooldown = false;
+        insideClassicPortal = false;
+    }
+    else if (insideClassicPortal) {
+        if (changingDimensionDelay <= 0) {
+            if (portalTime < 80)
+                portalTime++;
+            if (portalTime >= 80) {
+                portalTime = 0;
+                toggleClassicDimension(dimension == -1 ? Dimension::NORMAL : -1);
+            }
+        }
+        insideClassicPortal = false;
+    } else {
+        if (portalTime > 0)
+            portalTime -= 4;
+        if (portalTime < 0)
+            portalTime = 0;
+    }
+    if (changingDimensionDelay > 0)
+        changingDimensionDelay--;
+}
+
+void Player::handleInsideClassicPortal()
+{
+    if (portalEntranceCooldown) {
+        insideClassicPortal = true;
+        return;
+    }
+    if (changingDimensionDelay > 0) {
+        changingDimensionDelay = 10;
+        return;
+    }
+    insideClassicPortal = true;
+}
+
+#include "../../level/PortalForcer.h"
+#include "../../level/dimension/Dimension.h"
+
+void Player::toggleClassicDimension(int dimId)
+{
+    if (dimId == dimension)
+        return;
+
+    float scale = (dimension == -1) ? 8.0f : ((dimId == -1) ? 0.125f : 1.0f);
+    const float maxCoord = (float)Level::MAX_LEVEL_SIZE;
+    const float minCoord = -maxCoord;
+
+    float nx = Mth::clamp(x * scale, minCoord, maxCoord);
+    float nz = Mth::clamp(z * scale, minCoord, maxCoord);
+
+    moveTo(nx, y - heightOffset, nz, yRot, xRot);
+
+    // Swap dimension directly in PocketMC (triggers ProgressScreen inside Level::changeDimension)
+    level->changeDimension(dimId);
+
+    PortalForcer forcer;
+    forcer.force(level, this);
+
+    dimension = dimId;
+    insideClassicPortal = false;
+    portalEntranceCooldown = true;
+    changingDimensionDelay = 10;
+    portalTime = 0;
+    oPortalTime = 0;
 }
 
 /*private*/

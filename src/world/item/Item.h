@@ -200,6 +200,7 @@ public:
 
 	static Item* netherbrick;
 	static Item* netherQuartz;
+	static Item* netherWart;
 
     static Item* record_01;
     static Item* record_02;

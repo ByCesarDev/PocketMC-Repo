@@ -25,6 +25,7 @@ public:
     static Biome* plains;
     static Biome* iceDesert;
     static Biome* tundra;
+    static Biome* hell;
 
     class MobSpawnerData: public WeighedRandom::WeighedRandomItem
 	{

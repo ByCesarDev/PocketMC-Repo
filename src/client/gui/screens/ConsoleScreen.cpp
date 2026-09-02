@@ -1,4 +1,4 @@
-﻿#include "ConsoleScreen.h"
+#include "ConsoleScreen.h"
 #include "../Gui.h"
 #include "../../Minecraft.h"
 #include "../../player/LocalPlayer.h"
@@ -70,8 +70,15 @@ void ConsoleScreen::execute()
     if (_input[0] == '/') {
         // Command
         std::string result = processCommand(_input);
-        if (!result.empty())
+        
+        // If the client doesn't recognize it, but we're connected to a server, forward it
+        if (result.find("Unknown command") == 0 && minecraft->netCallback && !minecraft->raknetInstance->isServer()) {
+            ChatPacket chatPkt(_input);
+            minecraft->raknetInstance->send(chatPkt);
+        }
+        else if (!result.empty()) {
             minecraft->gui.addMessage(result);
+        }
     } else {
         // Chat message: <name> message
         std::string msg = std::string("<") + minecraft->player->name + "> " + _input;

@@ -234,6 +234,8 @@ public:
 
 	Player* getNearestPlayer(Entity* source, float maxDist);
 	Player* getNearestPlayer(float x, float y, float z, float maxDist);
+	Player* getNearestAttackablePlayer(Entity* source, float maxDist);
+	Player* getNearestAttackablePlayer(float x, float y, float z, float maxDist);
 	int getEntitiesOfType(int entityType, const AABB& bb, EntityList& list);
 	int getEntitiesOfClass(int type, const AABB& bb, EntityList& list);
 	int countInstanceOfType(int typeId);

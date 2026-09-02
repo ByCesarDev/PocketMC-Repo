@@ -7,6 +7,9 @@
 #include "../Facing.h"
 #include "../phys/HitResult.h"
 #include "../phys/AABB.h"
+#include "../level/dimension/Dimension.h"
+#include "../../util/Mth.h"
+#include "../entity/EntityTypes.h"
 
 bool BucketItem::useOn(ItemInstance* instance, Player* player, Level* level, int x, int y, int z, int face, float clickX, float clickY, float clickZ) {
     if (contains == 0) {
@@ -130,6 +133,27 @@ bool BucketItem::useOn(ItemInstance* instance, Player* player, Level* level, int
         }
 
         if (instance->count == 0) return false;
+
+        if (level->dimension && level->dimension->ultraWarm && (contains == Tile::water->id || contains == Tile::calmWater->id)) {
+            level->playSound((float)x + 0.5f, (float)y + 0.5f, (float)z + 0.5f, "random.fizz", 0.5f, 2.6f + (level->random.nextFloat() - level->random.nextFloat()) * 0.8f);
+            for (int i = 0; i < 8; i++) {
+                level->addParticle(PARTICLETYPE(largesmoke), (float)x + Mth::random(), (float)y + Mth::random(), (float)z + Mth::random(), 0, 0, 0);
+            }
+
+            if (player != NULL && player->abilities.instabuild) {
+                // creative
+            } else {
+                if (instance->count == 1) {
+                    instance->id = Item::bucket_empty->id;
+                } else {
+                    instance->count--;
+                    if (!player->inventory->add(new ItemInstance(Item::bucket_empty))) {
+                        player->drop(new ItemInstance(Item::bucket_empty), true);
+                    }
+                }
+            }
+            return true;
+        }
 
         if (level->mayPlace(contains, x, y, z, false, (unsigned char)face)) {
             if (!level->isClientSide) level->setTileAndData(x, y, z, contains, 0);

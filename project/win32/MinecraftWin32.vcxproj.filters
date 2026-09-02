@@ -644,8 +644,11 @@
     <ClCompile Include="..\..\src\world\level\tile\DoorTile.cpp">
       <Filter>Source Files\world\level\tile</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\client\renderer\ptexture\ClassicPortalTexture.cpp">
+      <Filter>client\renderer\ptexture</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\client\renderer\ptexture\DynamicTexture.cpp">
-      <Filter>Source Files\client\renderer\ptexture</Filter>
+      <Filter>client\renderer\ptexture</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\client\renderer\entity\TripodCameraRenderer.cpp">
       <Filter>Source Files\client\renderer\entity</Filter>

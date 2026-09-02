@@ -153,6 +153,7 @@
     <ClCompile Include="..\..\src\client\renderer\gles.cpp" />
     <ClCompile Include="..\..\src\client\renderer\ItemInHandRenderer.cpp" />
     <ClCompile Include="..\..\src\client\renderer\LevelRenderer.cpp" />
+    <ClCompile Include="..\..\src\client\renderer\ptexture\ClassicPortalTexture.cpp" />
     <ClCompile Include="..\..\src\client\renderer\ptexture\DynamicTexture.cpp" />
     <ClCompile Include="..\..\src\client\renderer\RenderChunk.cpp" />
     <ClCompile Include="..\..\src\client\renderer\RenderList.cpp" />

@@ -56,6 +56,9 @@
 #include "renderer/ptexture/DynamicTexture.h"
 #include "renderer/GameRenderer.h"
 #include "renderer/ItemInHandRenderer.h"
+
+#include "renderer/ptexture/ClassicPortalTexture.h"
+#include "gui/Gui.h"
 #include "platform/log.h"
 #include "renderer/LevelRenderer.h"
 #include "renderer/entity/EntityRenderDispatcher.h"
@@ -1373,6 +1376,10 @@ void Minecraft::init()
 	PortalTexture* portalTex = new PortalTexture();
 	portalTex->loadSheet(platform());
 	textures->addDynamicTexture(portalTex);
+
+	ClassicPortalTexture* classicPortalTex = new ClassicPortalTexture();
+	classicPortalTex->loadSheet(platform());
+	textures->addDynamicTexture(classicPortalTex);
 
 	gui.texturesLoaded(textures);
 

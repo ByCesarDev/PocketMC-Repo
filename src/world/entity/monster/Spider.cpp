@@ -68,7 +68,7 @@ bool Spider::makeStepSound() {
 Entity* Spider::findAttackTarget() {
 	float br = getBrightness(1);
 	if (br < 0.5f) {
-		return level->getNearestPlayer(this, 16);
+		return level->getNearestAttackablePlayer(this, 16.0f);
 	}
 	return NULL;
 }

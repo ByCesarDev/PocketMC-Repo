@@ -6,6 +6,7 @@
 #include "SoulSandTile.h"
 // AncientDebrisTile removed
 #include "NetherPortalTile.h"
+#include "ClassicPortalTile.h"
 #include "entity/NetherReactorTileEntity.h"
 #include "../Level.h"
 #include "../../entity/player/Player.h"
@@ -171,19 +172,23 @@ Tile* Tile::info_reserved6   = NULL;
 Tile* Tile::grass_carried    = NULL;
 LeafTile* Tile::leaves_carried   = NULL;
 
-Tile* Tile::netherPortal = NULL;
-
-Tile* Tile::netherReactor = NULL;
 Tile* Tile::glowingObsidian = NULL;
+Tile* Tile::netherReactor = NULL;
+Tile* Tile::netherPortal = NULL;
+Tile* Tile::classicPortal = NULL;
 
 Tile* Tile::stairs_stoneBrickSmooth   = NULL;
 Tile* Tile::netherBrick   = NULL;
+Tile* Tile::netherFence   = NULL;
 Tile* Tile::netherrack   = NULL;
 Tile* Tile::stairs_netherBricks   = NULL;
 Tile* Tile::stairs_sandStone   = NULL;
 Tile* Tile::quartzBlock   = NULL;
 Tile* Tile::stairs_quartz   = NULL;
 
+Tile* Tile::netherStalk = NULL;
+Tile* Tile::netherWartBlock = NULL;
+Tile* Tile::ancientDebris = NULL;
 Tile* Tile::netherQuartzOre = NULL;
 Tile* Tile::endStone = NULL;
 Tile* Tile::soulSand = NULL;
@@ -307,7 +312,9 @@ void Tile::initTiles() {
 
 	thinGlass = (new ThinFenceTile(102, 1 + 3 * 16, 4 + 9 * 16, Material::glass, false))->init()->setDestroyTime(0.3f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Structures)->setDescriptionId("thinGlass")->setAllFacesTexture("glass_pane");
 
-	netherPortal = (new NetherPortalTile(90, 250))->init()->setDestroyTime(-1.0f)->setLightEmission(11 / 16.0f)->setSoundType(SOUND_GLASS)->setDescriptionId("netherPortal")->setAllFacesTexture("portal");
+	netherPortal = (new NetherPortalTile(90, 250))->init()->setDestroyTime(-1.0f)->setLightEmission(11 / 16.0f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("netherPortal")->setAllFacesTexture("portal");
+	classicPortal = (new ClassicPortalTile(250, 14, Material::portal))->init()->setDestroyTime(-1.0f)->setLightEmission(15 / 16.0f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("classicPortal");
+	classicPortal->setTicking(true);
 
 	melon = (new MelonTile(103))->init()->setDestroyTime(1.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("melon")->setSimplifiedTextures("melon_side", "melon_top", "melon_top");
 	melonStem = (new StemTile(105, Tile::melon))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("pumpkinStem");
@@ -316,7 +323,9 @@ void Tile::initTiles() {
 
 	stairs_stoneBrickSmooth = (new StairTile(109, Tile::stoneBrickSmooth))->init()->setCategory(ItemCategory::Structures)->setDescriptionId("stairsStoneBrickSmooth");
 	netherBrick    = (new Tile(112, 0 + 14 * 16, Material::stone))->init()->setDestroyTime(2.0f)->setExplodeable(10)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("netherBrick")->setAllFacesTexture("nether_brick");
+	netherFence    = (new FenceTile(113, 0 + 14 * 16, Material::stone))->init()->setDestroyTime(2.0f)->setExplodeable(10)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("netherFence")->setAllFacesTexture("nether_brick");
 	stairs_netherBricks = (new StairTile(114, Tile::netherBrick))->init()->setCategory(ItemCategory::Structures)->setDescriptionId("stairsNetherBrick");
+	netherStalk    = (new NetherStalkTile(115))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("netherStalk");
 	stairs_sandStone = (new StairTile(128, Tile::sandStone))->init()->setCategory(ItemCategory::Structures)->setDescriptionId("stairsSandStone");
 
 	quartzBlock   = (new QuartzBlockTile(155))->init()->setSoundType(SOUND_STONE)->setDestroyTime(0.8f)->setCategory(ItemCategory::Structures)->setDescriptionId("quartzBlock");
@@ -325,6 +334,9 @@ void Tile::initTiles() {
 	netherQuartzOre = (new NetherQuartzOreTile(117, 7 + 16 | TEXTURE_ALT_FLAG))->init()->setDestroyTime(3.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("netherQuartzOre")->setAllFacesTexture("nether_quartz_ore", 23 | Tile::TEXTURE_ALT_FLAG);
 	endStone = (new Tile(118, 8 + 16 | TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(3.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("endStone")->setAllFacesTexture("end_stone", 24 | Tile::TEXTURE_ALT_FLAG);
 	soulSand = (new SoulSandTile(119, 9 + 16 | TEXTURE_ALT_FLAG))->init()->setDestroyTime(0.5f)->setSoundType(SOUND_SAND)->setCategory(ItemCategory::Decorations)->setDescriptionId("soulSand")->setAllFacesTexture("soul_sand", 25 | Tile::TEXTURE_ALT_FLAG);
+
+	netherWartBlock = (new Tile(214, 29 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.0f)->setExplodeable(1.0f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Structures)->setDescriptionId("netherWartBlock")->setAllFacesTexture("nether_wart_block", 29 | Tile::TEXTURE_ALT_FLAG);
+	ancientDebris  = (new AncientDebrisTile(185))->init();
 
 	stonecutterBench= (new StonecutterTile(245))->init()->setDestroyTime(2.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("stonecutter")
 						->setFaceTexture(FACE_UP, "stonecutter_top")
@@ -506,6 +518,7 @@ bool Tile::isTileAllowedInCreative(int id) {
 	case 59:  // crops (placed by Item::seeds_wheat)
 	case 60:  // farmland
 	case 105: // melonStem (placed by Item::seeds_melon)
+	case 115: // netherStalk (placed by Item::netherWart)
 
 	// Lit / Active variants
 	case 62:  // furnace_lit (use furnace)
@@ -513,8 +526,8 @@ bool Tile::isTileAllowedInCreative(int id) {
 	case 178: // deepslateRedstoneOre_lit (use deepslateRedstoneOre)
 
 	// Portals, invisible barrier & internal engine blocks
-	case 90:  // netherPortal
 	case 95:  // invisible_bedrock
+	case 246: // classicPortal
 	case 248: // info_updateGame1
 	case 249: // info_updateGame2
 	case 253: // grass_carried

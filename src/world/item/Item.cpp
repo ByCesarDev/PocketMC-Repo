@@ -151,6 +151,7 @@ Item* Item::chicken_cooked = NULL;
 
 Item* Item::netherbrick = NULL;
 Item* Item::netherQuartz = NULL;
+Item* Item::netherWart = NULL;
 
 //Item* Item::record_01 = NULL;
 //Item* Item::record_02 = NULL;
@@ -283,6 +284,7 @@ void Item::initItems() {
 
 	Item::netherbrick = (new Item(149))->setIcon(5, 9)->setDescriptionId("netherbrickItem")->setCategory(ItemCategory::FoodArmor);
 	Item::netherQuartz = (new Item(150))->setIcon(5, 10)->setDescriptionId("netherquartz")->setCategory(ItemCategory::FoodArmor);
+	Item::netherWart = (new SeedItem(116, Tile::netherStalk ? Tile::netherStalk->id : 115, Tile::soulSand ? Tile::soulSand->id : 119))->setIcon(13, 7)->setCategory(ItemCategory::Decorations)->setDescriptionId("netherStalkSeeds");
 
 	//Item::record_01 = (new RecordingItem(2000, "13"))->setIcon(0, 15)->setCategory(ItemCategory::Decorations)->setDescriptionId("record");
 	//Item::record_02 = (new RecordingItem(2001, "cat"))->setIcon(1, 15)->setCategory(ItemCategory::Decorations)->setDescriptionId("record");

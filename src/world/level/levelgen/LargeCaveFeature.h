@@ -14,6 +14,10 @@
 
 class LargeCaveFeature: public LargeFeature
 {
+public:
+    LargeCaveFeature() : m_bIsNether(false) {}
+    LargeCaveFeature(bool isNether) : m_bIsNether(isNether) {}
+
 protected:
     void addRoom(Level* level, int xOffs, int zOffs, unsigned char* blocks, float xRoom, float yRoom, float zRoom) {
         addTunnel(level, xOffs, zOffs, blocks, xRoom, yRoom, zRoom, 1 + random.nextFloat() * 6, 0, 0, -1, -1, 0.5);
@@ -157,11 +161,19 @@ protected:
 
     void addFeature(Level* level, int x, int z, int xOffs, int zOffs, unsigned char* blocks, int blocksSize) {
         int caves = random.nextInt(random.nextInt(random.nextInt(40) + 1) + 1);
-        if (random.nextInt(15) != 0) caves = 0;
+        if (m_bIsNether) {
+            if (random.nextInt(5) != 0) caves = 0;
+        } else {
+            if (random.nextInt(15) != 0) caves = 0;
+        }
 
         for (int cave = 0; cave < caves; cave++) {
             float xCave = (float)(x * 16 + random.nextInt(16));
-            float yCave = (float)(random.nextInt(random.nextInt(120) + 8));
+            float yCave;
+            if (m_bIsNether)
+                yCave = (float)(random.nextInt(128));
+            else
+                yCave = (float)(random.nextInt(random.nextInt(120) + 8));
             float zCave = (float)(z * 16 + random.nextInt(16));
 
             int tunnels = 1;
@@ -170,16 +182,21 @@ protected:
                 tunnels += random.nextInt(4);
             }
 
+            float thicknessMult = m_bIsNether ? 2.0f : 1.0f;
+
             for (int i = 0; i < tunnels; i++) {
 
                 float yRot = random.nextFloat() * Mth::PI * 2;
                 float xRot = ((random.nextFloat() - 0.5f) * 2) / 8;
-                float thickness = random.nextFloat() * 2 + random.nextFloat();
+                float thickness = (random.nextFloat() * 2 + random.nextFloat()) * thicknessMult;
 
                 addTunnel(level, xOffs, zOffs, blocks, xCave, yCave, zCave, thickness, yRot, xRot, 0, 0, 1.0);
             }
         }
     }
+
+private:
+    bool m_bIsNether;
 };
 
 #endif /*NET_MINECRAFT_WORLD_LEVEL_LEVELGEN__LargeCaveFeature_H__*/

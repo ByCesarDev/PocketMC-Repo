@@ -23,7 +23,7 @@ public:
     bool canUse() {
         if (randomInterval > 0 && mob->random.nextInt(randomInterval) != 0) return false;
         Mob* potentialTarget = NULL;
-        if (targetType == 1) potentialTarget = mob->level->getNearestPlayer(mob, within); //@todo: targetType
+        if (targetType == 1) potentialTarget = mob->level->getNearestAttackablePlayer(mob, within); //@todo: targetType
         //else potentialTarget = (Mob*) mob->level->getClosestEntityOfClass(targetType, mob->bb.grow(within, 4, within), mob);
         if (!canAttack(potentialTarget, false)) return false;
         target = potentialTarget;
