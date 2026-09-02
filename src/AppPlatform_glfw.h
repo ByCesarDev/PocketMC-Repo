@@ -36,18 +36,20 @@ public:
     }
 
 	BinaryBlob readAssetFile(const std::string& filename) override {
-		FILE* fp = fopen(("data/" + filename).c_str(), "r");
+		FILE* fp = fopen(("data/" + filename).c_str(), "rb");
 		if (!fp)
 			return BinaryBlob();
 
 		int size = getRemainingFileSize(fp);
 
 		BinaryBlob blob;
-		blob.size = size;
-		blob.data = new unsigned char[size];
+		blob.data = new unsigned char[size + 1];
 
-		fread(blob.data, 1, size, fp);
+		size_t readBytes = fread(blob.data, 1, size, fp);
 		fclose(fp);
+
+		blob.size = (int)readBytes;
+		blob.data[readBytes] = '\0';
 
 		return blob;
 	}

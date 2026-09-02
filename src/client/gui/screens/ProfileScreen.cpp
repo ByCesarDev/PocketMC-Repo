@@ -169,15 +169,10 @@ void ProfileScreen::drawIconTexture(const std::string& path, int x, int y, int w
     glEnable2(GL_BLEND);
     glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    float r = ((color >> 16) & 0xff) / 255.0f;
-    float g = ((color >> 8) & 0xff) / 255.0f;
-    float b = (color & 0xff) / 255.0f;
-    float a = ((color >> 24) & 0xff) / 255.0f;
-    if (a == 0.0f) a = 1.0f;
-    glColor4f2(r, g, b, a);
-
     Tesselator& t = Tesselator::instance;
     t.begin();
+    const int abgr = (color & 0xff00ff00) | ((color & 0xff0000) >> 16) | ((color & 0xff) << 16);
+    t.colorABGR(abgr);
     t.vertexUV((float)x,       (float)(y + h), 0.0f, 0.0f, 1.0f);
     t.vertexUV((float)(x + w), (float)(y + h), 0.0f, 1.0f, 1.0f);
     t.vertexUV((float)(x + w), (float)y,       0.0f, 1.0f, 0.0f);
