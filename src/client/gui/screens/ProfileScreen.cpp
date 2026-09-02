@@ -451,20 +451,25 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
 
     drawString(font, I18n::get("profile.account"), accountCardX + 8, accountCardY + 4, 0xffffcc00);
 
-    drawScaledString(I18n::get("profile.accountType"), (float)(accountCardX + 8), (float)(accountCardY + 14), 0xff888888, 0.72f);
-    drawString(font, isOnline ? I18n::get("profile.online") : I18n::get("profile.offline"), accountCardX + 8, accountCardY + 21, isOnline ? 0xff55ff55 : 0xffff5555);
+    if (isOnline) {
+        drawString(font, I18n::get("profile.accountType"), accountCardX + 8, accountCardY + 14, 0xffaaaaaa);
+        drawScaledString(I18n::get("profile.online"), (float)(accountCardX + 8), (float)(accountCardY + 23), 0xff55ff55, 0.75f);
 
-    drawScaledString(I18n::get("profile.status"), (float)(accountCardX + 8), (float)(accountCardY + 31), 0xff888888, 0.72f);
-    drawString(font, isOnline ? I18n::get("profile.linkedActive") : I18n::get("profile.unlinked"), accountCardX + 8, accountCardY + 38, isOnline ? 0xff55ff55 : 0xffffcc00);
+        drawString(font, I18n::get("profile.status"), accountCardX + 8, accountCardY + 32, 0xffaaaaaa);
+        drawScaledString(I18n::get("profile.linkedActive"), (float)(accountCardX + 8), (float)(accountCardY + 41), 0xff55ff55, 0.75f);
+    } else {
+        drawString(font, I18n::get("profile.accountType"), accountCardX + 8, accountCardY + 12, 0xffaaaaaa);
+        drawScaledString(I18n::get("profile.offline"), (float)(accountCardX + 8), (float)(accountCardY + 20), 0xffff5555, 0.75f);
 
-    // Golden CTA Button only when Offline
-    if (!isOnline) {
+        drawString(font, I18n::get("profile.status"), accountCardX + 8, accountCardY + 27, 0xffaaaaaa);
+        drawScaledString(I18n::get("profile.unlinked"), (float)(accountCardX + 8), (float)(accountCardY + 35), 0xffffcc00, 0.75f);
+
         int bx = accountCardX + 5;
-        int by = accountCardY + 40;
+        int by = accountCardY + 42;
         int bw = accountCardW - 10;
-        int bh = 13;
+        int bh = 12;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
-        drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.68f);
+        drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.65f);
     }
 
     // ── SECTION 2: ACCIONES RAPIDAS ──
@@ -477,8 +482,8 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
     int actionCardW = (contentW - 16 - actionCardGap * 2) / 3;
 
     drawActionCard(_rightPanelX + 8, actionCardY, actionCardW, actionCardH, "gui/user/pencil_edit_icon.png", I18n::get("profile.editLocalName"), I18n::get("profile.editLocalNameDesc"), xm, ym);
-    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap), actionCardY, actionCardW, actionCardH, "", I18n::get("profile.exportProfile"), I18n::get("profile.exportProfileDesc"), xm, ym);
-    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap) * 2, actionCardY, actionCardW, actionCardH, "", I18n::get("profile.deleteLocalProfile"), I18n::get("profile.deleteLocalProfileDesc"), xm, ym);
+    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap), actionCardY, actionCardW, actionCardH, "gui/user/export.png", I18n::get("profile.exportProfile"), I18n::get("profile.exportProfileDesc"), xm, ym);
+    drawActionCard(_rightPanelX + 8 + (actionCardW + actionCardGap) * 2, actionCardY, actionCardW, actionCardH, "gui/user/trash.png", I18n::get("profile.deleteLocalProfile"), I18n::get("profile.deleteLocalProfileDesc"), xm, ym);
 
     // ── Bottom Note Box ──
     fill(noteX, noteY, noteX + noteW, noteY + noteH, 0x500f1c29);
@@ -487,7 +492,8 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
     fill(noteX, noteY, noteX + 1, noteY + noteH, 0xff1e3a5a);
     fill(noteX + noteW - 1, noteY, noteX + noteW, noteY + noteH, 0xff1e3a5a);
 
-    drawString(font, "(i)", noteX + 5, noteY + (noteH - 8) / 2, 0xff38bdf8);
+    int noteIconSize = 10;
+    drawIconTexture("gui/user/notice.png", noteX + 5, noteY + (noteH - noteIconSize) / 2, noteIconSize, noteIconSize, 0xff38bdf8);
     drawScaledString(I18n::get("profile.bottomNotice1"), (float)(noteX + 18), (float)(noteY + 2), 0xff88a0b8, 0.70f);
     drawScaledString(I18n::get("profile.bottomNotice2"), (float)(noteX + 18), (float)(noteY + 9), 0xff88a0b8, 0.70f);
 }
