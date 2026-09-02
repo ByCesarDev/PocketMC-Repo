@@ -98,6 +98,39 @@ void ProfileScreen::drawScaledString(const std::string& str, float x, float y, i
     glPopMatrix();
 }
 
+void ProfileScreen::drawGoldButton(int x, int y, int w, int h, const std::string& text, bool hover, float scale)
+{
+    // Background fill
+    fill(x, y, x + w, y + h, hover ? 0xfff0b020 : 0xffd99b16);
+    // Highlight top/left border
+    fill(x, y, x + w, y + 1, 0xfff5c542);
+    fill(x, y, x + 1, y + h, 0xfff5c542);
+    // Shadow bottom/right border
+    fill(x, y + h - 1, x + w, y + h, 0xff9e6c07);
+    fill(x + w - 1, y, x + w, y + h, 0xff9e6c07);
+
+    // Text with soft grayish-gold shadow (no harsh black shadow)
+    glPushMatrix();
+    float textX = (float)(x + 6);
+    float textY = (float)(y + (h - 8.0f * scale) / 2.0f);
+    glTranslatef(textX, textY, 0.0f);
+    glScalef(scale, scale, 1.0f);
+
+    font->draw(text, 1.0f, 1.0f, 0xff8c7040);
+    font->draw(text, 0.0f, 0.0f, 0xff1c1202);
+    glPopMatrix();
+
+    // Right chevron >
+    glPushMatrix();
+    float arrX = (float)(x + w - 9);
+    float arrY = (float)(y + (h - 8.0f * scale) / 2.0f);
+    glTranslatef(arrX, arrY, 0.0f);
+    glScalef(scale, scale, 1.0f);
+    font->draw(">", 1.0f, 1.0f, 0xff8c7040);
+    font->draw(">", 0.0f, 0.0f, 0xff1c1202);
+    glPopMatrix();
+}
+
 void ProfileScreen::copyToClipboard(const std::string& text)
 {
 #ifdef _WIN32
@@ -419,7 +452,7 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
         int tagH = 10;
         fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0x40ff0000);
         fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xffff4444);
-        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xffff4444);
+        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xffff4444);
         fill(profileInfoX, badgeTagY + tagH - 1, profileInfoX + tagW, badgeTagY + tagH, 0xffff4444);
         fill(profileInfoX + tagW - 1, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xffff4444);
         drawScaledString(I18n::get("profile.offline"), (float)(profileInfoX + 4), (float)(badgeTagY + 2), 0xffff5555, 0.75f);
@@ -432,7 +465,7 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
         int tagH = 10;
         fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0x4000ff00);
         fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xff55ff55);
-        fill(profileInfoX, badgeTagY, profileInfoX + 1, badgeTagY + tagH, 0xff55ff55);
+        fill(profileInfoX, badgeTagY, profileInfoX + tagW, badgeTagY + 1, 0xff55ff55);
         fill(profileInfoX, badgeTagY + tagH - 1, profileInfoX + tagW, badgeTagY + tagH, 0xff55ff55);
         fill(profileInfoX + tagW - 1, badgeTagY, profileInfoX + tagW, badgeTagY + tagH, 0xff55ff55);
         drawScaledString(I18n::get("profile.online"), (float)(profileInfoX + 4), (float)(badgeTagY + 2), 0xff55ff55, 0.75f);
@@ -456,20 +489,14 @@ void ProfileScreen::renderTabResumen(int xm, int ym)
     drawScaledString(I18n::get("profile.status"), (float)(accountCardX + 8), (float)(accountCardY + 32), 0xff888888, 0.75f);
     drawString(font, isOnline ? I18n::get("profile.linkedActive") : I18n::get("profile.unlinked"), accountCardX + 8, accountCardY + 40, isOnline ? 0xff55ff55 : 0xffffcc00);
 
-    // Golden CTA Button only when Offline (fitted inside box without overflow)
+    // Golden CTA Button only when Offline (fitted inside box with soft shadow)
     if (!isOnline) {
         int bx = accountCardX + 6;
         int by = accountCardY + 50;
         int bw = accountCardW - 12;
         int bh = 14;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
-        fill(bx, by, bx + bw, by + bh, bHover ? 0xfff0b020 : 0xffd99b16);
-        fill(bx, by, bx + bw, by + 1, 0xfff5c542);
-        fill(bx, by, bx + 1, by + bh, 0xfff5c542);
-        fill(bx, by + bh - 1, bx + bw, by + bh, 0xff9e6c07);
-        fill(bx + bw - 1, by, bx + bw, by + bh, 0xff9e6c07);
-        drawScaledString(I18n::get("profile.linkAccount"), (float)(bx + 4), (float)(by + 3), 0xff1c1202, 0.75f);
-        drawString(font, ">", bx + bw - 7, by + 3, 0xff1c1202);
+        drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.72f);
     }
 
     // SECTION 2: INFORMACION
@@ -559,12 +586,7 @@ void ProfileScreen::renderTabCuenta(int xm, int ym)
         int bw = 160, bh = 20;
         int bx = cardX + 12, by = lineY;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
-        fill(bx, by, bx + bw, by + bh, bHover ? 0xfff0b020 : 0xffd99b16);
-        fill(bx, by, bx + bw, by + 1, 0xfff5c542);
-        fill(bx, by, bx + 1, by + bh, 0xfff5c542);
-        fill(bx, by + bh - 1, bx + bw, by + bh, 0xff9e6c07);
-        fill(bx + bw - 1, by, bx + bw, by + bh, 0xff9e6c07);
-        drawString(font, I18n::get("profile.manageAccountWeb") + "  >", bx + 8, by + 6, 0xff1c1202);
+        drawGoldButton(bx, by, bw, bh, I18n::get("profile.manageAccountWeb"), bHover, 0.8f);
 
         // Button Cerrar sesion
         int sbx = bx + bw + 10;
@@ -583,12 +605,7 @@ void ProfileScreen::renderTabCuenta(int xm, int ym)
         int bw = 180, bh = 22;
         int bx = cardX + 12, by = lineY;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
-        fill(bx, by, bx + bw, by + bh, bHover ? 0xfff0b020 : 0xffd99b16);
-        fill(bx, by, bx + bw, by + 1, 0xfff5c542);
-        fill(bx, by, bx + 1, by + bh, 0xfff5c542);
-        fill(bx, by + bh - 1, bx + bw, by + bh, 0xff9e6c07);
-        fill(bx + bw - 1, by, bx + bw, by + bh, 0xff9e6c07);
-        drawString(font, I18n::get("profile.linkAccount") + "  >", bx + 10, by + 7, 0xff1c1202);
+        drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.8f);
     }
 }
 
@@ -665,12 +682,7 @@ void ProfileScreen::renderTabIdentidad(int xm, int ym)
         int ebx = bx + bw + 10;
         int ebw = 140;
         bool eHover = (xm >= ebx && xm <= ebx + ebw && ym >= by && ym <= by + bh);
-        fill(ebx, by, ebx + ebw, by + bh, eHover ? 0xfff0b020 : 0xffd99b16);
-        fill(ebx, by, ebx + ebw, by + 1, 0xfff5c542);
-        fill(ebx, by, ebx + 1, by + bh, 0xfff5c542);
-        fill(ebx, by + bh - 1, ebx + ebw, by + bh, 0xff9e6c07);
-        fill(ebx + ebw - 1, by, ebx + ebw, by + bh, 0xff9e6c07);
-        drawString(font, I18n::get("profile.identity.editWeb") + "  >", ebx + 10, by + 6, 0xff1c1202);
+        drawGoldButton(ebx, by, ebw, bh, I18n::get("profile.identity.editWeb"), eHover, 0.8f);
     }
 }
 
@@ -705,12 +717,7 @@ void ProfileScreen::renderTabSeguridad(int xm, int ym)
         int bw = 180, bh = 22;
         int bx = cardX + 12, by = lineY;
         bool bHover = (xm >= bx && xm <= bx + bw && ym >= by && ym <= by + bh);
-        fill(bx, by, bx + bw, by + bh, bHover ? 0xfff0b020 : 0xffd99b16);
-        fill(bx, by, bx + bw, by + 1, 0xfff5c542);
-        fill(bx, by, bx + 1, by + bh, 0xfff5c542);
-        fill(bx, by + bh - 1, bx + bw, by + bh, 0xff9e6c07);
-        fill(bx + bw - 1, by, bx + bw, by + bh, 0xff9e6c07);
-        drawString(font, I18n::get("profile.linkAccount") + "  >", bx + 10, by + 7, 0xff1c1202);
+        drawGoldButton(bx, by, bw, bh, I18n::get("profile.linkAccount"), bHover, 0.8f);
     } else {
         drawScaledString(I18n::get("profile.security.activeSession"), (float)(cardX + 12), (float)lineY, 0xff888888, 0.8f);
         drawString(font, I18n::get("profile.security.activeDevice"), cardX + 12, lineY + 9, 0xff55ff55);

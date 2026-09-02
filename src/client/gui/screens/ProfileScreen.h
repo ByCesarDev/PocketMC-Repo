@@ -27,6 +27,7 @@ private:
     void drawInfoCard(int x, int y, int w, int h, const std::string& iconPath, const std::string& label, const std::string& val, int valColor);
     void drawActionCard(int x, int y, int w, int h, const std::string& iconPath, const std::string& title, const std::string& subtitle, int xm, int ym);
     void drawScaledString(const std::string& str, float x, float y, int color, float scale = 0.8f);
+    void drawGoldButton(int x, int y, int w, int h, const std::string& text, bool hover, float scale = 0.8f);
     void copyToClipboard(const std::string& text);
     std::string maskEmail(const std::string& email);
 
