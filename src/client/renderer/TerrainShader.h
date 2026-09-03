@@ -12,6 +12,8 @@ public:
 
     static bool init();
     static void setupMVP(const Matrix4f& mvp);
+    static void setupModelView(const Matrix4f& modelView);
+    static void setupFog(bool enabled, float fogStart, float fogEnd, float r, float g, float b, float a = 1.0f);
     static void bind();
     static void unbind();
 };

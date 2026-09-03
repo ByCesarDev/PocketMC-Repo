@@ -2,6 +2,7 @@
 #include "client/Options.h"
 #include "gles.h"
 #include "GuiShader.h"
+#include "TerrainShader.h"
 #include "../../world/item/ItemInstance.h"
 
 #include "../../util/PerfTimer.h"
@@ -281,6 +282,10 @@ void GameRenderer::renderLevel(float a) {
 
 		TIMER_POP_PUSH("camera");
         setupCamera(a, i);
+		Matrix4f mvMatrix;
+		glGetFloatv(GL_MODELVIEW_MATRIX, mvMatrix.m);
+		TerrainShader::setupModelView(mvMatrix);
+
 		saveMatrices();
 
 		if (useScreenScissor) {
@@ -577,34 +582,29 @@ void GameRenderer::setupFog(int i) {
     glFogfv(GL_FOG_COLOR, (GLfloat*)fogBuffer);
     glColor4f2(1, 1, 1, 1);
 
-    if (player->isUnderLiquid(Material::lava)) {
+    float fStart = renderDistance * 0.6f;
+    float fEnd = renderDistance;
+
+    if (player && player->isUnderLiquid(Material::lava)) {
         glFogx(GL_FOG_MODE, GL_EXP);
         glFogf(GL_FOG_DENSITY, 2.f); // was 0.06
-//        float rr = 0.4f;
-//        float gg = 0.3f;
-//        float bb = 0.3f;
-//
-//        if (mc->options.anaglyph3d) {
-//            float rrr = (rr * 30 + gg * 59 + bb * 11) / 100;
-//            float ggg = (rr * 30 + gg * 70) / (100);
-//            float bbb = (rr * 30 + bb * 70) / (100);
-//
-//            rr = rrr;
-//            gg = ggg;
-//            bb = bbb;
-//        }
+        fStart = 0.0f;
+        fEnd = 2.0f;
     } else {
         glFogx(GL_FOG_MODE, GL_LINEAR);
-        glFogf(GL_FOG_START, renderDistance * 0.6f);
-        glFogf(GL_FOG_END, renderDistance);
         if (i < 0) {
-            glFogf(GL_FOG_START, 0);
-            glFogf(GL_FOG_END, renderDistance * 1.0f);
+            fStart = 0.0f;
+            fEnd = renderDistance * 1.0f;
+        } else if (mc->level && mc->level->dimension && mc->level->dimension->foggy) {
+            fStart = renderDistance * 0.3f;
         }
 
-        if (mc->level->dimension->foggy) {
-            glFogf(GL_FOG_START, renderDistance * 0.3f);
-        }
+        glFogf(GL_FOG_START, fStart);
+        glFogf(GL_FOG_END, fEnd);
+    }
+
+    if (TerrainShader::inited) {
+        TerrainShader::setupFog(true, fStart, fEnd, fr, fg, fb, 1.0f);
     }
 
     glEnable2(GL_COLOR_MATERIAL);
