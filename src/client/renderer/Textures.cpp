@@ -9,7 +9,7 @@
 
 /*static*/ int  Textures::textureChanges = 0;
 /*static*/ bool Textures::MIPMAP = false;
-/*static*/ int  Textures::MIPMAP_LEVELS = 4;
+/*static*/ int  Textures::MIPMAP_LEVELS = 0;
 /*static*/ const TextureId Textures::InvalidId = -1;
 
 static bool _isSkyBodyTexture(const std::string& resourceName)

@@ -1363,7 +1363,11 @@ bool Minecraft::supportNonTouchScreen() {
 }
 void Minecraft::init()
 {
+	options.load();
+
 #ifndef STANDALONE_SERVER
+	Textures::MIPMAP_LEVELS = options.getIntValue(OPTIONS_MIPMAP_LEVEL);
+
 	checkGlError("Init enter");
 
 	_supportsNonTouchscreen = !platform()->supportsTouchscreen();
@@ -1413,8 +1417,6 @@ void Minecraft::init()
 
 	checkGlError("Init complete");
 #endif
-
-	options.load();
 
 	bool fancy = options.getBooleanValue(OPTIONS_FANCY_GRAPHICS);
 	if (Tile::leaves) Tile::leaves->setFancy(fancy);

@@ -110,7 +110,7 @@ OptionBool chunkGenerate("chunkGenerate", true);
 OptionBool chunkSimulation("chunkSimulation", true);
 OptionBool clouds("clouds", true);
 OptionBool particles("particles", true);
-OptionInt mipmapLevel("mipmapLevel", 4, 0, 4);
+OptionInt mipmapLevel("mipmapLevel", 0, 0, 4);
 OptionBool entityShadows("entityShadows", true);
 OptionFloat entityDistance("entityDistance", 1.0f, 0.0f, 2.0f);
 OptionBool menuBlur("menuBlur", true);
