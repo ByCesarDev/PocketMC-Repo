@@ -13,7 +13,7 @@
 #include "../../level/tile/SandStoneTile.h"
 
 Inventory::Inventory( Player* player, bool creativeMode )
-:   super(	36 + Inventory::MAX_SELECTION_SIZE,
+:   super(	INVENTORY_SIZE_DEMO + Inventory::MAX_SELECTION_SIZE,
 			MAX_SELECTION_SIZE,
 			ContainerType::INVENTORY,
 			creativeMode),
