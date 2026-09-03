@@ -1035,6 +1035,7 @@ void LevelRenderer::renderHit( Player* player, const HitResult& h, int mode, /*I
 
 			glDepthMask(true);
 			glPopMatrix2();
+			glColor4f2(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 	}
 	//else if (inventoryItem != NULL) {
@@ -1082,6 +1083,7 @@ void LevelRenderer::renderHitOutline( Player* player, const HitResult& h, int mo
 		glDepthMask(true);
 		glEnable2(GL_TEXTURE_2D);
 		glDisable2(GL_BLEND);
+		glColor4f2(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 }
 

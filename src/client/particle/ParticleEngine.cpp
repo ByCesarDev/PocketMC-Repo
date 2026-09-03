@@ -2,6 +2,7 @@
 #include "Particle.h"
 #include "TerrainParticle.h"
 #include "../renderer/Textures.h"
+#include "../renderer/gles.h"
 #include "../../world/level/Level.h"
 #include "../../NinecraftApp.h"
 
@@ -72,6 +73,7 @@ void ParticleEngine::render(Entity* player, float a) {
     }
 
 	renderLit(player, a);
+	glColor4f2(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void ParticleEngine::renderLit(Entity* player, float a) {
@@ -97,6 +99,7 @@ void ParticleEngine::renderLit(Entity* player, float a) {
 		p->render(t, a, xa, ya, za, xa2, za2);
     }
     t.draw();
+	glColor4f2(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void ParticleEngine::setLevel(Level* level) {

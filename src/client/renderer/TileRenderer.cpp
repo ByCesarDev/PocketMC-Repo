@@ -317,6 +317,7 @@ bool TileRenderer::tesselateFireInWorld( Tile* tt, int x, int y, int z )
 	if (fixedTexture >= 0) tex = fixedTexture;
 
 	float br = tt->getBrightness( level, x, y, z );
+	if (Tile::lightEmission[tt->id] > 0) br = 1.0f;
 	t.color( br, br, br );
 
 	int xt = ((tex & 0xf) << 4);
