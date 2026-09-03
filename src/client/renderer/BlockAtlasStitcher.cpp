@@ -166,9 +166,11 @@ static const std::vector<BlockAtlasStitcher::TextureMapping> s_mappings = {
     { "door_iron_upper.png", 82, "terrain.png" },
     { "door_iron_lower.png", 98, "terrain.png" },
     { "leaves_oak.png", 52, "terrain.png" },
+    { "leaves_oak_opaque.png", 53, "terrain.png" },
     { "leaves_spruce.png", 132, "terrain.png" },
-    { "leaves_birch.png", 52, "terrain.png" },
+    { "leaves_spruce_opaque.png", 133, "terrain.png" },
     { "leaves_carried.png", 235, "terrain.png" },
+    { "leaves_oak_carried.png", 235, "terrain.png" },
 
     // Terrain2.png - Atlas Secundario
     { "log_spruce_side.png", 0, "terrain2.png" },
@@ -199,7 +201,32 @@ static const std::vector<BlockAtlasStitcher::TextureMapping> s_mappings = {
     { "nether_wart_stage_2.png", 28, "terrain2.png" },
     { "nether_wart_block.png", 29, "terrain2.png" },
     { "ancient_debris_side.png", 30, "terrain2.png" },
-    { "ancient_debris_top.png", 31, "terrain2.png" }
+    { "ancient_debris_top.png", 31, "terrain2.png" },
+
+    // Wood, Planks, Saplings & Leaves Extensions
+    { "log_jungle.png", 32, "terrain2.png" },
+    { "log_jungle_top.png", 33, "terrain2.png" },
+    { "log_acacia.png", 34, "terrain2.png" },
+    { "log_acacia_top.png", 35, "terrain2.png" },
+    { "planks_jungle.png", 36, "terrain2.png" },
+    { "planks_acacia.png", 37, "terrain2.png" },
+    { "planks_big_oak.png", 38, "terrain2.png" },
+    { "sapling_jungle.png", 39, "terrain2.png" },
+    { "sapling_acacia.png", 40, "terrain2.png" },
+    { "leaves_birch.png", 41, "terrain2.png" },
+    { "leaves_birch_opaque.png", 42, "terrain2.png" },
+    { "leaves_jungle.png", 43, "terrain2.png" },
+    { "leaves_jungle_opaque.png", 44, "terrain2.png" },
+    { "leaves_acacia.png", 45, "terrain2.png" },
+    { "leaves_acacia_opaque.png", 46, "terrain2.png" },
+    { "leaves_big_oak.png", 47, "terrain2.png" },
+    { "leaves_big_oak_opaque.png", 48, "terrain2.png" },
+    { "leaves_spruce_carried.png", 49, "terrain2.png" },
+    { "leaves_birch_carried.png", 50, "terrain2.png" },
+    { "leaves_jungle_carried.png", 51, "terrain2.png" },
+    { "leaves_acacia_carried.png", 52, "terrain2.png" },
+    { "leaves_big_oak_carried.png", 53, "terrain2.png" },
+    { "sapling_big_oak.png", 54, "terrain2.png" }
 };
 
 const std::vector<BlockAtlasStitcher::TextureMapping>& BlockAtlasStitcher::getTextureMappings() {

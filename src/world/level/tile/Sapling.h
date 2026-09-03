@@ -15,12 +15,23 @@ class Sapling: public Bush
 
     static const int TYPE_MASK = 3;
     static const int AGE_BIT = 8;
+    int treeType;
 public:
-    Sapling(int id, int tex)
-    :   super(id, tex)
+    Sapling(int id, int tex, int treeType = LeafTile::NORMAL_LEAF)
+    :   super(id, tex), treeType(treeType)
     {
         float ss = 0.4f;
         setShape(0.5f - ss, 0, 0.5f - ss, 0.5f + ss, ss * 2, 0.5f + ss);
+    }
+
+    int getTreeType(int data = 0) const {
+        if (this == Tile::spruceSapling)  return LeafTile::EVERGREEN_LEAF;
+        if (this == Tile::birchSapling)   return LeafTile::BIRCH_LEAF;
+        if (this == Tile::jungleSapling)  return LeafTile::JUNGLE_LEAF;
+        if (this == Tile::acaciaSapling)  return LeafTile::ACACIA_LEAF;
+        if (this == Tile::darkOakSapling) return LeafTile::DARK_OAK_LEAF;
+        if (treeType != LeafTile::NORMAL_LEAF) return treeType;
+        return (data & LeafTile::LEAF_TYPE_MASK);
     }
 
     void tick(Level* level, int x, int y, int z, Random* random) {
@@ -43,57 +54,37 @@ public:
 
     /*@Override*/
     int getTexture(int face, int data) {
-        data = data & LeafTile::LEAF_TYPE_MASK;
-        if (data == LeafTile::EVERGREEN_LEAF) {
+        int t = getTreeType(data);
+        if (t == LeafTile::EVERGREEN_LEAF) {
             return 15 + 16 * 3;
-        } else if (data == LeafTile::BIRCH_LEAF) {
+        } else if (t == LeafTile::BIRCH_LEAF) {
             return 15 + 16 * 4;
-        //} else if (data == TYPE_JUNGLE) {
-        //    return 14 + 16;
+        } else if (t == LeafTile::JUNGLE_LEAF) {
+            return 39 | Tile::TEXTURE_ALT_FLAG;
+        } else if (t == LeafTile::ACACIA_LEAF) {
+            return 40 | Tile::TEXTURE_ALT_FLAG;
+        } else if (t == LeafTile::DARK_OAK_LEAF) {
+            return 54 | Tile::TEXTURE_ALT_FLAG;
         } else {
             return super::getTexture(face, data);
         }
     }
 
     void growTree(Level* level, int x, int y, int z, Random* random) {
-        int data = level->getData(x, y, z) & TYPE_MASK;
+        int data = level->getData(x, y, z);
+        int t = getTreeType(data);
 
         Feature* f = NULL;
 
         int ox = 0, oz = 0;
         bool multiblock = false;
 
-        if (data == LeafTile::EVERGREEN_LEAF) {
+        if (t == LeafTile::EVERGREEN_LEAF) {
             f = new SpruceFeature(true);
-        } else if (data == LeafTile::BIRCH_LEAF) {
+        } else if (t == LeafTile::BIRCH_LEAF) {
             f = new BirchFeature(true);
-//         } else if (data == TYPE_JUNGLE) {
-// 
-//             // check for mega tree
-//             for (ox = 0; ox >= -1; ox--) {
-//                 for (oz = 0; oz >= -1; oz--) {
-//                     if (isSapling(level, x + ox, y, z + oz, TYPE_JUNGLE) &&
-//                             isSapling(level, x + ox + 1, y, z + oz, TYPE_JUNGLE) &&
-//                             isSapling(level, x + ox, y, z + oz + 1, TYPE_JUNGLE) &&
-//                             isSapling(level, x + ox + 1, y, z + oz + 1, TYPE_JUNGLE)) {
-//                         f = /*new*/ MegaTreeFeature(true, 10 + random.nextInt(20), TreeTile::JUNGLE_TRUNK, LeafTile::JUNGLE_LEAF);
-//                         multiblock = true;
-//                         break;
-//                     }
-//                 }
-//                 if (f) {
-//                     break;
-//                 }
-//             }
-//             if (!f) {
-//                 ox = oz = 0;
-//                 f = new TreeFeature(true, 4 + random.nextInt(7), TreeTile::JUNGLE_TRUNK, LeafTile::JUNGLE_LEAF, false);
-//             }
         } else {
-            //if (random->nextInt(10) == 0) {
-            //    f = new BasicTree(true);
-            //} else
-                f = new TreeFeature(true);
+            f = new TreeFeature(true);
         }
 
         if (multiblock) {

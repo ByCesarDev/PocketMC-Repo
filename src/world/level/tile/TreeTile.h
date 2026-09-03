@@ -16,6 +16,9 @@ public:
 	static const int NORMAL_TRUNK = 0;
     static const int DARK_TRUNK   = 1;
     static const int BIRCH_TRUNK  = 2;
+    static const int JUNGLE_TRUNK = 3;
+    static const int ACACIA_TRUNK = 4;
+    static const int DARK_OAK_TRUNK = 5;
 
 	TreeTile(int id)
 	:	Tile(id, Material::wood)
@@ -51,21 +54,20 @@ public:
     }
 
     int getTexture(int face, int data) {
-        // Top / bottom: use separate cells for spruce and birch (from terrain2)
+        // Top / bottom: use separate cells from terrain2
         if (face == 1 || face == 0) {
-            if (this == Tile::spruceTrunk) return 1 | Tile::TEXTURE_ALT_FLAG; // Top/Bottom: 1,0
-            if (this == Tile::birchTrunk)  return 3 | Tile::TEXTURE_ALT_FLAG; // Top/Bottom: 3,0
-            if (data == DARK_TRUNK)  return 1 | Tile::TEXTURE_ALT_FLAG;
-            if (data == BIRCH_TRUNK) return 3 | Tile::TEXTURE_ALT_FLAG;
+            if (this == Tile::spruceTrunk || data == DARK_TRUNK)  return 1 | Tile::TEXTURE_ALT_FLAG; // Top/Bottom: 1,0
+            if (this == Tile::birchTrunk  || data == BIRCH_TRUNK) return 3 | Tile::TEXTURE_ALT_FLAG; // Top/Bottom: 3,0
+            if (this == Tile::jungleTrunk || data == JUNGLE_TRUNK) return 33 | Tile::TEXTURE_ALT_FLAG;
+            if (this == Tile::acaciaTrunk || data == ACACIA_TRUNK) return 35 | Tile::TEXTURE_ALT_FLAG;
             return 21; // legacy oak top (main atlas)
         }
 
-        // Sides: different cells per trunk type (use alt atlas)
-        if (this == Tile::spruceTrunk)  return 0 | Tile::TEXTURE_ALT_FLAG; // spruce sides: 0,0
-        if (this == Tile::birchTrunk)   return 2 | Tile::TEXTURE_ALT_FLAG; // birch sides: 2,0
-        // Fallback to legacy data-based selection for compatibility
-        if (data == DARK_TRUNK)  return 0 | Tile::TEXTURE_ALT_FLAG;
-        if (data == BIRCH_TRUNK) return 2 | Tile::TEXTURE_ALT_FLAG;
+        // Sides: different cells per trunk type
+        if (this == Tile::spruceTrunk || data == DARK_TRUNK)   return 0 | Tile::TEXTURE_ALT_FLAG; // spruce sides: 0,0
+        if (this == Tile::birchTrunk  || data == BIRCH_TRUNK)  return 2 | Tile::TEXTURE_ALT_FLAG; // birch sides: 2,0
+        if (this == Tile::jungleTrunk || data == JUNGLE_TRUNK) return 32 | Tile::TEXTURE_ALT_FLAG;
+        if (this == Tile::acaciaTrunk || data == ACACIA_TRUNK) return 34 | Tile::TEXTURE_ALT_FLAG;
         return 20;
     }
 

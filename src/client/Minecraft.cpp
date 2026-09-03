@@ -1417,6 +1417,11 @@ void Minecraft::init()
 	bool fancy = options.getBooleanValue(OPTIONS_FANCY_GRAPHICS);
 	if (Tile::leaves) Tile::leaves->setFancy(fancy);
 	if (Tile::leaves_carried) Tile::leaves_carried->setFancy(fancy);
+	if (Tile::spruceLeaves) Tile::spruceLeaves->setFancy(fancy);
+	if (Tile::birchLeaves) Tile::birchLeaves->setFancy(fancy);
+	if (Tile::jungleLeaves) Tile::jungleLeaves->setFancy(fancy);
+	if (Tile::acaciaLeaves) Tile::acaciaLeaves->setFancy(fancy);
+	if (Tile::darkOakLeaves) Tile::darkOakLeaves->setFancy(fancy);
 
 	// Load saved language
 	int langIndex = options.getIntValue(OPTIONS_LANGUAGE);

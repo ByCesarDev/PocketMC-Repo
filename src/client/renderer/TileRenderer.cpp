@@ -7,6 +7,8 @@
 
 #include "../../world/level/LevelSource.h"
 #include "../../world/level/tile/Tile.h"
+#include "../../world/level/tile/LeafTile.h"
+#include "../../world/level/FoliageColor.h"
 #include "../../world/level/tile/DoorTile.h"
 #include "../../world/level/tile/LiquidTile.h"
 #include "../../world/level/tile/FenceTile.h"
@@ -2541,7 +2543,16 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 	float tb = (color & 0xff) / 255.0f;
 
 	bool isGrassTile = (tile == (Tile*)Tile::grass || tile == (Tile*)Tile::grass_carried);
-	bool isLeafTile = (tile == (Tile*)Tile::leaves || tile == (Tile*)Tile::leaves_carried);
+	bool isLeafTile = (tile == (Tile*)Tile::leaves || tile == (Tile*)Tile::leaves_carried
+		|| (Tile::spruceLeaves && tile == (Tile*)Tile::spruceLeaves)
+		|| (Tile::birchLeaves && tile == (Tile*)Tile::birchLeaves)
+		|| (Tile::jungleLeaves && tile == (Tile*)Tile::jungleLeaves)
+		|| (Tile::acaciaLeaves && tile == (Tile*)Tile::acaciaLeaves)
+		|| (Tile::darkOakLeaves && tile == (Tile*)Tile::darkOakLeaves));
+
+	if (!isGrassTile && !isLeafTile) {
+		tr = tg = tb = 1.0f;
+	}
 
 	int shape = tile->getRenderShape();
 
@@ -2554,24 +2565,24 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 		if (isGrassTile) {
 			t.color(1.0f, 1.0f, 1.0f);
 			renderFaceDown(tile, 0, 0, 0, 2);
-		} else if (isLeafTile && data == 0) {
+		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
-			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0, data));
+			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0, data) & ~Tile::TEXTURE_ALT_FLAG);
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
-			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0, data));
+			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0, data) & ~Tile::TEXTURE_ALT_FLAG);
 		}
 
 		t.normal(0.0f, 1.0f, 0.0f); 
 		if (isGrassTile) {
 			t.color(tr, tg, tb);
 			renderFaceUp(tile, 0, 0, 0, 0); // grass_top
-		} else if (isLeafTile && data == 0) {
+		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
-			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1, data));
+			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1, data) & ~Tile::TEXTURE_ALT_FLAG);
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
-			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1, data));
+			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1, data) & ~Tile::TEXTURE_ALT_FLAG);
 		}
 
 		t.normal(0.0f, 0.0f, -1.0f);
@@ -2580,12 +2591,12 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 			renderNorth(tile, 0, 0, 0, 236); // dirt_grass
 			t.color(tr, tg, tb);
 			renderNorth(tile, 0, 0, -0.001f, 38); // grass_side_overlay
-		} else if (isLeafTile && data == 0) {
+		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
-			renderNorth(tile, 0, 0, 0, tile->getTexture(2, data));
+			renderNorth(tile, 0, 0, 0, tile->getTexture(2, data) & ~Tile::TEXTURE_ALT_FLAG);
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
-			renderNorth(tile, 0, 0, 0, tile->getTexture(2, data));
+			renderNorth(tile, 0, 0, 0, tile->getTexture(2, data) & ~Tile::TEXTURE_ALT_FLAG);
 		}
 
 		t.normal(0.0f, 0.0f, 1.0f);
@@ -2594,12 +2605,12 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 			renderSouth(tile, 0, 0, 0, 236); // dirt_grass
 			t.color(tr, tg, tb);
 			renderSouth(tile, 0, 0, 0.001f, 38); // grass_side_overlay
-		} else if (isLeafTile && data == 0) {
+		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
-			renderSouth(tile, 0, 0, 0, tile->getTexture(3, data));
+			renderSouth(tile, 0, 0, 0, tile->getTexture(3, data) & ~Tile::TEXTURE_ALT_FLAG);
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
-			renderSouth(tile, 0, 0, 0, tile->getTexture(3, data));
+			renderSouth(tile, 0, 0, 0, tile->getTexture(3, data) & ~Tile::TEXTURE_ALT_FLAG);
 		}
 
 		t.normal(-1.0f, 0.0f, 0.0f);
@@ -2608,12 +2619,12 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 			renderWest(tile, 0, 0, 0, 236); // dirt_grass
 			t.color(tr, tg, tb);
 			renderWest(tile, -0.001f, 0, 0, 38); // grass_side_overlay
-		} else if (isLeafTile && data == 0) {
+		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
-			renderWest(tile, 0, 0, 0, tile->getTexture(4, data));
+			renderWest(tile, 0, 0, 0, tile->getTexture(4, data) & ~Tile::TEXTURE_ALT_FLAG);
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
-			renderWest(tile, 0, 0, 0, tile->getTexture(4, data));
+			renderWest(tile, 0, 0, 0, tile->getTexture(4, data) & ~Tile::TEXTURE_ALT_FLAG);
 		}
 
 		t.normal(1.0f, 0.0f, 0.0f);
@@ -2622,12 +2633,12 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 			renderEast(tile, 0, 0, 0, 236); // dirt_grass
 			t.color(tr, tg, tb);
 			renderEast(tile, 0.001f, 0, 0, 38); // grass_side_overlay
-		} else if (isLeafTile && data == 0) {
+		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
-			renderEast(tile, 0, 0, 0, tile->getTexture(5, data));
+			renderEast(tile, 0, 0, 0, tile->getTexture(5, data) & ~Tile::TEXTURE_ALT_FLAG);
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
-			renderEast(tile, 0, 0, 0, tile->getTexture(5, data));
+			renderEast(tile, 0, 0, 0, tile->getTexture(5, data) & ~Tile::TEXTURE_ALT_FLAG);
 		}
 		t.draw();
 
@@ -2635,14 +2646,14 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 
 	} else if (shape == Tile::SHAPE_CROSS_TEXTURE) { // uhh java has this but is this even ever used??? - shredder
 		t.begin();
-
+		t.color(tr, tg, tb);
 		t.normal(0.0f, -1.0f, 0.0f);
 
 		tesselateCrossTexture(tile, data, -0.5f, -0.5f, -0.5f);
 		t.draw();
 	} else if(shape == Tile::SHAPE_STEM) {
 		t.begin();
-
+		t.color(tr, tg, tb);
 		t.normal(0.0f, -1.0f, 0.0f);
 
 		tile->updateDefaultShape();
@@ -2653,21 +2664,22 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 		t.offset(-0.5f, -0.5f, -0.5f);
 		float s = 1 / 16.0f;
 		t.begin();
+		t.color(tr, tg, tb);
 
 		t.normal(0.0f, -1.0f, 0.0f);
 
-		renderFaceDown(tile, 0, 0, 0, tile->getTexture(0));
+		renderFaceDown(tile, 0, 0, 0, tile->getTexture(0) & ~Tile::TEXTURE_ALT_FLAG);
 
 		t.normal(0.0f, 1.0f, 0.0f);
 
-		renderFaceUp(tile, 0, 0, 0, tile->getTexture(1));
+		renderFaceUp(tile, 0, 0, 0, tile->getTexture(1) & ~Tile::TEXTURE_ALT_FLAG);
 
 		t.normal(0.0f, 0.0f, -1.0f);
 
 		t.addOffset(0, 0, s);
 
 
-		renderNorth(tile, 0, 0, 0, tile->getTexture(2));
+		renderNorth(tile, 0, 0, 0, tile->getTexture(2) & ~Tile::TEXTURE_ALT_FLAG);
 
 		t.normal(0.0f, 0.0f, 1.0f);
 
@@ -2676,59 +2688,55 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 
 
 
-		renderSouth(tile, 0, 0, 0, tile->getTexture(3));
+		renderSouth(tile, 0, 0, 0, tile->getTexture(3) & ~Tile::TEXTURE_ALT_FLAG);
 
 		t.normal(-1.0f, 0.0f, 0.0f);
 
 		t.addOffset(0, 0, s);
 		t.addOffset(s, 0, 0);
-		renderWest(tile, 0, 0, 0, tile->getTexture(4));
+		renderWest(tile, 0, 0, 0, tile->getTexture(4) & ~Tile::TEXTURE_ALT_FLAG);
 
 		t.normal(1.0f, 0.0f, 0.0f);
 
 		t.addOffset(-s, 0, 0);
 		t.addOffset(-s, 0, 0);
-		renderEast(tile, 0, 0, 0, tile->getTexture(5));
+		renderEast(tile, 0, 0, 0, tile->getTexture(5) & ~Tile::TEXTURE_ALT_FLAG);
 		t.addOffset(s, 0, 0);
 		t.draw();
 		t.offset(0, 0, 0);//0.5f, 0.5f, 0.5f);
 	} else if (shape == Tile::SHAPE_ROWS) {
 		t.begin();
+		t.color(tr, tg, tb);
 		t.normal(0, -1, 0);
 		tesselateRowTexture(tile, data, -0.5f, -0.5f, -0.5f);
-		//}  else if (shape == Tile::SHAPE_TORCH) {
-		////    t.begin();
-		////    t.normal(0, -1, 0);
-		///    tesselateTorch(tile, -0.5f, -0.5f, -0.5f, 0, 0);
-		////    t.end();
 	} else if (shape == Tile::SHAPE_ENTITYTILE_ANIMATED) {
 		EntityTileRenderer::instance->render(tile, data, 1.0f);
-		//glEnable(GL_RESCALE_NORMAL);
 	} else if (shape == Tile::SHAPE_STAIRS) {
 		t.addOffset(-0.5f, -0.5f, -0.5f);
 		t.begin();
+		t.color(tr, tg, tb);
 		for (int i = 0; i < 2; i++) {
 			if (i == 0) tile->setShape(0, 0, 0, 1, 1, 0.5f);
 			if (i == 1) tile->setShape(0, 0, 0.5f, 1, 0.5f, 1);
 
 
 			t.normal(0.0f, -1.0f, 0.0f);
-			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0));
+			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(0.0f, 1.0f, 0.0f);
-			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1));
+			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(0.0f, 0.0f, -1.0f);
-			renderNorth(tile, 0, 0, 0, tile->getTexture(2));
+			renderNorth(tile, 0, 0, 0, tile->getTexture(2) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(0.0f, 0.0f, 1.0f);
-			renderSouth(tile, 0, 0, 0, tile->getTexture(3));
+			renderSouth(tile, 0, 0, 0, tile->getTexture(3) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(-1.0f, 0.0f, 0.0f);
-			renderWest(tile, 0, 0, 0, tile->getTexture(4));
+			renderWest(tile, 0, 0, 0, tile->getTexture(4) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(1.0f, 0.0f, 0.0f);
-			renderEast(tile, 0, 0, 0, tile->getTexture(5));
+			renderEast(tile, 0, 0, 0, tile->getTexture(5) & ~Tile::TEXTURE_ALT_FLAG);
 		}
 		t.draw();
 		t.addOffset(0.5f, 0.5f, 0.5f);
@@ -2736,6 +2744,7 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 	else if (shape == Tile::SHAPE_FENCE) {
 		t.addOffset(-0.5f, -0.5f, -0.5f);
 		t.begin();
+		t.color(tr, tg, tb);
 		for (int i = 0; i < 4; i++) {
 			float w = 2 / 16.0f;
 			if (i == 0) tile->setShape(0.5f - w, 0, 0, 0.5f + w, 1, w * 2);
@@ -2745,22 +2754,22 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 			if (i == 3) tile->setShape(0.5f - w, 0.5f - w * 3, -w * 2, 0.5f + w, 0.5f - w, 1 + w * 2);
 
 			t.normal(0.0f, -1.0f, 0.0f);
-			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0));
+			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(0.0f, 1.0f, 0.0f);
-			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1));
+			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(0.0f, 0.0f, -1.0f);
-			renderNorth(tile, 0, 0, 0, tile->getTexture(2));
+			renderNorth(tile, 0, 0, 0, tile->getTexture(2) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(0.0f, 0.0f, 1.0f);
-			renderSouth(tile, 0, 0, 0, tile->getTexture(3));
+			renderSouth(tile, 0, 0, 0, tile->getTexture(3) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(-1.0f, 0.0f, 0.0f);
-			renderWest(tile, 0, 0, 0, tile->getTexture(4));
+			renderWest(tile, 0, 0, 0, tile->getTexture(4) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(1.0f, 0.0f, 0.0f);
-			renderEast(tile, 0, 0, 0, tile->getTexture(5));
+			renderEast(tile, 0, 0, 0, tile->getTexture(5) & ~Tile::TEXTURE_ALT_FLAG);
 		}
 		t.draw();
 		t.addOffset(0.5f, 0.5f, 0.5f);
@@ -2768,6 +2777,7 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 	} else if (shape == Tile::SHAPE_FENCE_GATE) {
 		t.addOffset(-0.5f, -0.5f, -0.5f);
 		t.begin();
+		t.color(tr, tg, tb);
 		for (int i = 0; i < 3; i++) {
 			float w = 1 / 16.0f;
 			if (i == 0) tile->setShape(0.5f - w, .3f, 0, 0.5f + w, 1, w * 2);
@@ -2775,22 +2785,22 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 			if (i == 2) tile->setShape(0.5f - w, .5f, w * 2, 0.5f + w, 1 - w, 1 - w * 2);
 
 			t.normal(0.0f, -1.0f, 0.0f);
-			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0));
+			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(0.0f, 1.0f, 0.0f);
-			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1));
+			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(0.0f, 0.0f, -1.0f);
-			renderNorth(tile, 0, 0, 0, tile->getTexture(2));
+			renderNorth(tile, 0, 0, 0, tile->getTexture(2) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(0.0f, 0.0f, 1.0f);
-			renderSouth(tile, 0, 0, 0, tile->getTexture(3));
+			renderSouth(tile, 0, 0, 0, tile->getTexture(3) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(-1.0f, 0.0f, 0.0f);
-			renderWest(tile, 0, 0, 0, tile->getTexture(4));
+			renderWest(tile, 0, 0, 0, tile->getTexture(4) & ~Tile::TEXTURE_ALT_FLAG);
 
 			t.normal(1.0f, 0.0f, 0.0f);
-			renderEast(tile, 0, 0, 0, tile->getTexture(5));
+			renderEast(tile, 0, 0, 0, tile->getTexture(5) & ~Tile::TEXTURE_ALT_FLAG);
 		}
 		t.draw();
 		t.addOffset(0.5f, 0.5f, 0.5f);
@@ -2824,11 +2834,37 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 		t.begin();
 		t.addOffset(-0.5f, -0.5f, -0.5f);
 
+		bool isLeaf = (tile == ((Tile*)Tile::leaves)
+			|| (Tile::spruceLeaves && tile == (Tile*)Tile::spruceLeaves)
+			|| (Tile::birchLeaves && tile == (Tile*)Tile::birchLeaves)
+			|| (Tile::jungleLeaves && tile == (Tile*)Tile::jungleLeaves)
+			|| (Tile::acaciaLeaves && tile == (Tile*)Tile::acaciaLeaves)
+			|| (Tile::darkOakLeaves && tile == (Tile*)Tile::darkOakLeaves));
+
+		int lr = 0x48, lg = 0xb5, lb = 0x18;
+		if (isLeaf) {
+			int leafColor = 0x48b518;
+			if (tile == (Tile*)Tile::spruceLeaves || (tile == (Tile*)Tile::leaves && data == LeafTile::EVERGREEN_LEAF)) {
+				leafColor = FoliageColor::getEvergreenColor();
+			} else if (tile == (Tile*)Tile::birchLeaves || (tile == (Tile*)Tile::leaves && data == LeafTile::BIRCH_LEAF)) {
+				leafColor = FoliageColor::getBirchColor();
+			} else if (tile == (Tile*)Tile::jungleLeaves || (tile == (Tile*)Tile::leaves && data == LeafTile::JUNGLE_LEAF)) {
+				leafColor = 0x30bb0b;
+			} else if (tile == (Tile*)Tile::acaciaLeaves || (tile == (Tile*)Tile::leaves && data == LeafTile::ACACIA_LEAF)) {
+				leafColor = 0xaea42a;
+			} else if (tile == (Tile*)Tile::darkOakLeaves || (tile == (Tile*)Tile::leaves && data == LeafTile::DARK_OAK_LEAF)) {
+				leafColor = 0x3b5919;
+			}
+			lr = (leafColor >> 16) & 0xff;
+			lg = (leafColor >> 8) & 0xff;
+			lb = leafColor & 0xff;
+		}
+
 		// Up face
 		if (tile == Tile::grass) {
 			t.color(0x79, 0xc0, 0x5a); // Grass green tint for top face
-		} else if (tile == ((Tile*)Tile::leaves)) {
-			t.color(0x48, 0xb5, 0x18);
+		} else if (isLeaf) {
+			t.color(lr, lg, lb);
 		} else {
 			t.color(0xff, 0xff, 0xff);
 		}
@@ -2841,8 +2877,8 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 
 		// Down face
 		t.color(0xff, 0xff, 0xff);
-		if (tile == ((Tile*)Tile::leaves)) {
-			t.color(0x48, 0xb5, 0x18);
+		if (isLeaf) {
+			t.color(lr, lg, lb);
 		}
 		{
 			int texDown = tile->getTexture(0, data);
@@ -2852,8 +2888,8 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 		}
 
 		// North / South (Front-Left face: Medium-light)
-		if (tile == ((Tile*)Tile::leaves)) {
-			t.color(0x3c, 0x9a, 0x14);
+		if (isLeaf) {
+			t.color((lr * 200) / 255, (lg * 200) / 255, (lb * 200) / 255);
 		} else {
 			t.color(0xd0, 0xd0, 0xd0);
 		}
@@ -2870,8 +2906,8 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 		}
 
 		// East / West (Front-Right face: Shadow)
-		if (tile == ((Tile*)Tile::leaves)) {
-			t.color(0x28, 0x6e, 0x0c);
+		if (isLeaf) {
+			t.color((lr * 150) / 255, (lg * 150) / 255, (lb * 150) / 255);
 		} else {
 			t.color(0x80, 0x80, 0x80);
 		}

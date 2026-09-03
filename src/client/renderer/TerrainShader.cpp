@@ -35,7 +35,14 @@ out vec4 fragColor;
 
 void main() {
     vec4 texColor = texture(u_Texture, v_TexCoord);
-    vec4 finalColor = texColor * v_Color;
+    float maxDiff = max(abs(texColor.r - texColor.g), max(abs(texColor.r - texColor.b), abs(texColor.g - texColor.b)));
+    vec4 finalColor;
+    if (maxDiff > 0.15) {
+        float light = max(v_Color.r, max(v_Color.g, v_Color.b));
+        finalColor = vec4(texColor.rgb * light, texColor.a * v_Color.a);
+    } else {
+        finalColor = texColor * v_Color;
+    }
 
     if (finalColor.a < 0.1) {
         discard;

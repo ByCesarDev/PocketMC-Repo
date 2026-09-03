@@ -82,16 +82,17 @@ void ItemRenderer::render(Entity* itemEntity_, float x, float y, float z, float 
 		glScalef2(1 / 2.0f, 1 / 2.0f, 1 / 2.0f);
 		int icon = item->getIcon();
 		if (item->id < 256) {
-			bindTexture("terrain.png");
+			bindTexture((icon & Tile::TEXTURE_ALT_FLAG) ? "terrain2.png" : "terrain.png");
 		} else {
 			bindTexture("gui/items.png");
 		}
 		Tesselator& t = Tesselator::instance;
 
-		float u0 = ((icon % 16) * 16 + 0) / 256.0f;
-		float u1 = ((icon % 16) * 16 + 16) / 256.0f;
-		float v0 = ((icon / 16) * 16 + 0) / 256.0f;
-		float v1 = ((icon / 16) * 16 + 16) / 256.0f;
+		int iconIdx = icon & ~Tile::TEXTURE_ALT_FLAG;
+		float u0 = ((iconIdx % 16) * 16 + 0) / 256.0f;
+		float u1 = ((iconIdx % 16) * 16 + 16) / 256.0f;
+		float v0 = ((iconIdx / 16) * 16 + 0) / 256.0f;
+		float v1 = ((iconIdx / 16) * 16 + 16) / 256.0f;
 
 		float r = 1.0f;
 		float xo = 0.5f;
@@ -313,16 +314,15 @@ void ItemRenderer::renderGuiItemCorrect(Font* font, Textures* textures, const It
 	}
 	else if (item->getIcon() >= 0)
 	{
-		//if (item->id == Item::camera->id) {
-		//	printf("item->id: %d, %d\n", item->id, item->getIcon());
-		//}
+		int icon = item->getIcon();
 		if (item->id < 256) {
-			textures->loadAndBindTexture("terrain.png");
+			textures->loadAndBindTexture((icon & Tile::TEXTURE_ALT_FLAG) ? "terrain2.png" : "terrain.png");
 		} else {
 			textures->loadAndBindTexture("gui/items.png");
 		}
+		int iconIdx = icon & ~Tile::TEXTURE_ALT_FLAG;
 		if (depthWasEnabled) glDisable2(GL_DEPTH_TEST);
-		blit((float)x + 2.0f, (float)y + 2.0f, (float)(item->getIcon() % 16 * 16), (float)(item->getIcon() / 16 * 16), 12.0f, 12.0f);
+		blit((float)x + 2.0f, (float)y + 2.0f, (float)(iconIdx % 16 * 16), (float)(iconIdx / 16 * 16), 12.0f, 12.0f);
 		if (depthWasEnabled) glEnable2(GL_DEPTH_TEST);
 	}
 	if (cullWasEnabled)

@@ -363,6 +363,11 @@ void LevelRenderer::allChanged()
 
 	Tile::leaves->setFancy(fancy);
 	Tile::leaves_carried->setFancy(fancy);
+	if (Tile::spruceLeaves) Tile::spruceLeaves->setFancy(fancy);
+	if (Tile::birchLeaves) Tile::birchLeaves->setFancy(fancy);
+	if (Tile::jungleLeaves) Tile::jungleLeaves->setFancy(fancy);
+	if (Tile::acaciaLeaves) Tile::acaciaLeaves->setFancy(fancy);
+	if (Tile::darkOakLeaves) Tile::darkOakLeaves->setFancy(fancy);
 	isCloudMeshGenerated = false;
 	lastViewDistance = mc->options.getIntValue(OPTIONS_VIEW_DISTANCE);
 

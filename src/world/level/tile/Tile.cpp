@@ -76,6 +76,9 @@ Tile* Tile::redBrick    = NULL;
 Tile* Tile::wood        = NULL;
 Tile* Tile::birchPlanks = NULL;
 Tile* Tile::sprucePlanks = NULL;
+Tile* Tile::junglePlanks = NULL;
+Tile* Tile::acaciaPlanks = NULL;
+Tile* Tile::darkOakPlanks = NULL;
 Tile* Tile::spruceSlab  = NULL;
 Tile* Tile::spruceSlabHalf = NULL;
 Tile* Tile::birchSlab   = NULL;
@@ -86,7 +89,41 @@ Tile* Tile::fenceBirch    = NULL;
 Tile* Tile::fenceSpruce   = NULL;
 Tile* Tile::fenceGateBirch = NULL;
 Tile* Tile::fenceGateSpruce = NULL;
+Tile* Tile::stairs_jungle = NULL;
+Tile* Tile::jungleSlab = NULL;
+Tile* Tile::jungleSlabHalf = NULL;
+Tile* Tile::fenceJungle = NULL;
+Tile* Tile::fenceGateJungle = NULL;
+Tile* Tile::stairs_acacia = NULL;
+Tile* Tile::acaciaSlab = NULL;
+Tile* Tile::acaciaSlabHalf = NULL;
+Tile* Tile::fenceAcacia = NULL;
+Tile* Tile::fenceGateAcacia = NULL;
+Tile* Tile::stairs_darkOak = NULL;
+Tile* Tile::darkOakSlab = NULL;
+Tile* Tile::darkOakSlabHalf = NULL;
+Tile* Tile::fenceDarkOak = NULL;
+Tile* Tile::fenceGateDarkOak = NULL;
+Tile* Tile::sandstoneSlab = NULL;
+Tile* Tile::sandstoneSlabHalf = NULL;
+Tile* Tile::oakSlab = NULL;
+Tile* Tile::oakSlabHalf = NULL;
+Tile* Tile::cobbleSlab = NULL;
+Tile* Tile::cobbleSlabHalf = NULL;
+Tile* Tile::brickSlab = NULL;
+Tile* Tile::brickSlabHalf = NULL;
+Tile* Tile::stoneBrickSlab = NULL;
+Tile* Tile::stoneBrickSlabHalf = NULL;
+Tile* Tile::netherBrickSlab = NULL;
+Tile* Tile::netherBrickSlabHalf = NULL;
+Tile* Tile::quartzSlab = NULL;
+Tile* Tile::quartzSlabHalf = NULL;
 Tile* Tile::sapling     = NULL;
+Tile* Tile::spruceSapling = NULL;
+Tile* Tile::birchSapling = NULL;
+Tile* Tile::jungleSapling = NULL;
+Tile* Tile::acaciaSapling = NULL;
+Tile* Tile::darkOakSapling = NULL;
 Tile* Tile::glass       = NULL;
 Tile* Tile::web	        = NULL;
 Tile* Tile::thinGlass   = NULL;
@@ -113,8 +150,15 @@ Tile* Tile::topSnow     = NULL;
 Tile* Tile::treeTrunk   = NULL;
 Tile* Tile::birchTrunk  = NULL;
 Tile* Tile::spruceTrunk = NULL;
+Tile* Tile::jungleTrunk = NULL;
+Tile* Tile::acaciaTrunk = NULL;
 Tile* Tile::snow        = NULL;
 LeafTile* Tile::leaves  = NULL;
+LeafTile* Tile::spruceLeaves  = NULL;
+LeafTile* Tile::birchLeaves   = NULL;
+LeafTile* Tile::jungleLeaves  = NULL;
+LeafTile* Tile::acaciaLeaves  = NULL;
+LeafTile* Tile::darkOakLeaves = NULL;
 Tile* Tile::emeraldOre  = NULL;
 Tile* Tile::redStoneOre = NULL;
 Tile* Tile::redStoneOre_lit = NULL;
@@ -369,11 +413,25 @@ void Tile::initTiles() {
 	// Register separate item entries for birch and spruce trunks
 	Item::items[birchTrunk->id] = (new TileItem(birchTrunk->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("logBirch");
 	Item::items[spruceTrunk->id] = (new TileItem(spruceTrunk->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("logSpruce");
+	Item::items[jungleTrunk->id] = (new TileItem(jungleTrunk->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("logJungle");
+	Item::items[acaciaTrunk->id] = (new TileItem(acaciaTrunk->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("logAcacia");
 
 	Item::items[stoneBrickSmooth->id] = (new AuxDataTileItem(stoneBrickSmooth->id - 256, stoneBrickSmooth))->setCategory(ItemCategory::Structures)->setDescriptionId("stonebricksmooth");
-	Item::items[stoneSlabHalf->id] = (new StoneSlabTileItem(stoneSlabHalf->id - 256))->setCategory(ItemCategory::Structures)->setDescriptionId("stoneSlab");
+	Item::items[stoneSlabHalf->id] = (new TileItem(stoneSlabHalf->id - 256))->setCategory(ItemCategory::Structures)->setDescriptionId("stoneSlab");
 	Item::items[sapling->id] = (new SaplingTileItem(sapling->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("sapling");
+	Item::items[spruceSapling->id]  = (new SaplingTileItem(spruceSapling->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("saplingSpruce");
+	Item::items[birchSapling->id]   = (new SaplingTileItem(birchSapling->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("saplingBirch");
+	Item::items[jungleSapling->id]  = (new SaplingTileItem(jungleSapling->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("saplingJungle");
+	Item::items[acaciaSapling->id]  = (new SaplingTileItem(acaciaSapling->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("saplingAcacia");
+	Item::items[darkOakSapling->id] = (new SaplingTileItem(darkOakSapling->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("saplingDarkOak");
+
 	Item::items[leaves->id] = (new LeafTileItem(leaves->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("leaves");
+	Item::items[spruceLeaves->id]  = (new LeafTileItem(spruceLeaves->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("leavesSpruce");
+	Item::items[birchLeaves->id]   = (new LeafTileItem(birchLeaves->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("leavesBirch");
+	Item::items[jungleLeaves->id]  = (new LeafTileItem(jungleLeaves->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("leavesJungle");
+	Item::items[acaciaLeaves->id]  = (new LeafTileItem(acaciaLeaves->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("leavesAcacia");
+	Item::items[darkOakLeaves->id] = (new LeafTileItem(darkOakLeaves->id - 256))->setCategory(ItemCategory::Decorations)->setDescriptionId("leavesDarkOak");
+
 	Item::items[sandStone->id] = (new AuxDataTileItem(sandStone->id - 256, sandStone))->setCategory(ItemCategory::Structures)->setDescriptionId("sandStone");
 
 	Item::items[quartzBlock->id] = (new AuxDataTileItem(quartzBlock->id - 256, quartzBlock))->setCategory(ItemCategory::Structures)->setDescriptionId("quartzBlock");
@@ -443,8 +501,14 @@ void Tile::initExtraTiles()
 {
 	// New plank blocks using textures from the secondary atlas (terrain2.png)
 	// Spruce planks texture at (4,0) -> index 4, Birch planks at (5,0) -> index 5
-	sprucePlanks = (new Tile(150, 4 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("planksSpruce")->setAllFacesTexture("planks_spruce", 4 | Tile::TEXTURE_ALT_FLAG);
-	birchPlanks  = (new Tile(151, 5 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("planksBirch")->setAllFacesTexture("planks_birch", 5 | Tile::TEXTURE_ALT_FLAG);
+	sprucePlanks  = (new Tile(150, 4 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("planksSpruce")->setAllFacesTexture("planks_spruce", 4 | Tile::TEXTURE_ALT_FLAG);
+	birchPlanks   = (new Tile(151, 5 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("planksBirch")->setAllFacesTexture("planks_birch", 5 | Tile::TEXTURE_ALT_FLAG);
+	junglePlanks  = (new Tile(152, 36 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("planksJungle")->setAllFacesTexture("planks_jungle", 36 | Tile::TEXTURE_ALT_FLAG);
+	acaciaPlanks  = (new Tile(153, 37 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("planksAcacia")->setAllFacesTexture("planks_acacia", 37 | Tile::TEXTURE_ALT_FLAG);
+	darkOakPlanks = (new Tile(154, 38 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("planksDarkOak")->setAllFacesTexture("planks_big_oak", 38 | Tile::TEXTURE_ALT_FLAG);
+
+	jungleTrunk = (new TreeTile(186))->init()->setDestroyTime(2.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("logJungle");
+	acaciaTrunk = (new TreeTile(187))->init()->setDestroyTime(2.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("logAcacia");
 
 	// Spruce Slabs
 	spruceSlab = (new Tile(157, 4 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setDescriptionId("spruceSlab")->setAllFacesTexture("planks_spruce", 4 | Tile::TEXTURE_ALT_FLAG);
@@ -487,6 +551,89 @@ void Tile::initExtraTiles()
 	deepslatePolished    = (new PolishedDeepslateTile(181))->init()->setDestroyTime(1.5f)->setExplodeable(6.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("deepslatePolished")->setAllFacesTexture("polished_deepslate", 18 | Tile::TEXTURE_ALT_FLAG);
 	deepslateTiles       = (new DeepslateTilesTile(182))->init()->setDestroyTime(1.5f)->setExplodeable(6.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("deepslateTiles")->setAllFacesTexture("deepslate_tiles", 19 | Tile::TEXTURE_ALT_FLAG);
 	deepslateBricks      = (new DeepslateBricksTile(183))->init()->setDestroyTime(1.5f)->setExplodeable(6.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("deepslateBricks")->setAllFacesTexture("deepslate_bricks", 20 | Tile::TEXTURE_ALT_FLAG);
+
+	// Leaves (IDs 188-192)
+	spruceLeaves  = (LeafTile*) (new LeafTile(188, 132, LeafTile::EVERGREEN_LEAF))->init()->setDestroyTime(0.2f)->setLightBlock(1)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("leavesSpruce");
+	birchLeaves   = (LeafTile*) (new LeafTile(189, 41 | Tile::TEXTURE_ALT_FLAG, LeafTile::BIRCH_LEAF))->init()->setDestroyTime(0.2f)->setLightBlock(1)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("leavesBirch");
+	jungleLeaves  = (LeafTile*) (new LeafTile(190, 43 | Tile::TEXTURE_ALT_FLAG, LeafTile::JUNGLE_LEAF))->init()->setDestroyTime(0.2f)->setLightBlock(1)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("leavesJungle");
+	acaciaLeaves  = (LeafTile*) (new LeafTile(191, 45 | Tile::TEXTURE_ALT_FLAG, LeafTile::ACACIA_LEAF))->init()->setDestroyTime(0.2f)->setLightBlock(1)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("leavesAcacia");
+	darkOakLeaves = (LeafTile*) (new LeafTile(192, 47 | Tile::TEXTURE_ALT_FLAG, LeafTile::DARK_OAK_LEAF))->init()->setDestroyTime(0.2f)->setLightBlock(1)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("leavesDarkOak");
+
+	// Saplings (IDs 193-197)
+	spruceSapling  = (new Sapling(193, 15 + 16 * 3, LeafTile::EVERGREEN_LEAF))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("saplingSpruce")->setAllFacesTexture("sapling_spruce");
+	birchSapling   = (new Sapling(194, 15 + 16 * 4, LeafTile::BIRCH_LEAF))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("saplingBirch")->setAllFacesTexture("sapling_birch");
+	jungleSapling  = (new Sapling(195, 39 | Tile::TEXTURE_ALT_FLAG, LeafTile::JUNGLE_LEAF))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("saplingJungle")->setAllFacesTexture("sapling_jungle", 39 | Tile::TEXTURE_ALT_FLAG);
+	acaciaSapling  = (new Sapling(196, 40 | Tile::TEXTURE_ALT_FLAG, LeafTile::ACACIA_LEAF))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("saplingAcacia")->setAllFacesTexture("sapling_acacia", 40 | Tile::TEXTURE_ALT_FLAG);
+	darkOakSapling = (new Sapling(197, 54 | Tile::TEXTURE_ALT_FLAG, LeafTile::DARK_OAK_LEAF))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("saplingDarkOak")->setAllFacesTexture("sapling_big_oak", 54 | Tile::TEXTURE_ALT_FLAG);
+
+	// Jungle wood structures (IDs 198-202)
+	stairs_jungle    = (new StairTile(198, junglePlanks))->init()->setCategory(ItemCategory::Structures)->setDescriptionId("stairsJungle");
+	jungleSlab       = (new Tile(199, 36 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("jungleSlab")->setAllFacesTexture("planks_jungle", 36 | Tile::TEXTURE_ALT_FLAG);
+	jungleSlabHalf   = (new Tile(200, 36 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init();
+	jungleSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
+	jungleSlabHalf->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("jungleSlab")->setAllFacesTexture("planks_jungle", 36 | Tile::TEXTURE_ALT_FLAG);
+	fenceJungle      = (new FenceTile(201, 36 | Tile::TEXTURE_ALT_FLAG))->init()->setDestroyTime(2.0f)->setExplodeable(5)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("fenceJungle")->setAllFacesTexture("planks_jungle", 36 | Tile::TEXTURE_ALT_FLAG);
+	fenceGateJungle  = (new FenceGateTile(202, 36 | Tile::TEXTURE_ALT_FLAG))->init()->setDestroyTime(2.0f)->setExplodeable(5)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("fenceGateJungle")->setAllFacesTexture("planks_jungle", 36 | Tile::TEXTURE_ALT_FLAG);
+
+	// Acacia wood structures (IDs 203-207)
+	stairs_acacia    = (new StairTile(203, acaciaPlanks))->init()->setCategory(ItemCategory::Structures)->setDescriptionId("stairsAcacia");
+	acaciaSlab       = (new Tile(204, 37 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("acaciaSlab")->setAllFacesTexture("planks_acacia", 37 | Tile::TEXTURE_ALT_FLAG);
+	acaciaSlabHalf   = (new Tile(205, 37 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init();
+	acaciaSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
+	acaciaSlabHalf->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("acaciaSlab")->setAllFacesTexture("planks_acacia", 37 | Tile::TEXTURE_ALT_FLAG);
+	fenceAcacia      = (new FenceTile(206, 37 | Tile::TEXTURE_ALT_FLAG))->init()->setDestroyTime(2.0f)->setExplodeable(5)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("fenceAcacia")->setAllFacesTexture("planks_acacia", 37 | Tile::TEXTURE_ALT_FLAG);
+	fenceGateAcacia  = (new FenceGateTile(207, 37 | Tile::TEXTURE_ALT_FLAG))->init()->setDestroyTime(2.0f)->setExplodeable(5)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("fenceGateAcacia")->setAllFacesTexture("planks_acacia", 37 | Tile::TEXTURE_ALT_FLAG);
+
+	// Dark Oak wood structures (IDs 208-212)
+	stairs_darkOak   = (new StairTile(208, darkOakPlanks))->init()->setCategory(ItemCategory::Structures)->setDescriptionId("stairsDarkOak");
+	darkOakSlab      = (new Tile(209, 38 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("darkOakSlab")->setAllFacesTexture("planks_big_oak", 38 | Tile::TEXTURE_ALT_FLAG);
+	darkOakSlabHalf  = (new Tile(210, 38 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init();
+	darkOakSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
+	darkOakSlabHalf->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("darkOakSlab")->setAllFacesTexture("planks_big_oak", 38 | Tile::TEXTURE_ALT_FLAG);
+	fenceDarkOak     = (new FenceTile(211, 38 | Tile::TEXTURE_ALT_FLAG))->init()->setDestroyTime(2.0f)->setExplodeable(5)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("fenceDarkOak")->setAllFacesTexture("planks_big_oak", 38 | Tile::TEXTURE_ALT_FLAG);
+	fenceGateDarkOak = (new FenceGateTile(212, 38 | Tile::TEXTURE_ALT_FLAG))->init()->setDestroyTime(2.0f)->setExplodeable(5)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("fenceGateDarkOak")->setAllFacesTexture("planks_big_oak", 38 | Tile::TEXTURE_ALT_FLAG);
+
+	// Sandstone Slabs (IDs 215, 216)
+	sandstoneSlab       = (new Tile(215, 192, Material::stone))->init()->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("sandstoneSlab");
+	sandstoneSlabHalf   = (new Tile(216, 192, Material::stone))->init();
+	sandstoneSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
+	sandstoneSlabHalf->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("sandstoneSlab");
+
+	// Oak Slabs (IDs 217, 218)
+	oakSlab       = (new Tile(217, 4, Material::wood))->init()->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("oakSlab");
+	oakSlabHalf   = (new Tile(218, 4, Material::wood))->init();
+	oakSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
+	oakSlabHalf->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("oakSlab");
+
+	// Cobblestone Slabs (IDs 219, 220)
+	cobbleSlab       = (new Tile(219, 16, Material::stone))->init()->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("cobbleSlab");
+	cobbleSlabHalf   = (new Tile(220, 16, Material::stone))->init();
+	cobbleSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
+	cobbleSlabHalf->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("cobbleSlab");
+
+	// Brick Slabs (IDs 221, 222)
+	brickSlab       = (new Tile(221, 7, Material::stone))->init()->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("brickSlab");
+	brickSlabHalf   = (new Tile(222, 7, Material::stone))->init();
+	brickSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
+	brickSlabHalf->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("brickSlab");
+
+	// Stone Brick Slabs (IDs 223, 224)
+	stoneBrickSlab       = (new Tile(223, 54, Material::stone))->init()->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("stoneBrickSlab");
+	stoneBrickSlabHalf   = (new Tile(224, 54, Material::stone))->init();
+	stoneBrickSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
+	stoneBrickSlabHalf->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("stoneBrickSlab");
+
+	// Nether Brick Slabs (IDs 225, 226)
+	netherBrickSlab       = (new Tile(225, 224, Material::stone))->init()->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("netherBrickSlab");
+	netherBrickSlabHalf   = (new Tile(226, 224, Material::stone))->init();
+	netherBrickSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
+	netherBrickSlabHalf->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("netherBrickSlab");
+
+	// Quartz Slabs (IDs 227, 228)
+	quartzSlab       = (new Tile(227, 233, Material::stone))->init()->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("quartzSlab");
+	quartzSlabHalf   = (new Tile(228, 233, Material::stone))->init();
+	quartzSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
+	quartzSlabHalf->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("quartzSlab");
 }
 
 bool Tile::isTileAllowedInCreative(int id) {
@@ -513,6 +660,16 @@ bool Tile::isTileAllowedInCreative(int id) {
 	case 43:  // stoneSlab
 	case 157: // spruceSlab
 	case 159: // birchSlab
+	case 199: // jungleSlab
+	case 204: // acaciaSlab
+	case 209: // darkOakSlab
+	case 213: // sandstoneSlab
+	case 215: // oakSlab
+	case 217: // cobbleSlab
+	case 219: // brickSlab
+	case 221: // stoneBrickSlab
+	case 223: // netherBrickSlab
+	case 225: // quartzSlab
 
 	// Crops / Growth stages / Farmland (use seeds)
 	case 59:  // crops (placed by Item::seeds_wheat)

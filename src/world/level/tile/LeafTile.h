@@ -18,7 +18,7 @@ class LeafTile: public TransparentTile
 	typedef TransparentTile super;
 
 public:
-	static const int LEAF_TYPE_MASK = 3;
+	static const int LEAF_TYPE_MASK = 7;
 	static const int REQUIRED_WOOD_RANGE = 4;
 
 	//@attn @note:	PERSISTENT_LEAF_BIT and UPDATE_LEAF_BIT are reversed
@@ -28,9 +28,15 @@ public:
     static const int NORMAL_LEAF = 0;
     static const int EVERGREEN_LEAF = 1;
     static const int BIRCH_LEAF = 2;
+    static const int JUNGLE_LEAF = 3;
+    static const int ACACIA_LEAF = 4;
+    static const int DARK_OAK_LEAF = 5;
 
-	LeafTile(int id, int tex)
+    int leafType;
+
+	LeafTile(int id, int tex, int leafType = NORMAL_LEAF)
 	:	super(id, tex, Material::leaves, false),
+		leafType(leafType),
 		oTex(tex),
 		checkBuffer(NULL)
 	{
@@ -46,13 +52,29 @@ public:
         return isSolidRender()? Tile::RENDERLAYER_OPAQUE : Tile::RENDERLAYER_ALPHATEST;
     }
 
+	int getLeafType(int data = 0) const {
+		if (this == (Tile*)Tile::spruceLeaves)  return EVERGREEN_LEAF;
+		if (this == (Tile*)Tile::birchLeaves)   return BIRCH_LEAF;
+		if (this == (Tile*)Tile::jungleLeaves)  return JUNGLE_LEAF;
+		if (this == (Tile*)Tile::acaciaLeaves)  return ACACIA_LEAF;
+		if (this == (Tile*)Tile::darkOakLeaves) return DARK_OAK_LEAF;
+		if (leafType != NORMAL_LEAF)            return leafType;
+		return (data & LEAF_TYPE_MASK);
+	}
+
     int getColor(LevelSource* level, int x, int y, int z) {
-        int data = (level->getData(x, y, z) & LEAF_TYPE_MASK);
+        int data = getLeafType(level ? level->getData(x, y, z) : 0);
         if (data == EVERGREEN_LEAF) {
             return FoliageColor::getEvergreenColor();
         }
         if (data == BIRCH_LEAF) {
             return FoliageColor::getBirchColor();
+        }
+        if (data == ACACIA_LEAF) {
+            return 0xaea42a;
+        }
+        if (data == DARK_OAK_LEAF) {
+            return 0x3b5919;
         }
 		if (!FoliageColor::useTint) {
 			return FoliageColor::getDefaultColor();
@@ -156,8 +178,8 @@ public:
 		if (!level->isClientSide) {
 			ItemInstance* item = player->inventory->getSelected();
 			if (item && item->id == ((Item*)Item::shears)->id) {
-				// drop leaf block instead of sapling
-				popResource(level, x, y, z, ItemInstance(Tile::leaves->id, 1, data & LEAF_TYPE_MASK));
+				// drop this specific leaf block
+				popResource(level, x, y, z, ItemInstance(this->id, 1, 0));
 				return;
 			}
 		}
@@ -169,7 +191,13 @@ public:
     }
 
     int getResource(int data, Random* random) {
-        return Tile::sapling->id;
+        int type = getLeafType(data);
+        if (type == EVERGREEN_LEAF && Tile::spruceSapling) return Tile::spruceSapling->id;
+        if (type == BIRCH_LEAF && Tile::birchSapling)     return Tile::birchSapling->id;
+        if (type == JUNGLE_LEAF && Tile::jungleSapling)   return Tile::jungleSapling->id;
+        if (type == ACACIA_LEAF && Tile::acaciaSapling)   return Tile::acaciaSapling->id;
+        if (type == DARK_OAK_LEAF && Tile::darkOakSapling) return Tile::darkOakSapling->id;
+        return Tile::sapling ? Tile::sapling->id : 6;
     }
 
 	void spawnResources(Level* level, int x, int y, int z, int data, float odds) {
@@ -177,10 +205,10 @@ public:
 			int chance = 20;
 			if (level->random.nextInt(chance) == 0) {
 				int type = getResource(data, &level->random);
-				popResource(level, x, y, z, ItemInstance(type, 1, getSpawnResourcesAuxValue(data)));
+				popResource(level, x, y, z, ItemInstance(type, 1, 0));
 			}
 
-			if ((data & LEAF_TYPE_MASK) == NORMAL_LEAF && level->random.nextInt(200) == 0) {
+			if (getLeafType(data) == NORMAL_LEAF && level->random.nextInt(200) == 0) {
 				popResource(level, x, y, z, ItemInstance(Item::apple, 1, 0));
 			}
 		}
@@ -191,11 +219,22 @@ public:
     }
 
     int getTexture(int face, int data) {
-        if ((data & LEAF_TYPE_MASK) == EVERGREEN_LEAF) {
-			return (this == Tile::leaves)?	tex + 5 * 16
-										:	tex -     16;
-        }
-        return tex;
+		int type = getLeafType(data);
+		if (this == Tile::leaves_carried) {
+			if (type == EVERGREEN_LEAF) return 49 | Tile::TEXTURE_ALT_FLAG;
+			if (type == BIRCH_LEAF)     return 50 | Tile::TEXTURE_ALT_FLAG;
+			if (type == JUNGLE_LEAF)    return 51 | Tile::TEXTURE_ALT_FLAG;
+			if (type == ACACIA_LEAF)    return 52 | Tile::TEXTURE_ALT_FLAG;
+			if (type == DARK_OAK_LEAF)  return 53 | Tile::TEXTURE_ALT_FLAG;
+			return 235; // Oak carried
+		}
+		bool opaque = isSolidRender();
+		if (type == EVERGREEN_LEAF) return opaque ? 133 : 132;
+		if (type == BIRCH_LEAF)     return (opaque ? 42 : 41) | Tile::TEXTURE_ALT_FLAG;
+		if (type == JUNGLE_LEAF)    return (opaque ? 44 : 43) | Tile::TEXTURE_ALT_FLAG;
+		if (type == ACACIA_LEAF)    return (opaque ? 46 : 45) | Tile::TEXTURE_ALT_FLAG;
+		if (type == DARK_OAK_LEAF)  return (opaque ? 48 : 47) | Tile::TEXTURE_ALT_FLAG;
+		return opaque ? 53 : 52; // Oak
     }
 
     void setFancy(bool fancyGraphics) {

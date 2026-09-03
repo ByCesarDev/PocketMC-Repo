@@ -106,6 +106,10 @@ public:
         }
         Tile* tileInstance = Tile::tiles[tile];
         if (tileInstance != NULL) {
+            int shape = tileInstance->getRenderShape();
+            if (shape == Tile::SHAPE_FENCE || shape == Tile::SHAPE_FENCE_GATE) {
+                return true;
+            }
             if (tileInstance->material->isSolidBlocking() && tileInstance->isCubeShaped()) {
                 return tileInstance->material != Material::vegetable;
             }

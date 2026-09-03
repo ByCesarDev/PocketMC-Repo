@@ -42,6 +42,7 @@ private:
 	int lastIconRendered;
 	int lastItemRendered;
 	int lastHandColor;
+	int lastAuxValue;
 	int lastSlot;
 	ItemInstance item;
 

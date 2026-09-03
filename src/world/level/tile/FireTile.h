@@ -49,10 +49,25 @@ public:
         if (Tile::birchSlabHalf) setFlammable(Tile::birchSlabHalf->id, FLAME_HARD, BURN_MEDIUM);
         if (Tile::stairs_spruce) setFlammable(Tile::stairs_spruce->id, FLAME_HARD, BURN_MEDIUM);
         if (Tile::stairs_birch) setFlammable(Tile::stairs_birch->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::stairs_jungle) setFlammable(Tile::stairs_jungle->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::stairs_acacia) setFlammable(Tile::stairs_acacia->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::stairs_darkOak) setFlammable(Tile::stairs_darkOak->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::jungleSlab) setFlammable(Tile::jungleSlab->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::jungleSlabHalf) setFlammable(Tile::jungleSlabHalf->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::acaciaSlab) setFlammable(Tile::acaciaSlab->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::acaciaSlabHalf) setFlammable(Tile::acaciaSlabHalf->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::darkOakSlab) setFlammable(Tile::darkOakSlab->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::darkOakSlabHalf) setFlammable(Tile::darkOakSlabHalf->id, FLAME_HARD, BURN_MEDIUM);
         if (Tile::fenceSpruce) setFlammable(Tile::fenceSpruce->id, FLAME_HARD, BURN_MEDIUM);
         if (Tile::fenceBirch) setFlammable(Tile::fenceBirch->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::fenceJungle) setFlammable(Tile::fenceJungle->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::fenceAcacia) setFlammable(Tile::fenceAcacia->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::fenceDarkOak) setFlammable(Tile::fenceDarkOak->id, FLAME_HARD, BURN_MEDIUM);
         if (Tile::fenceGateSpruce) setFlammable(Tile::fenceGateSpruce->id, FLAME_HARD, BURN_MEDIUM);
         if (Tile::fenceGateBirch) setFlammable(Tile::fenceGateBirch->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::fenceGateJungle) setFlammable(Tile::fenceGateJungle->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::fenceGateAcacia) setFlammable(Tile::fenceGateAcacia->id, FLAME_HARD, BURN_MEDIUM);
+        if (Tile::fenceGateDarkOak) setFlammable(Tile::fenceGateDarkOak->id, FLAME_HARD, BURN_MEDIUM);
 
         setTicking(true); //@fire
     }

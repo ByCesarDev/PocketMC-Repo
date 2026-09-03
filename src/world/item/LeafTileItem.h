@@ -23,15 +23,26 @@ public:
     }
 
     int getIcon(int itemAuxValue) {
-        return Tile::leaves->getTexture(0, itemAuxValue);
+        return Tile::tiles[tileId] ? Tile::tiles[tileId]->getTexture(0, itemAuxValue) : 0;
     }
 
     int getColor(int data) {
-        if ((data & LeafTile::EVERGREEN_LEAF) == LeafTile::EVERGREEN_LEAF) {
+        LeafTile* leaf = Tile::tiles[tileId] ? (LeafTile*)Tile::tiles[tileId] : NULL;
+        int type = leaf ? leaf->getLeafType(data) : (data & LeafTile::LEAF_TYPE_MASK);
+        if (type == LeafTile::EVERGREEN_LEAF) {
             return FoliageColor::getEvergreenColor();
         }
-        if ((data & LeafTile::BIRCH_LEAF) == LeafTile::BIRCH_LEAF) {
+        if (type == LeafTile::BIRCH_LEAF) {
             return FoliageColor::getBirchColor();
+        }
+        if (type == LeafTile::JUNGLE_LEAF) {
+            return 0x30bb0b;
+        }
+        if (type == LeafTile::ACACIA_LEAF) {
+            return 0xaea42a;
+        }
+        if (type == LeafTile::DARK_OAK_LEAF) {
+            return 0x3b5919;
         }
         return FoliageColor::getDefaultColor();
     }

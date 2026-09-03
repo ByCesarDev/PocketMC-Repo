@@ -36,6 +36,7 @@ ItemInHandRenderer::ItemInHandRenderer( Minecraft* mc )
 	lastIconRendered(0),
 	lastItemRendered(0),
 	lastHandColor(-1),
+	lastAuxValue(-1),
 	//selectedItem(NULL),
 	item(0, 1, 0)
 {
@@ -77,23 +78,13 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 	//w.start();
 
 	int itemId = item->id;
-	// Ugly hack, but what the heck, I don't have time at the moment
-	// Use spare slots between 200 and 255 (for now) for items with different
-	// graphics per data. @note: Check Tile.cpp for needed IDs to override
+	// Use spare slots between 200 and 255 for items with different graphics per data
 	if (itemId == Tile::cloth->id) {
 		itemId = 200 + item->getAuxValue(); // 200 to 215
 	} else if (itemId == Tile::treeTrunk->id) {
 		itemId = 216 + item->getAuxValue(); // 216 to 219 @treeTrunk
-	} else if (itemId == Tile::spruceTrunk->id) {
-		itemId = 216 + TreeTile::DARK_TRUNK;
-	} else if (itemId == Tile::birchTrunk->id) {
-		itemId = 216 + TreeTile::BIRCH_TRUNK;
-	} else if (itemId == Tile::sapling->id) {
-		itemId = 220 + item->getAuxValue(); // 220 to 223 @sapling
 	} else if (itemId == Tile::stoneSlabHalf->id) {
 		itemId = 224 + item->getAuxValue(); // 224 to 231 @stoneslab
-	} else if (itemId == ((Tile*)Tile::leaves)->id) {
-		itemId = 232 + (item->getAuxValue() & LeafTile::LEAF_TYPE_MASK); // 232 to 235 @leaves
 	}
 
 	RenderCall& renderObject = renderObjects[itemId];
@@ -102,14 +93,25 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 		itemIcon = mob->getItemInHandIcon(item, 0);
 	}
 	
+	bool isLeafTile = (item->id == ((Tile*)Tile::leaves)->id
+		|| (Tile::spruceLeaves && item->id == Tile::spruceLeaves->id)
+		|| (Tile::birchLeaves && item->id == Tile::birchLeaves->id)
+		|| (Tile::jungleLeaves && item->id == Tile::jungleLeaves->id)
+		|| (Tile::acaciaLeaves && item->id == Tile::acaciaLeaves->id)
+		|| (Tile::darkOakLeaves && item->id == Tile::darkOakLeaves->id));
+
 	int renderedItemId = item->id;
-	if (renderedItemId == ((Tile*)Tile::leaves)->id)
+	int leafType = LeafTile::NORMAL_LEAF;
+	if (isLeafTile) {
 		renderedItemId = ((Tile*)Tile::leaves_carried)->id;
+		LeafTile* leaf = (LeafTile*)Tile::tiles[item->id];
+		leafType = leaf ? leaf->getLeafType(item->getAuxValue()) : LeafTile::NORMAL_LEAF;
+	}
 	if (renderedItemId == Tile::grass->id)
 		renderedItemId = Tile::grass_carried->id;
 
 	int handColor = 0xffffff;
-	bool isBiomeTinted = (renderedItemId == Tile::grass_carried->id || renderedItemId == ((Tile*)Tile::leaves_carried)->id);
+	bool isBiomeTinted = (renderedItemId == Tile::grass_carried->id || isLeafTile);
 	if (isBiomeTinted) {
 		if (mc->level && mc->level->getBiomeSource() && mc->player) {
 			int px = Mth::floor(mc->player->x);
@@ -120,12 +122,12 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 			if (renderedItemId == Tile::grass_carried->id) {
 				handColor = GrassColor::get(temp, rain);
 			} else {
-				if ((item->getAuxValue() & LeafTile::LEAF_TYPE_MASK) == LeafTile::NORMAL_LEAF) {
-					handColor = FoliageColor::get(temp, rain);
-				} else if ((item->getAuxValue() & LeafTile::LEAF_TYPE_MASK) == LeafTile::EVERGREEN_LEAF) {
+				if (leafType == LeafTile::EVERGREEN_LEAF) {
 					handColor = FoliageColor::getEvergreenColor();
-				} else if ((item->getAuxValue() & LeafTile::LEAF_TYPE_MASK) == LeafTile::BIRCH_LEAF) {
+				} else if (leafType == LeafTile::BIRCH_LEAF) {
 					handColor = FoliageColor::getBirchColor();
+				} else {
+					handColor = FoliageColor::get(temp, rain);
 				}
 			}
 		} else {
@@ -144,6 +146,11 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 		reTesselate = true;
 		lastHandColor = handColor;
 	}
+	// Force retesselation when the aux value (leaf type, sapling type, etc.) changes
+	if (item->getAuxValue() != lastAuxValue) {
+		reTesselate = true;
+		lastAuxValue = item->getAuxValue();
+	}
 	lastItemRendered = itemId;
 	lastIconRendered = itemIcon;
 	//const int aux = item->getAuxValue();
@@ -153,11 +160,11 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 			Tesselator& t = Tesselator::instance;
 			t.beginOverride();
 
-			tileRenderer.renderTile(Tile::tiles[renderedItemId], item->getAuxValue(), handColor);
+			tileRenderer.renderTile(Tile::tiles[renderedItemId], isLeafTile ? leafType : item->getAuxValue(), handColor);
 			renderObject.chunk = t.endOverride(renderObject.chunk.vboId);
 
 			// choose atlas based on the tile's texture flag
-			int texCheck = Tile::tiles[renderedItemId]->getTexture(0, item->getAuxValue());
+			int texCheck = Tile::tiles[renderedItemId]->getTexture(0, isLeafTile ? leafType : item->getAuxValue());
 			renderObject.texture = (texCheck & Tile::TEXTURE_ALT_FLAG) ? "terrain2.png" : "terrain.png";
 			renderObject.itemId = itemId;
 			renderObject.isFlat = false;
@@ -166,18 +173,17 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 			renderObject.isFlat = true;
 
 			if (item->id < 256) {
-				renderObject.texture = "terrain.png";
-				//mc->textures->loadAndBindTexture("terrain.png");
+				renderObject.texture = (itemIcon & Tile::TEXTURE_ALT_FLAG) ? "terrain2.png" : "terrain.png";
 			} else {
 				renderObject.texture = "gui/items.png";
-				//mc->textures->loadAndBindTexture("gui/items.png");
 			}
 			// glDisable2(GL_LIGHTING);
 			Tesselator& t = Tesselator::instance;
 			t.beginOverride();
 			t.color(0xff, 0xff, 0xff);
-			const int up = itemIcon & 15;
-			const int vp = itemIcon >> 4;
+			const int iconIdx = itemIcon & ~Tile::TEXTURE_ALT_FLAG;
+			const int up = iconIdx & 15;
+			const int vp = iconIdx >> 4;
 			float u1 = (up * 16 + 0.00f) / 256.0f;
 			float u0 = (up * 16 + 15.99f) / 256.0f;
 			float v0 = (vp * 16 + 0.00f) / 256.0f;
@@ -264,7 +270,7 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 		}
 		mc->textures->loadAndBindTexture(renderObject.texture);
 
-		drawArrayVT_NoState(renderObject.chunk.vboId, renderObject.chunk.vertexCount);
+		drawArrayVTC_NoState(renderObject.chunk.vboId, renderObject.chunk.vertexCount);
 		if (renderObject.isFlat)
 			glPopMatrix2();
 	}
@@ -375,9 +381,11 @@ void ItemInHandRenderer::render( float a )
 		}
 		glEnableClientState2(GL_VERTEX_ARRAY);
 		glEnableClientState2(GL_TEXTURE_COORD_ARRAY);
+		glEnableClientState2(GL_COLOR_ARRAY);
 		renderItem(player, item);
 		glDisableClientState2(GL_VERTEX_ARRAY);
 		glDisableClientState2(GL_TEXTURE_COORD_ARRAY);
+		glDisableClientState2(GL_COLOR_ARRAY);
 		glPopMatrix2();
 	} else {
 		glColor4f2(br, br, br, 1);

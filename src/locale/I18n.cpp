@@ -142,9 +142,9 @@ std::string I18n::getDescriptionString( const ItemInstance& item )
 	// Handle special cases
 	if (item.id == Tile::cloth->id)
 		return get(item.getAuxValue()? "desc.wool" : "desc.woolstring");
-	else if (item.id == Tile::fenceGate->id || item.id == Tile::fenceGateBirch->id || item.id == Tile::fenceGateSpruce->id)
+	else if (item.id == Tile::fenceGate->id || item.id == Tile::fenceGateBirch->id || item.id == Tile::fenceGateSpruce->id || item.id == Tile::fenceGateJungle->id || item.id == Tile::fenceGateAcacia->id || item.id == Tile::fenceGateDarkOak->id)
 		return I18n::get("desc.fence");
-	else if (item.id == Tile::stoneSlabHalf->id || item.id == Tile::spruceSlabHalf->id || item.id == Tile::birchSlabHalf->id)
+	else if (item.id == Tile::stoneSlabHalf->id || item.id == Tile::spruceSlabHalf->id || item.id == Tile::birchSlabHalf->id || item.id == Tile::jungleSlabHalf->id || item.id == Tile::acaciaSlabHalf->id || item.id == Tile::darkOakSlabHalf->id)
 		return I18n::get("desc.slab");
 	else if ((item.id >= 170 && item.id <= 178) || (item.id >= 181 && item.id <= 183))
 		return I18n::get("desc.stonebricksmooth");

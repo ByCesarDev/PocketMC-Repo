@@ -18,8 +18,8 @@ class TileItem: public Item
 {
 	typedef Item super;
 
-	int tileId;
 public:
+	int tileId;
     TileItem(int id_)
 	:	super(id_)
 	{

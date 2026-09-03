@@ -18,6 +18,8 @@
 #include "../../../world/item/ItemInstance.h"
 #include "../../../world/entity/player/Player.h"
 #include "../../../world/entity/player/Inventory.h"
+#include "../../../world/level/tile/LeafTile.h"
+#include "../../../world/level/tile/TreeTile.h"
 #include "../../../world/entity/item/ItemEntity.h"
 #include "../../../world/level/Level.h"
 #include "../../renderer/entity/EntityRenderDispatcher.h"
@@ -346,8 +348,9 @@ void UnifiedInventoryScreen::updateItems() {
                     int cat = it ? it->category : 1;
                     if (cat <= 0) cat = 8;
                     bool match = showAll ? (cat == mask) : ((mask == 8) ? (cat == 8 || cat >= 16) : (cat == mask));
-                    if (match)
-                        catalogItems.push_back(new ItemInstance(Tile::tiles[i], 1));
+                    if (!match) continue;
+                    Tile* tile = Tile::tiles[i];
+                    catalogItems.push_back(new ItemInstance(tile, 1));
                 }
             }
             for (int i = 256; i < 512; ++i) {
@@ -368,8 +371,10 @@ void UnifiedInventoryScreen::updateItems() {
                     Item* it = Item::items[i];
                     int cat = it ? it->category : 1;
                     if (cat <= 0) cat = 8;
-                    if (cat >= 16)
-                        catalogItems.push_back(new ItemInstance(Tile::tiles[i], 1));
+                    if (cat >= 16) {
+                        Tile* tile = Tile::tiles[i];
+                        catalogItems.push_back(new ItemInstance(tile, 1));
+                    }
                 }
             }
             for (int i = 256; i < 512; ++i) {

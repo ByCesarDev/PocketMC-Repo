@@ -22,7 +22,7 @@ public:
     }
 
     int getIcon(int itemAuxValue) {
-        return Tile::sapling->getTexture(0, itemAuxValue);
+        return Tile::tiles[tileId] ? Tile::tiles[tileId]->getTexture(0, itemAuxValue) : 0;
     }
 };
 
