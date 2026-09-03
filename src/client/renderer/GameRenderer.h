@@ -13,6 +13,7 @@ class Minecraft;
 class Entity;
 class ItemInHandRenderer;
 class LevelRenderer;
+class WeatherRenderer;
 class GameRenderer
 {
 public:
@@ -53,6 +54,7 @@ private:
 
 public:
 	ItemInHandRenderer* itemInHandRenderer;
+	WeatherRenderer* weatherRenderer;
 
 private:
 	Minecraft* mc;

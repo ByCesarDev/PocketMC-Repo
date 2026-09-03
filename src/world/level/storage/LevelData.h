@@ -75,6 +75,15 @@ public:
 	bool		getAllowCheats() const;
 	void		setAllowCheats(bool allow);
 
+	int			getRainTime() const;
+	void		setRainTime(int time);
+	bool		isRaining() const;
+	void		setRaining(bool raining);
+	int			getThunderTime() const;
+	void		setThunderTime(int time);
+	bool		isThundering() const;
+	void		setThundering(bool thundering);
+
 public:
 	PlayerData playerData;
 	int playerDataVersion;
@@ -93,6 +102,10 @@ private:
 	int storageVersion;
 	bool spawnMobs;
 	bool allowCheats;
+	int rainTime;
+	bool raining;
+	int thunderTime;
+	bool thundering;
 	//@note: This version is never written or loaded to disk. The only purpose
 	//       is to use it in the level generator on server and clients.
 	int generatorVersion;

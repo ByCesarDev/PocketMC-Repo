@@ -8,9 +8,6 @@
 #include "../LevelSource.h"
 #include "../biome/BiomeSource.h"
 
-bool GrassColor::useTint = true;
-bool FoliageColor::useTint = true;
-
 TallGrass::TallGrass( int id, int tex ) : super(id, tex, Material::replaceable_plant) {
 	float ss = 0.4f;
 	setShape(0.5f - ss, 0, 0.5f - ss, 0.5f + ss, 0.8f, 0.5f + ss);

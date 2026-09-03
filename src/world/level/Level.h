@@ -250,6 +250,18 @@ public:
     void setSpawnPos(Pos spawnPos);
 	void setSpawnSettings(bool spawnEnemies, bool spawnFriendlies);
 
+	float getRainLevel(float a);
+	float getOlderRainLevel();
+	float getThunderLevel(float a);
+	float getOlderThunderLevel();
+	bool isRaining();
+	bool isThundering();
+	bool isRainingAt(int x, int y, int z);
+	void tickWeather();
+	void toggleDownfall();
+	void resetWeatherCycle();
+	void setLightingFlash(int ticks);
+
 	ChunkSource* getChunkSource();
 	LevelStorage* getLevelStorage();
     LevelData* getLevelData();
@@ -343,6 +355,12 @@ private:
 
 	float _lastSavedPlayerTime;
 	PendingList _pendingPlayerRemovals;
+
+	float _rainLevel;
+	float _oRainLevel;
+	float _thunderLevel;
+	float _oThunderLevel;
+	int _flashTime;
 };
 
 #endif /*NET_MINECRAFT_WORLD_LEVEL__Level_H__*/

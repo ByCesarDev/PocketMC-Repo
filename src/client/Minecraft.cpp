@@ -25,6 +25,8 @@
 #include "../network/ServerSideNetworkHandler.h"
 //#include "../network/Packet.h"
 #include "../world/entity/player/Inventory.h"
+#include "../world/level/GrassColor.h"
+#include "../world/level/FoliageColor.h"
 #include "../world/level/tile/Tile.h"
 #include "../world/level/tile/LeafTile.h"
 #include "../world/level/tile/StoneSlabTile.h"
@@ -1365,6 +1367,15 @@ void Minecraft::init()
 	_supportsNonTouchscreen = !platform()->supportsTouchscreen();
 
 	textures = new Textures(&options, platform());
+
+	TextureId foliageId = textures->loadTexture("misc/foliagecolor.png");
+	int* foliagePixels = textures->loadTexturePixels(foliageId, "misc/foliagecolor.png");
+	FoliageColor::init(foliagePixels);
+
+	TextureId grassId = textures->loadTexture("misc/grasscolor.png");
+	int* grassPixels = textures->loadTexturePixels(grassId, "misc/grasscolor.png");
+	GrassColor::init(grassPixels);
+
 	textures->addDynamicTexture(new WaterTexture());
 	textures->addDynamicTexture(new WaterSideTexture());
 

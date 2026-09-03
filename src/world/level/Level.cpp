@@ -106,6 +106,11 @@ void Level::_init(const std::string& levelName, const LevelSettings& settings, i
 
 	_pathFinder = new PathFinder();
 	_nightMode = false;
+	_rainLevel = 0.0f;
+	_oRainLevel = 0.0f;
+	_thunderLevel = 0.0f;
+	_oThunderLevel = 0.0f;
+	_flashTime = 0;
     updateSkyBrightness();
 }
 
@@ -224,6 +229,8 @@ void Level::tick() {
 
 	TIMER_PUSH("chunkSource");
 	_chunkSource->tick();
+
+	tickWeather();
 
 	updateSkyDarken();
 	if(_nightMode) {
@@ -2467,3 +2474,72 @@ AdventureSettings::AdventureSettings()
 	showNameTags(true)
 {
 }
+
+float Level::getRainLevel(float a) {
+	return _oRainLevel + (_rainLevel - _oRainLevel) * a;
+}
+
+float Level::getOlderRainLevel() {
+	return _oRainLevel;
+}
+
+float Level::getThunderLevel(float a) {
+	return (_oThunderLevel + (_thunderLevel - _oThunderLevel) * a) * getRainLevel(a);
+}
+
+float Level::getOlderThunderLevel() {
+	return _oThunderLevel;
+}
+
+bool Level::isRaining() {
+	return _rainLevel > 0.0f;
+}
+
+bool Level::isThundering() {
+	return _thunderLevel > 0.0f;
+}
+
+bool Level::isRainingAt(int x, int y, int z) {
+	Biome* biome = getBiome(x, z);
+	if (biome == NULL) return false;
+	if (!biome->canOnlyRain()) return false;
+	return y >= getTopSolidBlock(x, z);
+}
+
+void Level::tickWeather() {
+	if (dimension && dimension->hasCeiling)
+		return;
+
+	_oRainLevel = _rainLevel;
+	if (levelData.isRaining())
+		_rainLevel += 0.01f;
+	else
+		_rainLevel -= 0.01f;
+	_rainLevel = Mth::clamp(_rainLevel, 0.0f, 1.0f);
+
+	_oThunderLevel = _thunderLevel;
+	if (levelData.isThundering())
+		_thunderLevel += 0.1f;
+	else
+		_thunderLevel -= 0.1f;
+	_thunderLevel = Mth::clamp(_thunderLevel, 0.0f, 1.0f);
+}
+
+void Level::toggleDownfall() {
+	levelData.setRaining(!levelData.isRaining());
+}
+
+void Level::resetWeatherCycle() {
+	levelData.setRaining(false);
+	levelData.setThundering(false);
+	_rainLevel = 0;
+	_oRainLevel = 0;
+	_thunderLevel = 0;
+	_oThunderLevel = 0;
+	_flashTime = 0;
+}
+
+void Level::setLightingFlash(int ticks) {
+	_flashTime = ticks;
+}
+

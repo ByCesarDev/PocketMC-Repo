@@ -43,6 +43,7 @@ public:
 
     TextureId assignTexture(const std::string& resourceName, const TextureData& img);
 	const TextureData* getTemporaryTextureData(TextureId id);
+	int* loadTexturePixels(TextureId texId, const std::string& resourceName);
 
 	void tick(bool uploadToGraphicsCard);
 

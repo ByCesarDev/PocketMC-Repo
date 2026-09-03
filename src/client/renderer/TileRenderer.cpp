@@ -20,7 +20,7 @@
 #include "../../world/Facing.h"
 #include "EntityTileRenderer.h"
 
-bool TileRenderer::sideTinting = false;
+bool TileRenderer::sideTinting = true;
 
 TileRenderer::TileRenderer(LevelSource* level /* = NULL */, Textures* textures /* = nullptr */ )
 	:	level(level),
@@ -137,10 +137,12 @@ bool TileRenderer::tesselateBlockInWorld( Tile* tt, int x, int y, int z, float r
 			float br = tt->getBrightness(level, x, y, z - 1);
 			if (tt->zz0 > 0) br = centerBrightness;
 			t.color(r2 * br, g2 * br, b2 * br);
-			renderNorth(tt, xf, yf, zf, texNorth & ~Tile::TEXTURE_ALT_FLAG);
-			if (((texNorth & ~Tile::TEXTURE_ALT_FLAG) == 3) && sideTinting) {
+			int cleanTex = texNorth & ~Tile::TEXTURE_ALT_FLAG;
+			int baseTex = (cleanTex == 3 && sideTinting) ? 236 : cleanTex;
+			renderNorth(tt, xf, yf, zf, baseTex);
+			if (cleanTex == 3 && sideTinting) {
 				t.color(c2 * br * biomeR, c2 * br * biomeG, c2 * br * biomeB);
-				renderNorth(tt, xf, yf, zf, 38);
+				renderNorth(tt, xf, yf, zf - 0.001f, 38);
 			}
 			changed = true;
 		}
@@ -153,10 +155,12 @@ bool TileRenderer::tesselateBlockInWorld( Tile* tt, int x, int y, int z, float r
 			float br = tt->getBrightness(level, x, y, z + 1);
 			if (tt->zz1 < 1) br = centerBrightness;
 			t.color(r2 * br, g2 * br, b2 * br);
-			renderSouth(tt, xf, yf, zf, texSouth & ~Tile::TEXTURE_ALT_FLAG);
-			if (((texSouth & ~Tile::TEXTURE_ALT_FLAG) == 3) && sideTinting) {
+			int cleanTex = texSouth & ~Tile::TEXTURE_ALT_FLAG;
+			int baseTex = (cleanTex == 3 && sideTinting) ? 236 : cleanTex;
+			renderSouth(tt, xf, yf, zf, baseTex);
+			if (cleanTex == 3 && sideTinting) {
 				t.color(c2 * br * biomeR, c2 * br * biomeG, c2 * br * biomeB);
-				renderSouth(tt, xf, yf, zf, 38);
+				renderSouth(tt, xf, yf, zf + 0.001f, 38);
 			}
 			changed = true;
 		}
@@ -169,10 +173,12 @@ bool TileRenderer::tesselateBlockInWorld( Tile* tt, int x, int y, int z, float r
 			float br = tt->getBrightness(level, x - 1, y, z);
 			if (tt->xx0 > 0) br = centerBrightness;
 			t.color(r3 * br, g3 * br, b3 * br);
-			renderWest(tt, xf, yf, zf, texWest & ~Tile::TEXTURE_ALT_FLAG);
-			if (((texWest & ~Tile::TEXTURE_ALT_FLAG) == 3) && sideTinting) {
-				t.color(c2 * br * biomeR, c2 * br * biomeG, c2 * br * biomeB);
-				renderWest(tt, xf, yf, zf, 38);
+			int cleanTex = texWest & ~Tile::TEXTURE_ALT_FLAG;
+			int baseTex = (cleanTex == 3 && sideTinting) ? 236 : cleanTex;
+			renderWest(tt, xf, yf, zf, baseTex);
+			if (cleanTex == 3 && sideTinting) {
+				t.color(c3 * br * biomeR, c3 * br * biomeG, c3 * br * biomeB);
+				renderWest(tt, xf - 0.001f, yf, zf, 38);
 			}
 			changed = true;
 		}
@@ -185,10 +191,12 @@ bool TileRenderer::tesselateBlockInWorld( Tile* tt, int x, int y, int z, float r
 			float br = tt->getBrightness(level, x + 1, y, z);
 			if (tt->xx1 < 1) br = centerBrightness;
 			t.color(r3 * br, g3 * br, b3 * br);
-			renderEast(tt, xf, yf, zf, texEast & ~Tile::TEXTURE_ALT_FLAG);
-			if (((texEast & ~Tile::TEXTURE_ALT_FLAG) == 3) && sideTinting) {
-				t.color(c2 * br * biomeR, c2 * br * biomeG, c2 * br * biomeB);
-				renderEast(tt, xf, yf, zf, 38);
+			int cleanTex = texEast & ~Tile::TEXTURE_ALT_FLAG;
+			int baseTex = (cleanTex == 3 && sideTinting) ? 236 : cleanTex;
+			renderEast(tt, xf, yf, zf, baseTex);
+			if (cleanTex == 3 && sideTinting) {
+				t.color(c3 * br * biomeR, c3 * br * biomeG, c3 * br * biomeB);
+				renderEast(tt, xf + 0.001f, yf, zf, 38);
 			}
 			changed = true;
 		}
@@ -1285,15 +1293,17 @@ bool TileRenderer::tesselateBlockInWorldWithAmbienceOcclusion( Tile* tt, int pX,
 			int tex2 = tt->getTexture(level, pX, pY, pZ, 2);
 			bool isAlt2 = (tex2 & Tile::TEXTURE_ALT_FLAG) != 0;
 			if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt2) || (atlasFilter == 1 && isAlt2)) {
-				renderNorth(tt, (float) pX, (float) pY, (float) pZ, tex2 & ~Tile::TEXTURE_ALT_FLAG);
-				if ((tex2 & ~Tile::TEXTURE_ALT_FLAG) == 3 && sideTinting) 
+				int cleanTex2 = tex2 & ~Tile::TEXTURE_ALT_FLAG;
+				int baseTex2 = (cleanTex2 == 3 && sideTinting) ? 236 : cleanTex2;
+				renderNorth(tt, (float) pX, (float) pY, (float) pZ, baseTex2);
+				if (cleanTex2 == 3 && sideTinting) 
 				{
 					c1r *= pBaseRed; c1g *= pBaseGreen; c1b *= pBaseBlue;
 					c2r *= pBaseRed; c2g *= pBaseGreen; c2b *= pBaseBlue;
 					c3r *= pBaseRed; c3g *= pBaseGreen; c3b *= pBaseBlue;
 					c4r *= pBaseRed; c4g *= pBaseGreen; c4b *= pBaseBlue;
 
-					renderNorth(tt, (float) pX, (float) pY, (float) pZ, 38);
+					renderNorth(tt, (float) pX, (float) pY, (float) pZ - 0.001f, 38);
 				}
 				i = true;
 			}
@@ -1353,15 +1363,17 @@ bool TileRenderer::tesselateBlockInWorldWithAmbienceOcclusion( Tile* tt, int pX,
 			int tex3 = tt->getTexture(level, pX, pY, pZ, 3);
 			bool isAlt3 = (tex3 & Tile::TEXTURE_ALT_FLAG) != 0;
 			if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt3) || (atlasFilter == 1 && isAlt3)) {
-				renderSouth(tt, (float) pX, (float) pY, (float) pZ, tex3 & ~Tile::TEXTURE_ALT_FLAG);
-				if ((tex3 & ~Tile::TEXTURE_ALT_FLAG) == 3 && sideTinting) 
+				int cleanTex3 = tex3 & ~Tile::TEXTURE_ALT_FLAG;
+				int baseTex3 = (cleanTex3 == 3 && sideTinting) ? 236 : cleanTex3;
+				renderSouth(tt, (float) pX, (float) pY, (float) pZ, baseTex3);
+				if (cleanTex3 == 3 && sideTinting) 
 				{
 					c1r *= pBaseRed; c1g *= pBaseGreen; c1b *= pBaseBlue;
 					c2r *= pBaseRed; c2g *= pBaseGreen; c2b *= pBaseBlue;
 					c3r *= pBaseRed; c3g *= pBaseGreen; c3b *= pBaseBlue;
 					c4r *= pBaseRed; c4g *= pBaseGreen; c4b *= pBaseBlue;
 
-					renderSouth(tt, (float) pX, (float) pY, (float) pZ, 38);
+					renderSouth(tt, (float) pX, (float) pY, (float) pZ + 0.001f, 38);
 				}
 				i = true;
 			}
@@ -1420,15 +1432,17 @@ bool TileRenderer::tesselateBlockInWorldWithAmbienceOcclusion( Tile* tt, int pX,
 			int tex4 = tt->getTexture(level, pX, pY, pZ, 4);
 			bool isAlt4 = (tex4 & Tile::TEXTURE_ALT_FLAG) != 0;
 			if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt4) || (atlasFilter == 1 && isAlt4)) {
-				renderWest(tt, (float) pX, (float) pY, (float) pZ, tex4 & ~Tile::TEXTURE_ALT_FLAG);
-				if ((tex4 & ~Tile::TEXTURE_ALT_FLAG) == 3 && sideTinting) 
+				int cleanTex4 = tex4 & ~Tile::TEXTURE_ALT_FLAG;
+				int baseTex4 = (cleanTex4 == 3 && sideTinting) ? 236 : cleanTex4;
+				renderWest(tt, (float) pX, (float) pY, (float) pZ, baseTex4);
+				if (cleanTex4 == 3 && sideTinting) 
 				{
 					c1r *= pBaseRed; c1g *= pBaseGreen; c1b *= pBaseBlue;
 					c2r *= pBaseRed; c2g *= pBaseGreen; c2b *= pBaseBlue;
 					c3r *= pBaseRed; c3g *= pBaseGreen; c3b *= pBaseBlue;
 					c4r *= pBaseRed; c4g *= pBaseGreen; c4b *= pBaseBlue;
 
-					renderWest(tt, (float) pX, (float) pY, (float) pZ, 38);
+					renderWest(tt, (float) pX - 0.001f, (float) pY, (float) pZ, 38);
 				}
 				i = true;
 			}
@@ -1488,15 +1502,17 @@ bool TileRenderer::tesselateBlockInWorldWithAmbienceOcclusion( Tile* tt, int pX,
 			int tex5 = tt->getTexture(level, pX, pY, pZ, 5);
 			bool isAlt5 = (tex5 & Tile::TEXTURE_ALT_FLAG) != 0;
 			if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt5) || (atlasFilter == 1 && isAlt5)) {
-				renderEast(tt, (float) pX, (float) pY, (float) pZ, tex5 & ~Tile::TEXTURE_ALT_FLAG);
-				if ((tex5 & ~Tile::TEXTURE_ALT_FLAG) == 3 && sideTinting) 
+				int cleanTex5 = tex5 & ~Tile::TEXTURE_ALT_FLAG;
+				int baseTex5 = (cleanTex5 == 3 && sideTinting) ? 236 : cleanTex5;
+				renderEast(tt, (float) pX, (float) pY, (float) pZ, baseTex5);
+				if (cleanTex5 == 3 && sideTinting) 
 				{
 					c1r *= pBaseRed; c1g *= pBaseGreen; c1b *= pBaseBlue;
 					c2r *= pBaseRed; c2g *= pBaseGreen; c2b *= pBaseBlue;
 					c3r *= pBaseRed; c3g *= pBaseGreen; c3b *= pBaseBlue;
 					c4r *= pBaseRed; c4g *= pBaseGreen; c4b *= pBaseBlue;
 
-					renderEast(tt, (float) pX, (float) pY, (float) pZ, 38);
+					renderEast(tt, (float) pX + 0.001f, (float) pY, (float) pZ, 38);
 				}
 				i = true;
 			}
@@ -2516,11 +2532,17 @@ void TileRenderer::renderEast( Tile* tt, float x, float y, float z, int tex )
 	}
 }
 
-void TileRenderer::renderTile( Tile* tile, int data )
+void TileRenderer::renderTile( Tile* tile, int data, int color )
 {
 	Tesselator& t = Tesselator::instance;
 
-	t.color(0xff, 0xff, 0xff); // i disabled this, this is normally enabled in normal mcpe see if this fits OPTION_NORMAL_LIGHTING - shredder
+	float tr = ((color >> 16) & 0xff) / 255.0f;
+	float tg = ((color >> 8) & 0xff) / 255.0f;
+	float tb = (color & 0xff) / 255.0f;
+
+	bool isGrassTile = (tile == (Tile*)Tile::grass || tile == (Tile*)Tile::grass_carried);
+	bool isLeafTile = (tile == (Tile*)Tile::leaves || tile == (Tile*)Tile::leaves_carried);
+
 	int shape = tile->getRenderShape();
 
 	if (shape == Tile::SHAPE_BLOCK) {
@@ -2528,29 +2550,85 @@ void TileRenderer::renderTile( Tile* tile, int data )
 		t.addOffset(-0.5f, -0.5f, -0.5f);
 		t.begin();
 
-		t.normal(0.0f, -1.0f, 0.0f);// most normal calls in this file has been added me since they existed in java - shredder
-
-		renderFaceDown(tile, 0, 0, 0, tile->getTexture(0, data));
+		t.normal(0.0f, -1.0f, 0.0f);
+		if (isGrassTile) {
+			t.color(1.0f, 1.0f, 1.0f);
+			renderFaceDown(tile, 0, 0, 0, 2);
+		} else if (isLeafTile && data == 0) {
+			t.color(tr, tg, tb);
+			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0, data));
+		} else {
+			t.color(1.0f, 1.0f, 1.0f);
+			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0, data));
+		}
 
 		t.normal(0.0f, 1.0f, 0.0f); 
-
-		renderFaceUp(tile, 0, 0, 0, tile->getTexture(1, data));
+		if (isGrassTile) {
+			t.color(tr, tg, tb);
+			renderFaceUp(tile, 0, 0, 0, 0); // grass_top
+		} else if (isLeafTile && data == 0) {
+			t.color(tr, tg, tb);
+			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1, data));
+		} else {
+			t.color(1.0f, 1.0f, 1.0f);
+			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1, data));
+		}
 
 		t.normal(0.0f, 0.0f, -1.0f);
-
-		renderNorth(tile, 0, 0, 0, tile->getTexture(2, data));
+		if (isGrassTile) {
+			t.color(1.0f, 1.0f, 1.0f);
+			renderNorth(tile, 0, 0, 0, 236); // dirt_grass
+			t.color(tr, tg, tb);
+			renderNorth(tile, 0, 0, -0.001f, 38); // grass_side_overlay
+		} else if (isLeafTile && data == 0) {
+			t.color(tr, tg, tb);
+			renderNorth(tile, 0, 0, 0, tile->getTexture(2, data));
+		} else {
+			t.color(1.0f, 1.0f, 1.0f);
+			renderNorth(tile, 0, 0, 0, tile->getTexture(2, data));
+		}
 
 		t.normal(0.0f, 0.0f, 1.0f);
-
-		renderSouth(tile, 0, 0, 0, tile->getTexture(3, data));
+		if (isGrassTile) {
+			t.color(1.0f, 1.0f, 1.0f);
+			renderSouth(tile, 0, 0, 0, 236); // dirt_grass
+			t.color(tr, tg, tb);
+			renderSouth(tile, 0, 0, 0.001f, 38); // grass_side_overlay
+		} else if (isLeafTile && data == 0) {
+			t.color(tr, tg, tb);
+			renderSouth(tile, 0, 0, 0, tile->getTexture(3, data));
+		} else {
+			t.color(1.0f, 1.0f, 1.0f);
+			renderSouth(tile, 0, 0, 0, tile->getTexture(3, data));
+		}
 
 		t.normal(-1.0f, 0.0f, 0.0f);
-
-		renderWest(tile, 0, 0, 0, tile->getTexture(4, data));
+		if (isGrassTile) {
+			t.color(1.0f, 1.0f, 1.0f);
+			renderWest(tile, 0, 0, 0, 236); // dirt_grass
+			t.color(tr, tg, tb);
+			renderWest(tile, -0.001f, 0, 0, 38); // grass_side_overlay
+		} else if (isLeafTile && data == 0) {
+			t.color(tr, tg, tb);
+			renderWest(tile, 0, 0, 0, tile->getTexture(4, data));
+		} else {
+			t.color(1.0f, 1.0f, 1.0f);
+			renderWest(tile, 0, 0, 0, tile->getTexture(4, data));
+		}
 
 		t.normal(1.0f, 0.0f, 0.0f);
-
-		renderEast(tile, 0, 0, 0, tile->getTexture(5, data));
+		if (isGrassTile) {
+			t.color(1.0f, 1.0f, 1.0f);
+			renderEast(tile, 0, 0, 0, 236); // dirt_grass
+			t.color(tr, tg, tb);
+			renderEast(tile, 0.001f, 0, 0, 38); // grass_side_overlay
+		} else if (isLeafTile && data == 0) {
+			t.color(tr, tg, tb);
+			renderEast(tile, 0, 0, 0, tile->getTexture(5, data));
+		} else {
+			t.color(1.0f, 1.0f, 1.0f);
+			renderEast(tile, 0, 0, 0, tile->getTexture(5, data));
+		}
 		t.draw();
 
 		t.addOffset(0.5f, 0.5f, 0.5f);

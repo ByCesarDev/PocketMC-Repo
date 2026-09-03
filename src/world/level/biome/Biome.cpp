@@ -1,4 +1,5 @@
 #include "BiomeInclude.h"
+#include "../GrassColor.h"
 
 #include "../levelgen/feature/TreeFeature.h"
 #include "../levelgen/feature/TallgrassFeature.h"
@@ -31,7 +32,11 @@ Biome* Biome::map[64*64];
 Biome::Biome()
 :	topMaterial(((Tile*)Tile::grass)->id),
 	material(((Tile*)Tile::dirt)->id),
-	leafColor(0x4EE031)
+	leafColor(0x4EE031),
+	temperature(0.5f),
+	downfall(0.5f),
+	m_bHasRain(true),
+	m_bHasSnow(false)
 {
     _friendlies.insert(_friendlies.end(), MobSpawnerData(MobTypes::Sheep, 12, 2, 3));
     _friendlies.insert(_friendlies.end(), MobSpawnerData(MobTypes::Pig, 10, 1, 3));
@@ -82,6 +87,14 @@ Biome* Biome::setColor( int color )
 
 Biome* Biome::setSnowCovered()
 {
+	m_bHasSnow = true;
+	m_bHasRain = false;
+	return this;
+}
+
+Biome* Biome::setNoRain()
+{
+	m_bHasRain = false;
 	return this;
 }
 
@@ -219,6 +232,24 @@ int Biome::getSkyColor( float temp )
 //	if (temp > 1) temp = 1;
 	return 0x80808080;
 	//return Color.getHSBColor(224 / 360.0f - temp * 0.05f, 0.50f + temp * 0.1f, 1.0f).getRGB();
+}
+
+float Biome::getDownfall()
+{
+	return downfall;
+}
+
+float Biome::getTemperature()
+{
+	return temperature;
+}
+
+int Biome::getGrassColor()
+{
+    float temp = Mth::clamp(getTemperature(), 0.0f, 1.0f);
+    float rain = Mth::clamp(getDownfall(), 0.0f, 1.0f);
+
+    return GrassColor::get(temp, rain);
 }
 
 Biome::MobList& Biome::getMobs(const MobCategory& category)

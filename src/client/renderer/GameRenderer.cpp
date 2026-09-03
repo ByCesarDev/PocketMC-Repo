@@ -8,6 +8,7 @@
 
 #include "LevelRenderer.h"
 #include "ItemInHandRenderer.h"
+#include "WeatherRenderer.h"
 #include "culling/AllowAllCuller.h"
 #include "culling/FrustumCuller.h"
 #include "entity/EntityRenderDispatcher.h"
@@ -60,6 +61,8 @@ GameRenderer::GameRenderer( Minecraft* mc )
 	saveMatrices();
 
 	itemInHandRenderer = new ItemInHandRenderer(mc);
+	weatherRenderer = new WeatherRenderer();
+	weatherRenderer->setLevel(mc);
 
 	EntityRenderDispatcher* e = EntityRenderDispatcher::getInstance();
 	e->itemInHandRenderer = itemInHandRenderer;
@@ -68,6 +71,7 @@ GameRenderer::GameRenderer( Minecraft* mc )
 
 GameRenderer::~GameRenderer() {
 	delete itemInHandRenderer;
+	delete weatherRenderer;
 }
 
 void renderCursor(float x, float y, Minecraft* minecraft) {
@@ -316,7 +320,7 @@ void GameRenderer::renderLevel(float a) {
         glEnable2(GL_FOG);
 
 		mc->textures->loadAndBindTexture("terrain.png");
-        glDisable2(GL_ALPHA_TEST);
+        glEnable2(GL_ALPHA_TEST);
         glDisable2(GL_BLEND);
         glEnable2(GL_CULL_FACE);
 		TIMER_POP_PUSH("terrain-0");
@@ -377,6 +381,10 @@ void GameRenderer::renderLevel(float a) {
 				// }
 				levelRenderer->renderHit(player, mc->hitResult, 0, NULL, a);//player->inventory.getSelected(), a);
 			}
+		}
+
+		if (weatherRenderer) {
+			weatherRenderer->render(a);
 		}
 
 		glDisable2(GL_FOG);
@@ -808,7 +816,9 @@ void GameRenderer::tick(int nTick, int maxTick) {
     _tick++;
 
     itemInHandRenderer->tick();
-//    if (mc->isRaining) tickRain();
+	if (weatherRenderer) {
+		weatherRenderer->tick();
+	}
 }
 
 /*private*/

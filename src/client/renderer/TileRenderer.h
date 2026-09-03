@@ -59,7 +59,7 @@ public:
     void renderWest(Tile* tt, float x, float y, float z, int tex);
     void renderEast(Tile* tt, float x, float y, float z, int tex);
 
-    void renderTile(Tile* tile, int data);
+    void renderTile(Tile* tile, int data, int color = 0xffffff);
 	void renderGuiTile(Tile* tile, int data);
 
 	bool renderWithMaterialInstances(Tile* tile, int x, int y, int z, int data = 0);

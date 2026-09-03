@@ -23,12 +23,29 @@ int GrassTile::getTexture( int face, int data ) {
 	return 3;
 }
 
-int GrassTile::getColor( LevelSource* level, int x, int y, int z ) {
-	//level.getBiomeSource().getBiomeBlock(x, z, 1, 1);
-	//float temp = level.getBiomeSource().temperatures[0];
-	//float rain = level.getBiomeSource().downfalls[0];
+#include "../GrassColor.h"
+#include "../Level.h"
+#include "../LevelSource.h"
+#include "../biome/BiomeSource.h"
 
-	return 0x339933;//GrassColor.get(temp, rain);
+int GrassTile::getColor( LevelSource* level, int x, int y, int z ) {
+	if(GrassColor::useAlpha){
+		return GrassColor::getAlphaColor();
+	}
+
+	if(!GrassColor::useTint){
+		return 0x339933;
+	}
+
+	if (!level || !level->getBiomeSource()) {
+		return 0x339933;
+	}
+
+	level->getBiomeSource()->getBiomeBlock(x, z, 1, 1);
+	float temp = level->getBiomeSource()->temperatures[0];
+	float rain = level->getBiomeSource()->downfalls[0];
+
+	return GrassColor::get(temp, rain);
 }
 
 void GrassTile::tick( Level* level, int x, int y, int z, Random* random ) {

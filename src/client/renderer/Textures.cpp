@@ -247,6 +247,24 @@ const TextureData* Textures::getTemporaryTextureData( TextureId id )
 	return &it->second;
 }
 
+int* Textures::loadTexturePixels(TextureId texId, const std::string& resourceName) {
+	const TextureData* texture = getTemporaryTextureData(texId);
+	if (!texture || !texture->data)
+		return NULL;
+
+	int size = texture->w * texture->h;
+	int* pixels = new int[size];
+	unsigned char* raw = texture->data;
+	for (int i = 0; i < size; i++) {
+		int r = raw[i * 4 + 0];
+		int g = raw[i * 4 + 1];
+		int b = raw[i * 4 + 2];
+		int a = raw[i * 4 + 3];
+		pixels[i] = (a << 24) | (r << 16) | (g << 8) | (b);
+	}
+	return pixels;
+}
+
 void Textures::tick(bool uploadToGraphicsCard)
 {
 	for (unsigned int i = 0; i < dynamicTextures.size(); ++i ) {

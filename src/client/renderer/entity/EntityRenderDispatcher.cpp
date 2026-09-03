@@ -133,7 +133,7 @@ void EntityRenderDispatcher::render( Entity* entity, float x, float y, float z, 
 	EntityRenderer* renderer = getRenderer(entity);
 	if (renderer != NULL) {
 		renderer->render(entity, x, y, z, rot, a);
-		//renderer->postRender(entity, x, y, z, rot, a);
+		renderer->postRender(entity, x, y, z, rot, a);
 	}
 }
 

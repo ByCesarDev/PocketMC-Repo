@@ -13,7 +13,8 @@ LevelData::LevelData()
 	playerDataVersion(-1),
 	storageVersion(0),
 	gameType(GameType::Default),	spawnMobs(true),
-	allowCheats(false),	loadedPlayerTag(NULL)
+	allowCheats(false),	loadedPlayerTag(NULL),
+	rainTime(0), raining(false), thunderTime(0), thundering(false)
 {
 	//LOGI("ctor 1: %p\n", this);
 	spawnMobs = true;
@@ -29,7 +30,8 @@ LevelData::LevelData( const LevelSettings& settings, const std::string& levelNam
 	time(0),
 	dimension(Dimension::NORMAL),
 	playerDataVersion(-1),
-	loadedPlayerTag(NULL)
+	loadedPlayerTag(NULL),
+	rainTime(0), raining(false), thunderTime(0), thundering(false)
 {
 	//LOGI("ctor 2: %p\n", this);
 
@@ -62,6 +64,10 @@ LevelData::LevelData( const LevelData& rhs )
 	generatorVersion(rhs.generatorVersion),
 	spawnMobs(rhs.spawnMobs),
 	allowCheats(rhs.allowCheats),
+	rainTime(rhs.rainTime),
+	raining(rhs.raining),
+	thunderTime(rhs.thunderTime),
+	thundering(rhs.thundering),
 	loadedPlayerTag(NULL),
 	playerData(rhs.playerData)
 {
@@ -85,6 +91,10 @@ LevelData& LevelData::operator=( const LevelData& rhs )
 		dimension	= rhs.dimension;
 		spawnMobs	= rhs.spawnMobs;
 		allowCheats	= rhs.allowCheats;
+		rainTime	= rhs.rainTime;
+		raining		= rhs.raining;
+		thunderTime	= rhs.thunderTime;
+		thundering	= rhs.thundering;
 		playerData  = rhs.playerData;
 		playerDataVersion	= rhs.playerDataVersion;
 		generatorVersion	= rhs.generatorVersion;
@@ -173,6 +183,10 @@ void LevelData::setTagData( CompoundTag* tag, CompoundTag* playerTag )
 	tag->putInt("StorageVersion", storageVersion);
 	tag->putInt("Platform", 2);
 	tag->putInt("Dimension", dimension);
+	tag->putInt("rainTime", rainTime);
+	tag->putBoolean("raining", raining);
+	tag->putInt("thunderTime", thunderTime);
+	tag->putBoolean("thundering", thundering);
 
 	if (playerTag != NULL) {
 		tag->putCompound("Player", playerTag);
@@ -196,6 +210,10 @@ void LevelData::getTagData( const CompoundTag* tag )
 	if (tag->contains("Dimension")) {
 		dimension = tag->getInt("Dimension");
 	}
+	if (tag->contains("rainTime")) rainTime = tag->getInt("rainTime");
+	if (tag->contains("raining")) raining = tag->getBoolean("raining");
+	if (tag->contains("thunderTime")) thunderTime = tag->getInt("thunderTime");
+	if (tag->contains("thundering")) thundering = tag->getBoolean("thundering");
 
 	spawnMobs = (gameType == GameType::Survival);
 
@@ -378,3 +396,36 @@ void LevelData::setAllowCheats( bool allow )
 {
 	allowCheats = allow;
 }
+
+int LevelData::getRainTime() const {
+	return rainTime;
+}
+
+void LevelData::setRainTime( int time ) {
+	rainTime = time;
+}
+
+bool LevelData::isRaining() const {
+	return raining;
+}
+
+void LevelData::setRaining( bool raining ) {
+	this->raining = raining;
+}
+
+int LevelData::getThunderTime() const {
+	return thunderTime;
+}
+
+void LevelData::setThunderTime( int time ) {
+	thunderTime = time;
+}
+
+bool LevelData::isThundering() const {
+	return thundering;
+}
+
+void LevelData::setThundering( bool thundering ) {
+	this->thundering = thundering;
+}
+

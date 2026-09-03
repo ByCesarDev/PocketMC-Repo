@@ -80,15 +80,26 @@ public:
     virtual float adjustDepth(float depth);
 
     virtual int getSkyColor(float temp);
+	virtual int getGrassColor();
+
+	virtual float getDownfall();
+	virtual float getTemperature();
 
 	virtual MobList& getMobs(const MobCategory& category);
 	virtual float getCreatureProbability();
+
+	Biome* setNoRain();
 
 	std::string name;
 	int color;
 	char topMaterial;
 	char material;
 	int leafColor;
+	float temperature;
+	float downfall;
+	bool m_bHasSnow;
+	bool m_bHasRain;
+	bool canOnlyRain() const { return !m_bHasSnow && m_bHasRain; }
 private:
 	static Biome* map[64*64];
 };

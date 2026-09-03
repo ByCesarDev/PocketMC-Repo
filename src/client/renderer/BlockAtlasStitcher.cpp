@@ -119,6 +119,7 @@ static const std::vector<BlockAtlasStitcher::TextureMapping> s_mappings = {
     { "grass_side.png", 3, "terrain.png" },
     { "grass_side_snow.png", 68, "terrain.png" },
     { "grass_side_overlay.png", 38, "terrain.png" },
+    { "dirt_grass.png", 236, "terrain.png" },
     { "log_oak_top.png", 21, "terrain.png" },
     { "log_oak_side.png", 20, "terrain.png" },
     { "bookshelf_side.png", 35, "terrain.png" },

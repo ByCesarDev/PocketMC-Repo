@@ -3,10 +3,7 @@
 
 //package net.minecraft.world.level;
 
-/*
 class BiomeSource;
-class TileEntity;
-*/
 class Material;
 class Biome;
 
@@ -31,7 +28,7 @@ public:
     virtual bool isSolidRenderTile(int x, int i, int z) = 0;
 	virtual bool isSolidBlockingTile(int x, int i, int z) = 0;
 
-    //virtual BiomeSource* getBiomeSource() = 0;
+    virtual BiomeSource* getBiomeSource() = 0;
 	virtual Biome* getBiome(int x, int z) = 0;
 	virtual Level* getLevel() = 0;
 };

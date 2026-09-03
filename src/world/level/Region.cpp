@@ -135,6 +135,6 @@ Biome* Region::getBiome( int x, int z ) {
 	return level->getBiome(x, z);
 }
 
-//BiomeSource getBiomeSource() {
-//    return level.getBiomeSource();
-//}
+BiomeSource* Region::getBiomeSource() {
+    return level ? level->getBiomeSource() : NULL;
+}

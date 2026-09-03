@@ -1554,22 +1554,19 @@ void LevelRenderer::addParticle(const std::string& name, float x, float y, float
     float zd = mc->cameraTargetPlayer->z - z;
 	float distanceSquared = xd * xd + yd * yd + zd * zd;
 
-	//Particle* p = NULL;
-	//if (name == "hugeexplosion") p = new HugeExplosionSeedParticle(level, x, y, z, xa, ya, za);
-	//else if (name == "largeexplode") p = new HugeExplosionParticle(textures, level, x, y, z, xa, ya, za);
+	Particle* p = NULL;
+	if (name == "hugeexplosion") p = new HugeExplosionSeedParticle(level, x, y, z, xa, ya, za);
+	else if (name == "largeexplode") p = new HugeExplosionParticle(textures, level, x, y, z, xa, ya, za);
 
-	//if (p) {
-	//	if (distanceSquared < 32 * 32) {
-	//		mc->particleEngine->add(p);
-	//	} else { delete p; }
-	//	return;
-	//}
+	if (p) {
+		if (distanceSquared < 32 * 32) {
+			mc->particleEngine->add(p);
+		} else { delete p; }
+		return;
+	}
 
     const float particleDistance = 16;
     if (distanceSquared > particleDistance * particleDistance) return;
-
-	//static Stopwatch sw;
-	//sw.start();
 
     if (name == "bubble") mc->particleEngine->add(new BubbleParticle(level, x, y, z, xa, ya, za));
 	else if (name == "crit") mc->particleEngine->add(new CritParticle2(level, x, y, z, xa, ya, za));
@@ -1583,7 +1580,6 @@ void LevelRenderer::addParticle(const std::string& name, float x, float y, float
     else if (name == "reddust") mc->particleEngine->add(new RedDustParticle(level, x, y, z, xa, ya, za));
 	else if (name == "iconcrack") mc->particleEngine->add(new BreakingItemParticle(level, x, y, z, xa, ya, za, Item::items[data]));
 	else if (name == "snowballpoof") mc->particleEngine->add(new BreakingItemParticle(level, x, y, z, Item::snowBall));
-    //else if (name == "snowballpoof") mc->particleEngine->add(new BreakingItemParticle(level, x, y, z, Item::snowBall));
     //else if (name == "slime") mc->particleEngine->add(new BreakingItemParticle(level, x, y, z, Item::slimeBall));
     //else if (name == "heart") mc->particleEngine->add(new HeartParticle(level, x, y, z, xa, ya, za));
 

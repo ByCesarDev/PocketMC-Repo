@@ -21,6 +21,9 @@
 #include "../../world/item/UseAnim.h"
 #include "../../world/item/BowItem.h"
 #include "../../world/level/tile/LeafTile.h"
+#include "../../world/level/GrassColor.h"
+#include "../../world/level/FoliageColor.h"
+#include "../../world/level/biome/BiomeSource.h"
 #include "entity/HumanoidMobRenderer.h"
 
 //static StopwatchHandler handler;
@@ -32,6 +35,7 @@ ItemInHandRenderer::ItemInHandRenderer( Minecraft* mc )
 	oHeight(0),
 	lastIconRendered(0),
 	lastItemRendered(0),
+	lastHandColor(-1),
 	//selectedItem(NULL),
 	item(0, 1, 0)
 {
@@ -98,9 +102,48 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 		itemIcon = mob->getItemInHandIcon(item, 0);
 	}
 	
+	int renderedItemId = item->id;
+	if (renderedItemId == ((Tile*)Tile::leaves)->id)
+		renderedItemId = ((Tile*)Tile::leaves_carried)->id;
+	if (renderedItemId == Tile::grass->id)
+		renderedItemId = Tile::grass_carried->id;
+
+	int handColor = 0xffffff;
+	bool isBiomeTinted = (renderedItemId == Tile::grass_carried->id || renderedItemId == ((Tile*)Tile::leaves_carried)->id);
+	if (isBiomeTinted) {
+		if (mc->level && mc->level->getBiomeSource() && mc->player) {
+			int px = Mth::floor(mc->player->x);
+			int pz = Mth::floor(mc->player->z);
+			mc->level->getBiomeSource()->getBiomeBlock(px, pz, 1, 1);
+			float temp = mc->level->getBiomeSource()->temperatures[0];
+			float rain = mc->level->getBiomeSource()->downfalls[0];
+			if (renderedItemId == Tile::grass_carried->id) {
+				handColor = GrassColor::get(temp, rain);
+			} else {
+				if ((item->getAuxValue() & LeafTile::LEAF_TYPE_MASK) == LeafTile::NORMAL_LEAF) {
+					handColor = FoliageColor::get(temp, rain);
+				} else if ((item->getAuxValue() & LeafTile::LEAF_TYPE_MASK) == LeafTile::EVERGREEN_LEAF) {
+					handColor = FoliageColor::getEvergreenColor();
+				} else if ((item->getAuxValue() & LeafTile::LEAF_TYPE_MASK) == LeafTile::BIRCH_LEAF) {
+					handColor = FoliageColor::getBirchColor();
+				}
+			}
+		} else {
+			if (renderedItemId == Tile::grass_carried->id) {
+				handColor = GrassColor::get(0.5f, 1.0f);
+			} else {
+				handColor = FoliageColor::getDefaultColor();
+			}
+		}
+	}
+
 	bool reTesselate(false);
-	if(itemIcon != lastIconRendered && lastItemRendered == itemId)
-		reTesselate  = true;
+	if (itemIcon != lastIconRendered && lastItemRendered == itemId)
+		reTesselate = true;
+	if (isBiomeTinted && handColor != lastHandColor) {
+		reTesselate = true;
+		lastHandColor = handColor;
+	}
 	lastItemRendered = itemId;
 	lastIconRendered = itemIcon;
 	//const int aux = item->getAuxValue();
@@ -110,12 +153,7 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 			Tesselator& t = Tesselator::instance;
 			t.beginOverride();
 
-			int renderedItemId = item->id;
-			if (renderedItemId == ((Tile*)Tile::leaves)->id)
-				renderedItemId = ((Tile*)Tile::leaves_carried)->id;
-			if (renderedItemId == Tile::grass->id)
-				renderedItemId = Tile::grass_carried->id;
-			tileRenderer.renderTile(Tile::tiles[renderedItemId], item->getAuxValue());
+			tileRenderer.renderTile(Tile::tiles[renderedItemId], item->getAuxValue(), handColor);
 			renderObject.chunk = t.endOverride(renderObject.chunk.vboId);
 
 			// choose atlas based on the tile's texture flag
@@ -402,10 +440,10 @@ void ItemInHandRenderer::renderScreenEffect( float a )
 		}
 	}
 
-	//     if (mc->player->isUnderLiquid(Material::water)) {
-	//mc->textures->loadAndBindTexture("misc/water.png");
-	//         renderWater(a);
-	//     }
+	if (mc->player->isUnderLiquid(Material::water)) {
+		mc->textures->loadAndBindTexture("misc/water.png");
+		renderWater(a);
+	}
 	glEnable2(GL_ALPHA_TEST);
 }
 
