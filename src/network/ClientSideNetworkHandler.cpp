@@ -480,7 +480,7 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, ChunkDat
 	DataLayer& blockData = chunk->data;
 
 	const int setSize = LEVEL_HEIGHT / 8;
-	const int setShift = 4; // power of LEVEL_HEIGHT / 8
+	const int setShift = 5; // power of LEVEL_HEIGHT / 8
 
 	bool recalcHeight = false;
 
@@ -502,7 +502,7 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, ChunkDat
 
 			int colX = (i % CHUNK_WIDTH);
 			int colZ = (i / CHUNK_WIDTH);
-			int colDataPosition = colX << 11 | colZ << 7;
+			int colDataPosition = colX << 12 | colZ << 8;
 
 			for (int set = 0; set < 8; set++)
 			{

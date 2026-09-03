@@ -384,7 +384,7 @@ void LevelRenderer::allChanged()
 	* if (Minecraft.FLYBY_MODE) { dist = 512 - CHUNK_SIZE * 2; }
 	*/
 	xChunks = (dist / LevelRenderer::CHUNK_SIZE) + 1;
-	yChunks = (128 /  LevelRenderer::CHUNK_SIZE);
+	yChunks = (LEVEL_HEIGHT /  LevelRenderer::CHUNK_SIZE);
 	zChunks = (dist / LevelRenderer::CHUNK_SIZE) + 1;
 	chunksLength = xChunks * yChunks * zChunks;
 

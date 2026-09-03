@@ -4,6 +4,9 @@
 
 //#include "../levelgen/SimpleLevelSource.h"
 #include "../levelgen/RandomLevelSource.h"
+#include "../levelgen/FlatLevelSource.h"
+#include "../levelgen/vanilla/VanillaLevelSource.h"
+#include "../storage/LevelData.h"
 #include "../Level.h"
 #include "../biome/BiomeSource.h"
 #include "../chunk/ChunkSource.h"
@@ -66,12 +69,19 @@ int Dimension::getMoonPhase(long time) {
 }
 
 ChunkSource* Dimension::createRandomLevelSource() {
+	if (level->getLevelData()) {
+		if (level->getLevelData()->getWorldType() == WorldType::FLAT || level->getLevelData()->isFlat()) {
+			return new FlatLevelSource(level, level->getSeed(), true);
+		}
+		if (level->getLevelData()->isExperimental() && level->getLevelData()->getWorldType() == WorldType::INFINITE_SIZE) {
+			return new VanillaLevelSource(level, level->getSeed());
+		}
+	}
 	return new RandomLevelSource(
 		level,
 		level->getSeed(),
 		level->getLevelData()->getGeneratorVersion(),
 		!level->isClientSide && level->getLevelData()->getSpawnMobs());
-	//return new PerformanceTestChunkSource(level);
 }
 
 

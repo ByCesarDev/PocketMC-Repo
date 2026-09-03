@@ -50,7 +50,7 @@ bool PortalForcer::findPortal(Level* level, Entity* entity)
         for (int z = pz - searchRadius; z <= pz + searchRadius; z++) {
             if (!level->hasChunk(x >> 4, z >> 4)) continue;
             double dz = z + 0.5 - entity->z;
-            for (int y = 127; y >= 0; y--) {
+            for (int y = Level::DEPTH - 1; y >= 0; y--) {
                 if (level->getTile(x, y, z) == Tile::classicPortal->id) {
                     while (level->getTile(x, y - 1, z) == Tile::classicPortal->id)
                         y--;
@@ -116,7 +116,7 @@ bool PortalForcer::createPortal(Level* level, Entity* entity)
         for (int z = pz - searchRadius; z <= pz + searchRadius; z++) {
             if (!level->hasChunk(x >> 4, z >> 4)) continue;
             double dz = z + 0.5 - entity->z;
-            for (int y = 127; y >= 0; y--) {
+            for (int y = Level::DEPTH - 1; y >= 0; y--) {
                 if (!level->isEmptyTile(x, y, z)) continue;
 
                 int ny = y;

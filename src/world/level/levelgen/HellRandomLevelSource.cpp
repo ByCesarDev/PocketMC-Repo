@@ -324,8 +324,8 @@ void HellRandomLevelSource::prepareHeights(int xOffs, int zOffs, unsigned char* 
                     float _s1a = (s3 - s1) * xStep;
 
                     for (int x = 0; x < 4; x++) {
-                        int offs = (x + xc * 4) << 11 | (0 + zc * 4) << 7 | (yc * 8 + y);
-                        int step = 1 << 7;
+                        int offs = (x + xc * 4) << 12 | (0 + zc * 4) << 8 | (yc * 8 + y);
+                        int step = 1 << 8;
                         float zStep = 1.0f / 4.0f;
                         float val = _s0;
                         float vala = (_s1 - _s0) * zStep;

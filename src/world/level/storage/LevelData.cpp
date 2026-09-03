@@ -13,7 +13,8 @@ LevelData::LevelData()
 	playerDataVersion(-1),
 	storageVersion(0),
 	gameType(GameType::Default),	spawnMobs(true),
-	allowCheats(false),	loadedPlayerTag(NULL),
+	allowCheats(false),	worldType(WorldType::INFINITE_SIZE),
+	flatWorld(false), experimental(false), loadedPlayerTag(NULL),
 	rainTime(0), raining(false), thunderTime(0), thundering(false)
 {
 	//LOGI("ctor 1: %p\n", this);
@@ -22,7 +23,8 @@ LevelData::LevelData()
 
 LevelData::LevelData( const LevelSettings& settings, const std::string& levelName, int generatorVersion /*= -1*/ )
 :	seed(settings.getSeed()),
-	gameType(settings.getGameType()),	allowCheats(settings.getAllowCheats()),	levelName(levelName),
+	gameType(settings.getGameType()),	allowCheats(settings.getAllowCheats()),	worldType(settings.worldType),
+	flatWorld(settings.flatWorld), experimental(settings.experimental), levelName(levelName),
 	xSpawn(128),
 	ySpawn(64),
 	zSpawn(128),
@@ -43,7 +45,7 @@ LevelData::LevelData( const LevelSettings& settings, const std::string& levelNam
 }
 
 LevelData::LevelData( CompoundTag* tag )
-:	loadedPlayerTag(NULL)
+:	loadedPlayerTag(NULL), worldType(WorldType::INFINITE_SIZE), flatWorld(false), experimental(false)
 {
 	//LOGI("ctor 3: %p (%p)\n", this, tag);
 	getTagData(tag);
@@ -64,6 +66,9 @@ LevelData::LevelData( const LevelData& rhs )
 	generatorVersion(rhs.generatorVersion),
 	spawnMobs(rhs.spawnMobs),
 	allowCheats(rhs.allowCheats),
+	worldType(rhs.worldType),
+	flatWorld(rhs.flatWorld),
+	experimental(rhs.experimental),
 	rainTime(rhs.rainTime),
 	raining(rhs.raining),
 	thunderTime(rhs.thunderTime),
@@ -91,6 +96,9 @@ LevelData& LevelData::operator=( const LevelData& rhs )
 		dimension	= rhs.dimension;
 		spawnMobs	= rhs.spawnMobs;
 		allowCheats	= rhs.allowCheats;
+		worldType	= rhs.worldType;
+		flatWorld	= rhs.flatWorld;
+		experimental = rhs.experimental;
 		rainTime	= rhs.rainTime;
 		raining		= rhs.raining;
 		thunderTime	= rhs.thunderTime;
@@ -173,6 +181,9 @@ void LevelData::setTagData( CompoundTag* tag, CompoundTag* playerTag )
 	tag->putLong("RandomSeed", seed);
 	tag->putInt("GameType", gameType);
 	tag->putBoolean("AllowCommands", allowCheats);
+	tag->putInt("WorldType", worldType);
+	tag->putBoolean("FlatWorld", flatWorld);
+	tag->putBoolean("Experimental", experimental);
 	tag->putInt("SpawnX", xSpawn);
 	tag->putInt("SpawnY", ySpawn);
 	tag->putInt("SpawnZ", zSpawn);
@@ -199,6 +210,9 @@ void LevelData::getTagData( const CompoundTag* tag )
 	seed = (long)tag->getLong("RandomSeed");
 	gameType = tag->getInt("GameType");
 	allowCheats = tag->getBoolean("AllowCommands");
+	if (tag->contains("WorldType")) worldType = tag->getInt("WorldType");
+	if (tag->contains("FlatWorld")) flatWorld = tag->getBoolean("FlatWorld");
+	if (tag->contains("Experimental")) experimental = tag->getBoolean("Experimental");
 	xSpawn = tag->getInt("SpawnX");
 	ySpawn = tag->getInt("SpawnY");
 	zSpawn = tag->getInt("SpawnZ");
@@ -428,4 +442,11 @@ bool LevelData::isThundering() const {
 void LevelData::setThundering( bool thundering ) {
 	this->thundering = thundering;
 }
+
+int LevelData::getWorldType() const { return worldType; }
+void LevelData::setWorldType(int type) { this->worldType = type; }
+bool LevelData::isFlat() const { return flatWorld || worldType == WorldType::FLAT; }
+void LevelData::setFlat(bool flat) { this->flatWorld = flat; }
+bool LevelData::isExperimental() const { return experimental; }
+void LevelData::setExperimental(bool exp) { this->experimental = exp; }
 

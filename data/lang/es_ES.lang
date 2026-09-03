@@ -138,8 +138,15 @@ selectWorld.gameMode.hardcore.line2=y solo una vida
 selectWorld.moreWorldOptions=Más Opciones de Mundo...
 selectWorld.mapFeatures=Generar Estructuras:
 selectWorld.mapFeatures.info=Aldeas, mazmorras, etc.
-selectWorld.mapType=Tipo de Mundo:
-selectWorld.mapType.normal=Normal
+selectWorld.mapType=Tipo de mundo
+selectWorld.mapType.infinite=Infinito
+selectWorld.mapType.flat=Plano
+selectWorld.mapType.pocket=Antiguo (256x256)
+selectWorld.mapType.small=Pequeño (512x512)
+selectWorld.mapType.large=Grande (2560x2560)
+selectWorld.experimental=Funciones experimentales
+selectWorld.experimental.off=Experimental: No
+selectWorld.experimental.on=Experimental: Sí
 selectWorld.hardcoreMode=Hardcore:
 selectWorld.hardcoreMode.info=El mundo se elimina al morir
 
@@ -1361,6 +1368,67 @@ tile.deepslateOreRedstone.name=Mena de redstone de pizarra profunda
 tile.deepslatePolished.name=Pizarra profunda pulida
 tile.deepslateTiles.name=Azulejos de pizarra profunda
 tile.deepslateBricks.name=Ladrillos de pizarra profunda
+
+# Stones & Polished
+tile.stoneGranite.name=Granito
+tile.stoneGraniteSmooth.name=Granito pulido
+tile.stoneDiorite.name=Diorita
+tile.stoneDioriteSmooth.name=Diorita pulida
+tile.stoneAndesite.name=Andesita
+tile.stoneAndesiteSmooth.name=Andesita pulida
+
+# Soils & Organic
+tile.dirtPodzol.name=Podzol
+tile.mycelium.name=Micelio
+
+# Ices
+tile.icePacked.name=Hielo compacto
+tile.iceBlue.name=Hielo azul
+tile.iceFrosted.name=Hielo escarchado
+
+# Terracotta & Stained Clay
+tile.clayHardened.name=Terracota
+tile.clayHardenedWhite.name=Terracota blanca
+tile.clayHardenedOrange.name=Terracota naranja
+tile.clayHardenedMagenta.name=Terracota magenta
+tile.clayHardenedLightBlue.name=Terracota celeste
+tile.clayHardenedYellow.name=Terracota amarilla
+tile.clayHardenedLime.name=Terracota verde lima
+tile.clayHardenedPink.name=Terracota rosa
+tile.clayHardenedGray.name=Terracota gris
+tile.clayHardenedSilver.name=Terracota gris claro
+tile.clayHardenedCyan.name=Terracota cian
+tile.clayHardenedPurple.name=Terracota morada
+tile.clayHardenedBlue.name=Terracota azul
+tile.clayHardenedBrown.name=Terracota marrón
+tile.clayHardenedGreen.name=Terracota verde
+tile.clayHardenedRed.name=Terracota roja
+tile.clayHardenedBlack.name=Terracota negra
+
+# Huge Mushrooms
+tile.mushroomBlockBrown.name=Bloque de champiñón marrón
+tile.mushroomBlockRed.name=Bloque de champiñón rojo
+tile.mushroomBlockStem.name=Tallo de champiñón
+
+# Flora & Special
+tile.waterlily.name=Nenúfar
+tile.vine.name=Enredadera
+tile.cocoa.name=Cacao
+tile.sweetBerryBush.name=Arbusto de bayas dulces
+
+# 1.7+ Flowers
+tile.flowerAllium.name=Allium
+tile.flowerBlueOrchid.name=Orquídea azul
+tile.flowerHoustonia.name=Houstonia
+tile.flowerTulipRed.name=Tulipán rojo
+tile.flowerTulipOrange.name=Tulipán naranja
+tile.flowerTulipWhite.name=Tulipán blanco
+tile.flowerTulipPink.name=Tulipán rosa
+tile.flowerOxeyeDaisy.name=Margarita
+tile.flowerPaeonia.name=Peonía
+tile.flowerRoseBlue.name=Rosa azul
+tile.flowerLilyOfTheValley.name=Lirio de los valles
+tile.flowerWitherRose.name=Rosa del Wither
 
 # ==========================================
 # Items Names

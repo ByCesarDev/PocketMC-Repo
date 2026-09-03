@@ -692,8 +692,9 @@ void TileRenderer::tesselateTorch( Tile* tt, float x, float y, float z, float xx
 	int tex = tt->getTexture(0);
 
 	if (fixedTexture >= 0) tex = fixedTexture;
-	int xt = (tex & 0xf) << 4;
-	int yt = tex & 0xf0;
+	int cleanTex = tex & ~Tile::TEXTURE_ALT_FLAG;
+	int xt = (cleanTex & 0xf) << 4;
+	int yt = cleanTex & 0xf0;
 	float u0 = (xt) / 256.0f;
 	float u1 = (xt + 15.99f) / 256.0f;
 	float v0 = (yt) / 256.0f;
@@ -747,8 +748,9 @@ void TileRenderer::tesselateCrossTexture( Tile* tt, int data, float x, float y, 
 	int tex = tt->getTexture(0, data);
 
 	if (fixedTexture >= 0) tex = fixedTexture;
-	int xt = (tex & 0xf) << 4;
-	int yt = tex & 0xf0;
+	int cleanTex = tex & ~Tile::TEXTURE_ALT_FLAG;
+	int xt = (cleanTex & 0xf) << 4;
+	int yt = cleanTex & 0xf0;
 	float u0 = (xt) / 256.0f;
 	float u1 = (xt + 15.99f) / 256.0f;
 	float v0 = (yt) / 256.0f;
@@ -783,8 +785,9 @@ void TileRenderer::tesselateStemTexture( Tile* tt, int data, float h, float x, f
 	Tesselator& t = Tesselator::instance;
 	int tex = tt->getTexture(0, data);
 	if(fixedTexture >= 0) tex = fixedTexture;
-	int xt = (tex & 0xf) << 4;
-	int yt = tex & 0xf0;
+	int cleanTex = tex & ~Tile::TEXTURE_ALT_FLAG;
+	int xt = (cleanTex & 0xf) << 4;
+	int yt = cleanTex & 0xf0;
 	float u0 = (xt) / 256.0f;
 	float u1 = (xt + 15.99f) / 256.0f;
 	float v0 = (yt) / 256.0f;
@@ -821,8 +824,9 @@ void TileRenderer::tesselateStemDirTexture( Tile* tt, int data, int dir, float h
 	int tex = tt->getTexture(0, data) + 16;
 
 	if (fixedTexture >= 0) tex = fixedTexture;
-	int xt = (tex & 0xf) << 4;
-	int yt = tex & 0xf0;
+	int cleanTex = tex & ~Tile::TEXTURE_ALT_FLAG;
+	int xt = (cleanTex & 0xf) << 4;
+	int yt = cleanTex & 0xf0;
 	float u0 = (xt) / 256.0f;
 	float u1 = (xt + 15.99f) / 256.0f;
 	float v0 = (yt) / 256.0f;

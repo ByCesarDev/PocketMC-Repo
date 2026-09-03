@@ -357,7 +357,7 @@ void Level::tickTiles() {
             int val = (_randValue >> 2);
             int x = (val & 15);
             int z = ((val >> 8) & 15);
-            int y = ((val >> 16) & 127);
+            int y = ((val >> 16) & 255);
 
             int id = lc->getTile(x, y, z);
             if (Tile::shouldTick[id]) {
@@ -464,17 +464,29 @@ bool Level::findPath(Path* path, Entity* from, int xBest, int yBest, int zBest, 
 void Level::setInitialSpawn() {
     isFindingSpawn = true;
     int xSpawn = 0;
-    int ySpawn = 64;
     int zSpawn = 0;
-    while (!dimension->isValidSpawn(xSpawn, zSpawn)) {
-        xSpawn += random.nextInt(32) - random.nextInt(32);
-        zSpawn += random.nextInt(32) - random.nextInt(32);
 
-		if (xSpawn < WORLD_MIN_X + 4) xSpawn += 32;
-		if (xSpawn > WORLD_MAX_X - 4) xSpawn -= 32;
-		if (zSpawn < WORLD_MIN_Z + 4) zSpawn += 32;
-		if (zSpawn > WORLD_MAX_Z - 4) zSpawn -= 32;
+    bool foundFromBiome = false;
+    if (_chunkSource) {
+        foundFromBiome = _chunkSource->findSpawnPosition(xSpawn, zSpawn);
     }
+
+    if (!foundFromBiome) {
+        int attempts = 0;
+        while (!dimension->isValidSpawn(xSpawn, zSpawn) && attempts < 100) {
+            xSpawn += random.nextInt(32) - random.nextInt(32);
+            zSpawn += random.nextInt(32) - random.nextInt(32);
+
+            if (xSpawn < WORLD_MIN_X + 4) xSpawn += 32;
+            if (xSpawn > WORLD_MAX_X - 4) xSpawn -= 32;
+            if (zSpawn < WORLD_MIN_Z + 4) zSpawn += 32;
+            if (zSpawn > WORLD_MAX_Z - 4) zSpawn -= 32;
+            attempts++;
+        }
+    }
+
+    int ySpawn = getTopTileY(xSpawn, zSpawn) + 1;
+    if (ySpawn <= 0) ySpawn = 64;
     levelData.setSpawn(xSpawn, ySpawn, zSpawn);
     isFindingSpawn = false;
 }
@@ -486,7 +498,8 @@ void Level::validateSpawn() {
     }
     int xSpawn = levelData.getXSpawn();
     int zSpawn = levelData.getZSpawn();
-    while (getTopTile(xSpawn, zSpawn) == 0 || getTopTile(xSpawn, zSpawn) == Tile::invisible_bedrock->id) {
+    int attempts = 0;
+    while ((getTopTile(xSpawn, zSpawn) == 0 || getTopTile(xSpawn, zSpawn) == Tile::invisible_bedrock->id) && attempts < 50) {
         xSpawn += random.nextInt(8) - random.nextInt(8);
         zSpawn += random.nextInt(8) - random.nextInt(8);
 
@@ -494,9 +507,11 @@ void Level::validateSpawn() {
         if (xSpawn > WORLD_MAX_X - 4) xSpawn -= 8;
         if (zSpawn < WORLD_MIN_Z + 4) zSpawn += 8;
         if (zSpawn > WORLD_MAX_Z - 4) zSpawn -= 8;
+        attempts++;
     }
-    levelData.setXSpawn(xSpawn);
-    levelData.setZSpawn(zSpawn);
+    int ySpawn = getTopTileY(xSpawn, zSpawn) + 1;
+    if (ySpawn <= 0) ySpawn = 64;
+    levelData.setSpawn(xSpawn, ySpawn, zSpawn);
 }
 
 #ifndef STANDALONE_SERVER
@@ -673,17 +688,17 @@ void Level::changeDimension(int dimId) {
 }
 
 int Level::getTopTile(int x, int z) {
-    int y = 63;
-    while (!isEmptyTile(x, y + 1, z)) {
-        y++;
+    int y = Level::DEPTH - 1;
+    while (y > 0 && isEmptyTile(x, y, z)) {
+        y--;
     }
     return getTile(x, y, z);
 }
 
 int Level::getTopTileY(int x, int z) {
-    int y = 63;
-    while (!isEmptyTile(x, y + 1, z)) {
-        y++;
+    int y = Level::DEPTH - 1;
+    while (y > 0 && isEmptyTile(x, y, z)) {
+        y--;
     }
     return y;
 }

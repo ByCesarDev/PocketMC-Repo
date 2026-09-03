@@ -346,6 +346,67 @@ public:
 	static Tile* deepslateTiles;
 	static Tile* deepslateBricks;
 
+	// Stones & Polished
+	static Tile* granite;
+	static Tile* graniteSmooth;
+	static Tile* diorite;
+	static Tile* dioriteSmooth;
+	static Tile* andesite;
+	static Tile* andesiteSmooth;
+
+	// Soils & Organic
+	static Tile* podzol;
+	static Tile* mycelium;
+
+	// Ices
+	static Tile* packedIce;
+	static Tile* blueIce;
+	static Tile* frostedIce;
+
+	// Terracotta & 16 Stained Clays
+	static Tile* hardenedClay;
+	static Tile* stainedClay_white;
+	static Tile* stainedClay_orange;
+	static Tile* stainedClay_magenta;
+	static Tile* stainedClay_lightBlue;
+	static Tile* stainedClay_yellow;
+	static Tile* stainedClay_lime;
+	static Tile* stainedClay_pink;
+	static Tile* stainedClay_gray;
+	static Tile* stainedClay_silver;
+	static Tile* stainedClay_cyan;
+	static Tile* stainedClay_purple;
+	static Tile* stainedClay_blue;
+	static Tile* stainedClay_brown;
+	static Tile* stainedClay_green;
+	static Tile* stainedClay_red;
+	static Tile* stainedClay_black;
+
+	// Huge Mushrooms
+	static Tile* mushroomBlock_brown;
+	static Tile* mushroomBlock_red;
+	static Tile* mushroomBlock_stem;
+
+	// Flora & Special
+	static Tile* waterlily;
+	static Tile* vines;
+	static Tile* cocoa;
+	static Tile* sweetBerryBush;
+
+	// 1.7+ Flowers
+	static Tile* flower_allium;
+	static Tile* flower_blueOrchid;
+	static Tile* flower_houstonia;
+	static Tile* flower_tulipRed;
+	static Tile* flower_tulipOrange;
+	static Tile* flower_tulipWhite;
+	static Tile* flower_tulipPink;
+	static Tile* flower_oxeyeDaisy;
+	static Tile* flower_paeonia;
+	static Tile* flower_roseBlue;
+	static Tile* flower_lilyOfTheValley;
+	static Tile* flower_witherRose;
+
 	// invisible bedrock is used to block off empty chunks (i.e. prevent player movement)
 	static Tile* invisible_bedrock;
 	static Tile* info_updateGame1;

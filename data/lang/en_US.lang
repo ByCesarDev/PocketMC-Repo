@@ -140,8 +140,15 @@ selectWorld.gameMode.hardcore.line2=difficulty, and one life only
 selectWorld.moreWorldOptions=More World Options...
 selectWorld.mapFeatures=Generate Structures:
 selectWorld.mapFeatures.info=Villages, dungeons etc
-selectWorld.mapType=World Type:
-selectWorld.mapType.normal=Normal
+selectWorld.mapType=World Type
+selectWorld.mapType.infinite=Infinite
+selectWorld.mapType.flat=Flat
+selectWorld.mapType.pocket=Old (256x256)
+selectWorld.mapType.small=Small (512x512)
+selectWorld.mapType.large=Large (2560x2560)
+selectWorld.experimental=Experimental Features
+selectWorld.experimental.off=Experimental: Off
+selectWorld.experimental.on=Experimental: On
 selectWorld.hardcoreMode=Hardcore:
 selectWorld.hardcoreMode.info=World is deleted upon death
 
@@ -1363,6 +1370,67 @@ tile.deepslateOreRedstone.name=Deepslate Redstone Ore
 tile.deepslatePolished.name=Polished Deepslate
 tile.deepslateTiles.name=Deepslate Tiles
 tile.deepslateBricks.name=Deepslate Bricks
+
+# Stones & Polished
+tile.stoneGranite.name=Granite
+tile.stoneGraniteSmooth.name=Polished Granite
+tile.stoneDiorite.name=Diorite
+tile.stoneDioriteSmooth.name=Polished Diorite
+tile.stoneAndesite.name=Andesite
+tile.stoneAndesiteSmooth.name=Polished Andesite
+
+# Soils & Organic
+tile.dirtPodzol.name=Podzol
+tile.mycelium.name=Mycelium
+
+# Ices
+tile.icePacked.name=Packed Ice
+tile.iceBlue.name=Blue Ice
+tile.iceFrosted.name=Frosted Ice
+
+# Terracotta & Stained Clay
+tile.clayHardened.name=Terracotta
+tile.clayHardenedWhite.name=White Terracotta
+tile.clayHardenedOrange.name=Orange Terracotta
+tile.clayHardenedMagenta.name=Magenta Terracotta
+tile.clayHardenedLightBlue.name=Light Blue Terracotta
+tile.clayHardenedYellow.name=Yellow Terracotta
+tile.clayHardenedLime.name=Lime Terracotta
+tile.clayHardenedPink.name=Pink Terracotta
+tile.clayHardenedGray.name=Gray Terracotta
+tile.clayHardenedSilver.name=Light Gray Terracotta
+tile.clayHardenedCyan.name=Cyan Terracotta
+tile.clayHardenedPurple.name=Purple Terracotta
+tile.clayHardenedBlue.name=Blue Terracotta
+tile.clayHardenedBrown.name=Brown Terracotta
+tile.clayHardenedGreen.name=Green Terracotta
+tile.clayHardenedRed.name=Red Terracotta
+tile.clayHardenedBlack.name=Black Terracotta
+
+# Huge Mushrooms
+tile.mushroomBlockBrown.name=Brown Mushroom Block
+tile.mushroomBlockRed.name=Red Mushroom Block
+tile.mushroomBlockStem.name=Mushroom Stem
+
+# Flora & Special
+tile.waterlily.name=Lily Pad
+tile.vine.name=Vines
+tile.cocoa.name=Cocoa
+tile.sweetBerryBush.name=Sweet Berry Bush
+
+# 1.7+ Flowers
+tile.flowerAllium.name=Allium
+tile.flowerBlueOrchid.name=Blue Orchid
+tile.flowerHoustonia.name=Azure Bluet
+tile.flowerTulipRed.name=Red Tulip
+tile.flowerTulipOrange.name=Orange Tulip
+tile.flowerTulipWhite.name=White Tulip
+tile.flowerTulipPink.name=Pink Tulip
+tile.flowerOxeyeDaisy.name=Oxeye Daisy
+tile.flowerPaeonia.name=Peony
+tile.flowerRoseBlue.name=Blue Rose
+tile.flowerLilyOfTheValley.name=Lily of the Valley
+tile.flowerWitherRose.name=Wither Rose
 
 # ==========================================
 # Items Names

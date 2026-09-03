@@ -18,7 +18,12 @@ LevelChunk::LevelChunk( Level* level, int x, int z )
 	x(x),
 	z(z),
 	xt(x * CHUNK_WIDTH),
-	zt(z * CHUNK_DEPTH)
+	zt(z * CHUNK_DEPTH),
+	blocks(new unsigned char[ChunkBlockCount]()),
+	data(ChunkBlockCount),
+	skyLight(ChunkBlockCount),
+	blockLight(ChunkBlockCount),
+	blocksLength(ChunkBlockCount)
 {
 	init();
 }
@@ -37,9 +42,9 @@ LevelChunk::LevelChunk( Level* level, unsigned char* blocks, int x, int z )
 {
 	if (this->blocks != NULL) {
 		for (int i = 0; i < ChunkBlockCount; ++i) {
-			int lx = (i >> 11) & 15;
-			int lz = (i >> 7) & 15;
-			int ly = i & 127;
+			int lx = (i >> 12) & 15;
+			int lz = (i >> 8) & 15;
+			int ly = i & 255;
 			this->blocks[i] = (unsigned char)Tile::transformToValidBlockId(this->blocks[i], xt + lx, ly, zt + lz);
 		}
 	}
@@ -59,8 +64,8 @@ void LevelChunk::init()
 	lastSaveHadEntities = false;
 	createdFromSave = false;
 	lastSaveTime = 0;
-	memset(heightmap, 0, 256);
-	memset(updateMap, 0, 256);
+	memset(heightmap, 0, sizeof(heightmap));
+	memset(updateMap, 0, sizeof(updateMap));
 }
 
 /*public*/
@@ -70,11 +75,11 @@ bool LevelChunk::setTileAndData(int x, int y, int z, int tile_, int data_) {
 
     int oldHeight = heightmap[z << 4 | x];
 
-    int old = blocks[x << 11 | z << 7 | y];
+    int old = blocks[x << 12 | z << 8 | y];
     if (old == tile && data.get(x, y, z) == data_) return false;
     int xOffs = xt + x;
     int zOffs = zt + z;
-    blocks[x << 11 | z << 7 | y] = (unsigned char) tile;
+    blocks[x << 12 | z << 8 | y] = (unsigned char) tile;
     if (old != 0 && Tile::tiles[old] != NULL) {
 		if (!level->isClientSide) {
 			Tile::tiles[old]->onRemove(level, xOffs, y, zOffs);
@@ -114,13 +119,13 @@ bool LevelChunk::setTileAndData(int x, int y, int z, int tile_, int data_) {
 bool LevelChunk::setTile(int x, int y, int z, int tile_) {
 
     int tile = Tile::transformToValidBlockId(tile_, xt + x, y, zt + z);
-    int oldHeight = heightmap[z << 4 | x] & 0xff;
+    int oldHeight = heightmap[z << 4 | x];
 
-    int old = blocks[x << 11 | z << 7 | y] & 0xff;
+    int old = blocks[x << 12 | z << 8 | y] & 0xff;
     if (old == tile) return false;
     int xOffs = xt + x;
     int zOffs = zt + z;
-    blocks[x << 11 | z << 7 | y] = (unsigned char) (tile & 0xff);
+    blocks[x << 12 | z << 8 | y] = (unsigned char) (tile & 0xff);
     if (old != 0 && Tile::tiles[old] != NULL) {
         Tile::tiles[old]->onRemove(level, xOffs, y, zOffs);
     }
@@ -150,7 +155,7 @@ bool LevelChunk::setTile(int x, int y, int z, int tile_) {
 }
 
 void LevelChunk::setTileRaw(int x, int y, int z, int tile) {
-	blocks[x << 11 | z << 7 | y] = (unsigned char)Tile::transformToValidBlockId(tile, xt + x, y, zt + z);
+	blocks[x << 12 | z << 8 | y] = (unsigned char)Tile::transformToValidBlockId(tile, xt + x, y, zt + z);
 }
 
 /*public*/
@@ -164,10 +169,10 @@ void LevelChunk::recalcHeightmapOnly() {
     for (int x = 0; x < 16; x++)
         for (int z = 0; z < 16; z++) {
             int y = Level::DEPTH - 1;
-            int p = x << 11 | z << 7;
+            int p = x << 12 | z << 8;
             while (y > 0 && Tile::lightBlock[blocks[p + y - 1] & 0xff] == 0)
                 y--;
-            heightmap[z << 4 | x] = (char) y;
+            heightmap[z << 4 | x] = (unsigned short) y;
             if (y < min) min = y;
         }
 
@@ -181,10 +186,10 @@ void LevelChunk::recalcHeightmap() {
     for (int x = 0; x < 16; x++)
         for (int z = 0; z < 16; z++) {
             int y = Level::DEPTH - 1;
-            int p = x << 11 | z << 7;
+            int p = x << 12 | z << 8;
             while (y > 0 && Tile::lightBlock[blocks[p + y - 1] & 0xff] == 0)
                 y--;
-            heightmap[z << 4 | x] = (char) y;
+            heightmap[z << 4 | x] = (unsigned short) y;
             if (y < min) min = y;
 
             if (!level->dimension->hasCeiling) { 
@@ -213,11 +218,11 @@ void LevelChunk::recalcHeightmap() {
 
 /*private*/
 void LevelChunk::recalcHeight(int x, int yStart, int z) {
-    int yOld = heightmap[z << 4 | x] & 0xff;
+    int yOld = heightmap[z << 4 | x];
     int y = yOld;
     if (yStart > yOld) y = yStart;
 
-    int p = x << 11 | z << 7;
+    int p = x << 12 | z << 8;
     while (y > 0 && Tile::lightBlock[blocks[p + y - 1] & 0xff] == 0)
         y--;
     if (y == yOld) return;
@@ -225,7 +230,7 @@ void LevelChunk::recalcHeight(int x, int yStart, int z) {
     const int xOffs = xt + x;
     const int zOffs = zt + z;
     level->lightColumnChanged(xOffs, zOffs, y, yOld);
-    heightmap[z << 4 | x] = (char) y;
+    heightmap[z << 4 | x] = (unsigned short) y;
 
     if (y < minHeight) {
         minHeight = y;
@@ -297,11 +302,11 @@ bool LevelChunk::shouldSave(bool force) {
 /*public*/
 void LevelChunk::setBlocks(unsigned char* newBlocks, int sub) { //@byte[]
 	LOGI("LevelChunk::setBlocks\n");
-	for (int i = 0; i < 128 * 16 * 4; i++) {
-		int local = sub * 128 * 16 * 4 + i;
-		int x = (local >> 11) & 15;
-		int z = (local >> 7) & 15;
-		int y = local & 127;
+	for (int i = 0; i < LEVEL_HEIGHT * 16 * 4; i++) {
+		int local = sub * LEVEL_HEIGHT * 16 * 4 + i;
+		int x = (local >> 12) & 15;
+		int z = (local >> 8) & 15;
+		int y = local & 255;
         blocks[local] = (unsigned char)Tile::transformToValidBlockId(newBlocks[i], xt + x, y, zt + z);
     }
 
@@ -311,15 +316,15 @@ void LevelChunk::setBlocks(unsigned char* newBlocks, int sub) { //@byte[]
         }
     }
 
-    level->updateLight(LightLayer::Sky, xt + sub * 4, 0, zt, xt + sub * 4 + 4, 128, zt + 16);
-    level->updateLight(LightLayer::Block, xt + sub * 4, 0, zt, xt + sub * 4 + 4, 128, zt + 16);
+    level->updateLight(LightLayer::Sky, xt + sub * 4, 0, zt, xt + sub * 4 + 4, LEVEL_HEIGHT, zt + 16);
+    level->updateLight(LightLayer::Block, xt + sub * 4, 0, zt, xt + sub * 4 + 4, LEVEL_HEIGHT, zt + 16);
 
     //for (int x = sub * 4; x < sub * 4 + 4; x++) {
     //    for (int z = 0; z < 16; z++) {
     //        lightGaps(x, z);
     //    }
     //}
-    level->setTilesDirty(xt + sub * 4, 0, zt, xt + sub * 4 + 4, 128, zt);
+    level->setTilesDirty(xt + sub * 4, 0, zt, xt + sub * 4 + 4, LEVEL_HEIGHT, zt);
 }
 
 /*public*/
@@ -379,7 +384,7 @@ void LevelChunk::lightGaps( int x, int z )
 
 int LevelChunk::getTile( int x, int y, int z )
 {
-	return blocks[x << 11 | z << 7 | y] & 0xff;
+	return blocks[x << 12 | z << 8 | y] & 0xff;
 }
 
 void LevelChunk::setData( int x, int y, int z, int val )
@@ -644,7 +649,7 @@ int LevelChunk::getBlocksAndData( unsigned char* data, int x0, int y0, int z0, i
 	int len = y1 - y0;
 	for (int x = x0; x < x1; x++)
 	for (int z = z0; z < z1; z++) {
-		int slot = x << 11 | z << 7 | y0;
+		int slot = x << 12 | z << 8 | y0;
 		memcpy(data + p, blocks + slot, len); //System.arraycopy(blocks, slot, data, p, len);
 		p += len;
 	}
@@ -652,7 +657,7 @@ int LevelChunk::getBlocksAndData( unsigned char* data, int x0, int y0, int z0, i
 	len = (y1 - y0) / 2;
 	for (int x = x0; x < x1; x++)
 	for (int z = z0; z < z1; z++) {
-		int slot = (x << 11 | z << 7 | y0) >> 1;
+		int slot = (x << 12 | z << 8 | y0) >> 1;
 		memcpy(data + p, this->data.data + slot, len); //System.arraycopy(this->data.data, slot, data, p, len);
 		p += len;
 	}
@@ -660,7 +665,7 @@ int LevelChunk::getBlocksAndData( unsigned char* data, int x0, int y0, int z0, i
 	//len = (y1 - y0) / 2;
 	for (int x = x0; x < x1; x++)
 	for (int z = z0; z < z1; z++) {
-		int slot = (x << 11 | z << 7 | y0) >> 1;
+		int slot = (x << 12 | z << 8 | y0) >> 1;
 		memcpy(data + p, blockLight.data + slot, len); //System.arraycopy(blockLight.data, slot, data, p, len);
 		p += len;
 	}
@@ -668,7 +673,7 @@ int LevelChunk::getBlocksAndData( unsigned char* data, int x0, int y0, int z0, i
 	//len = (y1 - y0) / 2;
 	for (int x = x0; x < x1; x++)
 	for (int z = z0; z < z1; z++) {
-		int slot = (x << 11 | z << 7 | y0) >> 1;
+		int slot = (x << 12 | z << 8 | y0) >> 1;
 		memcpy(data + p, skyLight.data + slot, len); //System.arraycopy(skyLight.data, slot, data, p, len);
 		p += len;
 	}
@@ -682,7 +687,7 @@ int LevelChunk::setBlocksAndData( unsigned char* data, int x0, int y0, int z0, i
 	for (int x = x0; x < x1; x++)
 	for (int z = z0; z < z1; z++) {
 		for (int y = y0; y < y1; ++y)
-			blocks[x << 11 | z << 7 | y] = (unsigned char)Tile::transformToValidBlockId(data[p + y - y0], xt + x, y, zt + z);
+			blocks[x << 12 | z << 8 | y] = (unsigned char)Tile::transformToValidBlockId(data[p + y - y0], xt + x, y, zt + z);
 		p += len;
 	}
 
@@ -691,7 +696,7 @@ int LevelChunk::setBlocksAndData( unsigned char* data, int x0, int y0, int z0, i
 	len = (y1 - y0) / 2;
 	for (int x = x0; x < x1; x++)
 	for (int z = z0; z < z1; z++) {
-		int slot = (x << 11 | z << 7 | y0) >> 1;
+		int slot = (x << 12 | z << 8 | y0) >> 1;
 		memcpy(this->data.data + slot, data + p, len); //System.arraycopy(data, p, this->data.data, slot, len);
 		p += len;
 	}
@@ -699,7 +704,7 @@ int LevelChunk::setBlocksAndData( unsigned char* data, int x0, int y0, int z0, i
 	//len = (y1 - y0) / 2;
 	for (int x = x0; x < x1; x++)
 	for (int z = z0; z < z1; z++) {
-		int slot = (x << 11 | z << 7 | y0) >> 1;
+		int slot = (x << 12 | z << 8 | y0) >> 1;
 		memcpy(blockLight.data + slot, data + p, len); //System.arraycopy(data, p, blockLight.data, slot, len);
 		p += len;
 	}
@@ -707,7 +712,7 @@ int LevelChunk::setBlocksAndData( unsigned char* data, int x0, int y0, int z0, i
 	//len = (y1 - y0) / 2;
 	for (int x = x0; x < x1; x++)
 	for (int z = z0; z < z1; z++) {
-		int slot = (x << 11 | z << 7 | y0) >> 1;
+		int slot = (x << 12 | z << 8 | y0) >> 1;
 		memcpy(skyLight.data + slot, data + p, len); //System.arraycopy(data, p, skyLight.data, slot, len);
 		p += len;
 	}

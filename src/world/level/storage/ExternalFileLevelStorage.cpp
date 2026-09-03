@@ -365,7 +365,7 @@ void ExternalFileLevelStorage::save(Level* level, LevelChunk* levelChunk)
 	chunkData.Write((const char*)levelChunk->skyLight.data, CHUNK_BLOCK_COUNT / 2);
 	chunkData.Write((const char*)levelChunk->blockLight.data, CHUNK_BLOCK_COUNT / 2);
 
-	chunkData.Write((const char*)levelChunk->updateMap, CHUNK_COLUMNS);
+	chunkData.Write((const char*)levelChunk->updateMap, sizeof(levelChunk->updateMap));
 
 	rFile->writeChunk(levelChunk->x, levelChunk->z, chunkData);
 
@@ -409,7 +409,7 @@ LevelChunk* ExternalFileLevelStorage::load(Level* level, int x, int z)
 		chunkData->Read((char*)levelChunk->skyLight.data, CHUNK_BLOCK_COUNT / 2);
 		chunkData->Read((char*)levelChunk->blockLight.data, CHUNK_BLOCK_COUNT / 2);
 	}
-	chunkData->Read((char*)levelChunk->updateMap, CHUNK_COLUMNS);
+	chunkData->Read((char*)levelChunk->updateMap, sizeof(levelChunk->updateMap));
 	// This will be difficult to maintain.. Storage version could be per chunk
 	// too (but probably better to just read all -> write all, so that all
 	// chunks got same version anyway)

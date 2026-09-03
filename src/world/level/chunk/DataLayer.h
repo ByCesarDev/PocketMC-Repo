@@ -30,11 +30,11 @@ public:
 	}
 
     int get(int x, int y, int z) {
-        return get(x << 11 | z << 7 | y);
+        return get(x << 12 | z << 8 | y);
     }
 
     void set(int x, int y, int z, int val) {
-        set(x << 11 | z << 7 | y, val);
+        set(x << 12 | z << 8 | y, val);
     }
 
 	__inline int get(int pos) {

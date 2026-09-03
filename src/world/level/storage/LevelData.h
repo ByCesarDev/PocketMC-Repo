@@ -75,6 +75,13 @@ public:
 	bool		getAllowCheats() const;
 	void		setAllowCheats(bool allow);
 
+	int			getWorldType() const;
+	void		setWorldType(int type);
+	bool		isFlat() const;
+	void		setFlat(bool flat);
+	bool		isExperimental() const;
+	void		setExperimental(bool exp);
+
 	int			getRainTime() const;
 	void		setRainTime(int time);
 	bool		isRaining() const;
@@ -102,6 +109,9 @@ private:
 	int storageVersion;
 	bool spawnMobs;
 	bool allowCheats;
+	int worldType;
+	bool flatWorld;
+	bool experimental;
 	int rainTime;
 	bool raining;
 	int thunderTime;

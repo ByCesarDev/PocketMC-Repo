@@ -227,7 +227,71 @@ static const std::vector<BlockAtlasStitcher::TextureMapping> s_mappings = {
     { "leaves_acacia_carried.png", 52, "terrain2.png" },
     { "leaves_big_oak_carried.png", 53, "terrain2.png" },
     { "sapling_big_oak.png", 54, "terrain2.png" },
-    { "leaves_jungle_fruits.png", 55, "terrain2.png" }
+    { "leaves_jungle_fruits.png", 55, "terrain2.png" },
+
+    // Stones & Polished (56..61)
+    { "stone_granite.png", 56, "terrain2.png" },
+    { "stone_granite_smooth.png", 57, "terrain2.png" },
+    { "stone_diorite.png", 58, "terrain2.png" },
+    { "stone_diorite_smooth.png", 59, "terrain2.png" },
+    { "stone_andesite.png", 60, "terrain2.png" },
+    { "stone_andesite_smooth.png", 61, "terrain2.png" },
+
+    // Soils & Organics (62..65)
+    { "dirt_podzol_top.png", 62, "terrain2.png" },
+    { "dirt_podzol_side.png", 63, "terrain2.png" },
+    { "mycelium_top.png", 64, "terrain2.png" },
+    { "mycelium_side.png", 65, "terrain2.png" },
+
+    // Ices (66..68)
+    { "ice_packed.png", 66, "terrain2.png" },
+    { "blue_ice.png", 67, "terrain2.png" },
+    { "frosted_ice_0.png", 68, "terrain2.png" },
+
+    // Terracotta & 16 Stained Clays (69..85)
+    { "hardened_clay.png", 69, "terrain2.png" },
+    { "hardened_clay_stained_white.png", 70, "terrain2.png" },
+    { "hardened_clay_stained_orange.png", 71, "terrain2.png" },
+    { "hardened_clay_stained_magenta.png", 72, "terrain2.png" },
+    { "hardened_clay_stained_light_blue.png", 73, "terrain2.png" },
+    { "hardened_clay_stained_yellow.png", 74, "terrain2.png" },
+    { "hardened_clay_stained_lime.png", 75, "terrain2.png" },
+    { "hardened_clay_stained_pink.png", 76, "terrain2.png" },
+    { "hardened_clay_stained_gray.png", 77, "terrain2.png" },
+    { "hardened_clay_stained_silver.png", 78, "terrain2.png" },
+    { "hardened_clay_stained_cyan.png", 79, "terrain2.png" },
+    { "hardened_clay_stained_purple.png", 80, "terrain2.png" },
+    { "hardened_clay_stained_blue.png", 81, "terrain2.png" },
+    { "hardened_clay_stained_brown.png", 82, "terrain2.png" },
+    { "hardened_clay_stained_green.png", 83, "terrain2.png" },
+    { "hardened_clay_stained_red.png", 84, "terrain2.png" },
+    { "hardened_clay_stained_black.png", 85, "terrain2.png" },
+
+    // Huge Mushrooms (86..89)
+    { "mushroom_block_skin_brown.png", 86, "terrain2.png" },
+    { "mushroom_block_skin_red.png", 87, "terrain2.png" },
+    { "mushroom_block_skin_stem.png", 88, "terrain2.png" },
+    { "mushroom_block_inside.png", 89, "terrain2.png" },
+
+    // Flora & Special (90..93)
+    { "waterlily.png", 90, "terrain2.png" },
+    { "vine.png", 91, "terrain2.png" },
+    { "cocoa_stage_2.png", 92, "terrain2.png" },
+    { "sweet_berry_bush_stage3.png", 93, "terrain2.png" },
+
+    // 1.7+ Flowers (94..105)
+    { "flower_allium.png", 94, "terrain2.png" },
+    { "flower_blue_orchid.png", 95, "terrain2.png" },
+    { "flower_houstonia.png", 96, "terrain2.png" },
+    { "flower_tulip_red.png", 97, "terrain2.png" },
+    { "flower_tulip_orange.png", 98, "terrain2.png" },
+    { "flower_tulip_white.png", 99, "terrain2.png" },
+    { "flower_tulip_pink.png", 100, "terrain2.png" },
+    { "flower_oxeye_daisy.png", 101, "terrain2.png" },
+    { "flower_paeonia.png", 102, "terrain2.png" },
+    { "flower_rose_blue.png", 103, "terrain2.png" },
+    { "flower_lily_of_the_valley.png", 104, "terrain2.png" },
+    { "flower_wither_rose.png", 105, "terrain2.png" }
 };
 
 const std::vector<BlockAtlasStitcher::TextureMapping>& BlockAtlasStitcher::getTextureMappings() {

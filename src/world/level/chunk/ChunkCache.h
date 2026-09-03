@@ -148,6 +148,13 @@ public:
         sprintf(buf, "ChunkCache: %zu loaded", chunkMap.size());
         return std::string(buf);
     }
+
+	bool findSpawnPosition(int& spawnX, int& spawnZ) override {
+		if (source != NULL) {
+			return source->findSpawnPosition(spawnX, spawnZ);
+		}
+		return false;
+	}
 	
 	void saveAll(bool onlyUnsaved) {
 		if (storage != NULL) {

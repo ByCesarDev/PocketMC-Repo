@@ -250,10 +250,64 @@ Tile* Tile::deepslatePolished = NULL;
 Tile* Tile::deepslateTiles = NULL;
 Tile* Tile::deepslateBricks = NULL;
 
+Tile* Tile::granite = NULL;
+Tile* Tile::graniteSmooth = NULL;
+Tile* Tile::diorite = NULL;
+Tile* Tile::dioriteSmooth = NULL;
+Tile* Tile::andesite = NULL;
+Tile* Tile::andesiteSmooth = NULL;
+
+Tile* Tile::podzol = NULL;
+Tile* Tile::mycelium = NULL;
+
+Tile* Tile::packedIce = NULL;
+Tile* Tile::blueIce = NULL;
+Tile* Tile::frostedIce = NULL;
+
+Tile* Tile::hardenedClay = NULL;
+Tile* Tile::stainedClay_white = NULL;
+Tile* Tile::stainedClay_orange = NULL;
+Tile* Tile::stainedClay_magenta = NULL;
+Tile* Tile::stainedClay_lightBlue = NULL;
+Tile* Tile::stainedClay_yellow = NULL;
+Tile* Tile::stainedClay_lime = NULL;
+Tile* Tile::stainedClay_pink = NULL;
+Tile* Tile::stainedClay_gray = NULL;
+Tile* Tile::stainedClay_silver = NULL;
+Tile* Tile::stainedClay_cyan = NULL;
+Tile* Tile::stainedClay_purple = NULL;
+Tile* Tile::stainedClay_blue = NULL;
+Tile* Tile::stainedClay_brown = NULL;
+Tile* Tile::stainedClay_green = NULL;
+Tile* Tile::stainedClay_red = NULL;
+Tile* Tile::stainedClay_black = NULL;
+
+Tile* Tile::mushroomBlock_brown = NULL;
+Tile* Tile::mushroomBlock_red = NULL;
+Tile* Tile::mushroomBlock_stem = NULL;
+
+Tile* Tile::waterlily = NULL;
+Tile* Tile::vines = NULL;
+Tile* Tile::cocoa = NULL;
+Tile* Tile::sweetBerryBush = NULL;
+
+Tile* Tile::flower_allium = NULL;
+Tile* Tile::flower_blueOrchid = NULL;
+Tile* Tile::flower_houstonia = NULL;
+Tile* Tile::flower_tulipRed = NULL;
+Tile* Tile::flower_tulipOrange = NULL;
+Tile* Tile::flower_tulipWhite = NULL;
+Tile* Tile::flower_tulipPink = NULL;
+Tile* Tile::flower_oxeyeDaisy = NULL;
+Tile* Tile::flower_paeonia = NULL;
+Tile* Tile::flower_roseBlue = NULL;
+Tile* Tile::flower_lilyOfTheValley = NULL;
+Tile* Tile::flower_witherRose = NULL;
+
 /*static*/
 void Tile::initTiles() {
 	rock        = (new StoneTile(1, 1))->init()->setDestroyTime(1.5f)->setExplodeable(10)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("stone")->setAllFacesTexture("stone");
-	grass       = (GrassTile*) (new GrassTile(2))->init()->setDestroyTime(0.6f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("grass")->setSimplifiedTextures("grass_side", "grass_top", "dirt");
+	grass       = (GrassTile*) (new GrassTile(2))->init()->setDestroyTime(0.6f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("grass");
 	dirt        = (new DirtTile(3, 2))->init()->setDestroyTime(0.5f)->setSoundType(SOUND_GRAVEL)->setCategory(ItemCategory::Decorations)->setDescriptionId("dirt")->setAllFacesTexture("dirt");
 	stoneBrick  = (new Tile(4, 16, Material::stone))->init()->setDestroyTime(2.0f)->setExplodeable(10)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("stonebrick")->setAllFacesTexture("stone_brick");
 	wood        = (new Tile(5, 4, Material::wood))->init()->setDestroyTime(2.0f)->setExplodeable(5)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("wood")->setAllFacesTexture("planks_oak");
@@ -634,6 +688,84 @@ void Tile::initExtraTiles()
 	quartzSlabHalf   = (new Tile(228, 233, Material::stone))->init();
 	quartzSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
 	quartzSlabHalf->setDestroyTime(2.0f)->setExplodeable(10.0f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("quartzSlab");
+
+	// Granite, Diorite, Andesite (IDs 131..136)
+	granite        = (new Tile(131, 56 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setExplodeable(10)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("stoneGranite")->setAllFacesTexture("stone_granite", 56 | Tile::TEXTURE_ALT_FLAG);
+	graniteSmooth  = (new Tile(132, 57 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setExplodeable(10)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("stoneGraniteSmooth")->setAllFacesTexture("stone_granite_smooth", 57 | Tile::TEXTURE_ALT_FLAG);
+	diorite        = (new Tile(133, 58 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setExplodeable(10)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("stoneDiorite")->setAllFacesTexture("stone_diorite", 58 | Tile::TEXTURE_ALT_FLAG);
+	dioriteSmooth  = (new Tile(134, 59 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setExplodeable(10)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("stoneDioriteSmooth")->setAllFacesTexture("stone_diorite_smooth", 59 | Tile::TEXTURE_ALT_FLAG);
+	andesite       = (new Tile(135, 60 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setExplodeable(10)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("stoneAndesite")->setAllFacesTexture("stone_andesite", 60 | Tile::TEXTURE_ALT_FLAG);
+	andesiteSmooth = (new Tile(136, 61 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setExplodeable(10)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("stoneAndesiteSmooth")->setAllFacesTexture("stone_andesite_smooth", 61 | Tile::TEXTURE_ALT_FLAG);
+
+	// Podzol & Mycelium (IDs 137, 110)
+	podzol   = (new Tile(137, 63 | Tile::TEXTURE_ALT_FLAG, Material::dirt))->init()->setDestroyTime(0.5f)->setSoundType(SOUND_GRAVEL)->setCategory(ItemCategory::Decorations)->setDescriptionId("dirtPodzol")
+				->setSideTexture("dirt_podzol_side", 63 | Tile::TEXTURE_ALT_FLAG)
+				->setTopTexture("dirt_podzol_top", 62 | Tile::TEXTURE_ALT_FLAG)
+				->setBottomTexture("dirt", 2);
+	mycelium = (new Tile(110, 65 | Tile::TEXTURE_ALT_FLAG, Material::dirt))->init()->setDestroyTime(0.6f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("mycelium")
+				->setSideTexture("mycelium_side", 65 | Tile::TEXTURE_ALT_FLAG)
+				->setTopTexture("mycelium_top", 64 | Tile::TEXTURE_ALT_FLAG)
+				->setBottomTexture("dirt", 2);
+
+	// Ices (IDs 138..140)
+	packedIce  = (new Tile(138, 66 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(0.5f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("icePacked")->setAllFacesTexture("ice_packed", 66 | Tile::TEXTURE_ALT_FLAG);
+	blueIce    = (new Tile(139, 67 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(2.8f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("iceBlue")->setAllFacesTexture("blue_ice", 67 | Tile::TEXTURE_ALT_FLAG);
+	frostedIce = (new Tile(140, 68 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(0.5f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("iceFrosted")->setAllFacesTexture("frosted_ice_0", 68 | Tile::TEXTURE_ALT_FLAG);
+
+	// Hardened Clay / Terracotta (ID 130)
+	hardenedClay = (new Tile(130, 69 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardened")->setAllFacesTexture("hardened_clay", 69 | Tile::TEXTURE_ALT_FLAG);
+
+	// 16 Stained Clays (IDs 229..244)
+	stainedClay_white     = (new Tile(229, 70 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedWhite")->setAllFacesTexture("hardened_clay_stained_white", 70 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_orange    = (new Tile(230, 71 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedOrange")->setAllFacesTexture("hardened_clay_stained_orange", 71 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_magenta   = (new Tile(231, 72 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedMagenta")->setAllFacesTexture("hardened_clay_stained_magenta", 72 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_lightBlue = (new Tile(232, 73 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedLightBlue")->setAllFacesTexture("hardened_clay_stained_light_blue", 73 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_yellow    = (new Tile(233, 74 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedYellow")->setAllFacesTexture("hardened_clay_stained_yellow", 74 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_lime      = (new Tile(234, 75 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedLime")->setAllFacesTexture("hardened_clay_stained_lime", 75 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_pink      = (new Tile(235, 76 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedPink")->setAllFacesTexture("hardened_clay_stained_pink", 76 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_gray      = (new Tile(236, 77 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedGray")->setAllFacesTexture("hardened_clay_stained_gray", 77 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_silver    = (new Tile(237, 78 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedSilver")->setAllFacesTexture("hardened_clay_stained_silver", 78 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_cyan      = (new Tile(238, 79 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedCyan")->setAllFacesTexture("hardened_clay_stained_cyan", 79 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_purple    = (new Tile(239, 80 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedPurple")->setAllFacesTexture("hardened_clay_stained_purple", 80 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_blue      = (new Tile(240, 81 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedBlue")->setAllFacesTexture("hardened_clay_stained_blue", 81 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_brown     = (new Tile(241, 82 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedBrown")->setAllFacesTexture("hardened_clay_stained_brown", 82 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_green     = (new Tile(242, 83 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedGreen")->setAllFacesTexture("hardened_clay_stained_green", 83 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_red       = (new Tile(243, 84 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedRed")->setAllFacesTexture("hardened_clay_stained_red", 84 | Tile::TEXTURE_ALT_FLAG);
+	stainedClay_black     = (new Tile(244, 85 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.25f)->setExplodeable(4.2f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("clayHardenedBlack")->setAllFacesTexture("hardened_clay_stained_black", 85 | Tile::TEXTURE_ALT_FLAG);
+
+	// Huge Mushroom blocks (IDs 99, 100, 141)
+	mushroomBlock_brown = (new Tile(99, 86 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(0.2f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("mushroomBlockBrown")
+							->setSideTexture("mushroom_block_skin_brown", 86 | Tile::TEXTURE_ALT_FLAG)
+							->setTopTexture("mushroom_block_skin_brown", 86 | Tile::TEXTURE_ALT_FLAG)
+							->setBottomTexture("mushroom_block_inside", 89 | Tile::TEXTURE_ALT_FLAG);
+	mushroomBlock_red   = (new Tile(100, 87 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(0.2f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("mushroomBlockRed")
+							->setSideTexture("mushroom_block_skin_red", 87 | Tile::TEXTURE_ALT_FLAG)
+							->setTopTexture("mushroom_block_skin_red", 87 | Tile::TEXTURE_ALT_FLAG)
+							->setBottomTexture("mushroom_block_inside", 89 | Tile::TEXTURE_ALT_FLAG);
+	mushroomBlock_stem  = (new Tile(141, 88 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(0.2f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("mushroomBlockStem")
+							->setSideTexture("mushroom_block_skin_stem", 88 | Tile::TEXTURE_ALT_FLAG)
+							->setTopTexture("mushroom_block_inside", 89 | Tile::TEXTURE_ALT_FLAG)
+							->setBottomTexture("mushroom_block_inside", 89 | Tile::TEXTURE_ALT_FLAG);
+
+	// Flora & Special (IDs 111, 106, 127, 142)
+	waterlily       = (new FlowerTile(111, 90 | Tile::TEXTURE_ALT_FLAG))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("waterlily")->setAllFacesTexture("waterlily", 90 | Tile::TEXTURE_ALT_FLAG);
+	vines           = (new FlowerTile(106, 91 | Tile::TEXTURE_ALT_FLAG))->init()->setDestroyTime(0.2f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("vine")->setAllFacesTexture("vine", 91 | Tile::TEXTURE_ALT_FLAG);
+	cocoa           = (new Tile(127, 92 | Tile::TEXTURE_ALT_FLAG, Material::plant))->init()->setDestroyTime(0.2f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("cocoa")->setAllFacesTexture("cocoa_stage_2", 92 | Tile::TEXTURE_ALT_FLAG);
+	sweetBerryBush  = (new FlowerTile(142, 93 | Tile::TEXTURE_ALT_FLAG))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("sweetBerryBush")->setAllFacesTexture("sweet_berry_bush_stage3", 93 | Tile::TEXTURE_ALT_FLAG);
+
+	// 1.7+ Flowers (IDs 143..149, 167..169, 184, 213)
+	flower_allium           = (new FlowerTile(143, 94 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerAllium")->setAllFacesTexture("flower_allium", 94 | Tile::TEXTURE_ALT_FLAG);
+	flower_blueOrchid       = (new FlowerTile(144, 95 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerBlueOrchid")->setAllFacesTexture("flower_blue_orchid", 95 | Tile::TEXTURE_ALT_FLAG);
+	flower_houstonia        = (new FlowerTile(145, 96 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerHoustonia")->setAllFacesTexture("flower_houstonia", 96 | Tile::TEXTURE_ALT_FLAG);
+	flower_tulipRed         = (new FlowerTile(146, 97 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerTulipRed")->setAllFacesTexture("flower_tulip_red", 97 | Tile::TEXTURE_ALT_FLAG);
+	flower_tulipOrange      = (new FlowerTile(147, 98 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerTulipOrange")->setAllFacesTexture("flower_tulip_orange", 98 | Tile::TEXTURE_ALT_FLAG);
+	flower_tulipWhite       = (new FlowerTile(148, 99 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerTulipWhite")->setAllFacesTexture("flower_tulip_white", 99 | Tile::TEXTURE_ALT_FLAG);
+	flower_tulipPink        = (new FlowerTile(149, 100 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerTulipPink")->setAllFacesTexture("flower_tulip_pink", 100 | Tile::TEXTURE_ALT_FLAG);
+	flower_oxeyeDaisy       = (new FlowerTile(167, 101 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerOxeyeDaisy")->setAllFacesTexture("flower_oxeye_daisy", 101 | Tile::TEXTURE_ALT_FLAG);
+	flower_paeonia          = (new FlowerTile(168, 102 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerPaeonia")->setAllFacesTexture("flower_paeonia", 102 | Tile::TEXTURE_ALT_FLAG);
+	flower_roseBlue         = (new FlowerTile(169, 103 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerRoseBlue")->setAllFacesTexture("flower_rose_blue", 103 | Tile::TEXTURE_ALT_FLAG);
+	flower_lilyOfTheValley  = (new FlowerTile(184, 104 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerLilyOfTheValley")->setAllFacesTexture("flower_lily_of_the_valley", 104 | Tile::TEXTURE_ALT_FLAG);
+	flower_witherRose       = (new FlowerTile(213, 105 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerWitherRose")->setAllFacesTexture("flower_wither_rose", 105 | Tile::TEXTURE_ALT_FLAG);
 }
 
 bool Tile::isTileAllowedInCreative(int id) {
@@ -965,10 +1097,6 @@ int Tile::getTexture( int face )
 			return mat->textureIndex;
 		}
 	}
-	// SOLUCIÓN DEFINITIVA: Forzamos la limpieza del flag de atlas alternativo (0x1000)
-	// para los IDs de las flores. Esto evita que el motor use terrain2.png
-	// incluso si los índices 12/13 están siendo usados por otros bloques allí.
-	if (id == 179 || id == 180) return tex & 0xfff;
 	return tex;
 }
 
@@ -980,10 +1108,28 @@ void Tile::addAABBs( Level* level, int x, int y, int z, const AABB* box, std::ve
 	}
 }
 
+static inline bool isPlantOrCutoutTile(int id) {
+	return (id == 179 || id == 180 || id == 6 || id == 31 || id == 39 || id == 40 ||
+	        id == 106 || id == 111 || id == 142 ||
+	        (id >= 143 && id <= 149) || (id >= 167 && id <= 169) ||
+	        id == 184 || id == 213 || (id >= 193 && id <= 197));
+}
+
 AABB* Tile::getAABB( Level* level, int x, int y, int z )
 {
-	// Las flores (179, 180) no deben tener caja de colisión para que el jugador pase a través
-	if (id == 179 || id == 180) {
+	// Waterlily (111) has a thin surface collision box
+	if (id == 111) {
+		tmpBB.x0 = x + 0.0f;
+		tmpBB.y0 = y + 0.0f;
+		tmpBB.z0 = z + 0.0f;
+		tmpBB.x1 = x + 1.0f;
+		tmpBB.y1 = y + 0.015625f;
+		tmpBB.z1 = z + 1.0f;
+		return &tmpBB;
+	}
+
+	// Flowers, tall grass, vines, saplings have no collision box
+	if (isPlantOrCutoutTile(id)) {
 		return NULL;
 	}
 
@@ -998,8 +1144,7 @@ AABB* Tile::getAABB( Level* level, int x, int y, int z )
 
 bool Tile::isSolidRender()
 {
-	// Las plantas nunca deben considerarse renderizado sólido para evitar que se dibujen caras de cubo opacas
-	if (id == 179 || id == 180 || id == 6 || id == 31 || id == 39 || id == 40) return false;
+	if (isPlantOrCutoutTile(id)) return false;
 	return xx0 <= 0.0f && yy0 <= 0.0f && zz0 <= 0.0f && xx1 >= 1.0f && yy1 >= 1.0f && zz1 >= 1.0f;
 }
 
@@ -1035,8 +1180,7 @@ float Tile::getExplosionResistance( Entity* source )
 
 int Tile::getRenderLayer()
 {
-	// Forzamos que las flores usen la capa de AlphaTest para descartar el fondo sólido
-	if (id == 179 || id == 180 || id == 6 || id == 31 || id == 39 || id == 40) return Tile::RENDERLAYER_ALPHATEST;
+	if (isPlantOrCutoutTile(id)) return Tile::RENDERLAYER_ALPHATEST;
 	return Tile::RENDERLAYER_OPAQUE;
 }
 

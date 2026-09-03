@@ -37,6 +37,8 @@ public:
 
 	virtual Biome::MobList getMobsAt(const MobCategory& mobCategory, int x, int y, int z) = 0;
 
+	virtual bool findSpawnPosition(int& spawnX, int& spawnZ) { return false; }
+
     /**
      * Returns some stats that are rendered when the user holds F3.
      */

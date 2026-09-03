@@ -34,7 +34,7 @@ public:
 		DataLayer& blockData = chunk->data;
 
 		const int setSize = LEVEL_HEIGHT / 8;
-		const int setShift = 4; // power of LEVEL_HEIGHT / 8
+		const int setShift = 5; // power of LEVEL_HEIGHT / 8
 
 		chunkData.Reset();
 		for (int i = 0; i < CHUNK_COLUMNS; i++)
@@ -44,7 +44,7 @@ public:
 
 			if (updateBits > 0)
 			{
-				int colDataPosition = (i % CHUNK_WIDTH) << 11 | (i / CHUNK_WIDTH) << 7;
+				int colDataPosition = (i % CHUNK_WIDTH) << 12 | (i / CHUNK_WIDTH) << 8;
 
 				for (int set = 0; set < 8; set++)
 				{

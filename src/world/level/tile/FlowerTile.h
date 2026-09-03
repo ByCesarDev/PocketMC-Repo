@@ -11,7 +11,9 @@ public:
         this->category = 2; // Decorations
     }
 
-    virtual int getTexture(int face) override { return tex & 0xfff; }
+    virtual int getTexture(int face) override { return tex; }
+    virtual int getTexture(int face, int data) override { return tex; }
+    virtual int getTexture(LevelSource* level, int x, int y, int z, int face) override { return tex; }
 };
 
 #endif

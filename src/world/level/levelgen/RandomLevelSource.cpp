@@ -95,8 +95,8 @@ void RandomLevelSource::prepareHeights(int xOffs, int zOffs, unsigned char* bloc
                     float _s1a = (s3 - s1) * xStep;
 
                     for (int x = 0; x < CHUNK_WIDTH; x++) {
-                        int offs = (x + xc * CHUNK_WIDTH) << 11 | (0 + zc * CHUNK_WIDTH) << 7 | (yc * CHUNK_HEIGHT + y);
-                        int step = 1 << 7;
+                        int offs = (x + xc * CHUNK_WIDTH) << 12 | (0 + zc * CHUNK_WIDTH) << 8 | (yc * CHUNK_HEIGHT + y);
+                        int step = 1 << 8;
                         float zStep = 1 / (float) CHUNK_WIDTH;
 
                         float val = _s0;
@@ -724,7 +724,7 @@ LevelChunk* PerformanceTestChunkSource::create(int x, int z)
 			{
 				for (int z = y & 1; z < 16; z += 2)
 				{
-					blocks[x << 11 | z << 7 | y] = 3;
+					blocks[x << 12 | z << 8 | y] = 3;
 				}
 			}
 		}
@@ -734,7 +734,7 @@ LevelChunk* PerformanceTestChunkSource::create(int x, int z)
 			{
 				for (int z = 0; z < 16; z += 2)
 				{
-					blocks[x << 11 | z << 7 | y] = 3;
+					blocks[x << 12 | z << 8 | y] = 3;
 				}
 			}
 

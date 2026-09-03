@@ -3,6 +3,8 @@
 
 //package net.minecraft.world.level;
 
+#include "WorldType.h"
+
 namespace GameType {
 	const int Undefined = -1;
 	const int Survival = 0;
@@ -14,10 +16,13 @@ namespace GameType {
 class LevelSettings
 {
 public:
-    LevelSettings(long seed, int gameType, bool allowCheats = false)
+    LevelSettings(long seed, int gameType, bool allowCheats = false, int worldType = WorldType::INFINITE_SIZE, bool flatWorld = false, bool experimental = false)
     :   seed(seed),
         gameType(gameType),
-        allowCheats(allowCheats)
+        allowCheats(allowCheats),
+        worldType(worldType),
+        flatWorld(flatWorld),
+        experimental(experimental)
     {
     }
 	static LevelSettings None() {
@@ -35,6 +40,10 @@ public:
     bool getAllowCheats() const {
         return allowCheats;
     }
+
+    int worldType = WorldType::INFINITE_SIZE;
+    bool flatWorld = false;
+    bool experimental = false;
 
 	//
 	// Those two should actually not be here

@@ -108,7 +108,7 @@ public:
     static bool touchedSky;
 	static const int ChunkBlockCount = CHUNK_BLOCK_COUNT;
 	static const int ChunkSize = ChunkBlockCount;
-	static const int UpdateMapBitShift = 4; // power of (LEVEL_HEIGHT / 8) == 16
+	static const int UpdateMapBitShift = 5; // power of (LEVEL_HEIGHT / 8) == 32
 
 	int blocksLength; // ? needed or not? (i.e. are all chunks the same size?)
 
@@ -118,8 +118,8 @@ public:
     DataLayer skyLight;
     DataLayer blockLight;
 
-	char heightmap[CHUNK_COLUMNS];
-	unsigned char updateMap[CHUNK_COLUMNS]; // marks regions within block columns that have been modified
+	unsigned short heightmap[CHUNK_COLUMNS];
+	unsigned int updateMap[CHUNK_COLUMNS]; // marks regions within block columns that have been modified
 	int minHeight;
 
 	const int x, z;
@@ -134,7 +134,7 @@ public:
 protected:
 	unsigned char* blocks;
 
-	static const int EntityBlocksArraySize = 128/16;
+	static const int EntityBlocksArraySize = LEVEL_HEIGHT / 16;
 	std::vector<Entity*> entityBlocks[EntityBlocksArraySize];
 
     TEMap tileEntities;

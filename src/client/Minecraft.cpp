@@ -379,6 +379,8 @@ void Minecraft::prepareLevel(const std::string& title) {
 	// Dont update lights if we load the level (ok, actually just with leveldata version=1.+(?))
 	if (!level->isNew())
 		level->setUpdateLights(false);
+	else
+		level->setInitialSpawn();
 
 	// Generate chunks around spawn point for infinite world
 	int spawnRadius = 16; // Generate 16x16 chunks around spawn
@@ -424,7 +426,7 @@ void Minecraft::prepareLevel(const std::string& title) {
 
 	progressStageStatusId = 3;
 	if (level->isNew()) {
-		level->setInitialSpawn(); // @note: should obviously be called from Level itself
+		level->validateSpawn();
 		level->saveLevelData();
 		level->getChunkSource()->saveAll(false);
 		level->saveGame();

@@ -23,7 +23,7 @@ static bool existsReactorOrPortalElsewhere(Level* level, int x, int y, int z) {
 						int absZ = chunk->zt + lz;
 						if (absX == x && ly == y && absZ == z) continue;
 						
-						int tile = blocks[lx << 11 | lz << 7 | ly];
+						int tile = blocks[lx << 12 | lz << 8 | ly];
 						if (tile == Tile::netherPortal->id || tile == Tile::netherReactor->id) {
 							return true;
 						}
