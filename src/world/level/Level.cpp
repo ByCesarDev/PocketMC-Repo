@@ -499,6 +499,11 @@ void Level::setInitialSpawn() {
     if (!foundSafe) {
         foundSafe = findSafeSpawnNear(dimension, 0, 0, 512, safeX, safeZ);
     }
+    if (!foundSafe) {
+        for (int r = 64; r <= 2048 && !foundSafe; r += 64) {
+            foundSafe = findSafeSpawnNear(dimension, 0, 0, r, safeX, safeZ);
+        }
+    }
 
     if (foundSafe) {
         xSpawn = safeX;

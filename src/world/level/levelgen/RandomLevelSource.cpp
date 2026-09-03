@@ -524,6 +524,7 @@ LevelChunk* RandomLevelSource::getChunk(int xOffs, int zOffs) {
     random.setSeed((long)(xOffs * 341872712l + zOffs * 132899541l)); //@fix
 
     unsigned char* blocks = new unsigned char[LevelChunk::ChunkBlockCount];
+    memset(blocks, 0, LevelChunk::ChunkBlockCount);
     LevelChunk* levelChunk = new LevelChunk(level, blocks, xOffs, zOffs);
 	chunkMap.insert(std::make_pair(hashedPos, levelChunk));
 
