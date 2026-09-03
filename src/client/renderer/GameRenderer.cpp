@@ -303,7 +303,7 @@ void GameRenderer::renderLevel(float a) {
             glDepthMask(GL_FALSE);
             levelRenderer->renderSky(a);
             glDepthMask(GL_TRUE);
-			glFogf(GL_FOG_START, renderDistance  * 0.6f);
+			glFogf(GL_FOG_START, renderDistance  * 0.35f);
 			glFogf(GL_FOG_END, renderDistance);
         }
         glEnable2(GL_FOG);
@@ -582,7 +582,7 @@ void GameRenderer::setupFog(int i) {
     glFogfv(GL_FOG_COLOR, (GLfloat*)fogBuffer);
     glColor4f2(1, 1, 1, 1);
 
-    float fStart = renderDistance * 0.6f;
+    float fStart = renderDistance * 0.35f;
     float fEnd = renderDistance;
 
     if (player && player->isUnderLiquid(Material::lava)) {
@@ -1006,7 +1006,7 @@ void GameRenderer::prepareAndRenderClouds( LevelRenderer* levelRenderer, float a
 	glFogf(GL_FOG_START, renderDistance * 4.2f * 0.6f);
 	glFogf(GL_FOG_END, renderDistance * 4.2f);
 	levelRenderer->renderClouds(a);
-	glFogf(GL_FOG_START, renderDistance  * 0.6f);
+	glFogf(GL_FOG_START, renderDistance  * 0.35f);
 	glFogf(GL_FOG_END, renderDistance);
 	glDisable2(GL_FOG);
 	glDepthMask(true);
