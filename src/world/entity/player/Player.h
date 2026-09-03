@@ -184,7 +184,6 @@ public:
 
 	// ok I know it's not so nice to build in RakNet dependency here, BUT I DON'T CARE! MUAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHHAHAHAHAHAHAHAHAHHAHAHAHAHAHAHA
 	RakNet::RakNetGUID owner;
-	bool hasFakeInventory;
 	Pos bedPosition;
 	float bedOffsetX;
 	float bedOffsetY;

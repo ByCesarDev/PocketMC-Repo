@@ -103,9 +103,6 @@ bool Inventory::stillValid(Player* player) {
 }
 
 bool Inventory::add( ItemInstance* item ){
-	if (player->hasFakeInventory)
-		return true;
-
 	return super::add(item);
 }
 

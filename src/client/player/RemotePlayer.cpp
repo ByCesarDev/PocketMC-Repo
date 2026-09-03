@@ -6,7 +6,6 @@ RemotePlayer::RemotePlayer(Level* level, bool isCreative)
 :	Player(level, isCreative),
 	hasStartedUsingItem(false)
 {
-	hasFakeInventory = true;
 }
 
 void RemotePlayer::tick() {

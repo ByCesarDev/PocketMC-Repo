@@ -29,7 +29,6 @@ Player::Player(Level* level, bool isCreative)
 :	super(level),
 	userType(0),
 	playerHasRespawnPosition(false),
-	hasFakeInventory(false),
 	containerMenu(NULL),
 	useItemDuration(0),
 	playerIsSleeping(false),

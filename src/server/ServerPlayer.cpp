@@ -26,7 +26,6 @@ ServerPlayer::ServerPlayer( Minecraft* minecraft, Level* level )
 	_prevHealth(-999),
 	_containerCounter(0)
 {
-	hasFakeInventory = true;
 	footSize = 0;
 }
 
