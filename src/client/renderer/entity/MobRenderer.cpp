@@ -67,6 +67,8 @@ void MobRenderer::render(Entity* e, float x, float y, float z, float rot, float 
 
 	if (ws > 1) ws = 1;
 
+	float br = mob->getBrightness(a);
+	glColor4f2(br, br, br, 1.0f);
 	bindTexture(mob->getTexture());
 	//glEnable2(GL_ALPHA_TEST);
 
@@ -83,7 +85,6 @@ void MobRenderer::render(Entity* e, float x, float y, float z, float rot, float 
 	}
 
 	additionalRendering(mob, a);
-	float br = mob->getBrightness(a);
 	int overlayColor = getOverlayColor(mob, br, a);
 
 	bool renderOverlay = ((overlayColor >> 24) & 0xff) > 0;

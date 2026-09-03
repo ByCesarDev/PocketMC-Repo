@@ -238,7 +238,7 @@ void EntityRenderer::renderTileShadow(Tile* tt, float x, float y, float z, int x
 	float a = ((pow - (y - (yt + yo)) / 2) * 0.5f) * getLevel()->getBrightness(xt, yt, zt);
 	if (a < 0) return;
 	if (a > 1) a = 1;
-	glColor4f2(1, 1, 1, (float) a);
+	t.color(1.0f, 1.0f, 1.0f, (float) a);
 
 	float x0 = xt + tt->xx0 + xo;
 	float x1 = xt + tt->xx1 + xo;

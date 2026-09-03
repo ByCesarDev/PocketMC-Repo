@@ -101,9 +101,9 @@ void Dimension::updateLightRamp()
 void Dimension::updateLightRamp(float gamma)
 {
 	for (int i = 0; i <= 15; i++) {
-		float v = 1.0f - i * 0.0625f;
-		float f = ((1.0f - v) / (v * 3.0f + 1.0f)) * 0.95f + 0.15f;
-		brightnessRamp[i] = f * (1.0f - gamma) + (f * 3.0f + 1.0f) / 4.0f * gamma;
+		float v = 1.0f - i / 15.0f;
+		float f = (1.0f - v) / (v * 3.0f + 1.0f);
+		brightnessRamp[i] = (f * (1.0f - gamma) + ((f * 3.0f + 1.0f) / 4.0f) * gamma) * 0.95f + 0.05f;
 	}
 }
 

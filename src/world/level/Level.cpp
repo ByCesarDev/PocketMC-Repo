@@ -1434,7 +1434,7 @@ int Level::getSkyDarken(float a) {
 
     float br = 1 - (Mth::cos(td * Mth::PI * 2) * 2 + 0.5f);
     if (br < 0.0f) br = 0.0f;
-    if (br > 0.80f) br = 0.80f; //@note; was 1.0f
+    if (br > 1.0f) br = 1.0f;
     return ((int) (br * 11));
 }
 
