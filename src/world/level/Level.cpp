@@ -486,6 +486,8 @@ static bool findSafeSpawnNear(Dimension* dimension, int centerX, int centerZ, in
 /*protected*/
 void Level::setInitialSpawn() {
     isFindingSpawn = true;
+    long long startTime = getTimeMs();
+
     int xSpawn = 0;
     int zSpawn = 0;
 
@@ -495,14 +497,9 @@ void Level::setInitialSpawn() {
 
     int safeX = xSpawn;
     int safeZ = zSpawn;
-    bool foundSafe = findSafeSpawnNear(dimension, xSpawn, zSpawn, 256, safeX, safeZ);
+    bool foundSafe = findSafeSpawnNear(dimension, xSpawn, zSpawn, 64, safeX, safeZ);
     if (!foundSafe) {
-        foundSafe = findSafeSpawnNear(dimension, 0, 0, 512, safeX, safeZ);
-    }
-    if (!foundSafe) {
-        for (int r = 64; r <= 2048 && !foundSafe; r += 64) {
-            foundSafe = findSafeSpawnNear(dimension, 0, 0, r, safeX, safeZ);
-        }
+        foundSafe = findSafeSpawnNear(dimension, 0, 0, 64, safeX, safeZ);
     }
 
     if (foundSafe) {
@@ -513,6 +510,11 @@ void Level::setInitialSpawn() {
     int ySpawn = getTopTileY(xSpawn, zSpawn) + 1;
     if (ySpawn <= 0) ySpawn = 64;
     levelData.setSpawn(xSpawn, ySpawn, zSpawn);
+
+    long long elapsed = getTimeMs() - startTime;
+    LOGI("[Spawn] Initial spawn set at (%d, %d, %d) [foundSafe=%d, elapsed=%lld ms]\n",
+        xSpawn, ySpawn, zSpawn, foundSafe ? 1 : 0, elapsed);
+
     isFindingSpawn = false;
 }
 
