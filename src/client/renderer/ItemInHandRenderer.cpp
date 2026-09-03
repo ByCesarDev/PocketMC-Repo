@@ -448,6 +448,7 @@ void ItemInHandRenderer::renderScreenEffect( float a )
 		}
 	}
 
+	glColor4f2(1, 1, 1, 1);
 	glEnable2(GL_ALPHA_TEST);
 }
 
@@ -465,9 +466,10 @@ void ItemInHandRenderer::renderTex( float a, int tex )
 {
 	Tesselator& t = Tesselator::instance;
 
-	float br;// = mc->player->getBrightness(a);
-	br = 0.1f;
+	float br = 0.1f;
 	glColor4f2(br, br, br, 0.5f);
+	glEnable2(GL_BLEND);
+	glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glPushMatrix2();
 
@@ -488,10 +490,10 @@ void ItemInHandRenderer::renderTex( float a, int tex )
 	t.vertexUV(x1, y0, z0, u0, v1);
 	t.vertexUV(x1, y1, z0, u0, v0);
 	t.vertexUV(x0, y1, z0, u1, v0);
-	//t.end();
 	t.draw();
 	glPopMatrix2();
 
+	glDisable2(GL_BLEND);
 	glColor4f2(1, 1, 1, 1);
 }
 

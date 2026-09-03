@@ -403,9 +403,9 @@ void Tile::initTiles() {
 	netherrack = (new Tile(87, 7 + 6 * 16, Material::stone))->init()->setDestroyTime(0.4f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("hellrock")->setAllFacesTexture("netherrack");
 
 	lightGem	= (new LightGemTile(89, 9 + 16 * 6, Material::glass))->init()->setDestroyTime(0.3f)->setCategory(ItemCategory::Decorations)->setSoundType(SOUND_GLASS)->setLightEmission(1.0f)->setDescriptionId("lightgem")->setAllFacesTexture("glowstone");
-	invisible_bedrock = (new InvisibleTile(95, 0, Material::stone))->init()->setDestroyTime(-1)->setExplodeable(6000000);
+	invisible_bedrock = (new InvisibleTile(95, 0, Material::stone))->init()->setDestroyTime(-1)->setExplodeable(6000000)->setCategory(ItemCategory::Structures);
 	trapdoor = (new TrapDoorTile(96, Material::wood))->init()->setDestroyTime(3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("trapdoor");
-
+ 
 	stoneBrickSmooth = (new MultiTextureTile(98, (const int*)&STONE_BRICK_TEXTURES, STONE_BRICK_TEXTURE_COUNT, Material::stone))->init()->setDestroyTime(1.5f)->setExplodeable(10)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("stonebricksmooth");
 
 	thinGlass = (new ThinFenceTile(102, 1 + 3 * 16, 4 + 9 * 16, Material::glass, false))->init()->setDestroyTime(0.3f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Structures)->setDescriptionId("thinGlass")->setAllFacesTexture("glass_pane");
@@ -445,9 +445,9 @@ void Tile::initTiles() {
 	netherReactor	= (new NetherReactor(247, 10  + 14 * 16, Material::metal))->init()->setDestroyTime(3.0f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("netherreactor");
 	info_updateGame1= (new Tile(248, 252, Material::dirt))->init()->setDestroyTime(1.0f)->setSoundType(SOUND_GRAVEL)->setCategory(ItemCategory::Structures)->setDescriptionId("info_update");
 	info_updateGame2= (new Tile(249, 253, Material::dirt))->init()->setDestroyTime(1.0f)->setSoundType(SOUND_GRAVEL)->setCategory(ItemCategory::Structures)->setDescriptionId("info_update");
-	grass_carried   = (new CarriedTile(253, 3, 12*16 + 12))->init()->setDescriptionId("grass");
+	grass_carried   = (new CarriedTile(253, 3, 12*16 + 12))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("grass");
 	leaves_carried  = (LeafTile*) (new LeafTile(254, 11 + 14 * 16))->init()->setDestroyTime(0.2f)->setLightBlock(1)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("leaves");
-	info_reserved6  = (new Tile(255, Material::dirt))->init();
+	info_reserved6  = (new Tile(255, Material::dirt))->init()->setCategory(ItemCategory::Structures);
 
     //
     // Stuff that need to be inited in a specific order (i.e. after the other tiles have been created)
@@ -565,14 +565,14 @@ void Tile::initExtraTiles()
 	acaciaTrunk = (new TreeTile(187))->init()->setDestroyTime(2.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("logAcacia");
 
 	// Spruce Slabs
-	spruceSlab = (new Tile(157, 4 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setDescriptionId("spruceSlab")->setAllFacesTexture("planks_spruce", 4 | Tile::TEXTURE_ALT_FLAG);
+	spruceSlab = (new Tile(157, 4 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("spruceSlab")->setAllFacesTexture("planks_spruce", 4 | Tile::TEXTURE_ALT_FLAG);
 
 	spruceSlabHalf = (new Tile(158, 4 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init();
 	spruceSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
 	spruceSlabHalf->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("spruceSlab")->setAllFacesTexture("planks_spruce", 4 | Tile::TEXTURE_ALT_FLAG);
 
 	// Birch Slabs
-	birchSlab = (new Tile(159, 5 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setDescriptionId("birchSlab")->setAllFacesTexture("planks_birch", 5 | Tile::TEXTURE_ALT_FLAG);
+	birchSlab = (new Tile(159, 5 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(2.0f)->setExplodeable(5.0f / 3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("birchSlab")->setAllFacesTexture("planks_birch", 5 | Tile::TEXTURE_ALT_FLAG);
 
 	birchSlabHalf = (new Tile(160, 5 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init();
 	birchSlabHalf->setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);

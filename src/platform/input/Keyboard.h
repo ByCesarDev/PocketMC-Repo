@@ -55,6 +55,17 @@ public:
 	static const int KEY_Y = 89;
 	static const int KEY_Z = 90;
 
+	static const int KEY_0 = 48;
+	static const int KEY_1 = 49;
+	static const int KEY_2 = 50;
+	static const int KEY_3 = 51;
+	static const int KEY_4 = 52;
+	static const int KEY_5 = 53;
+	static const int KEY_6 = 54;
+	static const int KEY_7 = 55;
+	static const int KEY_8 = 56;
+	static const int KEY_9 = 57;
+
 	static const int KEY_BACKSPACE = 8;
 	static const int KEY_TAB = 9;
 	static const int KEY_RETURN = 13;

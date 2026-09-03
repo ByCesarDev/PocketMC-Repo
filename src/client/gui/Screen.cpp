@@ -135,11 +135,19 @@ void Screen::updateEvents()
 void Screen::mouseEvent()
 {
 	const MouseAction& e = Mouse::getEvent();
+	int xm = e.x * width / minecraft->width;
+	int ym = e.y * height / minecraft->height - 1;
+
 	// forward wheel events to subclasses
 	if (e.action == MouseAction::ACTION_WHEEL) {
-		int xm = e.x * width / minecraft->width;
-		int ym = e.y * height / minecraft->height - 1;
 		mouseWheel(e.dx, e.dy, xm, ym);
+		return;
+	}
+
+	if (e.action == MouseAction::ACTION_MOVE) {
+		int dx = e.dx * width / minecraft->width;
+		int dy = e.dy * height / minecraft->height;
+		mouseMoved(xm, ym, dx, dy);
 		return;
 	}
 
@@ -147,12 +155,8 @@ void Screen::mouseEvent()
 		return;
 
 	if (Mouse::getEventButtonState()) {
-		int xm = e.x * width / minecraft->width;
-		int ym = e.y * height / minecraft->height - 1;
 		mouseClicked(xm, ym, Mouse::getEventButton());
 	} else {
-		int xm = e.x * width / minecraft->width;
-		int ym = e.y * height / minecraft->height - 1;
 		mouseReleased(xm, ym, Mouse::getEventButton());
 	}
 }

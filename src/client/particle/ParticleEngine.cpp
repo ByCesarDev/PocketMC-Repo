@@ -49,6 +49,7 @@ void ParticleEngine::render(Entity* player, float a) {
     Particle::yOff = (player->yOld+(player->y-player->yOld)*a);
     Particle::zOff = (player->zOld+(player->z-player->zOld)*a);
     for (int tt = 0; tt < 5; tt++) {
+        if (tt == ENTITY_PARTICLE_TEXTURE) continue;
         if (particles[tt].size() == 0) continue;
 
         if (tt == MISC_TEXTURE)
@@ -79,6 +80,8 @@ void ParticleEngine::renderLit(Entity* player, float a) {
 	const int size = pl.size();
 	if (size == 0) return;
 
+	textures->loadAndBindTexture("particles.png");
+
 	float xa = Mth::cos(player->yRot * Mth::DEGRAD);
 	float za = Mth::sin(player->yRot * Mth::DEGRAD);
 
@@ -88,10 +91,12 @@ void ParticleEngine::renderLit(Entity* player, float a) {
 	float ya = Mth::cos(player->xRot * Mth::DEGRAD);
 	
     Tesselator& t = Tesselator::instance;
+    t.begin();
     for (int i = 0; i < size; i++) {
         Particle* p = pl[i];
 		p->render(t, a, xa, ya, za, xa2, za2);
     }
+    t.draw();
 }
 
 void ParticleEngine::setLevel(Level* level) {

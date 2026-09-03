@@ -29,6 +29,9 @@
 #include "../../../world/level/tile/Tile.h"
 #include "../../../util/Mth.h"
 #include "../../../SharedConstants.h"
+#include "../../../platform/input/Keyboard.h"
+#include "../../../platform/input/Mouse.h"
+#include "../../../platform/time.h"
 
 // Category 0=Construccion(1), 1=Equipamiento(2), 2=Items(4), 3=Naturaleza(8), 4=Todos(-1)
 static const char* categoryIconPaths[5] = {
@@ -99,6 +102,14 @@ UnifiedInventoryScreen::UnifiedInventoryScreen() :
     selectedCategoryButton(NULL),
     craftResultItem(NULL),
     carriedItem(NULL),
+    lastMouseX(0),
+    lastMouseY(0),
+    dragMode(DRAG_NONE),
+    isDragging(false),
+    lastClickTimeMs(0),
+    lastClickLoc(SLOT_LOC_NONE),
+    lastClickIndex(-1),
+    lastClickButton(-1),
     guiLeftPanelBg(NULL),
     guiRightPanelBg(NULL),
     guiSlot(NULL),
@@ -396,6 +407,8 @@ void UnifiedInventoryScreen::updateItems() {
 }
 
 void UnifiedInventoryScreen::render(int xm, int ym, float a) {
+    lastMouseX = xm;
+    lastMouseY = ym;
     Tesselator& t = Tesselator::instance;
 
     // 1. Dark semi-transparent background overlay over the game level
@@ -947,6 +960,607 @@ bool UnifiedInventoryScreen::getSlotAt(int x, int y, SlotLocation& outLoc, int& 
     return false;
 }
 
+ItemInstance* UnifiedInventoryScreen::getSlotItem(SlotLocation loc, int index) {
+    if (!player) return NULL;
+    switch (loc) {
+        case SLOT_LOC_HOTBAR:
+            if (player->inventory && index >= 0 && index < Inventory::MAX_SELECTION_SIZE)
+                return player->inventory->getItem(index);
+            break;
+        case SLOT_LOC_INVENTORY:
+            if (player->inventory && index >= 0) {
+                int realSlot = Inventory::MAX_SELECTION_SIZE + index;
+                if (realSlot < player->inventory->getContainerSize())
+                    return player->inventory->getItem(realSlot);
+            }
+            break;
+        case SLOT_LOC_ARMOR:
+            if (index >= 0 && index < NUM_ARMOR)
+                return player->getArmor(index);
+            break;
+        case SLOT_LOC_CRAFT_INPUT:
+            if (index >= 0 && index < 4)
+                return craftInputSlots[index];
+            break;
+        case SLOT_LOC_CRAFT_RESULT:
+            return craftResultItem;
+        case SLOT_LOC_CATALOG:
+            if (index >= 0 && index < static_cast<int>(catalogItems.size()))
+                return catalogItems[index];
+            break;
+        default:
+            break;
+    }
+    return NULL;
+}
+
+void UnifiedInventoryScreen::setSlotItem(SlotLocation loc, int index, ItemInstance* item) {
+    if (!player) return;
+    switch (loc) {
+        case SLOT_LOC_HOTBAR:
+            if (player->inventory && index >= 0 && index < Inventory::MAX_SELECTION_SIZE)
+                player->inventory->setItem(index, item);
+            break;
+        case SLOT_LOC_INVENTORY:
+            if (player->inventory && index >= 0) {
+                int realSlot = Inventory::MAX_SELECTION_SIZE + index;
+                if (realSlot < player->inventory->getContainerSize())
+                    player->inventory->setItem(realSlot, item);
+            }
+            break;
+        case SLOT_LOC_ARMOR:
+            if (index >= 0 && index < NUM_ARMOR)
+                player->setArmor(index, item);
+            break;
+        case SLOT_LOC_CRAFT_INPUT:
+            if (index >= 0 && index < 4) {
+                craftInputSlots[index] = item;
+                updateCraftingResult();
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+void UnifiedInventoryScreen::clearSlot(SlotLocation loc, int index) {
+    if (!player) return;
+    switch (loc) {
+        case SLOT_LOC_HOTBAR:
+            if (player->inventory && index >= 0 && index < Inventory::MAX_SELECTION_SIZE)
+                player->inventory->clearSlot(index);
+            break;
+        case SLOT_LOC_INVENTORY:
+            if (player->inventory && index >= 0) {
+                int realSlot = Inventory::MAX_SELECTION_SIZE + index;
+                if (realSlot < player->inventory->getContainerSize())
+                    player->inventory->clearSlot(realSlot);
+            }
+            break;
+        case SLOT_LOC_ARMOR:
+            if (index >= 0 && index < NUM_ARMOR)
+                player->setArmor(index, NULL);
+            break;
+        case SLOT_LOC_CRAFT_INPUT:
+            if (index >= 0 && index < 4) {
+                delete craftInputSlots[index];
+                craftInputSlots[index] = NULL;
+                updateCraftingResult();
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+int UnifiedInventoryScreen::getSlotCapacity(SlotLocation loc, int index, const ItemInstance* item) {
+    if (!item || item->isNull()) return 0;
+    if (!canPlaceInSlot(loc, index, item)) return 0;
+    ItemInstance* existing = getSlotItem(loc, index);
+    int maxStack = std::min(item->getMaxStackSize(), player ? player->inventory->getMaxStackSize() : 64);
+    if (!existing || existing->isNull()) {
+        return maxStack;
+    }
+    if (ItemInstance::isStackable(existing, item)) {
+        return std::max(0, maxStack - existing->count);
+    }
+    return 0;
+}
+
+bool UnifiedInventoryScreen::canPlaceInSlot(SlotLocation loc, int index, const ItemInstance* item) {
+    if (loc == SLOT_LOC_CATALOG || loc == SLOT_LOC_CRAFT_RESULT || loc == SLOT_LOC_NONE)
+        return false;
+    if (loc == SLOT_LOC_ARMOR) {
+        if (!item || item->isNull()) return false;
+        if (!ItemInstance::isArmorItem(item)) return false;
+        ArmorItem* armor = static_cast<ArmorItem*>(item->getItem());
+        return armor && armor->slot == index;
+    }
+    return true;
+}
+
+void UnifiedInventoryScreen::mouseMoved(int x, int y, int dx, int dy) {
+    super::mouseMoved(x, y, dx, dy);
+    lastMouseX = x;
+    lastMouseY = y;
+
+    if (isDragging && dragMode != DRAG_NONE) {
+        SlotLocation loc;
+        int index;
+        if (getSlotAt(x, y, loc, index)) {
+            if (canPlaceInSlot(loc, index, carriedItem) && !containsDragSlot(loc, index)) {
+                dragSlots.push_back({loc, index});
+            }
+        }
+    }
+}
+
+void UnifiedInventoryScreen::handleLeftClick(SlotLocation loc, int index) {
+    if (!player || !player->inventory) return;
+
+    if (loc == SLOT_LOC_CATALOG) {
+        if (!isCreative) return;
+        if (carriedItem != NULL) {
+            delete carriedItem;
+            carriedItem = NULL;
+        } else if (index >= 0 && index < static_cast<int>(catalogItems.size())) {
+            const ItemInstance* catItem = catalogItems[index];
+            if (catItem) {
+                int stackCount = catItem->getMaxStackSize();
+                if (stackCount <= 0) stackCount = 64;
+                carriedItem = new ItemInstance(catItem->id, stackCount, catItem->getAuxValue());
+            }
+        }
+        return;
+    }
+
+    if (loc == SLOT_LOC_CRAFT_RESULT) {
+        if (craftResultItem && !craftResultItem->isNull()) {
+            if (carriedItem == NULL) {
+                carriedItem = new ItemInstance(*craftResultItem);
+                for (int i = 0; i < 4; ++i) {
+                    if (craftInputSlots[i] && !craftInputSlots[i]->isNull()) {
+                        craftInputSlots[i]->count--;
+                        if (craftInputSlots[i]->count <= 0) {
+                            delete craftInputSlots[i];
+                            craftInputSlots[i] = NULL;
+                        }
+                    }
+                }
+                updateCraftingResult();
+            } else if (ItemInstance::isStackable(carriedItem, craftResultItem)) {
+                int maxStack = std::min(craftResultItem->getMaxStackSize(), player->inventory->getMaxStackSize());
+                if (carriedItem->count + craftResultItem->count <= maxStack) {
+                    carriedItem->count += craftResultItem->count;
+                    for (int i = 0; i < 4; ++i) {
+                        if (craftInputSlots[i] && !craftInputSlots[i]->isNull()) {
+                            craftInputSlots[i]->count--;
+                            if (craftInputSlots[i]->count <= 0) {
+                                delete craftInputSlots[i];
+                                craftInputSlots[i] = NULL;
+                            }
+                        }
+                    }
+                    updateCraftingResult();
+                }
+            }
+        }
+        return;
+    }
+
+    if (loc == SLOT_LOC_ARMOR) {
+        ItemInstance* armorPiece = player->getArmor(index);
+        if (carriedItem == NULL) {
+            if (armorPiece && !armorPiece->isNull()) {
+                carriedItem = new ItemInstance(*armorPiece);
+                player->setArmor(index, NULL);
+            }
+        } else if (canPlaceInSlot(loc, index, carriedItem)) {
+            ItemInstance* oldArmor = player->getArmor(index);
+            player->setArmor(index, carriedItem);
+            carriedItem = (oldArmor && !oldArmor->isNull()) ? new ItemInstance(*oldArmor) : NULL;
+        }
+        return;
+    }
+
+    ItemInstance* target = getSlotItem(loc, index);
+
+    // Case 1: Cursor empty -> take all
+    if (carriedItem == NULL) {
+        if (target && !target->isNull()) {
+            carriedItem = new ItemInstance(*target);
+            clearSlot(loc, index);
+        }
+        return;
+    }
+
+    // Case 2: Cursor occupied -> slot empty
+    if (target == NULL || target->isNull()) {
+        setSlotItem(loc, index, carriedItem);
+        carriedItem = NULL;
+        return;
+    }
+
+    // Case 3: Cursor & Slot compatible -> merge
+    if (ItemInstance::isStackable(target, carriedItem)) {
+        int maxStack = std::min(target->getMaxStackSize(), player->inventory->getMaxStackSize());
+        int space = maxStack - target->count;
+        if (space > 0) {
+            int toAdd = std::min(space, carriedItem->count);
+            target->count += toAdd;
+            carriedItem->count -= toAdd;
+            if (carriedItem->count <= 0) {
+                delete carriedItem;
+                carriedItem = NULL;
+            }
+        }
+        return;
+    }
+
+    // Case 4: Incompatible -> swap
+    ItemInstance* temp = new ItemInstance(*target);
+    setSlotItem(loc, index, carriedItem);
+    carriedItem = temp;
+}
+
+void UnifiedInventoryScreen::handleRightClick(SlotLocation loc, int index) {
+    if (!player || !player->inventory) return;
+
+    if (loc == SLOT_LOC_CATALOG) {
+        if (!isCreative) return;
+        if (carriedItem == NULL && index >= 0 && index < static_cast<int>(catalogItems.size())) {
+            const ItemInstance* catItem = catalogItems[index];
+            if (catItem) {
+                carriedItem = new ItemInstance(catItem->id, 1, catItem->getAuxValue());
+            }
+        }
+        return;
+    }
+
+    if (loc == SLOT_LOC_CRAFT_RESULT || loc == SLOT_LOC_ARMOR) {
+        handleLeftClick(loc, index);
+        return;
+    }
+
+    ItemInstance* target = getSlotItem(loc, index);
+
+    // Case 1: Cursor empty -> take half
+    if (carriedItem == NULL) {
+        if (!target || target->isNull()) return;
+        int take = (target->count + 1) / 2;
+        carriedItem = new ItemInstance(*target);
+        carriedItem->count = take;
+        target->count -= take;
+        if (target->count <= 0) {
+            clearSlot(loc, index);
+        }
+        return;
+    }
+
+    // Case 2: Cursor occupied -> slot empty (place 1)
+    if (target == NULL || target->isNull()) {
+        ItemInstance* one = new ItemInstance(*carriedItem);
+        one->count = 1;
+        setSlotItem(loc, index, one);
+        carriedItem->count--;
+        if (carriedItem->count <= 0) {
+            delete carriedItem;
+            carriedItem = NULL;
+        }
+        return;
+    }
+
+    // Case 3: Cursor occupied -> compatible slot (place 1)
+    if (ItemInstance::isStackable(target, carriedItem)) {
+        int maxStack = std::min(target->getMaxStackSize(), player->inventory->getMaxStackSize());
+        if (target->count < maxStack) {
+            target->count++;
+            carriedItem->count--;
+            if (carriedItem->count <= 0) {
+                delete carriedItem;
+                carriedItem = NULL;
+            }
+        }
+    }
+}
+
+bool UnifiedInventoryScreen::moveStackToRange(ItemInstance*& source, int begin, int end) {
+    if (!player || !player->inventory || !source || source->isNull() || source->count <= 0)
+        return false;
+
+    bool changed = false;
+
+    // Pass 1: merge into existing compatible stacks
+    for (int i = begin; i < end && source && source->count > 0; ++i) {
+        ItemInstance* dst = player->inventory->getItem(i);
+        if (!dst || dst->isNull()) continue;
+        if (!ItemInstance::isStackable(dst, source)) continue;
+
+        int maxStack = std::min(dst->getMaxStackSize(), player->inventory->getMaxStackSize());
+        int space = maxStack - dst->count;
+        if (space <= 0) continue;
+
+        int toAdd = std::min(space, source->count);
+        dst->count += toAdd;
+        source->count -= toAdd;
+        changed = true;
+    }
+
+    // Pass 2: fill empty slots
+    for (int i = begin; i < end && source && source->count > 0; ++i) {
+        ItemInstance* dst = player->inventory->getItem(i);
+        if (dst && !dst->isNull()) continue;
+
+        int maxStack = std::min(source->getMaxStackSize(), player->inventory->getMaxStackSize());
+        int toMove = std::min(source->count, maxStack);
+
+        ItemInstance* moved = new ItemInstance(*source);
+        moved->count = toMove;
+        player->inventory->setItem(i, moved);
+        source->count -= toMove;
+        changed = true;
+    }
+
+    return changed;
+}
+
+void UnifiedInventoryScreen::quickMove(SlotLocation loc, int index) {
+    if (!player || !player->inventory) return;
+
+    if (loc == SLOT_LOC_HOTBAR) {
+        ItemInstance* item = player->inventory->getItem(index);
+        if (!item || item->isNull()) return;
+
+        moveStackToRange(item, Inventory::MAX_SELECTION_SIZE, player->inventory->getContainerSize());
+        if (item->count <= 0) {
+            player->inventory->clearSlot(index);
+        }
+    } else if (loc == SLOT_LOC_INVENTORY) {
+        int realSlot = Inventory::MAX_SELECTION_SIZE + index;
+        ItemInstance* item = player->inventory->getItem(realSlot);
+        if (!item || item->isNull()) return;
+
+        moveStackToRange(item, 0, Inventory::MAX_SELECTION_SIZE);
+        if (item->count <= 0) {
+            player->inventory->clearSlot(realSlot);
+        }
+    } else if (loc == SLOT_LOC_CRAFT_INPUT) {
+        ItemInstance* item = craftInputSlots[index];
+        if (!item || item->isNull()) return;
+
+        moveStackToRange(item, Inventory::MAX_SELECTION_SIZE, player->inventory->getContainerSize());
+        if (item->count > 0) {
+            moveStackToRange(item, 0, Inventory::MAX_SELECTION_SIZE);
+        }
+        if (item->count <= 0) {
+            delete craftInputSlots[index];
+            craftInputSlots[index] = NULL;
+            updateCraftingResult();
+        }
+    } else if (loc == SLOT_LOC_ARMOR) {
+        ItemInstance* item = player->getArmor(index);
+        if (!item || item->isNull()) return;
+
+        ItemInstance* copy = new ItemInstance(*item);
+        moveStackToRange(copy, Inventory::MAX_SELECTION_SIZE, player->inventory->getContainerSize());
+        if (copy->count > 0) {
+            moveStackToRange(copy, 0, Inventory::MAX_SELECTION_SIZE);
+        }
+        if (copy->count <= 0) {
+            player->setArmor(index, NULL);
+            delete copy;
+        } else {
+            player->setArmor(index, copy);
+        }
+    } else if (loc == SLOT_LOC_CATALOG && isCreative) {
+        if (index >= 0 && index < static_cast<int>(catalogItems.size())) {
+            const ItemInstance* catItem = catalogItems[index];
+            if (catItem) {
+                ItemInstance* copy = new ItemInstance(catItem->id, catItem->getMaxStackSize(), catItem->getAuxValue());
+                moveStackToRange(copy, 0, Inventory::MAX_SELECTION_SIZE);
+                if (copy->count > 0) {
+                    moveStackToRange(copy, Inventory::MAX_SELECTION_SIZE, player->inventory->getContainerSize());
+                }
+                delete copy;
+            }
+        }
+    }
+}
+
+void UnifiedInventoryScreen::swapInventorySlots(int slotA, int slotB) {
+    if (!player || !player->inventory || slotA == slotB) return;
+
+    ItemInstance* itemA = player->inventory->getItem(slotA);
+    ItemInstance* itemB = player->inventory->getItem(slotB);
+
+    ItemInstance* copyA = (itemA && !itemA->isNull()) ? new ItemInstance(*itemA) : NULL;
+    ItemInstance* copyB = (itemB && !itemB->isNull()) ? new ItemInstance(*itemB) : NULL;
+
+    player->inventory->clearSlot(slotA);
+    player->inventory->clearSlot(slotB);
+
+    if (copyB) player->inventory->setItem(slotA, copyB);
+    if (copyA) player->inventory->setItem(slotB, copyA);
+}
+
+void UnifiedInventoryScreen::dropFromSlot(SlotLocation loc, int index, bool entireStack) {
+    if (!player || !player->inventory) return;
+
+    ItemInstance* target = getSlotItem(loc, index);
+    if (!target || target->isNull() || target->count <= 0) return;
+
+    int countToDrop = entireStack ? target->count : 1;
+    ItemInstance* toDrop = new ItemInstance(*target);
+    toDrop->count = countToDrop;
+
+    target->count -= countToDrop;
+    if (target->count <= 0) {
+        clearSlot(loc, index);
+    }
+
+    player->drop(toDrop, false);
+    if (player->abilities.instabuild) {
+        delete toDrop;
+    }
+}
+
+void UnifiedInventoryScreen::dropCarried(bool entireStack) {
+    if (!player || !carriedItem || carriedItem->isNull() || carriedItem->count <= 0) return;
+
+    int countToDrop = entireStack ? carriedItem->count : 1;
+    ItemInstance* toDrop = new ItemInstance(*carriedItem);
+    toDrop->count = countToDrop;
+
+    carriedItem->count -= countToDrop;
+    if (carriedItem->count <= 0) {
+        delete carriedItem;
+        carriedItem = NULL;
+    }
+
+    player->drop(toDrop, false);
+    if (player->abilities.instabuild) {
+        delete toDrop;
+    }
+}
+
+bool UnifiedInventoryScreen::isOutsideInventoryPanels(int x, int y) {
+    bool inRight = (x >= rightPanelRect.x && x < rightPanelRect.x + rightPanelRect.w &&
+                    y >= rightPanelRect.y && y < rightPanelRect.y + rightPanelRect.h);
+    bool inLeft = (isDualPane && x >= leftPanelRect.x && x < leftPanelRect.x + leftPanelRect.w &&
+                   y >= leftPanelRect.y && y < leftPanelRect.y + leftPanelRect.h);
+    bool inClose = (x >= btnClose.x && x < btnClose.x + btnClose.width &&
+                    y >= btnClose.y && y < btnClose.y + btnClose.height);
+    return !inRight && !inLeft && !inClose;
+}
+
+void UnifiedInventoryScreen::creativeClone(SlotLocation loc, int index) {
+    if (!isCreative || !player) return;
+    ItemInstance* source = getSlotItem(loc, index);
+    if (!source || source->isNull()) return;
+
+    delete carriedItem;
+    carriedItem = new ItemInstance(source->id, source->getMaxStackSize(), source->getAuxValue());
+}
+
+void UnifiedInventoryScreen::collectMatching(SlotLocation loc, int index) {
+    if (!player || !player->inventory || !carriedItem || carriedItem->isNull()) return;
+
+    int maxStack = std::min(carriedItem->getMaxStackSize(), player->inventory->getMaxStackSize());
+    if (carriedItem->count >= maxStack) return;
+
+    // 1. Scan Main Inventory (9..35)
+    for (int i = Inventory::MAX_SELECTION_SIZE; i < player->inventory->getContainerSize() && carriedItem->count < maxStack; ++i) {
+        ItemInstance* item = player->inventory->getItem(i);
+        if (!item || item->isNull()) continue;
+        if (!ItemInstance::isStackable(item, carriedItem)) continue;
+
+        int needed = maxStack - carriedItem->count;
+        int take = std::min(needed, item->count);
+        carriedItem->count += take;
+        item->count -= take;
+        if (item->count <= 0) {
+            player->inventory->clearSlot(i);
+        }
+    }
+
+    // 2. Scan Hotbar (0..8)
+    for (int i = 0; i < Inventory::MAX_SELECTION_SIZE && carriedItem->count < maxStack; ++i) {
+        ItemInstance* item = player->inventory->getItem(i);
+        if (!item || item->isNull()) continue;
+        if (!ItemInstance::isStackable(item, carriedItem)) continue;
+
+        int needed = maxStack - carriedItem->count;
+        int take = std::min(needed, item->count);
+        carriedItem->count += take;
+        item->count -= take;
+        if (item->count <= 0) {
+            player->inventory->clearSlot(i);
+        }
+    }
+}
+
+bool UnifiedInventoryScreen::containsDragSlot(SlotLocation loc, int index) const {
+    for (size_t i = 0; i < dragSlots.size(); ++i) {
+        if (dragSlots[i].location == loc && dragSlots[i].index == index)
+            return true;
+    }
+    return false;
+}
+
+void UnifiedInventoryScreen::executeDragDistribution() {
+    if (dragSlots.empty() || !player || !player->inventory) return;
+
+    if (dragMode == DRAG_CREATIVE_MIDDLE && isCreative && carriedItem && !carriedItem->isNull()) {
+        for (size_t i = 0; i < dragSlots.size(); ++i) {
+            if (canPlaceInSlot(dragSlots[i], carriedItem)) {
+                ItemInstance* clone = new ItemInstance(carriedItem->id, carriedItem->getMaxStackSize(), carriedItem->getAuxValue());
+                setSlotItem(dragSlots[i], clone);
+            }
+        }
+    } else if (dragMode == DRAG_RIGHT && carriedItem && carriedItem->count > 0) {
+        for (size_t i = 0; i < dragSlots.size() && carriedItem->count > 0; ++i) {
+            ItemInstance* target = getSlotItem(dragSlots[i]);
+            if (!target || target->isNull()) {
+                ItemInstance* one = new ItemInstance(*carriedItem);
+                one->count = 1;
+                setSlotItem(dragSlots[i], one);
+                carriedItem->count--;
+            } else if (ItemInstance::isStackable(target, carriedItem)) {
+                int maxStack = std::min(target->getMaxStackSize(), player->inventory->getMaxStackSize());
+                if (target->count < maxStack) {
+                    target->count++;
+                    carriedItem->count--;
+                }
+            }
+        }
+        if (carriedItem && carriedItem->count <= 0) {
+            delete carriedItem;
+            carriedItem = NULL;
+        }
+    } else if (dragMode == DRAG_LEFT && carriedItem && carriedItem->count > 0) {
+        int remaining = carriedItem->count;
+        while (remaining > 0) {
+            int validCount = 0;
+            for (size_t i = 0; i < dragSlots.size(); ++i) {
+                if (getSlotCapacity(dragSlots[i], carriedItem) > 0)
+                    validCount++;
+            }
+            if (validCount == 0) break;
+
+            int amount = std::max(1, remaining / validCount);
+            bool changed = false;
+
+            for (size_t i = 0; i < dragSlots.size() && remaining > 0; ++i) {
+                int cap = getSlotCapacity(dragSlots[i], carriedItem);
+                if (cap <= 0) continue;
+
+                int toAdd = std::min(amount, cap);
+                toAdd = std::min(toAdd, remaining);
+
+                ItemInstance* target = getSlotItem(dragSlots[i]);
+                if (!target || target->isNull()) {
+                    ItemInstance* placed = new ItemInstance(*carriedItem);
+                    placed->count = toAdd;
+                    setSlotItem(dragSlots[i], placed);
+                } else {
+                    target->count += toAdd;
+                }
+
+                remaining -= toAdd;
+                changed = true;
+            }
+
+            if (!changed) break;
+        }
+
+        carriedItem->count = remaining;
+        if (carriedItem->count <= 0) {
+            delete carriedItem;
+            carriedItem = NULL;
+        }
+    }
+}
+
 void UnifiedInventoryScreen::mouseClicked(int x, int y, int buttonNum) {
     super::mouseClicked(x, y, buttonNum);
 
@@ -992,212 +1606,81 @@ void UnifiedInventoryScreen::mouseClicked(int x, int y, int buttonNum) {
         }
     }
 
-    SlotLocation loc;
-    int index;
-    if (getSlotAt(x, y, loc, index)) {
-        handleSlotInteraction(loc, index, buttonNum);
-    } else if (isCreative && isDualPane && carriedItem != NULL) {
-        // Clicking anywhere in the creative left panel area with a carried item deletes it (Bedrock behavior)
-        if (x >= leftPanelRect.x && x < leftPanelRect.x + leftPanelRect.w &&
-            y >= leftPanelRect.y && y < leftPanelRect.y + leftPanelRect.h) {
+    SlotLocation loc = SLOT_LOC_NONE;
+    int index = -1;
+    bool onSlot = getSlotAt(x, y, loc, index);
+
+    bool shiftDown = Keyboard::isKeyDown(Keyboard::KEY_LSHIFT);
+
+    if (buttonNum == MouseAction::ACTION_MIDDLE && isCreative && onSlot) {
+        creativeClone(loc, index);
+        dragMode = DRAG_CREATIVE_MIDDLE;
+        isDragging = true;
+        dragSlots.clear();
+        dragSlots.push_back({loc, index});
+        if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+        return;
+    }
+
+    if (buttonNum == MouseAction::ACTION_RIGHT) {
+        if (onSlot) {
+            handleRightClick(loc, index);
+            dragMode = DRAG_RIGHT;
+            isDragging = true;
+            dragSlots.clear();
+            dragSlots.push_back({loc, index});
+            if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+        } else if (isOutsideInventoryPanels(x, y)) {
+            dropCarried(false);
+            if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.pop", 1.0f, 1.0f);
+        }
+        return;
+    }
+
+    if (buttonNum == MouseAction::ACTION_LEFT) {
+        if (onSlot) {
+            if (shiftDown) {
+                quickMove(loc, index);
+                if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+            } else {
+                uint64_t nowMs = static_cast<uint64_t>(getTimeMs());
+                bool isDoubleClick = (nowMs - lastClickTimeMs < 300) && (loc == lastClickLoc) && (index == lastClickIndex) && (buttonNum == lastClickButton);
+
+                if (isDoubleClick && carriedItem != NULL) {
+                    collectMatching(loc, index);
+                } else {
+                    handleLeftClick(loc, index);
+                    dragMode = DRAG_LEFT;
+                    isDragging = true;
+                    dragSlots.clear();
+                    dragSlots.push_back({loc, index});
+                }
+
+                lastClickTimeMs = nowMs;
+                lastClickLoc = loc;
+                lastClickIndex = index;
+                lastClickButton = buttonNum;
+                if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+            }
+        } else if (isCreative && isDualPane && carriedItem != NULL &&
+                   x >= leftPanelRect.x && x < leftPanelRect.x + leftPanelRect.w &&
+                   y >= leftPanelRect.y && y < leftPanelRect.y + leftPanelRect.h) {
+            // Delete zone on creative catalog pane
             delete carriedItem;
             carriedItem = NULL;
-            if (minecraft->soundEngine) {
-                minecraft->soundEngine->playUI("random.pop", 1.0f, 1.0f);
-            }
+            if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.pop", 1.0f, 1.0f);
+        } else if (isOutsideInventoryPanels(x, y)) {
+            dropCarried(true);
+            if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.pop", 1.0f, 1.0f);
         }
     }
 }
 
 void UnifiedInventoryScreen::handleSlotInteraction(SlotLocation loc, int index, int buttonNum) {
-    if (!player || !player->inventory) return;
-
-    bool playedSound = false;
-
-    switch (loc) {
-        case SLOT_LOC_CATALOG: {
-            if (!isCreative) break;
-            if (carriedItem != NULL) {
-                // In Bedrock Creative: clicking catalog with item on cursor deletes/destroys it
-                delete carriedItem;
-                carriedItem = NULL;
-                playedSound = true;
-            } else if (index >= 0 && index < static_cast<int>(catalogItems.size())) {
-                const ItemInstance* catItem = catalogItems[index];
-                if (catItem) {
-                    int stackCount = catItem->getMaxStackSize();
-                    if (stackCount <= 0) stackCount = 64;
-                    carriedItem = new ItemInstance(catItem->id, stackCount, catItem->getAuxValue());
-                    playedSound = true;
-                }
-            }
-            break;
-        }
-
-        case SLOT_LOC_HOTBAR: {
-            ItemInstance* hotItem = player->inventory->getItem(index);
-
-            if (carriedItem == NULL) {
-                // Pick up item from hotbar
-                if (hotItem && !hotItem->isNull()) {
-                    carriedItem = new ItemInstance(*hotItem);
-                    player->inventory->clearSlot(index);
-                    playedSound = true;
-                }
-            } else {
-                // Place or Swap into hotbar
-                if (hotItem == NULL || hotItem->isNull()) {
-                    player->inventory->setItem(index, carriedItem);
-                    carriedItem = NULL;
-                    playedSound = true;
-                } else if (ItemInstance::isStackable(hotItem, carriedItem)) {
-                    // Stack
-                    int space = hotItem->getMaxStackSize() - hotItem->count;
-                    if (space > 0) {
-                        int toAdd = std::min(space, carriedItem->count);
-                        hotItem->count += toAdd;
-                        carriedItem->count -= toAdd;
-                        if (carriedItem->count <= 0) {
-                            delete carriedItem;
-                            carriedItem = NULL;
-                        }
-                        playedSound = true;
-                    }
-                } else {
-                    // Swap
-                    ItemInstance* temp = new ItemInstance(*hotItem);
-                    player->inventory->setItem(index, carriedItem);
-                    carriedItem = temp;
-                    playedSound = true;
-                }
-            }
-            break;
-        }
-
-        case SLOT_LOC_INVENTORY: {
-            int realSlot = Inventory::MAX_SELECTION_SIZE + index;
-            ItemInstance* invItem = player->inventory->getItem(realSlot);
-
-            if (carriedItem == NULL) {
-                if (invItem && !invItem->isNull()) {
-                    carriedItem = new ItemInstance(*invItem);
-                    player->inventory->clearSlot(realSlot);
-                    playedSound = true;
-                }
-            } else {
-                if (invItem == NULL || invItem->isNull()) {
-                    player->inventory->setItem(realSlot, carriedItem);
-                    carriedItem = NULL;
-                    playedSound = true;
-                } else if (ItemInstance::isStackable(invItem, carriedItem)) {
-                    int space = invItem->getMaxStackSize() - invItem->count;
-                    if (space > 0) {
-                        int toAdd = std::min(space, carriedItem->count);
-                        invItem->count += toAdd;
-                        carriedItem->count -= toAdd;
-                        if (carriedItem->count <= 0) {
-                            delete carriedItem;
-                            carriedItem = NULL;
-                        }
-                        playedSound = true;
-                    }
-                } else {
-                    // Swap
-                    ItemInstance* temp = new ItemInstance(*invItem);
-                    player->inventory->setItem(realSlot, carriedItem);
-                    carriedItem = temp;
-                    playedSound = true;
-                }
-            }
-            break;
-        }
-
-        case SLOT_LOC_ARMOR: {
-            ItemInstance* armorPiece = player->getArmor(index);
-            if (carriedItem == NULL) {
-                if (armorPiece && !armorPiece->isNull()) {
-                    carriedItem = new ItemInstance(*armorPiece);
-                    player->setArmor(index, NULL);
-                    playedSound = true;
-                }
-            } else {
-                if (ItemInstance::isArmorItem(carriedItem)) {
-                    ArmorItem* armor = static_cast<ArmorItem*>(carriedItem->getItem());
-                    if (armor->slot == index) {
-                        ItemInstance* oldArmor = player->getArmor(index);
-                        player->setArmor(index, carriedItem);
-                        carriedItem = (oldArmor && !oldArmor->isNull()) ? new ItemInstance(*oldArmor) : NULL;
-                        playedSound = true;
-                    }
-                }
-            }
-            break;
-        }
-
-        case SLOT_LOC_CRAFT_INPUT: {
-            ItemInstance* slotItem = craftInputSlots[index];
-            if (carriedItem == NULL) {
-                if (slotItem && !slotItem->isNull()) {
-                    carriedItem = slotItem;
-                    craftInputSlots[index] = NULL;
-                    playedSound = true;
-                }
-            } else {
-                if (slotItem == NULL || slotItem->isNull()) {
-                    craftInputSlots[index] = carriedItem;
-                    carriedItem = NULL;
-                    playedSound = true;
-                } else if (ItemInstance::isStackable(slotItem, carriedItem)) {
-                    int space = slotItem->getMaxStackSize() - slotItem->count;
-                    if (space > 0) {
-                        int toAdd = std::min(space, carriedItem->count);
-                        slotItem->count += toAdd;
-                        carriedItem->count -= toAdd;
-                        if (carriedItem->count <= 0) {
-                            delete carriedItem;
-                            carriedItem = NULL;
-                        }
-                        playedSound = true;
-                    }
-                } else {
-                    // Swap
-                    ItemInstance* temp = slotItem;
-                    craftInputSlots[index] = carriedItem;
-                    carriedItem = temp;
-                    playedSound = true;
-                }
-            }
-            updateCraftingResult();
-            break;
-        }
-
-        case SLOT_LOC_CRAFT_RESULT: {
-            if (craftResultItem && !craftResultItem->isNull()) {
-                if (carriedItem == NULL) {
-                    carriedItem = new ItemInstance(*craftResultItem);
-                    // Consume 1 ingredient from each craftInputSlot
-                    for (int i = 0; i < 4; ++i) {
-                        if (craftInputSlots[i] && !craftInputSlots[i]->isNull()) {
-                            craftInputSlots[i]->count--;
-                            if (craftInputSlots[i]->count <= 0) {
-                                delete craftInputSlots[i];
-                                craftInputSlots[i] = NULL;
-                            }
-                        }
-                    }
-                    updateCraftingResult();
-                    playedSound = true;
-                }
-            }
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    if (playedSound && minecraft->soundEngine) {
-        minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+    if (buttonNum == MouseAction::ACTION_RIGHT) {
+        handleRightClick(loc, index);
+    } else {
+        handleLeftClick(loc, index);
     }
 }
 
@@ -1205,7 +1688,6 @@ void UnifiedInventoryScreen::updateCraftingResult() {
     delete craftResultItem;
     craftResultItem = NULL;
 
-    // Count non-empty slots
     int count = 0;
     int firstSlot = -1;
     for (int i = 0; i < 4; ++i) {
@@ -1217,36 +1699,27 @@ void UnifiedInventoryScreen::updateCraftingResult() {
 
     if (count == 1 && firstSlot != -1) {
         ItemInstance* item = craftInputSlots[firstSlot];
-        // 1 Wood Log -> 4 Wood Planks
         if (item->id == Tile::treeTrunk->id) {
             craftResultItem = new ItemInstance(Tile::wood, 4, item->getAuxValue());
-        }
-        // 1 Wool -> 4 String
-        else if (item->id == Tile::cloth->id) {
+        } else if (item->id == Tile::cloth->id) {
             craftResultItem = new ItemInstance(Item::string, 4);
         }
     } else if (count == 2) {
-        // 2 Planks (vertically) -> 4 Sticks
         if (craftInputSlots[0] && craftInputSlots[2] &&
             craftInputSlots[0]->id == Tile::wood->id && craftInputSlots[2]->id == Tile::wood->id) {
             craftResultItem = new ItemInstance(Item::stick, 4);
-        }
-        // 1 Coal + 1 Stick -> 4 Torches
-        else if (((craftInputSlots[0] && craftInputSlots[2] && craftInputSlots[0]->id == Item::coal->id && craftInputSlots[2]->id == Item::stick->id) ||
-                  (craftInputSlots[1] && craftInputSlots[3] && craftInputSlots[1]->id == Item::coal->id && craftInputSlots[3]->id == Item::stick->id))) {
+        } else if (((craftInputSlots[0] && craftInputSlots[2] && craftInputSlots[0]->id == Item::coal->id && craftInputSlots[2]->id == Item::stick->id) ||
+                    (craftInputSlots[1] && craftInputSlots[3] && craftInputSlots[1]->id == Item::coal->id && craftInputSlots[3]->id == Item::stick->id))) {
             craftResultItem = new ItemInstance(Tile::torch, 4);
         }
     } else if (count == 4) {
-        // 4 Planks -> 1 Crafting Table
         if (craftInputSlots[0] && craftInputSlots[1] && craftInputSlots[2] && craftInputSlots[3] &&
             craftInputSlots[0]->id == Tile::wood->id && craftInputSlots[1]->id == Tile::wood->id &&
             craftInputSlots[2]->id == Tile::wood->id && craftInputSlots[3]->id == Tile::wood->id) {
             craftResultItem = new ItemInstance(Tile::workBench, 1);
-        }
-        // 4 Sand -> 1 Sandstone
-        else if (craftInputSlots[0] && craftInputSlots[1] && craftInputSlots[2] && craftInputSlots[3] &&
-            craftInputSlots[0]->id == Tile::sand->id && craftInputSlots[1]->id == Tile::sand->id &&
-            craftInputSlots[2]->id == Tile::sand->id && craftInputSlots[3]->id == Tile::sand->id) {
+        } else if (craftInputSlots[0] && craftInputSlots[1] && craftInputSlots[2] && craftInputSlots[3] &&
+                   craftInputSlots[0]->id == Tile::sand->id && craftInputSlots[1]->id == Tile::sand->id &&
+                   craftInputSlots[2]->id == Tile::sand->id && craftInputSlots[3]->id == Tile::sand->id) {
             craftResultItem = new ItemInstance(Tile::sandStone, 1);
         }
     }
@@ -1254,6 +1727,17 @@ void UnifiedInventoryScreen::updateCraftingResult() {
 
 void UnifiedInventoryScreen::mouseReleased(int x, int y, int buttonNum) {
     super::mouseReleased(x, y, buttonNum);
+
+    if (isDragging && dragSlots.size() > 1) {
+        executeDragDistribution();
+        if (minecraft->soundEngine) {
+            minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+        }
+    }
+
+    dragMode = DRAG_NONE;
+    isDragging = false;
+    dragSlots.clear();
 }
 
 void UnifiedInventoryScreen::mouseWheel(int dx, int dy, int xm, int ym) {
@@ -1268,10 +1752,13 @@ void UnifiedInventoryScreen::removed() {
 
     // Return any held items or crafting input items safely
     if (player && player->inventory) {
-        if (carriedItem && !carriedItem->isNull()) {
+        if (carriedItem && !carriedItem->isNull() && carriedItem->count > 0) {
             if (!isCreative) {
-                if (!player->inventory->add(carriedItem)) {
+                player->inventory->add(carriedItem);
+                if (carriedItem->count > 0) {
                     player->drop(carriedItem, false);
+                } else {
+                    delete carriedItem;
                 }
             } else {
                 delete carriedItem;
@@ -1280,10 +1767,13 @@ void UnifiedInventoryScreen::removed() {
         }
 
         for (int i = 0; i < 4; ++i) {
-            if (craftInputSlots[i] && !craftInputSlots[i]->isNull()) {
+            if (craftInputSlots[i] && !craftInputSlots[i]->isNull() && craftInputSlots[i]->count > 0) {
                 if (!isCreative) {
-                    if (!player->inventory->add(craftInputSlots[i])) {
+                    player->inventory->add(craftInputSlots[i]);
+                    if (craftInputSlots[i]->count > 0) {
                         player->drop(craftInputSlots[i], false);
+                    } else {
+                        delete craftInputSlots[i];
                     }
                 } else {
                     delete craftInputSlots[i];
@@ -1295,9 +1785,57 @@ void UnifiedInventoryScreen::removed() {
 }
 
 void UnifiedInventoryScreen::keyPressed(int eventKey) {
-    if (eventKey == 27 || eventKey == 69 || eventKey == 101) { // ESC, E, e
+    if (eventKey == 27 || eventKey == 69 || eventKey == 101 || eventKey == Keyboard::KEY_ESCAPE || eventKey == Keyboard::KEY_E) { // ESC, E, e
         minecraft->setScreen(NULL);
-    } else {
-        super::keyPressed(eventKey);
+        return;
     }
+
+    // 1-9 Hotbar Swapping
+    if (eventKey >= Keyboard::KEY_1 && eventKey <= Keyboard::KEY_9) {
+        int hotbarTarget = eventKey - Keyboard::KEY_1; // 0..8
+        SlotLocation hoveredLoc;
+        int hoveredIndex;
+        if (getSlotAt(lastMouseX, lastMouseY, hoveredLoc, hoveredIndex)) {
+            if (hoveredLoc == SLOT_LOC_INVENTORY) {
+                int realSlot = Inventory::MAX_SELECTION_SIZE + hoveredIndex;
+                swapInventorySlots(realSlot, hotbarTarget);
+                if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+                return;
+            } else if (hoveredLoc == SLOT_LOC_HOTBAR) {
+                swapInventorySlots(hoveredIndex, hotbarTarget);
+                if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+                return;
+            } else if (hoveredLoc == SLOT_LOC_CRAFT_INPUT) {
+                ItemInstance* inputItem = craftInputSlots[hoveredIndex];
+                ItemInstance* hotItem = player->inventory->getItem(hotbarTarget);
+
+                ItemInstance* copyInput = (inputItem && !inputItem->isNull()) ? new ItemInstance(*inputItem) : NULL;
+                ItemInstance* copyHot = (hotItem && !hotItem->isNull()) ? new ItemInstance(*hotItem) : NULL;
+
+                delete craftInputSlots[hoveredIndex];
+                craftInputSlots[hoveredIndex] = copyHot;
+                updateCraftingResult();
+
+                player->inventory->clearSlot(hotbarTarget);
+                if (copyInput) player->inventory->setItem(hotbarTarget, copyInput);
+
+                if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
+                return;
+            }
+        }
+    }
+
+    // Q / Ctrl+Q Dropping from hovered slot
+    if (eventKey == Keyboard::KEY_Q || eventKey == 81 || eventKey == 113) {
+        SlotLocation hoveredLoc;
+        int hoveredIndex;
+        if (getSlotAt(lastMouseX, lastMouseY, hoveredLoc, hoveredIndex)) {
+            bool entireStack = Keyboard::isKeyDown(Keyboard::KEY_LEFT_CTRL);
+            dropFromSlot(hoveredLoc, hoveredIndex, entireStack);
+            if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.pop", 1.0f, 1.0f);
+            return;
+        }
+    }
+
+    super::keyPressed(eventKey);
 }

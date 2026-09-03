@@ -109,6 +109,7 @@ void SoundEngine::init( Minecraft* mc, Options* options )
 	sounds.add("random.splash", SA_splash);
 	sounds.add("random.explode", SA_explode);
 	sounds.add("random.click", SA_click);
+	sounds.add("fire.ignite", SA_click);
 
 	sounds.add("random.door_open", SA_door_open);
 	sounds.add("random.door_close", SA_door_close);

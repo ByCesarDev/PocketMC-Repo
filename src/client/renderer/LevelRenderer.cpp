@@ -1695,6 +1695,7 @@ void LevelRenderer::renderHitSelect( Player* player, const HitResult& h, int mod
 
 		glEnable2(GL_ALPHA_TEST);
 		glDisable2(GL_BLEND);
+		glColor4f2(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 }
 

@@ -30,6 +30,22 @@ enum SlotLocation {
     SLOT_LOC_CRAFT_RESULT
 };
 
+struct SlotRef {
+    SlotLocation location;
+    int index;
+
+    bool operator==(const SlotRef& other) const {
+        return location == other.location && index == other.index;
+    }
+};
+
+enum InventoryDragMode {
+    DRAG_NONE,
+    DRAG_LEFT,
+    DRAG_RIGHT,
+    DRAG_CREATIVE_MIDDLE
+};
+
 class UnifiedInventoryScreen : public Screen
 {
     typedef Screen super;
@@ -56,6 +72,7 @@ public:
 protected:
     void mouseClicked(int x, int y, int buttonNum) override;
     void mouseReleased(int x, int y, int buttonNum) override;
+    void mouseMoved(int x, int y, int dx, int dy) override;
     void mouseWheel(int dx, int dy, int xm, int ym) override;
     void keyPressed(int eventKey) override;
 
@@ -70,6 +87,32 @@ private:
     bool getSlotAt(int x, int y, SlotLocation& outLoc, int& outIndex);
     void handleSlotInteraction(SlotLocation loc, int index, int buttonNum);
     void updateCraftingResult();
+
+    // Slot Reference Helpers
+    ItemInstance* getSlotItem(SlotLocation loc, int index);
+    ItemInstance* getSlotItem(const SlotRef& slot) { return getSlotItem(slot.location, slot.index); }
+    void setSlotItem(SlotLocation loc, int index, ItemInstance* item);
+    void setSlotItem(const SlotRef& slot, ItemInstance* item) { setSlotItem(slot.location, slot.index, item); }
+    void clearSlot(SlotLocation loc, int index);
+    void clearSlot(const SlotRef& slot) { clearSlot(slot.location, slot.index); }
+    int getSlotCapacity(SlotLocation loc, int index, const ItemInstance* item);
+    int getSlotCapacity(const SlotRef& slot, const ItemInstance* item) { return getSlotCapacity(slot.location, slot.index, item); }
+    bool canPlaceInSlot(SlotLocation loc, int index, const ItemInstance* item);
+    bool canPlaceInSlot(const SlotRef& slot, const ItemInstance* item) { return canPlaceInSlot(slot.location, slot.index, item); }
+
+    // Advanced Inventory Actions
+    void handleLeftClick(SlotLocation loc, int index);
+    void handleRightClick(SlotLocation loc, int index);
+    void quickMove(SlotLocation loc, int index);
+    bool moveStackToRange(ItemInstance*& source, int begin, int end);
+    void swapInventorySlots(int slotA, int slotB);
+    void dropFromSlot(SlotLocation loc, int index, bool entireStack);
+    void dropCarried(bool entireStack);
+    bool isOutsideInventoryPanels(int x, int y);
+    void creativeClone(SlotLocation loc, int index);
+    void collectMatching(SlotLocation loc, int index);
+    void executeDragDistribution();
+    bool containsDragSlot(SlotLocation loc, int index) const;
 
     bool isCreative;
     bool isDualPane;
@@ -106,6 +149,19 @@ private:
 
     // Drag & Drop Cursor Carried Item
     ItemInstance* carriedItem;
+
+    // Mouse Tracking & Drag Distribution
+    int lastMouseX;
+    int lastMouseY;
+    InventoryDragMode dragMode;
+    std::vector<SlotRef> dragSlots;
+    bool isDragging;
+
+    // Double-click Tracking
+    uint64_t lastClickTimeMs;
+    SlotLocation lastClickLoc;
+    int lastClickIndex;
+    int lastClickButton;
 
     NinePatchLayer* guiLeftPanelBg;
     NinePatchLayer* guiRightPanelBg;
