@@ -57,6 +57,7 @@ GameRenderer::GameRenderer( Minecraft* mc )
 	fr(0), fg(0), fb(0),
 	_rotX(0), _rotY(0),
 	_rotXlast(0), _rotYlast(0),
+	_underwaterTime(0.0f),
 	useScreenScissor(false)
 {
 	saveMatrices();
@@ -574,6 +575,13 @@ void GameRenderer::bobView(float a) {
     glRotatef2((float) tilt, 1, 0, 0);
 }
 
+static float getWaterFogProgress(float seconds) {
+    if (seconds <= 0.0f) return 0.25f;
+    if (seconds <= 5.0f) return 0.25f + (0.60f - 0.25f) * (seconds / 5.0f);
+    if (seconds <= 30.0f) return 0.60f + (1.00f - 0.60f) * ((seconds - 5.0f) / 25.0f);
+    return 1.0f;
+}
+
 /*private*/
 void GameRenderer::setupFog(int i) {
     Mob* player = mc->cameraTargetPlayer;
@@ -590,6 +598,23 @@ void GameRenderer::setupFog(int i) {
         glFogf(GL_FOG_DENSITY, 2.f); // was 0.06
         fStart = 0.0f;
         fEnd = 2.0f;
+    } else if (player && player->isUnderLiquid(Material::water)) {
+        glFogx(GL_FOG_MODE, GL_LINEAR);
+#ifndef GL_FOG_DISTANCE_MODE_NV
+#define GL_FOG_DISTANCE_MODE_NV 0x855A
+#endif
+#ifndef GL_EYE_RADIAL_NV
+#define GL_EYE_RADIAL_NV 0x855B
+#endif
+        glFogi(GL_FOG_DISTANCE_MODE_NV, GL_EYE_RADIAL_NV);
+
+        float progress = getWaterFogProgress(_underwaterTime);
+        fStart = 0.0f;
+        fEnd = 60.0f * progress;
+        if (fEnd < 8.0f) fEnd = 8.0f;
+
+        glFogf(GL_FOG_START, fStart);
+        glFogf(GL_FOG_END, fEnd);
     } else {
         glFogx(GL_FOG_MODE, GL_LINEAR);
 #ifndef GL_FOG_DISTANCE_MODE_NV
@@ -821,6 +846,13 @@ void GameRenderer::tick(int nTick, int maxTick) {
     float fogBrT = brr * (1 - whiteness) + whiteness;
     fogBr += (fogBrT - fogBr) * 0.1f;
 
+    if (mc->cameraTargetPlayer && mc->cameraTargetPlayer->isUnderLiquid(Material::water)) {
+        _underwaterTime += 0.05f; // 20 ticks per second = 0.05s per tick
+        if (_underwaterTime > 30.0f) _underwaterTime = 30.0f;
+    } else {
+        _underwaterTime = 0.0f;
+    }
+
     _tick++;
 
     itemInHandRenderer->tick();
@@ -868,25 +900,43 @@ void GameRenderer::setupClearColor(float a) {
     fb += (sb - fb) * whiteness;
 
     if (player->isUnderLiquid(Material::water)) {
-        fr = 0.05f;
-        fg = 0.3f;
-        fb = 0.7f;
+        // Bedrock official water fog base: #44AFF5 -> (0.267f, 0.686f, 0.961f)
+        fr = 0.267f;
+        fg = 0.686f;
+        fb = 0.961f;
+
+        // Gentle depth darkening below sea level (Y=64 down to Y=0)
+        float depth = 64.0f - player->y;
+        if (depth > 0.0f) {
+            float depthFactor = 1.0f - Mth::clamp(depth / 96.0f, 0.0f, 0.55f);
+            fr *= depthFactor;
+            fg *= depthFactor;
+            fb *= depthFactor;
+        }
+
+        // Time of day influence (daylight vs night underwater)
+        float dayLight = level->getTimeOfDay(a);
+        float sunBr = Mth::cos(dayLight * Mth::PI * 2.0f) * 2.0f + 0.5f;
+        sunBr = Mth::clamp(sunBr, 0.25f, 1.0f);
+        fr *= sunBr;
+        fg *= sunBr;
+        fb *= sunBr;
     } else if (player->isUnderLiquid(Material::lava)) {
         fr = 0.6f;
         fg = 0.1f;
         fb = 0.00f;
+    } else {
+        float brr = fogBrO + (fogBr - fogBrO) * a;
+
+        // Check if we are in the main menu or a similar screen and ensure visibility
+        if (mc->screen != NULL && !mc->screen->passEvents) {
+            brr = 1.0f; // Force full brightness in menus to fix dark tint
+        }
+
+        fr *= brr;
+        fg *= brr;
+        fb *= brr;
     }
-
-    float brr = fogBrO + (fogBr - fogBrO) * a;
-
-    // Check if we are in the main menu or a similar screen and ensure visibility
-    if (mc->screen != NULL && !mc->screen->passEvents) {
-        brr = 1.0f; // Force full brightness in menus to fix dark tint
-    }
-
-    fr *= brr;
-    fg *= brr;
-    fb *= brr;
 
     if (mc->options.getBooleanValue(OPTIONS_ANAGLYPH_3D)) {
         float frr = (fr * 30 + fg * 59 + fb * 11) / 100;

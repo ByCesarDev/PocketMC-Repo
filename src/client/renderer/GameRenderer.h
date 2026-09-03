@@ -108,6 +108,7 @@ private:
 	float _rotXlast;
 	float _rotYlast;
 	float _lastTickT;
+	float _underwaterTime;
 
 	void saveMatrices();
 	float lastProjMatrix[16];
