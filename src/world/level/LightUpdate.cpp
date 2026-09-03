@@ -68,7 +68,7 @@ void LightUpdate::update(Level* level)
     int yd = (y1 - y0) + 1;
     int zd = (z1 - z0) + 1;
     int size = xd * yd * zd;
-    if (size > 16 * 16 * 128) {
+    if (size > 16 * 16 * Level::DEPTH) {
         //System.out.println("Light too large, skipping!");
         return;
     }

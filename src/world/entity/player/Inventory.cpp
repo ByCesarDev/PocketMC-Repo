@@ -103,7 +103,7 @@ bool Inventory::stillValid(Player* player) {
 }
 
 bool Inventory::add( ItemInstance* item ){
-	if (_isCreative || player->hasFakeInventory)
+	if (player->hasFakeInventory)
 		return true;
 
 	return super::add(item);

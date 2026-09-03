@@ -85,7 +85,7 @@ void Level::_init(const std::string& levelName, const LevelSettings& settings, i
 
 	isGeneratingTerrain = false;
 
-	LevelData* preparedData = levelStorage->prepareLevel(this);
+	LevelData* preparedData = levelStorage ? levelStorage->prepareLevel(this) : NULL;
     _isNew = (preparedData == NULL);
 
     if (preparedData == NULL) {
@@ -466,23 +466,20 @@ void Level::setInitialSpawn() {
     int xSpawn = 0;
     int zSpawn = 0;
 
-    bool foundFromBiome = false;
     if (_chunkSource) {
-        foundFromBiome = _chunkSource->findSpawnPosition(xSpawn, zSpawn);
+        _chunkSource->findSpawnPosition(xSpawn, zSpawn);
     }
 
-    if (!foundFromBiome) {
-        int attempts = 0;
-        while (!dimension->isValidSpawn(xSpawn, zSpawn) && attempts < 100) {
-            xSpawn += random.nextInt(32) - random.nextInt(32);
-            zSpawn += random.nextInt(32) - random.nextInt(32);
+    int attempts = 0;
+    while (!dimension->isValidSpawn(xSpawn, zSpawn) && attempts < 1000) {
+        xSpawn += random.nextInt(16) - random.nextInt(16);
+        zSpawn += random.nextInt(16) - random.nextInt(16);
 
-            if (xSpawn < WORLD_MIN_X + 4) xSpawn += 32;
-            if (xSpawn > WORLD_MAX_X - 4) xSpawn -= 32;
-            if (zSpawn < WORLD_MIN_Z + 4) zSpawn += 32;
-            if (zSpawn > WORLD_MAX_Z - 4) zSpawn -= 32;
-            attempts++;
-        }
+        if (xSpawn < WORLD_MIN_X + 4) xSpawn += 16;
+        if (xSpawn > WORLD_MAX_X - 4) xSpawn -= 16;
+        if (zSpawn < WORLD_MIN_Z + 4) zSpawn += 16;
+        if (zSpawn > WORLD_MAX_Z - 4) zSpawn -= 16;
+        attempts++;
     }
 
     int ySpawn = getTopTileY(xSpawn, zSpawn) + 1;
@@ -499,7 +496,7 @@ void Level::validateSpawn() {
     int xSpawn = levelData.getXSpawn();
     int zSpawn = levelData.getZSpawn();
     int attempts = 0;
-    while ((getTopTile(xSpawn, zSpawn) == 0 || getTopTile(xSpawn, zSpawn) == Tile::invisible_bedrock->id) && attempts < 50) {
+    while (!dimension->isValidSpawn(xSpawn, zSpawn) && attempts < 50) {
         xSpawn += random.nextInt(8) - random.nextInt(8);
         zSpawn += random.nextInt(8) - random.nextInt(8);
 
@@ -722,7 +719,8 @@ int Level::getTopTileY(int x, int z) {
 //}
 
 void Level::saveLevelData() {
-	levelStorage->saveLevelData(levelData, &players);
+	if (levelStorage)
+		levelStorage->saveLevelData(levelData, &players);
 }
 
 //    bool pauseSave(int step) {

@@ -106,8 +106,6 @@ void FillingContainer::swapSlots( int from, int to )
 
 bool FillingContainer::add( ItemInstance* item )
 {
-	if (_isCreative) return true;
-
 	if (!item || item->isNull()) return true;
 
 	if (!item->isDamaged()) {

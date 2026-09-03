@@ -263,26 +263,36 @@ ItemInstance* ItemInstance::fromTag( CompoundTag* tag ) {
 }
 
 Item* ItemInstance::getItem() const {
+	if (id < 0 || id >= Item::MAX_ITEMS) return NULL;
 	return Item::items[id];
 }
 
 int ItemInstance::getIcon() const {
-	return Item::items[id]->getIcon(this->auxValue);
+	Item* item = getItem();
+	if (item != NULL) {
+		return item->getIcon(this->auxValue);
+	}
+	return -1;
 }
+
 void ItemInstance::releaseUsing( Level* level, Player* player, int durationLeft ) {
-	getItem()->releaseUsing(this, level, player, durationLeft);
+	Item* it = getItem();
+	if (it) it->releaseUsing(this, level, player, durationLeft);
 }
 
 int ItemInstance::getUseDuration() {
-	return getItem()->getUseDuration(this);
+	Item* it = getItem();
+	return it ? it->getUseDuration(this) : 0;
 }
 
 UseAnim::UseAnimation ItemInstance::getUseAnimation() const {
-	return getItem()->getUseAnimation();
+	Item* it = getItem();
+	return it ? it->getUseAnimation() : UseAnim::none;
 }
 
 ItemInstance ItemInstance::useTimeDepleted( Level* level, Player* player ) {
-	return getItem()->useTimeDepleted(this, level, player);
+	Item* it = getItem();
+	return it ? it->useTimeDepleted(this, level, player) : *this;
 }
 
 bool ItemInstance::isArmorItem( const ItemInstance* instance ) {

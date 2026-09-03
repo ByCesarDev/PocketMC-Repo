@@ -52,6 +52,9 @@ bool Dimension::isValidSpawn(int x, int z) {
 
 	if (!Tile::tiles[topTile]->isSolidRender()) return false;
 
+	int topY = level->getTopTileY(x, z);
+	if (topY < 63) return false;
+
     return true;
 }
 

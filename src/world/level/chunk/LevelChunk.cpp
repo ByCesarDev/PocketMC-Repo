@@ -105,7 +105,7 @@ bool LevelChunk::setTileAndData(int x, int y, int z, int tile_, int data_) {
     level->updateLight(LightLayer::Block, xOffs, y, zOffs, xOffs, y, zOffs);
     lightGaps(x, z);
 
-    if (!level->isClientSide && tile != 0) {
+    if (!level->isClientSide && tile != 0 && Tile::tiles[tile] != NULL) {
         Tile::tiles[tile]->onPlace(level, xOffs, y, zOffs);
     }
 
@@ -146,7 +146,7 @@ bool LevelChunk::setTile(int x, int y, int z, int tile_) {
     lightGaps(x, z);
 
     if (tile != 0) {
-        if (!level->isClientSide) Tile::tiles[tile]->onPlace(level, xOffs, y, zOffs);
+        if (!level->isClientSide && Tile::tiles[tile] != NULL) Tile::tiles[tile]->onPlace(level, xOffs, y, zOffs);
     }
 
     this->unsaved = true;
@@ -165,10 +165,10 @@ int LevelChunk::getData(int x, int y, int z) {
 
 /*public*/
 void LevelChunk::recalcHeightmapOnly() {
-    int min = Level::DEPTH - 1;
+    int min = Level::DEPTH;
     for (int x = 0; x < 16; x++)
         for (int z = 0; z < 16; z++) {
-            int y = Level::DEPTH - 1;
+            int y = Level::DEPTH;
             int p = x << 12 | z << 8;
             while (y > 0 && Tile::lightBlock[blocks[p + y - 1] & 0xff] == 0)
                 y--;
@@ -182,10 +182,10 @@ void LevelChunk::recalcHeightmapOnly() {
 
 /*public?*/
 void LevelChunk::recalcHeightmap() {
-    int min = Level::DEPTH - 1;
+    int min = Level::DEPTH;
     for (int x = 0; x < 16; x++)
         for (int z = 0; z < 16; z++) {
-            int y = Level::DEPTH - 1;
+            int y = Level::DEPTH;
             int p = x << 12 | z << 8;
             while (y > 0 && Tile::lightBlock[blocks[p + y - 1] & 0xff] == 0)
                 y--;
@@ -221,6 +221,7 @@ void LevelChunk::recalcHeight(int x, int yStart, int z) {
     int yOld = heightmap[z << 4 | x];
     int y = yOld;
     if (yStart > yOld) y = yStart;
+    if (y > Level::DEPTH) y = Level::DEPTH;
 
     int p = x << 12 | z << 8;
     while (y > 0 && Tile::lightBlock[blocks[p + y - 1] & 0xff] == 0)
@@ -235,10 +236,10 @@ void LevelChunk::recalcHeight(int x, int yStart, int z) {
     if (y < minHeight) {
         minHeight = y;
     } else {
-        int min = Level::DEPTH - 1;
+        int min = Level::DEPTH;
         for (int _x = 0; _x < 16; _x++)
             for (int _z = 0; _z < 16; _z++) {
-                if ((heightmap[_z << 4 | _x] & 0xff) < min) min = (heightmap[_z << 4 | _x] & 0xff);
+                if (heightmap[_z << 4 | _x] < min) min = heightmap[_z << 4 | _x];
             }
         this->minHeight = min;
     }
@@ -345,7 +346,7 @@ void LevelChunk::lightGap( int x, int z, int source )
 
 void LevelChunk::clearUpdateMap()
 {
-	memset(updateMap, 0x0, 256);
+	memset(updateMap, 0, sizeof(updateMap));
 	unsaved = false;
 }
 
@@ -362,7 +363,7 @@ bool LevelChunk::isAt( int x, int z )
 
 int LevelChunk::getHeightmap( int x, int z )
 {
-	return heightmap[z << 4 | x] & 0xff;
+	return heightmap[z << 4 | x];
 }
 
 void LevelChunk::recalcBlockLights()
@@ -455,7 +456,7 @@ void LevelChunk::removeEntity( Entity* e, int yc )
 
 bool LevelChunk::isSkyLit( int x, int y, int z )
 {
-	return y >= (heightmap[z << 4 | x] & 0xff);
+	return y >= heightmap[z << 4 | x];
 }
 
 void LevelChunk::load()

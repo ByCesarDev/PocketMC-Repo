@@ -33,8 +33,24 @@ void ItemRenderer::teardown_static() {
 
 void ItemRenderer::render(Entity* itemEntity_, float x, float y, float z, float rot, float a) {
 	ItemEntity* itemEntity = (ItemEntity*) itemEntity_;
-	random.setSeed(187);
+	if (!itemEntity) return;
+
 	ItemInstance* item = &itemEntity->item;
+	if (!item || item->isNull() || item->id <= 0 || item->id >= Item::MAX_ITEMS) return;
+
+	if (item->id < 256 && Tile::tiles[item->id] == NULL) {
+		LOGE("[ItemRenderer] UNKNOWN TILE DROP: id=%d count=%d aux=%d at (%.2f, %.2f, %.2f)\n",
+			item->id, item->count, item->getAuxValue(), itemEntity->x, itemEntity->y, itemEntity->z);
+		return;
+	}
+
+	if (item->id >= 256 && Item::items[item->id] == NULL) {
+		LOGE("[ItemRenderer] UNKNOWN ITEM DROP: id=%d count=%d aux=%d at (%.2f, %.2f, %.2f)\n",
+			item->id, item->count, item->getAuxValue(), itemEntity->x, itemEntity->y, itemEntity->z);
+		return;
+	}
+
+	random.setSeed(187);
 
 	glPushMatrix2();
 	float bob = Mth::sin((itemEntity->age + a) / 10.0f + itemEntity->bobOffs) * 0.1f + 0.1f;
@@ -47,7 +63,7 @@ void ItemRenderer::render(Entity* itemEntity_, float x, float y, float z, float 
 
 	glTranslatef2((float) x, (float) y + bob, (float) z);
 	//glEnable2(GL_RESCALE_NORMAL);
-	if (item->id < 256 && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape())) {
+	if (item->id < 256 && Tile::tiles[item->id] != NULL && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape())) {
 		glRotatef2(spin, 0, 1, 0);
 
 		float br = itemEntity->getBrightness(a);
