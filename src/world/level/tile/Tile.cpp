@@ -313,8 +313,8 @@ void Tile::initTiles() {
 	wood        = (new Tile(5, 4, Material::wood))->init()->setDestroyTime(2.0f)->setExplodeable(5)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("wood")->setAllFacesTexture("planks_oak");
 	sapling     = (new Sapling(6, 15))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("sapling")->setAllFacesTexture("sapling");
 	unbreakable = (new Tile(7, 17, Material::stone))->init()->setDestroyTime(-1)->setExplodeable(6000000)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Decorations)->setDescriptionId("bedrock");
-	water       = (new LiquidTileDynamic(8, Material::water))->init()->setDestroyTime(100.0f)->setLightBlock(3)->setCategory(ItemCategory::Decorations)->setDescriptionId("water");
-	calmWater   = (new LiquidTileStatic(9, Material::water))->init()->setDestroyTime(100.0f)->setLightBlock(3)->setCategory(ItemCategory::Decorations)->setDescriptionId("water");
+	water       = (new LiquidTileDynamic(8, Material::water))->init()->setDestroyTime(100.0f)->setLightBlock(2)->setCategory(ItemCategory::Decorations)->setDescriptionId("water");
+	calmWater   = (new LiquidTileStatic(9, Material::water))->init()->setDestroyTime(100.0f)->setLightBlock(2)->setCategory(ItemCategory::Decorations)->setDescriptionId("water");
 	lava        = (new LiquidTileDynamic(10, Material::lava))->init()->setDestroyTime(00.0f)->setLightEmission(1.0f)->setLightBlock(255)->setCategory(ItemCategory::Decorations)->setDescriptionId("lava");
 	calmLava    = (new LiquidTileStatic(11, Material::lava))->init()->setDestroyTime(100.0f)->setLightEmission(1.0f)->setLightBlock(255)->setCategory(ItemCategory::Decorations)->setDescriptionId("lava");
 	sand        = (new HeavyTile(12, 18))->init()->setDestroyTime(0.5f)->setSoundType(SOUND_SAND)->setCategory(ItemCategory::Decorations)->setDescriptionId("sand")->setAllFacesTexture("sand");
@@ -1318,7 +1318,6 @@ void Tile::setShape(float x0, float y0, float z0, float x1, float y1, float z1) 
 	// Mantener consistencia con el array de solidez
 	bool isPlant = (id == 179 || id == 180 || id == 6 || id == 31 || id == 39 || id == 40);
 	solid[id] = isPlant ? false : isSolidRender();
-	lightBlock[id] = isSolidRender() ? 255 : 0;
 }
 
 /*public*/
