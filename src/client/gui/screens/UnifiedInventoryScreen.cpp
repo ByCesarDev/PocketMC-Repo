@@ -1050,7 +1050,7 @@ void UnifiedInventoryScreen::handleSlotInteraction(SlotLocation loc, int index, 
                     player->inventory->setItem(index, carriedItem);
                     carriedItem = NULL;
                     playedSound = true;
-                } else if (hotItem->id == carriedItem->id && hotItem->getAuxValue() == carriedItem->getAuxValue() && hotItem->isStackable()) {
+                } else if (ItemInstance::isStackable(hotItem, carriedItem)) {
                     // Stack
                     int space = hotItem->getMaxStackSize() - hotItem->count;
                     if (space > 0) {
@@ -1089,7 +1089,7 @@ void UnifiedInventoryScreen::handleSlotInteraction(SlotLocation loc, int index, 
                     player->inventory->setItem(realSlot, carriedItem);
                     carriedItem = NULL;
                     playedSound = true;
-                } else if (invItem->id == carriedItem->id && invItem->getAuxValue() == carriedItem->getAuxValue() && invItem->isStackable()) {
+                } else if (ItemInstance::isStackable(invItem, carriedItem)) {
                     int space = invItem->getMaxStackSize() - invItem->count;
                     if (space > 0) {
                         int toAdd = std::min(space, carriedItem->count);
@@ -1147,7 +1147,7 @@ void UnifiedInventoryScreen::handleSlotInteraction(SlotLocation loc, int index, 
                     craftInputSlots[index] = carriedItem;
                     carriedItem = NULL;
                     playedSound = true;
-                } else if (slotItem->id == carriedItem->id && slotItem->getAuxValue() == carriedItem->getAuxValue() && slotItem->isStackable()) {
+                } else if (ItemInstance::isStackable(slotItem, carriedItem)) {
                     int space = slotItem->getMaxStackSize() - slotItem->count;
                     if (space > 0) {
                         int toAdd = std::min(space, carriedItem->count);
