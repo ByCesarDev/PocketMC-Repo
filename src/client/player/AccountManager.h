@@ -42,6 +42,7 @@ public:
     // ── Session persistence ────────────────────────────────────────────────
     static bool loadSession();
     static bool saveSession();
+    static bool refreshSession();
 };
 
 #endif // NET_MINECRAFT_CLIENT_PLAYER__AccountManager_H__

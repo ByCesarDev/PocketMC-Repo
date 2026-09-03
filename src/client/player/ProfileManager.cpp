@@ -36,15 +36,19 @@ bool ProfileManager::fetchAndCache(const std::string& accessToken, PlayerIdentit
     bool ok = ApiClient::getMe(accessToken, json);
 
     if (!ok || json.empty()) {
-        LOGW("[ProfileManager] fetchAndCache failed — trying local cache.\n");
+        LOGW("[ProfileManager] fetchAndCache failed — retaining/trying local cache.\n");
         return loadFromCache(identity);
     }
 
     identity.accountType  = AccountType::ONLINE;
     identity.authenticated = true;
-    identity.playerId     = extractVal(json, "id");
-    identity.username     = extractVal(json, "username");
-    identity.displayName  = extractVal(json, "display_name");
+    std::string pid = extractVal(json, "id");
+    std::string uname = extractVal(json, "username");
+    std::string dname = extractVal(json, "display_name");
+
+    if (!pid.empty()) identity.playerId = pid;
+    if (!uname.empty()) identity.username = uname;
+    if (!dname.empty()) identity.displayName = dname;
     if (identity.displayName.empty()) identity.displayName = identity.username;
 
     LOGI("[ProfileManager] Profile fetched: @%s (ID: %s)\n",
@@ -73,8 +77,7 @@ bool ProfileManager::loadFromCache(PlayerIdentity& identity) {
 
     if (!identity.playerId.empty() && !identity.username.empty()) {
         identity.accountType  = AccountType::ONLINE;
-        identity.authenticated = false; // offline mode, no live token
-        LOGI("[ProfileManager] Loaded from cache: @%s\n", identity.username.c_str());
+        LOGI("[ProfileManager] Loaded from cache: @%s (ID: %s)\n", identity.username.c_str(), identity.playerId.c_str());
         return true;
     }
 

@@ -76,12 +76,16 @@ void AccountManager::init(const std::string& dataDir) {
     ApiClient::init(apiUrl);
 
     if (loadSession()) {
-        // Try to refresh profile from API — falls back to cache if offline
-        std::string json;
-        if (!m_accessToken.empty()) {
+        // 1. Immediately hydrate profile from local cache so identity is ready offline
+        ProfileManager::loadFromCache(m_identity);
+        m_identity.accountType   = AccountType::ONLINE;
+        m_identity.authenticated = true;
+
+        // 2. Try to refresh session via Supabase refresh token or access token
+        if (!m_refreshToken.empty()) {
+            refreshSession();
+        } else if (!m_accessToken.empty()) {
             ProfileManager::fetchAndCache(m_accessToken, m_identity);
-        } else {
-            ProfileManager::loadFromCache(m_identity);
         }
     }
 }
@@ -238,4 +242,52 @@ bool AccountManager::saveSession() {
 
     f.close();
     return true;
+}
+
+bool AccountManager::refreshSession() {
+    if (m_refreshToken.empty()) {
+        return false;
+    }
+
+    std::string url = SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token";
+    std::string jsonBody = "{\"refresh_token\":\"" + m_refreshToken + "\"}";
+    std::string extraHeaders = "apikey: " + SUPABASE_ANON_KEY + "\r\n";
+
+    std::vector<unsigned char> outBody;
+    LOGI("[AccountManager] Refreshing Supabase session with refresh_token...\n");
+
+    bool ok = HttpClient::post(url, jsonBody, outBody, extraHeaders);
+    std::string responseStr;
+    if (!outBody.empty()) responseStr.assign(outBody.begin(), outBody.end());
+
+    if (!ok || responseStr.empty()) {
+        LOGW("[AccountManager] Token refresh network unreachable — retaining cached online session.\n");
+        return false;
+    }
+
+    std::string newAccessToken  = jsonVal(responseStr, "access_token");
+    std::string newRefreshToken = jsonVal(responseStr, "refresh_token");
+
+    if (!newAccessToken.empty()) {
+        m_accessToken = newAccessToken;
+        if (!newRefreshToken.empty()) {
+            m_refreshToken = newRefreshToken;
+        }
+        m_identity.accountType   = AccountType::ONLINE;
+        m_identity.authenticated = true;
+        LOGI("[AccountManager] Session successfully refreshed!\n");
+        saveSession();
+        ProfileManager::fetchAndCache(m_accessToken, m_identity);
+        return true;
+    }
+
+    std::string err = jsonVal(responseStr, "error");
+    if (err == "invalid_grant" || err == "invalid_request") {
+        LOGW("[AccountManager] Session expired on server (%s). Re-auth required.\n", err.c_str());
+        m_identity.authenticated = false;
+    } else {
+        LOGW("[AccountManager] Refresh token response: %s\n", responseStr.c_str());
+    }
+
+    return false;
 }
