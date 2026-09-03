@@ -58,8 +58,10 @@ private:
 
 public:
 	static bool MIPMAP;
+	static int MIPMAP_LEVELS;
 	static int textureChanges;
 	static const TextureId InvalidId;
+	static std::map<std::string, std::vector<TextureData>> s_atlasLevelsMap;
 
 private:
 	TextureMap idMap;

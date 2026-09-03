@@ -20,8 +20,9 @@ public:
     static const int TERRAIN_TEXTURE = 1;
     static const int ITEM_TEXTURE = 2;
     static const int ENTITY_PARTICLE_TEXTURE = 3;
+    static const int TERRAIN2_TEXTURE = 4;
 
-    static const int TEXTURE_COUNT = 4;
+    static const int TEXTURE_COUNT = 5;
 
     ParticleEngine(Level* level, Textures* textures);
 	~ParticleEngine();
@@ -43,10 +44,10 @@ protected:
 	void clear();
 
 	Level* level;
-	GLuint textureIds[4];
+	GLuint textureIds[TEXTURE_COUNT];
 
 private:
-    ParticleList particles[4];
+    ParticleList particles[TEXTURE_COUNT];
     Textures* textures;
     Random random;
 };

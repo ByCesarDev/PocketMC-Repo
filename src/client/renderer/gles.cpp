@@ -37,6 +37,24 @@ void __gluMakeIdentityf(GLfloat m[16]) {
     m[3] = 0;  m[7] = 0;  m[11] = 0;  m[15] = 1;
 }
 
+#include <GLFW/glfw3.h>
+
+PFNGLGENERATEMIPMAPPROC glGenerateMipmapFuncPtr = nullptr;
+
+void glGenerateMipmap2(GLenum target) {
+	if (!glGenerateMipmapFuncPtr) {
+		glGenerateMipmapFuncPtr = (PFNGLGENERATEMIPMAPPROC)glfwGetProcAddress("glGenerateMipmap");
+		if (!glGenerateMipmapFuncPtr) {
+			glGenerateMipmapFuncPtr = (PFNGLGENERATEMIPMAPPROC)glfwGetProcAddress("glGenerateMipmapEXT");
+		}
+	}
+	if (glGenerateMipmapFuncPtr) {
+		glGenerateMipmapFuncPtr(target);
+	} else {
+		glTexParameteri(target, GL_GENERATE_MIPMAP, GL_TRUE);
+	}
+}
+
 void glInit()
 {
 #ifndef OPENGL_ES

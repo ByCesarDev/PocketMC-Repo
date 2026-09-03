@@ -9,6 +9,7 @@
 
 /*static*/ int  Textures::textureChanges = 0;
 /*static*/ bool Textures::MIPMAP = false;
+/*static*/ int  Textures::MIPMAP_LEVELS = 4;
 /*static*/ const TextureId Textures::InvalidId = -1;
 
 static bool _isSkyBodyTexture(const std::string& resourceName)
@@ -108,6 +109,13 @@ Textures::~Textures()
 		delete dynamicTextures[i];
 }
 
+std::map<std::string, std::vector<TextureData>> Textures::s_atlasLevelsMap;
+
+static unsigned char s_animL1[8 * 8 * 4];
+static unsigned char s_animL2[4 * 4 * 4];
+static unsigned char s_animL3[2 * 2 * 4];
+static unsigned char s_animL4[1 * 1 * 4];
+
 void Textures::clear()
 {
 	for (TextureMap::iterator it = idMap.begin(); it != idMap.end(); ++it) {
@@ -118,6 +126,15 @@ void Textures::clear()
 		if (!(it->second).memoryHandledExternally)
 			delete[] (it->second).data;
 	}
+	for (auto& pair : s_atlasLevelsMap) {
+		for (size_t i = 1; i < pair.second.size(); i++) {
+			if (pair.second[i].data && !pair.second[i].memoryHandledExternally) {
+				delete[] pair.second[i].data;
+				pair.second[i].data = nullptr;
+			}
+		}
+	}
+	s_atlasLevelsMap.clear();
 	idMap.clear();
 	loadedImages.clear();
 
@@ -128,13 +145,9 @@ TextureId Textures::loadAndBindTexture( const std::string& resourceName )
 {
 	//static Stopwatch t;
 
-	//t.start();
 	TextureId id = loadTexture(resourceName);
-	//t.stop();
 	if (id != Textures::InvalidId)
 		bind(id);
-
-	//t.printEvery(1000);
 
 	return id;
 }
@@ -154,7 +167,8 @@ TextureId Textures::loadTexture( const std::string& resourceName, bool inTexture
 
 	TextureData texdata = platform->loadTexture(resourceName, isUrl ? false : useTextureFolder);
 	if (resourceName.find("terrain.png") != std::string::npos || resourceName.find("terrain2.png") != std::string::npos) {
-		BlockAtlasStitcher::stitchAtlas(resourceName, texdata, platform);
+		std::vector<TextureData> atlasLevels = BlockAtlasStitcher::stitchAtlasMultiLevel(resourceName, texdata, platform, Textures::MIPMAP_LEVELS);
+		s_atlasLevelsMap[resourceName] = atlasLevels;
 	}
 	if (_isSkyBodyTexture(resourceName)) {
 		_applySkyBodyAlpha(resourceName, texdata);
@@ -180,13 +194,55 @@ TextureId Textures::assignTexture( const std::string& resourceName, const Textur
 
 	bind(id);
 
-	if (MIPMAP) {
-		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	bool isTerrainAtlas = (resourceName.find("terrain.png") != std::string::npos || resourceName.find("terrain2.png") != std::string::npos);
+
+	if (isTerrainAtlas && s_atlasLevelsMap.find(resourceName) != s_atlasLevelsMap.end()) {
+		const auto& levels = s_atlasLevelsMap[resourceName];
+		int numLevels = std::min((int)levels.size() - 1, Textures::MIPMAP_LEVELS);
+		if (numLevels < 0) numLevels = 0;
+
+		if (numLevels > 0) {
+			glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, numLevels);
+			glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+			glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			for (int lvl = 0; lvl <= numLevels; lvl++) {
+				glTexImage2D2(GL_TEXTURE_2D, lvl, GL_RGBA, levels[lvl].w, levels[lvl].h, 0, GL_RGBA, GL_UNSIGNED_BYTE, levels[lvl].data);
+			}
+		} else {
+			glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+			glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexImage2D2(GL_TEXTURE_2D, 0, GL_RGBA, levels[0].w, levels[0].h, 0, GL_RGBA, GL_UNSIGNED_BYTE, levels[0].data);
+		}
+
+		if (clamp) {
+			glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		} else {
+			glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		}
+
+		idMap.insert(std::make_pair(resourceName, id));
+		loadedImages.insert(std::make_pair(id, img));
+		return id;
+	}
+
+	int levels = isTerrainAtlas ? Textures::MIPMAP_LEVELS : 0;
+	if (levels > 4) levels = 4;
+	if (levels < 0) levels = 0;
+
+	if (levels > 0) {
+		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, levels);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	} else {
+		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
+
 	if (blur) {
 		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -231,7 +287,6 @@ TextureId Textures::assignTexture( const std::string& resourceName, const Textur
             break;
     }
 
-    //LOGI("Adding id: %d to map\n", id);
 	idMap.insert(std::make_pair(resourceName, id));
 	loadedImages.insert(std::make_pair(id, img));
 
@@ -260,7 +315,7 @@ int* Textures::loadTexturePixels(TextureId texId, const std::string& resourceNam
 		int g = raw[i * 4 + 1];
 		int b = raw[i * 4 + 2];
 		int a = raw[i * 4 + 3];
-		pixels[i] = (a << 24) | (r << 16) | (g << 8) | (b);
+		pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
 	}
 	return pixels;
 }
@@ -271,15 +326,32 @@ void Textures::tick(bool uploadToGraphicsCard)
 		DynamicTexture* tex = dynamicTextures[i];
 		tex->tick();
 
-        if (uploadToGraphicsCard) {
-            tex->bindTexture(this);
-		    for (int xx = 0; xx < tex->replicate; xx++)
-		    for (int yy = 0; yy < tex->replicate; yy++) {
-			    glTexSubImage2D2(GL_TEXTURE_2D, 0, tex->tex % 16 * 16 + xx * 16,
-				    tex->tex / 16 * 16 + yy * 16, 16, 16,
-				    GL_RGBA, GL_UNSIGNED_BYTE, tex->pixels);
-		    }
-        }
+		if (uploadToGraphicsCard) {
+			tex->bindTexture(this);
+			for (int xx = 0; xx < tex->replicate; xx++) {
+				for (int yy = 0; yy < tex->replicate; yy++) {
+					int tileX = (tex->tex % 16) + xx;
+					int tileY = (tex->tex / 16) + yy;
+
+					glTexSubImage2D2(GL_TEXTURE_2D, 0, tileX * 16, tileY * 16, 16, 16, GL_RGBA, GL_UNSIGNED_BYTE, tex->pixels);
+
+					if (MIPMAP_LEVELS > 0) {
+						TextureCategory cat = (dynamic_cast<WaterTexture*>(tex) || dynamic_cast<WaterSideTexture*>(tex)) ? CAT_TRANSLUCENT : CAT_OPAQUE;
+						unsigned char* bufList[5] = { tex->pixels, s_animL1, s_animL2, s_animL3, s_animL4 };
+
+						for (int lvl = 1; lvl <= MIPMAP_LEVELS && lvl <= 4; lvl++) {
+							int prevS = 16 >> (lvl - 1);
+							int currS = 16 >> lvl;
+							BlockAtlasStitcher::downsampleTile(bufList[lvl - 1], prevS, prevS, bufList[lvl], cat);
+
+							int subX = tileX * currS;
+							int subY = tileY * currS;
+							glTexSubImage2D2(GL_TEXTURE_2D, lvl, subX, subY, currS, currS, GL_RGBA, GL_UNSIGNED_BYTE, bufList[lvl]);
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -291,39 +363,9 @@ void Textures::addDynamicTexture( DynamicTexture* dynamicTexture )
 
 void Textures::reloadAll()
 {
-	//TexturePack skin = skins.selected;
-
-	//for (int id : loadedImages.keySet()) {
-	//    BufferedImage image = loadedImages.get(id);
-	//    loadTexture(image, id);
-	//}
-
-	////for (HttpTexture httpTexture : httpTextures.values()) {
-	////    httpTexture.isLoaded = false;
-	////}
-
-	//for (std::string name : idMap.keySet()) {
-	//    try {
-	//        BufferedImage image;
-	//        if (name.startsWith("##")) {
-	//            image = makeStrip(readImage(skin.getResource(name.substring(2))));
-	//        } else if (name.startsWith("%clamp%")) {
-	//            clamp = true;
-	//            image = readImage(skin.getResource(name.substring(7)));
-	//        } else if (name.startsWith("%blur%")) {
-	//            blur = true;
-	//            image = readImage(skin.getResource(name.substring(6)));
-	//        } else {
-	//            image = readImage(skin.getResource(name));
-	//        }
-	//        int id = idMap.get(name);
-	//        loadTexture(image, id);
-	//        blur = false;
-	//        clamp = false;
-	//    } catch (IOException e) {
-	//        e.printStackTrace();
-	//    }
-	//}
+	clear();
+	loadAndBindTexture("terrain.png");
+	loadAndBindTexture("terrain2.png");
 }
 
 int Textures::smoothBlend( int c0, int c1 )

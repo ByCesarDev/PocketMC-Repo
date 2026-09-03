@@ -36,6 +36,15 @@
 		#define glClearDepthf(x)        glClearDepth(x)
 		#define glDepthRangef(a,b)      glDepthRange(a,b)
     #endif
+
+#ifndef PFNGLGENERATEMIPMAPPROC
+typedef void (APIENTRYP PFNGLGENERATEMIPMAPPROC)(GLenum target);
+#endif
+extern PFNGLGENERATEMIPMAPPROC glGenerateMipmapFuncPtr;
+void glGenerateMipmap2(GLenum target);
+#ifndef glGenerateMipmap
+#define glGenerateMipmap(target) glGenerateMipmap2(target)
+#endif
 // #else
 //     // Uglyness to fix redeclaration issues
 //     #ifdef WIN32

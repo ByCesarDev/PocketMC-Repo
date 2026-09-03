@@ -226,7 +226,8 @@ static const std::vector<BlockAtlasStitcher::TextureMapping> s_mappings = {
     { "leaves_jungle_carried.png", 51, "terrain2.png" },
     { "leaves_acacia_carried.png", 52, "terrain2.png" },
     { "leaves_big_oak_carried.png", 53, "terrain2.png" },
-    { "sapling_big_oak.png", 54, "terrain2.png" }
+    { "sapling_big_oak.png", 54, "terrain2.png" },
+    { "leaves_jungle_fruits.png", 55, "terrain2.png" }
 };
 
 const std::vector<BlockAtlasStitcher::TextureMapping>& BlockAtlasStitcher::getTextureMappings() {
@@ -332,4 +333,234 @@ void BlockAtlasStitcher::stitchAtlas(const std::string& atlasResourceName, Textu
             }
         }
     }
+}
+
+TextureCategory BlockAtlasStitcher::getTextureCategory(const std::string& filename) {
+    std::string name = filename;
+    for (auto& c : name) c = (char)tolower(c);
+    if (name.find("leaves") != std::string::npos ||
+        name.find("sapling") != std::string::npos ||
+        name.find("flower") != std::string::npos ||
+        name.find("grass") != std::string::npos ||
+        name.find("crop") != std::string::npos ||
+        name.find("wheat") != std::string::npos ||
+        name.find("dandelion") != std::string::npos ||
+        name.find("rose") != std::string::npos ||
+        name.find("fern") != std::string::npos ||
+        name.find("vine") != std::string::npos ||
+        name.find("sugar_cane") != std::string::npos ||
+        name.find("nether_wart") != std::string::npos ||
+        name.find("reeds") != std::string::npos ||
+        name.find("fire") != std::string::npos ||
+        name.find("torch") != std::string::npos ||
+        name.find("cactus") != std::string::npos) {
+        return CAT_CUTOUT;
+    }
+    if (name.find("water") != std::string::npos ||
+        name.find("ice") != std::string::npos ||
+        name.find("glass") != std::string::npos) {
+        return CAT_TRANSLUCENT;
+    }
+    return CAT_OPAQUE;
+}
+
+void BlockAtlasStitcher::downsampleTile(const unsigned char* src, int srcW, int srcH, unsigned char* dst, TextureCategory cat) {
+    int dstW = srcW / 2;
+    int dstH = srcH / 2;
+    if (dstW < 1) dstW = 1;
+    if (dstH < 1) dstH = 1;
+
+    const int alphaThreshold = 25; // 0.1 * 255 (PocketMC alpha test cutoff)
+
+    float origCoverage = 0.0f;
+    if (cat == CAT_CUTOUT) {
+        int passCount = 0;
+        int totalPix = srcW * srcH;
+        for (int i = 0; i < totalPix; i++) {
+            if (src[i * 4 + 3] >= alphaThreshold) {
+                passCount++;
+            }
+        }
+        origCoverage = (float)passCount / (float)totalPix;
+    }
+
+    struct RawTexel {
+        unsigned char r, g, b, a;
+        int idx;
+    };
+    std::vector<RawTexel> texels(dstW * dstH);
+
+    for (int y = 0; y < dstH; y++) {
+        for (int x = 0; x < dstW; x++) {
+            int srcX0 = x * 2;
+            int srcY0 = y * 2;
+            int srcX1 = std::min(srcX0 + 1, srcW - 1);
+            int srcY1 = std::min(srcY0 + 1, srcH - 1);
+
+            int i00 = (srcY0 * srcW + srcX0) * 4;
+            int i10 = (srcY0 * srcW + srcX1) * 4;
+            int i01 = (srcY1 * srcW + srcX0) * 4;
+            int i11 = (srcY1 * srcW + srcX1) * 4;
+
+            int idxs[4] = { i00, i10, i01, i11 };
+
+            if (cat == CAT_OPAQUE) {
+                int r = 0, g = 0, b = 0, a = 0;
+                for (int k = 0; k < 4; k++) {
+                    r += src[idxs[k] + 0];
+                    g += src[idxs[k] + 1];
+                    b += src[idxs[k] + 2];
+                    a += src[idxs[k] + 3];
+                }
+                int dstIdx = y * dstW + x;
+                texels[dstIdx] = { (unsigned char)(r / 4), (unsigned char)(g / 4), (unsigned char)(b / 4), (unsigned char)(a / 4), dstIdx };
+            } else {
+                // Alpha-weighted RGB
+                float rSum = 0.0f, gSum = 0.0f, bSum = 0.0f, wSum = 0.0f;
+                int aSum = 0;
+                for (int k = 0; k < 4; k++) {
+                    float w = src[idxs[k] + 3] / 255.0f;
+                    rSum += src[idxs[k] + 0] * w;
+                    gSum += src[idxs[k] + 1] * w;
+                    bSum += src[idxs[k] + 2] * w;
+                    wSum += w;
+                    aSum += src[idxs[k] + 3];
+                }
+                unsigned char r = 0, g = 0, b = 0;
+                if (wSum > 0.0f) {
+                    r = (unsigned char)std::min(255.0f, rSum / wSum);
+                    g = (unsigned char)std::min(255.0f, gSum / wSum);
+                    b = (unsigned char)std::min(255.0f, bSum / wSum);
+                }
+                unsigned char a = (unsigned char)(aSum / 4);
+                int dstIdx = y * dstW + x;
+                texels[dstIdx] = { r, g, b, a, dstIdx };
+            }
+        }
+    }
+
+    if (cat == CAT_CUTOUT && origCoverage > 0.0f) {
+        int totalDstPix = dstW * dstH;
+        int targetPassCount = (int)std::round(origCoverage * totalDstPix);
+        if (targetPassCount < 1 && origCoverage > 0.0f) targetPassCount = 1;
+
+        std::vector<RawTexel> sortedTexels = texels;
+        std::sort(sortedTexels.begin(), sortedTexels.end(), [](const RawTexel& a, const RawTexel& b) {
+            return a.a > b.a;
+        });
+
+        for (int i = 0; i < totalDstPix; i++) {
+            int origIdx = sortedTexels[i].idx;
+            if (i < targetPassCount) {
+                if (texels[origIdx].a < alphaThreshold) {
+                    texels[origIdx].a = 255;
+                }
+            } else {
+                if (sortedTexels[i].a < alphaThreshold) {
+                    texels[origIdx].a = 0;
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < dstW * dstH; i++) {
+        dst[i * 4 + 0] = texels[i].r;
+        dst[i * 4 + 1] = texels[i].g;
+        dst[i * 4 + 2] = texels[i].b;
+        dst[i * 4 + 3] = texels[i].a;
+    }
+}
+
+std::vector<TextureData> BlockAtlasStitcher::stitchAtlasMultiLevel(const std::string& atlasResourceName, TextureData& atlasL0, AppPlatform* platform, int maxLevels) {
+    stitchAtlas(atlasResourceName, atlasL0, platform);
+
+    int actualLevels = std::min(maxLevels, 4);
+    std::vector<TextureData> atlasLevels(actualLevels + 1);
+    atlasLevels[0] = atlasL0;
+
+    int baseW = atlasL0.w > 0 ? atlasL0.w : 256;
+    int baseH = atlasL0.h > 0 ? atlasL0.h : 256;
+
+    for (int lvl = 1; lvl <= actualLevels; lvl++) {
+        int w = baseW >> lvl;
+        int h = baseH >> lvl;
+        atlasLevels[lvl].w = w;
+        atlasLevels[lvl].h = h;
+        atlasLevels[lvl].format = TEXF_UNCOMPRESSED_8888;
+        atlasLevels[lvl].memoryHandledExternally = false;
+        atlasLevels[lvl].data = new unsigned char[w * h * 4];
+        std::memset(atlasLevels[lvl].data, 0, w * h * 4);
+    }
+
+    std::map<int, TextureCategory> slotCategories;
+    std::string cleanAtlasName = atlasResourceName;
+    size_t lastSlash = cleanAtlasName.find_last_of("/\\");
+    if (lastSlash != std::string::npos) {
+        cleanAtlasName = cleanAtlasName.substr(lastSlash + 1);
+    }
+
+    for (const auto& entry : s_mappings) {
+        if (entry.atlasName == cleanAtlasName) {
+            slotCategories[entry.index] = getTextureCategory(entry.filename);
+        }
+    }
+
+    for (int slot = 0; slot < 256; slot++) {
+        TextureCategory cat = CAT_OPAQUE;
+        auto catIt = slotCategories.find(slot);
+        if (catIt != slotCategories.end()) {
+            cat = catIt->second;
+        }
+
+        unsigned char tileL0[16 * 16 * 4];
+        unsigned char tileL1[8 * 8 * 4];
+        unsigned char tileL2[4 * 4 * 4];
+        unsigned char tileL3[2 * 2 * 4];
+        unsigned char tileL4[1 * 1 * 4];
+
+        unsigned char* tileBufs[5] = { tileL0, tileL1, tileL2, tileL3, tileL4 };
+
+        int tileX = slot & 0xf;
+        int tileY = (slot >> 4) & 0xf;
+        int cellW = baseW / 16;
+        int cellH = baseH / 16;
+        int startX = tileX * cellW;
+        int startY = tileY * cellH;
+
+        for (int y = 0; y < cellH; y++) {
+            for (int x = 0; x < cellW; x++) {
+                int srcIdx = ((startY + y) * baseW + (startX + x)) * 4;
+                int dstIdx = (y * cellW + x) * 4;
+                tileL0[dstIdx + 0] = atlasL0.data[srcIdx + 0];
+                tileL0[dstIdx + 1] = atlasL0.data[srcIdx + 1];
+                tileL0[dstIdx + 2] = atlasL0.data[srcIdx + 2];
+                tileL0[dstIdx + 3] = atlasL0.data[srcIdx + 3];
+            }
+        }
+
+        for (int lvl = 1; lvl <= actualLevels; lvl++) {
+            int prevS = 16 >> (lvl - 1);
+            int currS = 16 >> lvl;
+            downsampleTile(tileBufs[lvl - 1], prevS, prevS, tileBufs[lvl], cat);
+
+            int lvlAtlasW = baseW >> lvl;
+            int lvlCellW = lvlAtlasW / 16;
+            int lvlCellH = lvlAtlasW / 16;
+            int lvlStartX = tileX * lvlCellW;
+            int lvlStartY = tileY * lvlCellH;
+
+            for (int y = 0; y < lvlCellH; y++) {
+                for (int x = 0; x < lvlCellW; x++) {
+                    int srcIdx = (y * lvlCellW + x) * 4;
+                    int dstIdx = ((lvlStartY + y) * lvlAtlasW + (lvlStartX + x)) * 4;
+                    atlasLevels[lvl].data[dstIdx + 0] = tileBufs[lvl][srcIdx + 0];
+                    atlasLevels[lvl].data[dstIdx + 1] = tileBufs[lvl][srcIdx + 1];
+                    atlasLevels[lvl].data[dstIdx + 2] = tileBufs[lvl][srcIdx + 2];
+                    atlasLevels[lvl].data[dstIdx + 3] = tileBufs[lvl][srcIdx + 3];
+                }
+            }
+        }
+    }
+
+    return atlasLevels;
 }

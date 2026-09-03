@@ -1086,6 +1086,7 @@ void TileRenderer::renderBlock(Tile* tt, LevelSource* level, int x, int y, int z
 bool TileRenderer::tesselateBlockInWorldWithAmbienceOcclusion( Tile* tt, int pX, int pY, int pZ, float pBaseRed, float pBaseGreen, float pBaseBlue )
 {
 	applyAmbienceOcclusion = true;
+	bool isJungleWorld = (tt == (Tile*)Tile::jungleLeaves || (Tile::leaves && tt == (Tile*)Tile::leaves && level->getData(pX, pY, pZ) == LeafTile::JUNGLE_LEAF));
 	bool i = false;
 	float ll1 = ll000;
 	float ll2 = ll000;
@@ -1180,6 +1181,16 @@ bool TileRenderer::tesselateBlockInWorldWithAmbienceOcclusion( Tile* tt, int pX,
 				renderFaceDown(tt, (float) pX, (float) pY, (float) pZ, tex0 & ~Tile::TEXTURE_ALT_FLAG);
 				i = true;
 			}
+			if (isJungleWorld && (atlasFilter == -1 || atlasFilter == 1)) {
+				c1r = c2r = c3r = c4r = 0.5f;
+				c1g = c2g = c3g = c4g = 0.5f;
+				c1b = c2b = c3b = c4b = 0.5f;
+				c1r *= ll1; c1g *= ll1; c1b *= ll1;
+				c2r *= ll2; c2g *= ll2; c2b *= ll2;
+				c3r *= ll3; c3g *= ll3; c3b *= ll3;
+				c4r *= ll4; c4g *= ll4; c4b *= ll4;
+				renderFaceDown(tt, (float) pX, (float) pY, (float) pZ, 55);
+			}
 		}
 	}
 	if ((noCulling) || (tt->shouldRenderFace(level, pX, pY + 1, pZ, 1))) {
@@ -1239,6 +1250,16 @@ bool TileRenderer::tesselateBlockInWorldWithAmbienceOcclusion( Tile* tt, int pX,
 			if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt1) || (atlasFilter == 1 && isAlt1)) {
 				renderFaceUp(tt, (float) pX, (float) pY, (float) pZ, tex1 & ~Tile::TEXTURE_ALT_FLAG);
 				i = true;
+			}
+			if (isJungleWorld && (atlasFilter == -1 || atlasFilter == 1)) {
+				c1r = c2r = c3r = c4r = 1.0f;
+				c1g = c2g = c3g = c4g = 1.0f;
+				c1b = c2b = c3b = c4b = 1.0f;
+				c1r *= ll1; c1g *= ll1; c1b *= ll1;
+				c2r *= ll2; c2g *= ll2; c2b *= ll2;
+				c3r *= ll3; c3g *= ll3; c3b *= ll3;
+				c4r *= ll4; c4g *= ll4; c4b *= ll4;
+				renderFaceUp(tt, (float) pX, (float) pY, (float) pZ, 55);
 			}
 		}
 	}
@@ -1306,6 +1327,16 @@ bool TileRenderer::tesselateBlockInWorldWithAmbienceOcclusion( Tile* tt, int pX,
 					c4r *= pBaseRed; c4g *= pBaseGreen; c4b *= pBaseBlue;
 
 					renderNorth(tt, (float) pX, (float) pY, (float) pZ - 0.001f, 38);
+				}
+				if (isJungleWorld && (atlasFilter == -1 || atlasFilter == 1)) {
+					c1r = c2r = c3r = c4r = 0.8f;
+					c1g = c2g = c3g = c4g = 0.8f;
+					c1b = c2b = c3b = c4b = 0.8f;
+					c1r *= ll1; c1g *= ll1; c1b *= ll1;
+					c2r *= ll2; c2g *= ll2; c2b *= ll2;
+					c3r *= ll3; c3g *= ll3; c3b *= ll3;
+					c4r *= ll4; c4g *= ll4; c4b *= ll4;
+					renderNorth(tt, (float) pX, (float) pY, (float) pZ - 0.0005f, 55);
 				}
 				i = true;
 			}
@@ -1377,6 +1408,16 @@ bool TileRenderer::tesselateBlockInWorldWithAmbienceOcclusion( Tile* tt, int pX,
 
 					renderSouth(tt, (float) pX, (float) pY, (float) pZ + 0.001f, 38);
 				}
+				if (isJungleWorld && (atlasFilter == -1 || atlasFilter == 1)) {
+					c1r = c2r = c3r = c4r = 0.8f;
+					c1g = c2g = c3g = c4g = 0.8f;
+					c1b = c2b = c3b = c4b = 0.8f;
+					c1r *= ll1; c1g *= ll1; c1b *= ll1;
+					c2r *= ll2; c2g *= ll2; c2b *= ll2;
+					c3r *= ll3; c3g *= ll3; c3b *= ll3;
+					c4r *= ll4; c4g *= ll4; c4b *= ll4;
+					renderSouth(tt, (float) pX, (float) pY, (float) pZ + 0.0005f, 55);
+				}
 				i = true;
 			}
 		}
@@ -1445,6 +1486,16 @@ bool TileRenderer::tesselateBlockInWorldWithAmbienceOcclusion( Tile* tt, int pX,
 					c4r *= pBaseRed; c4g *= pBaseGreen; c4b *= pBaseBlue;
 
 					renderWest(tt, (float) pX - 0.001f, (float) pY, (float) pZ, 38);
+				}
+				if (isJungleWorld && (atlasFilter == -1 || atlasFilter == 1)) {
+					c1r = c2r = c3r = c4r = 0.6f;
+					c1g = c2g = c3g = c4g = 0.6f;
+					c1b = c2b = c3b = c4b = 0.6f;
+					c1r *= ll1; c1g *= ll1; c1b *= ll1;
+					c2r *= ll2; c2g *= ll2; c2b *= ll2;
+					c3r *= ll3; c3g *= ll3; c3b *= ll3;
+					c4r *= ll4; c4g *= ll4; c4b *= ll4;
+					renderWest(tt, (float) pX - 0.0005f, (float) pY, (float) pZ, 55);
 				}
 				i = true;
 			}
@@ -1515,6 +1566,16 @@ bool TileRenderer::tesselateBlockInWorldWithAmbienceOcclusion( Tile* tt, int pX,
 					c4r *= pBaseRed; c4g *= pBaseGreen; c4b *= pBaseBlue;
 
 					renderEast(tt, (float) pX + 0.001f, (float) pY, (float) pZ, 38);
+				}
+				if (isJungleWorld && (atlasFilter == -1 || atlasFilter == 1)) {
+					c1r = c2r = c3r = c4r = 0.6f;
+					c1g = c2g = c3g = c4g = 0.6f;
+					c1b = c2b = c3b = c4b = 0.6f;
+					c1r *= ll1; c1g *= ll1; c1b *= ll1;
+					c2r *= ll2; c2g *= ll2; c2b *= ll2;
+					c3r *= ll3; c3g *= ll3; c3b *= ll3;
+					c4r *= ll4; c4g *= ll4; c4b *= ll4;
+					renderEast(tt, (float) pX + 0.0005f, (float) pY, (float) pZ, 55);
 				}
 				i = true;
 			}
@@ -2187,18 +2248,21 @@ void TileRenderer::renderFaceDown( Tile* tt, float x, float y, float z, int tex 
 	int xt = (tex & 0xf) << 4;
 	int yt = tex & 0xf0;
 
-	float u0 = (xt + tt->xx0 * 16) / 256.0f;
-	float u1 = (xt + tt->xx1 * 16 - 0.01f) / 256.0f;
-	float v0 = (yt + tt->zz0 * 16) / 256.0f;
-	float v1 = (yt + tt->zz1 * 16 - 0.01f) / 256.0f;
+	const float atlasSize = 256.0f;
+	const float epsilon = 0.5f / atlasSize;
+
+	float u0 = (xt + tt->xx0 * 16.0f) / atlasSize + epsilon;
+	float u1 = (xt + tt->xx1 * 16.0f) / atlasSize - epsilon;
+	float v0 = (yt + tt->zz0 * 16.0f) / atlasSize + epsilon;
+	float v1 = (yt + tt->zz1 * 16.0f) / atlasSize - epsilon;
 
 	if (tt->xx0 < 0 || tt->xx1 > 1) {
-		u0 = (xt + 0 * 15.99f) / 256.0f;
-		u1 = (xt + 1 * 15.99f) / 256.0f;
+		u0 = (xt + 0.5f) / atlasSize;
+		u1 = (xt + 15.5f) / atlasSize;
 	}
 	if (tt->zz0 < 0 || tt->zz1 > 1) {
-		v0 = (yt + 0 * 15.99f) / 256.0f;
-		v1 = (yt + 1 * 15.99f) / 256.0f;
+		v0 = (yt + 0.5f) / atlasSize;
+		v1 = (yt + 15.5f) / atlasSize;
 	}
 
 	float x0 = x + tt->xx0;
@@ -2243,18 +2307,21 @@ void TileRenderer::renderFaceUp( Tile* tt, float x, float y, float z, int tex )
 	int xt = (tex & 0xf) << 4;
 	int yt = tex & 0xf0;
 
-	float u0 = (xt + tt->xx0 * 16) / 256.0f;
-	float u1 = (xt + tt->xx1 * 16 - 0.01f) / 256.0f;
-	float v0 = (yt + tt->zz0 * 16) / 256.0f;
-	float v1 = (yt + tt->zz1 * 16 - 0.01f) / 256.0f;
+	const float atlasSize = 256.0f;
+	const float epsilon = 0.5f / atlasSize;
+
+	float u0 = (xt + tt->xx0 * 16.0f) / atlasSize + epsilon;
+	float u1 = (xt + tt->xx1 * 16.0f) / atlasSize - epsilon;
+	float v0 = (yt + tt->zz0 * 16.0f) / atlasSize + epsilon;
+	float v1 = (yt + tt->zz1 * 16.0f) / atlasSize - epsilon;
 
 	if (tt->xx0 < 0 || tt->xx1 > 1) {
-		u0 = (xt + 0 * 15.99f) / 256.0f;
-		u1 = (xt + 1 * 15.99f) / 256.0f;
+		u0 = (xt + 0.5f) / atlasSize;
+		u1 = (xt + 15.5f) / atlasSize;
 	}
 	if (tt->zz0 < 0 || tt->zz1 > 1) {
-		v0 = (yt + 0 * 15.99f) / 256.0f;
-		v1 = (yt + 1 * 15.99f) / 256.0f;
+		v0 = (yt + 0.5f) / atlasSize;
+		v1 = (yt + 15.5f) / atlasSize;
 	}
 
 	float x0 = x + tt->xx0;
@@ -2298,10 +2365,14 @@ void TileRenderer::renderNorth( Tile* tt, float x, float y, float z, int tex )
 	if (fixedTexture >= 0) tex = fixedTexture;
 	int xt = (tex & 0xf) << 4;
 	int yt = tex & 0xf0;
-	float u0 = (xt + tt->xx0 * 16) / 256.0f;
-	float u1 = (xt + tt->xx1 * 16 - 0.01f) / 256.0f;
-	float v0 = (yt + 16 - tt->yy1 * 16) / 256.0f;
-	float v1 = (yt + 16 - tt->yy0 * 16 - 0.01f) / 256.0f;
+
+	const float atlasSize = 256.0f;
+	const float epsilon = 0.5f / atlasSize;
+
+	float u0 = (xt + tt->xx0 * 16.0f) / atlasSize + epsilon;
+	float u1 = (xt + tt->xx1 * 16.0f) / atlasSize - epsilon;
+	float v0 = (yt + 16.0f - tt->yy1 * 16.0f) / atlasSize + epsilon;
+	float v1 = (yt + 16.0f - tt->yy0 * 16.0f) / atlasSize - epsilon;
 	if (xFlipTexture) {
 		float tmp = u0;
 		u0 = u1;
@@ -2309,12 +2380,12 @@ void TileRenderer::renderNorth( Tile* tt, float x, float y, float z, int tex )
 	}
 
 	if (tt->xx0 < 0 || tt->xx1 > 1) {
-		u0 = (xt + 0 * 15.99f) / 256.0f;
-		u1 = (xt + 1 * 15.99f) / 256.0f;
+		u0 = (xt + 0.5f) / atlasSize;
+		u1 = (xt + 15.5f) / atlasSize;
 	}
 	if (tt->yy0 < 0 || tt->yy1 > 1) {
-		v0 = (yt + 0 * 15.99f) / 256.0f;
-		v1 = (yt + 1 * 15.99f) / 256.0f;
+		v0 = (yt + 0.5f) / atlasSize;
+		v1 = (yt + 15.5f) / atlasSize;
 	}
 
 	float x0 = x + tt->xx0;
@@ -2359,10 +2430,13 @@ void TileRenderer::renderSouth( Tile* tt, float x, float y, float z, int tex )
 	int xt = (tex & 0xf) << 4;
 	int yt = tex & 0xf0;
 
-	float u0 = (xt + tt->xx0 * 16) / 256.0f;
-	float u1 = (xt + tt->xx1 * 16 - 0.01f) / 256.0f;
-	float v0 = (yt + 16 - tt->yy1 * 16) / 256.0f;
-	float v1 = (yt + 16 - tt->yy0 * 16 - 0.01f) / 256.0f;
+	const float atlasSize = 256.0f;
+	const float epsilon = 0.5f / atlasSize;
+
+	float u0 = (xt + tt->xx0 * 16.0f) / atlasSize + epsilon;
+	float u1 = (xt + tt->xx1 * 16.0f) / atlasSize - epsilon;
+	float v0 = (yt + 16.0f - tt->yy1 * 16.0f) / atlasSize + epsilon;
+	float v1 = (yt + 16.0f - tt->yy0 * 16.0f) / atlasSize - epsilon;
 	if (xFlipTexture) {
 		float tmp = u0;
 		u0 = u1;
@@ -2370,12 +2444,12 @@ void TileRenderer::renderSouth( Tile* tt, float x, float y, float z, int tex )
 	}
 
 	if (tt->xx0 < 0 || tt->xx1 > 1) {
-		u0 = (xt + 0 * 15.99f) / 256.0f;
-		u1 = (xt + 1 * 15.99f) / 256.0f;
+		u0 = (xt + 0.5f) / atlasSize;
+		u1 = (xt + 15.5f) / atlasSize;
 	}
 	if (tt->yy0 < 0 || tt->yy1 > 1) {
-		v0 = (yt + 0 * 15.99f) / 256.0f;
-		v1 = (yt + 1 * 15.99f) / 256.0f;
+		v0 = (yt + 0.5f) / atlasSize;
+		v1 = (yt + 15.5f) / atlasSize;
 	}
 
 	float x0 = x + tt->xx0;
@@ -2420,10 +2494,13 @@ void TileRenderer::renderWest( Tile* tt, float x, float y, float z, int tex )
 	int xt = (tex & 0xf) << 4;
 	int yt = tex & 0xf0;
 
-	float u0 = (xt + tt->zz0 * 16) / 256.0f;
-	float u1 = (xt + tt->zz1 * 16 - 0.01f) / 256.0f;
-	float v0 = (yt + 16 - tt->yy1 * 16) / 256.0f;
-	float v1 = (yt + 16 - tt->yy0 * 16 - 0.01f) / 256.0f;
+	const float atlasSize = 256.0f;
+	const float epsilon = 0.5f / atlasSize;
+
+	float u0 = (xt + tt->zz0 * 16.0f) / atlasSize + epsilon;
+	float u1 = (xt + tt->zz1 * 16.0f) / atlasSize - epsilon;
+	float v0 = (yt + 16.0f - tt->yy1 * 16.0f) / atlasSize + epsilon;
+	float v1 = (yt + 16.0f - tt->yy0 * 16.0f) / atlasSize - epsilon;
 	if (xFlipTexture) {
 		float tmp = u0;
 		u0 = u1;
@@ -2431,12 +2508,12 @@ void TileRenderer::renderWest( Tile* tt, float x, float y, float z, int tex )
 	}
 
 	if (tt->zz0 < 0 || tt->zz1 > 1) {
-		u0 = (xt + 0 * 15.99f) / 256.0f;
-		u1 = (xt + 1 * 15.99f) / 256.0f;
+		u0 = (xt + 0.5f) / atlasSize;
+		u1 = (xt + 15.5f) / atlasSize;
 	}
 	if (tt->yy0 < 0 || tt->yy1 > 1) {
-		v0 = (yt + 0 * 15.99f) / 256.0f;
-		v1 = (yt + 1 * 15.99f) / 256.0f;
+		v0 = (yt + 0.5f) / atlasSize;
+		v1 = (yt + 15.5f) / atlasSize;
 	}
 
 	float x0 = x + tt->xx0;
@@ -2481,10 +2558,13 @@ void TileRenderer::renderEast( Tile* tt, float x, float y, float z, int tex )
 	int xt = (tex & 0xf) << 4;
 	int yt = tex & 0xf0;
 
-	float u0 = (xt + tt->zz0 * 16) / 256.0f;
-	float u1 = (xt + tt->zz1 * 16 - 0.01f) / 256.0f;
-	float v0 = (yt + 16 - tt->yy1 * 16) / 256.0f;
-	float v1 = (yt + 16 - tt->yy0 * 16 - 0.01f) / 256.0f;
+	const float atlasSize = 256.0f;
+	const float epsilon = 0.5f / atlasSize;
+
+	float u0 = (xt + tt->zz0 * 16.0f) / atlasSize + epsilon;
+	float u1 = (xt + tt->zz1 * 16.0f) / atlasSize - epsilon;
+	float v0 = (yt + 16.0f - tt->yy1 * 16.0f) / atlasSize + epsilon;
+	float v1 = (yt + 16.0f - tt->yy0 * 16.0f) / atlasSize - epsilon;
 	if (xFlipTexture) {
 		float tmp = u0;
 		u0 = u1;
@@ -2492,12 +2572,12 @@ void TileRenderer::renderEast( Tile* tt, float x, float y, float z, int tex )
 	}
 
 	if (tt->zz0 < 0 || tt->zz1 > 1) {
-		u0 = (xt + 0 * 15.99f) / 256.0f;
-		u1 = (xt + 1 * 15.99f) / 256.0f;
+		u0 = (xt + 0.5f) / atlasSize;
+		u1 = (xt + 15.5f) / atlasSize;
 	}
 	if (tt->yy0 < 0 || tt->yy1 > 1) {
-		v0 = (yt + 0 * 15.99f) / 256.0f;
-		v1 = (yt + 1 * 15.99f) / 256.0f;
+		v0 = (yt + 0.5f) / atlasSize;
+		v1 = (yt + 15.5f) / atlasSize;
 	}
 
 	float x1 = x + tt->xx1;
@@ -2549,6 +2629,7 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 		|| (Tile::jungleLeaves && tile == (Tile*)Tile::jungleLeaves)
 		|| (Tile::acaciaLeaves && tile == (Tile*)Tile::acaciaLeaves)
 		|| (Tile::darkOakLeaves && tile == (Tile*)Tile::darkOakLeaves));
+	bool isJungleLeaf = (tile == (Tile*)Tile::jungleLeaves || (tile == (Tile*)Tile::leaves && data == LeafTile::JUNGLE_LEAF));
 
 	if (!isGrassTile && !isLeafTile) {
 		tr = tg = tb = 1.0f;
@@ -2568,6 +2649,10 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
 			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0, data) & ~Tile::TEXTURE_ALT_FLAG);
+			if (isJungleLeaf) {
+				t.color(1.0f, 1.0f, 1.0f);
+				renderFaceDown(tile, 0, 0, 0, 55);
+			}
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
 			renderFaceDown(tile, 0, 0, 0, tile->getTexture(0, data) & ~Tile::TEXTURE_ALT_FLAG);
@@ -2580,6 +2665,10 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
 			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1, data) & ~Tile::TEXTURE_ALT_FLAG);
+			if (isJungleLeaf) {
+				t.color(1.0f, 1.0f, 1.0f);
+				renderFaceUp(tile, 0, 0, 0, 55);
+			}
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
 			renderFaceUp(tile, 0, 0, 0, tile->getTexture(1, data) & ~Tile::TEXTURE_ALT_FLAG);
@@ -2594,6 +2683,10 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
 			renderNorth(tile, 0, 0, 0, tile->getTexture(2, data) & ~Tile::TEXTURE_ALT_FLAG);
+			if (isJungleLeaf) {
+				t.color(1.0f, 1.0f, 1.0f);
+				renderNorth(tile, 0, 0, -0.0005f, 55);
+			}
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
 			renderNorth(tile, 0, 0, 0, tile->getTexture(2, data) & ~Tile::TEXTURE_ALT_FLAG);
@@ -2608,6 +2701,10 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
 			renderSouth(tile, 0, 0, 0, tile->getTexture(3, data) & ~Tile::TEXTURE_ALT_FLAG);
+			if (isJungleLeaf) {
+				t.color(1.0f, 1.0f, 1.0f);
+				renderSouth(tile, 0, 0, 0.0005f, 55);
+			}
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
 			renderSouth(tile, 0, 0, 0, tile->getTexture(3, data) & ~Tile::TEXTURE_ALT_FLAG);
@@ -2622,6 +2719,10 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
 			renderWest(tile, 0, 0, 0, tile->getTexture(4, data) & ~Tile::TEXTURE_ALT_FLAG);
+			if (isJungleLeaf) {
+				t.color(1.0f, 1.0f, 1.0f);
+				renderWest(tile, -0.0005f, 0, 0, 55);
+			}
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
 			renderWest(tile, 0, 0, 0, tile->getTexture(4, data) & ~Tile::TEXTURE_ALT_FLAG);
@@ -2636,6 +2737,10 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 		} else if (isLeafTile) {
 			t.color(tr, tg, tb);
 			renderEast(tile, 0, 0, 0, tile->getTexture(5, data) & ~Tile::TEXTURE_ALT_FLAG);
+			if (isJungleLeaf) {
+				t.color(1.0f, 1.0f, 1.0f);
+				renderEast(tile, 0.0005f, 0, 0, 55);
+			}
 		} else {
 			t.color(1.0f, 1.0f, 1.0f);
 			renderEast(tile, 0, 0, 0, tile->getTexture(5, data) & ~Tile::TEXTURE_ALT_FLAG);
@@ -2921,6 +3026,19 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 			bool isAltWest = (texWest & Tile::TEXTURE_ALT_FLAG) != 0;
 			if (atlasFilter == -1 || (atlasFilter == 0 && !isAltWest) || (atlasFilter == 1 && isAltWest))
 				renderWest(tile, 0, 0, 0, texWest & ~Tile::TEXTURE_ALT_FLAG);
+		}
+
+		bool isJungleGui = (tile == (Tile*)Tile::jungleLeaves || (tile == (Tile*)Tile::leaves && data == LeafTile::JUNGLE_LEAF));
+		if (isJungleGui && (atlasFilter == -1 || atlasFilter == 1)) {
+			t.color(0xff, 0xff, 0xff);
+			renderFaceUp(tile, 0, 0, 0, 55);
+			renderFaceDown(tile, 0, 0, 0, 55);
+			t.color(0xd0, 0xd0, 0xd0);
+			renderNorth(tile, 0, 0, -0.0005f, 55);
+			renderSouth(tile, 0, 0, 0.0005f, 55);
+			t.color(0x80, 0x80, 0x80);
+			renderEast(tile, 0.0005f, 0, 0, 55);
+			renderWest(tile, -0.0005f, 0, 0, 55);
 		}
 
 		t.draw();

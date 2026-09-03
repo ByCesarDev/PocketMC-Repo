@@ -18,7 +18,7 @@ class LeafTile: public TransparentTile
 	typedef TransparentTile super;
 
 public:
-	static const int LEAF_TYPE_MASK = 7;
+	static const int LEAF_TYPE_MASK = 3;
 	static const int REQUIRED_WOOD_RANGE = 4;
 
 	//@attn @note:	PERSISTENT_LEAF_BIT and UPDATE_LEAF_BIT are reversed
@@ -99,7 +99,7 @@ public:
             for (int yo = -r; yo <= r; yo++)
             for (int zo = -r; zo <= r; zo++) {
                 int t = level->getTile(x + xo, y + yo, z + zo);
-                if (t == Tile::leaves->id) {
+                if (Tile::tiles[t] && Tile::tiles[t]->material == Material::leaves) {
                     int currentData = level->getData(x + xo, y + yo, z + zo);
                     level->setDataNoUpdate(x + xo, y + yo, z + zo, currentData | UPDATE_LEAF_BIT);
                 }
@@ -129,9 +129,9 @@ public:
                 for (int yo = -r; yo <= r; yo++)
                 for (int zo = -r; zo <= r; zo++) {
                     int t = level->getTile(x + xo, y + yo, z + zo);
-                    if (t == Tile::treeTrunk->id || t == Tile::birchTrunk->id || t == Tile::spruceTrunk->id) {
+                    if (Tile::tiles[t] && Tile::tiles[t]->material == Material::wood) {
                         checkBuffer[(xo + WO) * WW + (yo + WO) * W + (zo + WO)] = 0;
-                    } else if (t == Tile::leaves->id) {
+                    } else if (Tile::tiles[t] && Tile::tiles[t]->material == Material::leaves) {
                         checkBuffer[(xo + WO) * WW + (yo + WO) * W + (zo + WO)] = -2;
                     } else {
                         checkBuffer[(xo + WO) * WW + (yo + WO) * W + (zo + WO)] = -1;

@@ -1906,6 +1906,12 @@ void Minecraft::optionUpdated(OptionId option, int value ) {
             I18n::loadLanguage(platform(), langCode);
         }
     }
+    if(option == OPTIONS_MIPMAP_LEVEL) {
+        Textures::MIPMAP_LEVELS = value;
+        if (textures) {
+            textures->reloadAll();
+        }
+    }
 }
 
 void Minecraft::optionUpdated(OptionId option, const std::string& value) {

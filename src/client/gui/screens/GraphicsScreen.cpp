@@ -31,6 +31,7 @@ void GraphicsScreen::init() {
     group->addOptionItem(OPTIONS_VSYNC, minecraft);
     group->addOptionItem(OPTIONS_CLOUDS, minecraft);
     group->addOptionItem(OPTIONS_PARTICLES, minecraft);
+    group->addOptionItem(OPTIONS_MIPMAP_LEVEL, minecraft);
     group->addOptionItem(OPTIONS_ANAGLYPH_3D, minecraft);
     group->addOptionItem(OPTIONS_RENDER_DEBUG, minecraft);
     group->addOptionItem(OPTIONS_SHOW_VIGNETTE, minecraft);

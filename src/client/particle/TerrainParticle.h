@@ -13,11 +13,15 @@ class TerrainParticle: public Particle
 	typedef Particle super;
 
 public:
+    bool isAlt;
+
     TerrainParticle(Level* level, float x, float y, float z, float xa, float ya, float za, Tile* tile, int data)
 	:	super(level, x, y, z, xa, ya, za),
 		tile(tile)
 	{
-        tex = tile->getTexture(2, data);
+        int rawTex = tile->getTexture(2, data);
+        isAlt = (rawTex & Tile::TEXTURE_ALT_FLAG) != 0;
+        tex = rawTex & ~Tile::TEXTURE_ALT_FLAG;
         gravity = tile->gravity;
         rCol = gCol = bCol = 0.6f;
         size /= 2;
@@ -34,7 +38,7 @@ public:
     }
 
     int getParticleTexture() {
-        return ParticleEngine::TERRAIN_TEXTURE;
+        return isAlt ? ParticleEngine::TERRAIN2_TEXTURE : ParticleEngine::TERRAIN_TEXTURE;
     }
 
     void render(Tesselator& t, float a, float xa, float ya, float za, float xa2, float za2) {

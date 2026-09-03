@@ -48,7 +48,7 @@ void ParticleEngine::render(Entity* player, float a) {
     Particle::xOff = (player->xOld+(player->x-player->xOld)*a);
     Particle::yOff = (player->yOld+(player->y-player->yOld)*a);
     Particle::zOff = (player->zOld+(player->z-player->zOld)*a);
-    for (int tt = 0; tt < 3; tt++) {
+    for (int tt = 0; tt < 5; tt++) {
         if (particles[tt].size() == 0) continue;
 
         if (tt == MISC_TEXTURE)
@@ -57,6 +57,8 @@ void ParticleEngine::render(Entity* player, float a) {
 			textures->loadAndBindTexture("terrain.png");
         else if (tt == ITEM_TEXTURE)
 			textures->loadAndBindTexture("gui/items.png");
+		else if (tt == TERRAIN2_TEXTURE)
+			textures->loadAndBindTexture("terrain2.png");
 
         Tesselator& t = Tesselator::instance;
         t.begin();
