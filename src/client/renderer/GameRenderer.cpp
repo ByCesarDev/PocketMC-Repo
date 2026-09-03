@@ -592,6 +592,14 @@ void GameRenderer::setupFog(int i) {
         fEnd = 2.0f;
     } else {
         glFogx(GL_FOG_MODE, GL_LINEAR);
+#ifndef GL_FOG_DISTANCE_MODE_NV
+#define GL_FOG_DISTANCE_MODE_NV 0x855A
+#endif
+#ifndef GL_EYE_RADIAL_NV
+#define GL_EYE_RADIAL_NV 0x855B
+#endif
+        glFogi(GL_FOG_DISTANCE_MODE_NV, GL_EYE_RADIAL_NV);
+
         if (i < 0) {
             fStart = 0.0f;
             fEnd = renderDistance * 1.0f;
