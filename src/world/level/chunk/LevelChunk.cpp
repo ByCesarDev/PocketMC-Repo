@@ -194,15 +194,11 @@ void LevelChunk::recalcHeightmap() {
 
             if (!level->dimension->hasCeiling) { 
                 int br = Level::MAX_BRIGHTNESS;
-                int yy = Level::DEPTH - 1;
-                do {
+                for (int yy = Level::DEPTH - 1; yy >= 0; yy--) {
                     br -= Tile::lightBlock[blocks[p + yy] & 0xff];
-                    if (br > 0) {
-                        skyLight.set(x, yy, z, br);
-                    }
-                    yy--;
-                } while (yy > 0 && br > 0);
-
+                    if (br < 0) br = 0;
+                    skyLight.set(x, yy, z, br);
+                }
             }
         }
 

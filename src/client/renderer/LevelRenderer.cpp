@@ -69,7 +69,7 @@ LevelRenderer::LevelRenderer( Minecraft* mc)
 #ifdef OPENGL_ES
 	int maxChunksWidth = 2 * VIEW_DISTANCE_CHUNKS * CHUNK_WIDTH / CHUNK_SIZE + 1;
 	// reserve twice as many (main + alt atlas)
-	numListsOrBuffers = maxChunksWidth * maxChunksWidth * (128/CHUNK_SIZE) * 6;
+	numListsOrBuffers = maxChunksWidth * maxChunksWidth * (LEVEL_HEIGHT/CHUNK_SIZE) * 6;
 	chunkBuffers = new GLuint[numListsOrBuffers];
 	glGenBuffers2(numListsOrBuffers, chunkBuffers);
 
