@@ -564,9 +564,7 @@ void UnifiedInventoryScreen::render(int xm, int ym, float a) {
 void UnifiedInventoryScreen::renderCarriedItem(int xm, int ym) {
     if (carriedItem && !carriedItem->isNull()) {
         ItemRenderer::renderGuiItem(minecraft->font, minecraft->textures, carriedItem, static_cast<float>(xm - 8), static_cast<float>(ym - 8), true);
-        glDisable2(GL_TEXTURE_2D);
-        ItemRenderer::renderGuiItemDecorations(carriedItem, static_cast<float>(xm - 8), static_cast<float>(ym - 8));
-        glEnable2(GL_TEXTURE_2D);
+        ItemRenderer::renderGuiItemDecorations(minecraft->font, carriedItem, static_cast<float>(xm - 8), static_cast<float>(ym - 8));
     }
 }
 
@@ -788,9 +786,7 @@ void UnifiedInventoryScreen::drawSlotItemAt(Tesselator& t, int slot, const ItemI
 
     if (item && !item->isNull()) {
         ItemRenderer::renderGuiItem(minecraft->font, minecraft->textures, item, xx + 1.0f, yy + 1.0f, true);
-        glDisable2(GL_TEXTURE_2D);
-        ItemRenderer::renderGuiItemDecorations(item, xx + 1.0f, yy + 1.0f);
-        glEnable2(GL_TEXTURE_2D);
+        ItemRenderer::renderGuiItemDecorations(minecraft->font, item, xx + 1.0f, yy + 1.0f);
     } else if (isArmorSlot) {
         minecraft->textures->loadAndBindTexture("gui/items.png");
         blit(x + 1, y + 1, 15 * 16, slot * 16, 16, 16, 16, 16);

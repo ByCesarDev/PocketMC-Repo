@@ -22,7 +22,7 @@ public:
     static void renderGuiItem(Font* font, Textures* textures, const ItemInstance* item, float x, float y, bool fancy);
 	static void renderGuiItem(Font* font, Textures* textures, const ItemInstance* item, float x, float y, float w, float h, bool fancy);
 	static void renderGuiItemCorrect(Font* font, Textures* textures, const ItemInstance* item, int x, int y);
-	//void renderGuiItemDecorations(Font* font, Textures* textures, ItemInstance* item, int x, int y);
+	static void renderGuiItemDecorations(Font* font, const ItemInstance* item, float x, float y);
 	static void renderGuiItemDecorations(const ItemInstance* item, float x, float y);
 
 	static void blit(float x, float y, float sx, float sy, float w, float h);
