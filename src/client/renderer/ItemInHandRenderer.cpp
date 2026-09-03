@@ -448,10 +448,6 @@ void ItemInHandRenderer::renderScreenEffect( float a )
 		}
 	}
 
-	if (mc->player->isUnderLiquid(Material::water)) {
-		mc->textures->loadAndBindTexture("misc/water.png");
-		renderWater(a);
-	}
 	glEnable2(GL_ALPHA_TEST);
 }
 

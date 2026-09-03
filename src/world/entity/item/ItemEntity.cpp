@@ -114,12 +114,19 @@ void ItemEntity::playerTouch( Player* player )
 {
 	if (level->isClientSide) return;
 
-	int orgCount = item.count;
-	if (throwTime == 0 && player->isAlive() && player->inventory->add(&item)) {
-	    level->playSound(this, "random.pop", 0.3f, ((sharedRandom.nextFloat() - sharedRandom.nextFloat()) * 0.7f + 1.0f) * 2.f);
-	    player->take(this, orgCount);
-		//if (item.count <= 0) remove(); //@todo
-		remove();
+	if (throwTime == 0 && player->isAlive()) {
+		int oldCount = item.count;
+		if (player->inventory->add(&item)) {
+			int pickedUp = oldCount - item.count;
+			if (pickedUp > 0) {
+				level->playSound(this, "random.pop", 0.3f, ((sharedRandom.nextFloat() - sharedRandom.nextFloat()) * 0.7f + 1.0f) * 2.f);
+				player->take(this, pickedUp);
+			}
+
+			if (item.count <= 0) {
+				remove();
+			}
+		}
 	}
 }
 
