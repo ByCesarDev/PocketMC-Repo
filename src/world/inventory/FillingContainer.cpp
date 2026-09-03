@@ -308,11 +308,10 @@ int FillingContainer::getNumLinkedSlots() {
 int FillingContainer::getSlotWithRemainingSpace( const ItemInstance& item )
 {
 	for (unsigned int i = 0; i < items.size(); i++) {
-		if (items[i] != NULL && items[i]->id == item.id
-		 && items[i]->isStackable()
+		if (items[i] != NULL && !items[i]->isNull()
+		 && ItemInstance::isStackable(items[i], &item)
 		 && items[i]->count < items[i]->getMaxStackSize()
-		 && items[i]->count < getMaxStackSize()
-		 && (!items[i]->isStackedByData() || items[i]->getAuxValue() == item.getAuxValue()))
+		 && items[i]->count < getMaxStackSize())
 		{
 			return i;
 		}

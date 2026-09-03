@@ -89,9 +89,13 @@ bool ItemInstance::isStackable() const {
     return getMaxStackSize() > 1 && (!isDamageableItem() || !isDamaged());
 }
 
+/*static*/
 bool ItemInstance::isStackable( const ItemInstance* a, const ItemInstance* b ) {
-	return a && b && a->id == b->id && b->isStackable()
-		&& (!b->isStackedByData() || a->getAuxValue() == b->getAuxValue());
+	if (!a || !b) return false;
+	if (a->id != b->id) return false;
+	if (!a->isStackable() || !b->isStackable()) return false;
+	if ((a->isStackedByData() || b->isStackedByData()) && a->getAuxValue() != b->getAuxValue()) return false;
+	return true;
 }
 
 bool ItemInstance::isDamageableItem() const {
