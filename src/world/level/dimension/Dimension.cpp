@@ -42,20 +42,25 @@ void Dimension::init()
 
 /*virtual*/
 bool Dimension::isValidSpawn(int x, int z) {
-    int topTile = level->getTopTile(x, z);
+	int groundY = level->getTopTileY(x, z);
+	if (groundY < 63 || groundY >= Level::DEPTH - 2) return false;
 
-    if (topTile <= 0 || topTile >= 256 || Tile::tiles[topTile] == NULL)
-        return false;
-
-	if (topTile == Tile::invisible_bedrock->id)
+	int groundId = level->getTile(x, groundY, z);
+	if (groundId <= 0 || groundId >= 256 || Tile::tiles[groundId] == NULL)
 		return false;
 
-	if (!Tile::tiles[topTile]->isSolidRender()) return false;
+	if (groundId == Tile::invisible_bedrock->id ||
+		groundId == Tile::water->id || groundId == Tile::calmWater->id ||
+		groundId == Tile::lava->id || groundId == Tile::calmLava->id)
+		return false;
 
-	int topY = level->getTopTileY(x, z);
-	if (topY < 63) return false;
+	Tile* ground = Tile::tiles[groundId];
+	if (!ground->isSolidRender()) return false;
 
-    return true;
+	if (!level->isEmptyTile(x, groundY + 1, z)) return false;
+	if (!level->isEmptyTile(x, groundY + 2, z)) return false;
+
+	return true;
 }
 
 float Dimension::getTimeOfDay(long time, float a) {

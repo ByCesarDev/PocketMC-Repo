@@ -460,6 +460,29 @@ bool Level::findPath(Path* path, Entity* from, int xBest, int yBest, int zBest, 
 * Sets the initial spawn, created this method so we could do a special
 * location for the demo version.
 */
+static bool findSafeSpawnNear(Dimension* dimension, int centerX, int centerZ, int maxRadius, int& outX, int& outZ) {
+    if (dimension->isValidSpawn(centerX, centerZ)) {
+        outX = centerX;
+        outZ = centerZ;
+        return true;
+    }
+    for (int r = 4; r <= maxRadius; r += 4) {
+        for (int x = centerX - r; x <= centerX + r; x += 4) {
+            int z1 = centerZ - r;
+            int z2 = centerZ + r;
+            if (dimension->isValidSpawn(x, z1)) { outX = x; outZ = z1; return true; }
+            if (dimension->isValidSpawn(x, z2)) { outX = x; outZ = z2; return true; }
+        }
+        for (int z = centerZ - r + 4; z < centerZ + r; z += 4) {
+            int x1 = centerX - r;
+            int x2 = centerX + r;
+            if (dimension->isValidSpawn(x1, z)) { outX = x1; outZ = z; return true; }
+            if (dimension->isValidSpawn(x2, z)) { outX = x2; outZ = z; return true; }
+        }
+    }
+    return false;
+}
+
 /*protected*/
 void Level::setInitialSpawn() {
     isFindingSpawn = true;
@@ -470,16 +493,16 @@ void Level::setInitialSpawn() {
         _chunkSource->findSpawnPosition(xSpawn, zSpawn);
     }
 
-    int attempts = 0;
-    while (!dimension->isValidSpawn(xSpawn, zSpawn) && attempts < 1000) {
-        xSpawn += random.nextInt(16) - random.nextInt(16);
-        zSpawn += random.nextInt(16) - random.nextInt(16);
+    int safeX = xSpawn;
+    int safeZ = zSpawn;
+    bool foundSafe = findSafeSpawnNear(dimension, xSpawn, zSpawn, 256, safeX, safeZ);
+    if (!foundSafe) {
+        foundSafe = findSafeSpawnNear(dimension, 0, 0, 512, safeX, safeZ);
+    }
 
-        if (xSpawn < WORLD_MIN_X + 4) xSpawn += 16;
-        if (xSpawn > WORLD_MAX_X - 4) xSpawn -= 16;
-        if (zSpawn < WORLD_MIN_Z + 4) zSpawn += 16;
-        if (zSpawn > WORLD_MAX_Z - 4) zSpawn -= 16;
-        attempts++;
+    if (foundSafe) {
+        xSpawn = safeX;
+        zSpawn = safeZ;
     }
 
     int ySpawn = getTopTileY(xSpawn, zSpawn) + 1;
@@ -495,17 +518,14 @@ void Level::validateSpawn() {
     }
     int xSpawn = levelData.getXSpawn();
     int zSpawn = levelData.getZSpawn();
-    int attempts = 0;
-    while (!dimension->isValidSpawn(xSpawn, zSpawn) && attempts < 50) {
-        xSpawn += random.nextInt(8) - random.nextInt(8);
-        zSpawn += random.nextInt(8) - random.nextInt(8);
 
-        if (xSpawn < WORLD_MIN_X + 4) xSpawn += 8;
-        if (xSpawn > WORLD_MAX_X - 4) xSpawn -= 8;
-        if (zSpawn < WORLD_MIN_Z + 4) zSpawn += 8;
-        if (zSpawn > WORLD_MAX_Z - 4) zSpawn -= 8;
-        attempts++;
+    int safeX = xSpawn;
+    int safeZ = zSpawn;
+    if (findSafeSpawnNear(dimension, xSpawn, zSpawn, 128, safeX, safeZ)) {
+        xSpawn = safeX;
+        zSpawn = safeZ;
     }
+
     int ySpawn = getTopTileY(xSpawn, zSpawn) + 1;
     if (ySpawn <= 0) ySpawn = 64;
     levelData.setSpawn(xSpawn, ySpawn, zSpawn);

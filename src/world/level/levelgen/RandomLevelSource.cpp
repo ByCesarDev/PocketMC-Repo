@@ -61,20 +61,23 @@ RandomLevelSource::~RandomLevelSource() {
 	delete[] fis;
 }
 
+static const int LEGACY_GENERATION_HEIGHT = 128;
+static const int LEGACY_SEA_LEVEL = 64;
+
 /*public*/
 void RandomLevelSource::prepareHeights(int xOffs, int zOffs, unsigned char* blocks, /*Biome*/void* biomes, float* temperatures) {
 	
 	int xChunks = 16 / CHUNK_WIDTH;
-    int waterHeight = Level::DEPTH - 64;
+    int waterHeight = LEGACY_SEA_LEVEL;
 
     int xSize = xChunks + 1;
-    int ySize = 128 / CHUNK_HEIGHT + 1;
+    int ySize = LEGACY_GENERATION_HEIGHT / CHUNK_HEIGHT + 1;
     int zSize = xChunks + 1;
     buffer = getHeights(buffer, xOffs * xChunks, 0, zOffs * xChunks, xSize, ySize, zSize);
 
     for (int xc = 0; xc < xChunks; xc++) {
         for (int zc = 0; zc < xChunks; zc++) {
-            for (int yc = 0; yc < 128 / CHUNK_HEIGHT; yc++) {
+            for (int yc = 0; yc < LEGACY_GENERATION_HEIGHT / CHUNK_HEIGHT; yc++) {
                 float yStep = 1 / (float) CHUNK_HEIGHT;
                 float s0 = buffer[((xc + 0) * zSize + (zc + 0)) * ySize + (yc + 0)];
                 float s1 = buffer[((xc + 0) * zSize + (zc + 1)) * ySize + (yc + 0)];
@@ -147,7 +150,7 @@ void RandomLevelSource::prepareHeights(int xOffs, int zOffs, unsigned char* bloc
 }
 
 void RandomLevelSource::buildSurfaces(int xOffs, int zOffs, unsigned char* blocks, Biome** biomes) {
-    int waterHeight = Level::DEPTH - 64;
+    int waterHeight = LEGACY_SEA_LEVEL;
 
     float s = 1 / 32.0f;
     perlinNoise2.getRegion(sandBuffer, (float)(xOffs * 16), (float)(zOffs * 16), 0, 16, 16, 1, s, s, 1);
@@ -167,8 +170,8 @@ void RandomLevelSource::buildSurfaces(int xOffs, int zOffs, unsigned char* block
             char top = b->topMaterial;
             char material = b->material;
 
-            for (int y = 127; y >= 0; y--) {
-                int offs = (x * 16 + z) * 128 + y;
+            for (int y = LEGACY_GENERATION_HEIGHT - 1; y >= 0; y--) {
+                int offs = (x << 12) | (z << 8) | y;
 
                 if (y <= 0 + random.nextInt(5)) {
                     blocks[offs] = (char) Tile::unbreakable->id;
