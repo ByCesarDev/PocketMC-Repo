@@ -75,9 +75,11 @@ private:
                     else expected = recipeItems[xs + ys * width];
                 }
                 ItemInstance* item = craftSlots->getItem(x, y);
-                if (!item && expected.isNull())
+                bool itemEmpty = (item == NULL || item->isNull());
+                bool expectedEmpty = expected.isNull();
+                if (itemEmpty && expectedEmpty)
                     continue;
-                if ((item == NULL) ^ expected.isNull())
+                if (itemEmpty != expectedEmpty)
                     return false;
                 if (expected.id != item->id)
                     return false;

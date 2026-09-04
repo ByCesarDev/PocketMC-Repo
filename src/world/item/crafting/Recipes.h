@@ -52,11 +52,11 @@ public:
 	void initStoneCutterRecipes();
 
 	Recipe* getRecipeFor(const ItemInstance& result);
+	ItemInstance getItemFor(CraftingContainer* craftSlots);
+
 private:
     Recipes();
 	~Recipes();
-
-    ItemInstance getItemFor(CraftingContainer* craftSlots);
 private:
 	static Recipes* instance;
 	RecipeList recipes;

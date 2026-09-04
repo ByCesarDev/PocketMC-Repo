@@ -42,6 +42,8 @@
 #include "../gui/Screen.h"
 #include "../gui/screens/FurnaceScreen.h"
 #include "../gui/screens/ChestScreen.h"
+#include "../gui/screens/ClassicCraftingScreen.h"
+#include "../gui/screens/ClassicChestScreen.h"
 #include "../gui/screens/crafting/WorkbenchScreen.h"
 #include "../gui/screens/crafting/StonecutterScreen.h"
 #include "../gui/screens/InBedScreen.h"
@@ -773,7 +775,7 @@ void LocalPlayer::_init() {
 
 void LocalPlayer::startCrafting(int x, int y, int z, int tableSize) {
 #ifndef STANDALONE_SERVER
-	minecraft->setScreen( new WorkbenchScreen(tableSize) );
+	minecraft->setScreen( new ClassicCraftingScreen() );
 #endif
 }
 
@@ -791,7 +793,7 @@ void LocalPlayer::openFurnace( FurnaceTileEntity* e ) {
 
 void LocalPlayer::openContainer( ChestTileEntity* container ) {
 #ifndef STANDALONE_SERVER
-	minecraft->setScreen( new ChestScreen(this, container) );
+	minecraft->setScreen( new ClassicChestScreen(this, container) );
 #endif
 }
 

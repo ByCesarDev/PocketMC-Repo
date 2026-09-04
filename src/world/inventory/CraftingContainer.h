@@ -40,10 +40,16 @@ public:
         return getItem(pos);
     }
 
-	//@itodo
     void setItem(int slot, const ItemInstance& item) {
         items[slot] = item;
-        //menu->slotsChanged(this);
+    }
+
+    void setItem(int slot, ItemInstance* item) override {
+        if (item) {
+            items[slot] = *item;
+        } else {
+            items[slot] = ItemInstance();
+        }
     }
 
     ItemInstance removeItem(int slot, int count) {

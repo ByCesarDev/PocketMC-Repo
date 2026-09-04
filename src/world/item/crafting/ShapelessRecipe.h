@@ -38,7 +38,7 @@ public:
             for (int x = 0; x < 3; x++) {
                 ItemInstance* item = craftSlots->getItem(x, y);
 
-                if (item) {
+                if (item && !item->isNull()) {
                     bool found = false;
 					for (unsigned int i = 0; i < ingredients.size(); ++i) {
 						const ItemInstance& ingredient = ingredients[i];
