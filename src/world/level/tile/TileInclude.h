@@ -51,6 +51,7 @@
 #include "StonecutterTile.h"
 #include "StoneTile.h"
 #include "StoneSlabTile.h"
+#include "SlabTile.h"
 #include "TallGrass.h"
 #include "ThinFenceTile.h"
 #include "TopSnowTile.h"

@@ -7,6 +7,7 @@ class TrapDoorTile : public Tile {
 
 public:
 	TrapDoorTile(int id, const Material* material);
+	TrapDoorTile(int id, int tex, const Material* material);
 	bool blocksLight();
 	bool isSolidRender();
 	bool isCubeShaped();

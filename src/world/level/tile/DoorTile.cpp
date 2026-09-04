@@ -15,6 +15,14 @@ DoorTile::DoorTile(int id, const Material* material)
 	super::setShape(0.5f - r, 0, 0.5f - r, 0.5f + r, h, 0.5f + r);
 }
 
+DoorTile::DoorTile(int id, int tex, const Material* material)
+:	super(id, tex, material)
+{
+	float r = 0.5f;
+	float h = 1.0f;
+	super::setShape(0.5f - r, 0, 0.5f - r, 0.5f + r, h, 0.5f + r);
+}
+
 int DoorTile::getTexture(LevelSource* level, int x, int y, int z, int face) {
 	if (face == 0 || face == 1) return tex;
 

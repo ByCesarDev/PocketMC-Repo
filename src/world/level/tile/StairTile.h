@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Tile.h"
+#include "../material/Material.h"
 #include "../../../util/Mth.h"
 #include "../../../util/Random.h"
 #include "../../entity/Mob.h"
@@ -32,15 +33,30 @@ public:
 	static const int DEAD_SPACES[8][2];
 
     StairTile(int id, Tile* base)
-    :   super(id, base->tex, base->material),
+    :   super(id, base ? base->tex : 0, base ? base->material : Material::stone),
         base(base),
 		isClipping(false),
 		clipStep(0),
 		baseData(0) // when needed in the future, set this to necessary texture data
     {
-        setDestroyTime(base->destroySpeed);
-        setExplodeable(base->explosionResistance / 3);
-        setSoundType(*base->soundType);
+        if (base) {
+            setDestroyTime(base->destroySpeed);
+            setExplodeable(base->explosionResistance / 3);
+            if (base->soundType) setSoundType(*base->soundType);
+        }
+		setLightBlock(255);
+    }
+
+    StairTile(int id, int tex, const Material* material)
+    :   super(id, tex, material),
+        base(NULL),
+		isClipping(false),
+		clipStep(0),
+		baseData(0)
+    {
+        setDestroyTime(1.5f);
+        setExplodeable(10.0f / 3.0f);
+        setSoundType(SOUND_STONE);
 		setLightBlock(255);
     }
 
@@ -130,100 +146,118 @@ public:
     /** DELEGATES: **/
 
     void addLights(Level* level, int x, int y, int z) {
-        base->addLights(level, x, y, z);
+        if (base) base->addLights(level, x, y, z);
+        else super::addLights(level, x, y, z);
     }
 
     void animateTick(Level* level, int x, int y, int z, Random* random) {
-        base->animateTick(level, x, y, z, random);
+        if (base) base->animateTick(level, x, y, z, random);
+        else super::animateTick(level, x, y, z, random);
     }
 
     void attack(Level* level, int x, int y, int z, Player* player) {
-        base->attack(level, x, y, z, player);
+        if (base) base->attack(level, x, y, z, player);
+        else super::attack(level, x, y, z, player);
     }
 
     void destroy(Level* level, int x, int y, int z, int data) {
-        base->destroy(level, x, y, z, data);
+        if (base) base->destroy(level, x, y, z, data);
+        else super::destroy(level, x, y, z, data);
     }
 
     float getBrightness(LevelSource* level, int x, int y, int z) {
-        return base->getBrightness(level, x, y, z);
+        if (base) return base->getBrightness(level, x, y, z);
+        return super::getBrightness(level, x, y, z);
     }
 
     float getExplosionResistance(Entity* source) {
-        return base->getExplosionResistance(source);
+        if (base) return base->getExplosionResistance(source);
+        return explosionResistance;
     }
 
     int getRenderLayer() {
-        return base->getRenderLayer();
+        if (base) return base->getRenderLayer();
+        return super::getRenderLayer();
     }
 
     int getResourceCount(Random* random) {
-        return base->getResourceCount(random);
+        if (base) return base->getResourceCount(random);
+        return super::getResourceCount(random);
     }
 
     int getTexture(int face, int data) {
+        if (useMaterialInstances || !base) return super::getTexture(face, data);
         return base->getTexture(face, baseData);
     }
 
     int getTexture(int face) {
+        if (useMaterialInstances || !base) return super::getTexture(face);
         return base->getTexture(face, baseData);
     }
 
     int getTexture(LevelSource* level, int x, int y, int z, int face) {
+        if (useMaterialInstances || !base) return super::getTexture(level, x, y, z, face);
         return base->getTexture(face, baseData);
     }
 
     int getTickDelay() {
-        return base->getTickDelay();
+        if (base) return base->getTickDelay();
+        return super::getTickDelay();
     }
 
     AABB getTileAABB(Level* level, int x, int y, int z) {
-        return base->getTileAABB(level, x, y, z);
+        if (base) return base->getTileAABB(level, x, y, z);
+        return super::getTileAABB(level, x, y, z);
     }
 
     void handleEntityInside(Level* level, int x, int y, int z, Entity* e, Vec3& current) {
-        base->handleEntityInside(level, x, y, z, e, current);
+        if (base) base->handleEntityInside(level, x, y, z, e, current);
+        else super::handleEntityInside(level, x, y, z, e, current);
     }
 
     bool mayPick() {
-        return base->mayPick();
+        if (base) return base->mayPick();
+        return super::mayPick();
     }
 
     bool mayPick(int data, bool liquid) {
-        return base->mayPick(data, liquid);
+        if (base) return base->mayPick(data, liquid);
+        return super::mayPick(data, liquid);
     }
 
     bool mayPlace(Level* level, int x, int y, int z, unsigned char face) {
-        return base->mayPlace(level, x, y, z);
+        if (base) return base->mayPlace(level, x, y, z);
+        return super::mayPlace(level, x, y, z, face);
     }
 
     void onPlace(Level* level, int x, int y, int z) {
         neighborChanged(level, x, y, z, 0);
-        base->onPlace(level, x, y, z);
+        if (base) base->onPlace(level, x, y, z);
     }
 
     void onRemove(Level* level, int x, int y, int z) {
-        base->onRemove(level, x, y, z);
+        if (base) base->onRemove(level, x, y, z);
     }
 
     void prepareRender(Level* level, int x, int y, int z) {
-        base->prepareRender(level, x, y, z);
+        if (base) base->prepareRender(level, x, y, z);
     }
 
     void stepOn(Level* level, int x, int y, int z, Entity* entity) {
-        base->stepOn(level, x, y, z, entity);
+        if (base) base->stepOn(level, x, y, z, entity);
     }
 
     void tick(Level* level, int x, int y, int z, Random* random) {
-        base->tick(level, x, y, z, random);
+        if (base) base->tick(level, x, y, z, random);
     }
 
     bool use(Level* level, int x, int y, int z, Player* player) {
-        return base->use(level, x, y, z, player);
+        if (base) return base->use(level, x, y, z, player);
+        return super::use(level, x, y, z, player);
     }
 
     void wasExploded(Level* level, int x, int y, int z) {
-        base->wasExploded(level, x, y, z);
+        if (base) base->wasExploded(level, x, y, z);
     }
 
     void setPlacedBy(Level* level, int x, int y, int z, Mob* by) {

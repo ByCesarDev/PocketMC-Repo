@@ -25,6 +25,7 @@ public:
 	static const int C_RIGHT_HINGE_MASK = 16;
 
 	DoorTile(int id, const Material* material);
+	DoorTile(int id, int tex, const Material* material);
 	int getTexture(LevelSource* level, int x, int y, int z, int face) override;
 
 	bool blocksLight();

@@ -10,6 +10,12 @@ TrapDoorTile::TrapDoorTile( int id, const Material* material ) : super(id, mater
 	super::setShape(0.5f - r, 0, 0.5f - r, 0.5f + r, h, 0.5f + r);
 }
 
+TrapDoorTile::TrapDoorTile( int id, int tex, const Material* material ) : super(id, tex, material) {
+	float r = 0.5f;
+	float h = 1.0f;
+	super::setShape(0.5f - r, 0, 0.5f - r, 0.5f + r, h, 0.5f + r);
+}
+
 bool TrapDoorTile::blocksLight() {
 	return false;
 }
