@@ -368,7 +368,7 @@ void BlockAtlasStitcher::stitchAtlas(const std::string& atlasResourceName, Textu
     }
 
     // 2. Stitch textures configured dynamically on Tile instances
-    for (int i = 0; i < 256; i++) {
+    for (int i = 0; i < Tile::NUM_BLOCK_TYPES; i++) {
         Tile* tile = Tile::tiles[i];
         if (!tile || !tile->hasMaterialInstances()) continue;
 
@@ -566,6 +566,22 @@ std::vector<TextureData> BlockAtlasStitcher::stitchAtlasMultiLevel(const std::st
     for (const auto& entry : s_mappings) {
         if (entry.atlasName == cleanAtlasName) {
             slotCategories[entry.index] = getTextureCategory(entry.filename);
+        }
+    }
+
+    for (int i = 0; i < Tile::NUM_BLOCK_TYPES; i++) {
+        Tile* tile = Tile::tiles[i];
+        if (!tile || !tile->hasMaterialInstances()) continue;
+        for (int f = 0; f < 6; f++) {
+            const Tile::MaterialInstance* matInst = tile->getMaterialInstance((Tile::BlockFace)f);
+            if (!matInst || !matInst->usesSeparateTexture()) continue;
+            int atlasIdx = matInst->textureIndex;
+            bool isAlt = (atlasIdx & Tile::TEXTURE_ALT_FLAG) != 0;
+            std::string targetAtlas = isAlt ? "terrain2.png" : "terrain.png";
+            if (targetAtlas == cleanAtlasName) {
+                int cleanIdx = atlasIdx & ~Tile::TEXTURE_ALT_FLAG;
+                slotCategories[cleanIdx] = getTextureCategory(matInst->textureName);
+            }
         }
     }
 
