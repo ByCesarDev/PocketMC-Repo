@@ -6,6 +6,7 @@
 #include "TileRenderer.h"
 #include "../renderer/RenderChunk.h"
 #include "../../world/item/ItemInstance.h"
+#include "../../world/item/Item.h"
 
 class Minecraft;
 
@@ -52,7 +53,7 @@ private:
 	float oHeight;
 	TileRenderer tileRenderer;
 
-	static const int MaxNumRenderObjects = 512;
+	static const int MaxNumRenderObjects = Item::MAX_ITEMS;
 	RenderCall renderObjects[MaxNumRenderObjects];
 };
 

@@ -77,7 +77,14 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 	//Stopwatch& w = handler.get("item:" + Tile::tiles[item->id]->getDescriptionId());
 	//w.start();
 
+	if (!item || item->isNull()) return;
+
 	int itemId = item->id;
+	if (itemId < 0 || itemId >= MaxNumRenderObjects) {
+		LOGE("ItemInHandRenderer::renderItem invalid itemId=%d (max=%d)\n", itemId, MaxNumRenderObjects);
+		return;
+	}
+
 	// Use spare slots between 200 and 255 for items with different graphics per data
 	if (itemId == Tile::cloth->id) {
 		itemId = 200 + item->getAuxValue(); // 200 to 215
@@ -85,6 +92,11 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 		itemId = 216 + item->getAuxValue(); // 216 to 219 @treeTrunk
 	} else if (itemId == Tile::stoneSlabHalf->id) {
 		itemId = 224 + item->getAuxValue(); // 224 to 231 @stoneslab
+	}
+
+	if (itemId < 0 || itemId >= MaxNumRenderObjects) {
+		LOGE("ItemInHandRenderer::renderItem invalid remapped itemId=%d (max=%d)\n", itemId, MaxNumRenderObjects);
+		return;
 	}
 
 	RenderCall& renderObject = renderObjects[itemId];
@@ -156,7 +168,7 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 	//const int aux = item->getAuxValue();
 
 	if (renderObject.itemId == -1 || reTesselate) {
-		if (Tile::isTile(item->id) && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape())) {
+		if (Tile::isTile(item->id) && Tile::tiles[item->id] != NULL && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape()) && Tile::isTile(renderedItemId) && Tile::tiles[renderedItemId] != NULL) {
 			Tesselator& t = Tesselator::instance;
 			t.beginOverride();
 
@@ -376,7 +388,7 @@ void ItemInHandRenderer::render( float a )
 				glRotatef(45 + 290, 0, 0, 1);
 			}
 		}
-		if (item->getItem()->isMirroredArt()) {
+		if (item->getItem() && item->getItem()->isMirroredArt()) {
 			glRotatef2(180, 0, 1, 0);
 		}
 		glEnableClientState2(GL_VERTEX_ARRAY);
