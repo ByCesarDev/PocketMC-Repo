@@ -100,7 +100,7 @@ const int Recipe::SIZE_3X3 = 1;
 
 bool Recipe::isAnyAuxValue( int id )
 {
-	bool isTile = id < 256;
+	bool isTile = Tile::isTile(id);
 	if (!isTile) return false;
 	if (id == Tile::cloth->id
 	 || id == Tile::stoneSlabHalf->id

@@ -353,7 +353,7 @@ void UnifiedInventoryScreen::updateItems() {
         for (int ci = 0; ci < numCatOrder; ++ci) {
             int mask = showAll ? catOrder[ci] : targetMask;
 
-            for (int i = 0; i < 256; ++i) {
+            for (int i = 0; i < Tile::NUM_BLOCK_TYPES; ++i) {
                 if (Tile::isTileAllowedInCreative(i)) {
                     Item* it = Item::items[i];
                     int cat = it ? it->category : 1;
@@ -377,7 +377,7 @@ void UnifiedInventoryScreen::updateItems() {
         }
 
         if (showAll) {
-            for (int i = 0; i < 256; ++i) {
+            for (int i = 0; i < Tile::NUM_BLOCK_TYPES; ++i) {
                 if (Tile::isTileAllowedInCreative(i)) {
                     Item* it = Item::items[i];
                     int cat = it ? it->category : 1;

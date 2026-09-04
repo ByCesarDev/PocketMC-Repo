@@ -1,4 +1,4 @@
-﻿#if 0
+#if 0
 
 #include "UploadPhotoScreen.h"
 #include "../renderer/TileRenderer.h"
@@ -61,10 +61,10 @@ void UploadPhotoScreen::renderSlot(int slot, int x, int y, float a)
 
 	const bool fancy = false;
 
-	if (fancy && itemId < 256 && TileRenderer::canRender(Tile::tiles[itemId]->getRenderShape())) {
+	if (fancy && Tile::isTile(itemId) && TileRenderer::canRender(Tile::tiles[itemId]->getRenderShape())) {
 
 	} else {
-		if (itemId < 256) {
+		if (Tile::isTile(itemId)) {
 			Tile* tile = Tile::tiles[itemId];
 			if (tile == NULL) return;
 

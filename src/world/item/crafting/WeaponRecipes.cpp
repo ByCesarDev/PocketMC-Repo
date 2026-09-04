@@ -22,7 +22,7 @@ void WeaponRecipes::addRecipes( Recipes* r )
 		for (int t = 0; t < NumRecipes; t++) {
 			Item* target = (Item*) map[t][m];
 
-			if (mId < 256) { // Tile
+			if (Tile::isTile(mId)) { // Tile
 				r->addShapedRecipe( ItemInstance(target), shapes[t],
 					definition('#', Item::stick, 'X', Tile::tiles[mId]) );
 			} else { // Item

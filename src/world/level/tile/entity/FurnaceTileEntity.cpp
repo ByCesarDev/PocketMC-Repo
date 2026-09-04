@@ -228,7 +228,7 @@ int FurnaceTileEntity::getBurnDuration(const ItemInstance& itemInstance) {
 	if (itemInstance.isNull()) return 0;
 	int id = itemInstance.getItem()->id;
 
-	if (id < 256 && Tile::tiles[id]->material == Material::wood)
+	if (Tile::isTile(id) && Tile::tiles[id]->material == Material::wood)
 		return BURN_INTERVAL * 3 / 2;
 
 	if (id == Item::stick->id)  return BURN_INTERVAL / 2;

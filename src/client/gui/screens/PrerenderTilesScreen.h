@@ -115,7 +115,7 @@ public:
 
 			int x = j%16 * 16;
 			int y = j/16 * 16;
-			if (item->id < 256 && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape())) {
+			if (Tile::isTile(item->id) && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape())) {
 				LOGI("0, %d, %d, %d, 0\n", j, item->id, item->getAuxValue());
 				ItemRenderer::renderGuiItemCorrect(minecraft->font, minecraft->textures, item, x, y);
 			} else if (item->getIcon() >= 0) {

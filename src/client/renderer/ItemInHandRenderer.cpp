@@ -156,7 +156,7 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 	//const int aux = item->getAuxValue();
 
 	if (renderObject.itemId == -1 || reTesselate) {
-		if (item->id < 256 && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape())) {
+		if (Tile::isTile(item->id) && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape())) {
 			Tesselator& t = Tesselator::instance;
 			t.beginOverride();
 
@@ -172,7 +172,7 @@ void ItemInHandRenderer::renderItem(Mob* mob,  ItemInstance* item )
 			renderObject.itemId = itemId;
 			renderObject.isFlat = true;
 
-			if (item->id < 256) {
+			if (Tile::isTile(item->id)) {
 				renderObject.texture = (itemIcon & Tile::TEXTURE_ALT_FLAG) ? "terrain2.png" : "terrain.png";
 			} else {
 				renderObject.texture = "gui/items.png";

@@ -414,7 +414,7 @@ public:
 	static Tile* info_reserved6;
 
 	// ============================================
-	// Bedrock Generator / Structures Blocks (IDs 256..491)
+	// Bedrock Generator / Structures Blocks (IDs 512..745)
 	// ============================================
 	static Tile* acaciaDoor;
 	static Tile* acaciaPressurePlate;
@@ -656,6 +656,9 @@ public:
     static void initExtraTiles();
 
 	static bool isTileAllowedInCreative(int id);
+	static inline bool isTile(int id) {
+		return (id >= 0 && id < NUM_BLOCK_TYPES && (id < 256 || id >= 512) && tiles[id] != NULL);
+	}
 
 	static int getOreVariant(int oreTileId, int replacedTileId);
 	static int transformToValidBlockId(int blockId);

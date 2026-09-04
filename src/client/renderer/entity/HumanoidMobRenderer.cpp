@@ -40,7 +40,7 @@ void HumanoidMobRenderer::additionalRendering(Mob* mob, float a) {
 		humanoidModel->arm0.translateTo(1 / 16.0f);
 		glTranslatef2(-1.0f / 16.0f, 7.0f / 16.0f, 1.0f / 16.0f);
 
-		if (item->id < 256 && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape())) {
+		if (Tile::isTile(item->id) && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape())) {
 			float s = 8.0f / 16.0f;
 			glTranslatef2(0.0f, 3.0f / 16.0f, -5 / 16.0f);
 			s *= 0.75f;

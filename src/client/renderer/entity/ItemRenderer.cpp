@@ -38,13 +38,13 @@ void ItemRenderer::render(Entity* itemEntity_, float x, float y, float z, float 
 	ItemInstance* item = &itemEntity->item;
 	if (!item || item->isNull() || item->id <= 0 || item->id >= Item::MAX_ITEMS) return;
 
-	if (item->id < 256 && Tile::tiles[item->id] == NULL) {
+	if (Tile::isTile(item->id) && Tile::tiles[item->id] == NULL) {
 		LOGE("[ItemRenderer] UNKNOWN TILE DROP: id=%d count=%d aux=%d at (%.2f, %.2f, %.2f)\n",
 			item->id, item->count, item->getAuxValue(), itemEntity->x, itemEntity->y, itemEntity->z);
 		return;
 	}
 
-	if (item->id >= 256 && Item::items[item->id] == NULL) {
+	if (!Tile::isTile(item->id) && Item::items[item->id] == NULL) {
 		LOGE("[ItemRenderer] UNKNOWN ITEM DROP: id=%d count=%d aux=%d at (%.2f, %.2f, %.2f)\n",
 			item->id, item->count, item->getAuxValue(), itemEntity->x, itemEntity->y, itemEntity->z);
 		return;
@@ -63,7 +63,7 @@ void ItemRenderer::render(Entity* itemEntity_, float x, float y, float z, float 
 
 	glTranslatef2((float) x, (float) y + bob, (float) z);
 	//glEnable2(GL_RESCALE_NORMAL);
-	if (item->id < 256 && Tile::tiles[item->id] != NULL && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape())) {
+	if (Tile::isTile(item->id) && TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape())) {
 		glRotatef2(spin, 0, 1, 0);
 
 		float br = itemEntity->getBrightness(a);
@@ -97,7 +97,7 @@ void ItemRenderer::render(Entity* itemEntity_, float x, float y, float z, float 
 	} else {
 		glScalef2(1 / 2.0f, 1 / 2.0f, 1 / 2.0f);
 		int icon = item->getIcon();
-		if (item->id < 256) {
+		if (Tile::isTile(item->id)) {
 			bindTexture((icon & Tile::TEXTURE_ALT_FLAG) ? "terrain2.png" : "terrain.png");
 		} else {
 			bindTexture("gui/items.png");
@@ -270,7 +270,7 @@ void ItemRenderer::renderGuiItemCorrect(Font* font, Textures* textures, const It
 	GLboolean depthWriteMaskWasEnabled = GL_TRUE;
 	glGetBooleanv(GL_DEPTH_WRITEMASK, &depthWriteMaskWasEnabled);
 	glDisable2(GL_CULL_FACE);
-	if (item->id >= 0 && item->id < 256 && Tile::tiles[item->id] != NULL &&
+	if (Tile::isTile(item->id) &&
 		TileRenderer::canRender(Tile::tiles[item->id]->getRenderShape()))
 	{
 		GuiShader::unbind();
@@ -278,8 +278,7 @@ void ItemRenderer::renderGuiItemCorrect(Font* font, Textures* textures, const It
 		int paint = item->id;
 		// Choose atlas based on tile texture flag so tiles using the
 		// secondary atlas (terrain2.png) render correctly in GUI.
-		Tile* tile = NULL;
-		if (paint >= 0 && paint < 256) tile = Tile::tiles[paint];
+		Tile* tile = (paint >= 0 && paint < Tile::NUM_BLOCK_TYPES) ? Tile::tiles[paint] : NULL;
 
 		// Render in two passes: main atlas (terrain.png) and alternate atlas (terrain2.png)
 		// First determine if any face uses the alternate atlas to avoid an unnecessary second pass.
@@ -340,7 +339,7 @@ void ItemRenderer::renderGuiItemCorrect(Font* font, Textures* textures, const It
 	else if (item->getIcon() >= 0)
 	{
 		int icon = item->getIcon();
-		if (item->id < 256) {
+		if (Tile::isTile(item->id)) {
 			textures->loadAndBindTexture((icon & Tile::TEXTURE_ALT_FLAG) ? "terrain2.png" : "terrain.png");
 		} else {
 			textures->loadAndBindTexture("gui/items.png");
