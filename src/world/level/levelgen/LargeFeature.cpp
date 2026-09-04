@@ -9,7 +9,7 @@ LargeFeature::~LargeFeature()
 {
 }
 
-void LargeFeature::apply( ChunkSource* chunkSource, Level* level, int xOffs, int zOffs, unsigned char* blocks, int blocksSize )
+void LargeFeature::apply( ChunkSource* chunkSource, Level* level, int xOffs, int zOffs, uint16_t* blocks, int blocksSize )
 {
 	int r = radius;
 

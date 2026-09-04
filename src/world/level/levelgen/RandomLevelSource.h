@@ -44,8 +44,8 @@ public:
     LevelChunk* create(int x, int z);
 	LevelChunk* getChunk(int xOffs, int zOffs);
 
-	void prepareHeights(int xOffs, int zOffs, unsigned char* blocks, /*Biome*/void* biomes, float* temperatures);
-    void buildSurfaces(int xOffs, int zOffs, unsigned char* blocks, Biome** biomes);
+	void prepareHeights(int xOffs, int zOffs, uint16_t* blocks, /*Biome*/void* biomes, float* temperatures);
+    void buildSurfaces(int xOffs, int zOffs, uint16_t* blocks, Biome** biomes);
 	void postProcess(ChunkSource* parent, int xt, int zt);
 
     bool tick();

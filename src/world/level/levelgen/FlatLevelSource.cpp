@@ -19,7 +19,7 @@ FlatLevelSource::~FlatLevelSource()
 {
 }
 
-void FlatLevelSource::prepareHeights(unsigned char* blocks)
+void FlatLevelSource::prepareHeights(uint16_t* blocks)
 {
 	const std::vector<FlatLayerInfo*>& layers = generatorInfo.getLayers();
 	for (int x = 0; x < 16; x++) {
@@ -30,7 +30,7 @@ void FlatLevelSource::prepareHeights(unsigned char* blocks)
 				int y = layer->getStart();
 				for (int h = 0; h < layer->getHeight(); h++) {
 					if (y + h < Level::DEPTH)
-						blocks[offs + y + h] = (unsigned char) layer->getId();
+						blocks[offs + y + h] = (uint16_t) layer->getId();
 				}
 			}
 		}
@@ -55,8 +55,8 @@ LevelChunk* FlatLevelSource::getChunk(int xOffs, int zOffs)
 	if (it != chunkMap.end())
 		return it->second;
 
-	unsigned char* blocks = new unsigned char[LevelChunk::ChunkBlockCount];
-	memset(blocks, 0, LevelChunk::ChunkBlockCount);
+	uint16_t* blocks = new uint16_t[LevelChunk::ChunkBlockCount];
+	memset(blocks, 0, LevelChunk::ChunkBlockCount * sizeof(uint16_t));
 
 	prepareHeights(blocks);
 
@@ -75,11 +75,11 @@ LevelChunk* FlatLevelSource::getChunkDontCreate(int x, int z)
 	if (it != chunkMap.end())
 		return it->second;
 
-	static unsigned char* emptyBlocks = nullptr;
+	static uint16_t* emptyBlocks = nullptr;
 	static LevelChunk* dummyChunk = nullptr;
 	if (!dummyChunk) {
-		emptyBlocks = new unsigned char[LevelChunk::ChunkBlockCount];
-		memset(emptyBlocks, 0, LevelChunk::ChunkBlockCount);
+		emptyBlocks = new uint16_t[LevelChunk::ChunkBlockCount];
+		memset(emptyBlocks, 0, LevelChunk::ChunkBlockCount * sizeof(uint16_t));
 		dummyChunk = new LevelChunk(level, emptyBlocks, 0, 0);
 	}
 	return dummyChunk;

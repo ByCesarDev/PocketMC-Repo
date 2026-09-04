@@ -29,11 +29,6 @@ public:
         dontSave = true;
     }
 
-    EmptyLevelChunk(Level* level, unsigned char* blocks, int x, int z)
-	:	LevelChunk(level, blocks, x, z)
-	{
-        dontSave = true;
-    }
 
     EmptyLevelChunk(Level* level, std::nullptr_t, int x, int z)
 	:	LevelChunk(level, (uint16_t*)NULL, x, z)

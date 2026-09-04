@@ -67,14 +67,16 @@ LevelChunk* HellRandomLevelSource::getChunk(int xOffs, int zOffs)
 
     random.setSeed(341873128712L * xOffs + 132897987541L * zOffs);
 
-    unsigned char* blocks = new unsigned char[CHUNK_BLOCK_COUNT];
-    LevelChunk* levelChunk = new LevelChunk(level, blocks, xOffs, zOffs);
-    chunkMap.insert(std::make_pair(hashedPos, levelChunk));
+    uint16_t* blocks = new uint16_t[CHUNK_BLOCK_COUNT];
+    memset(blocks, 0, CHUNK_BLOCK_COUNT * sizeof(uint16_t));
 
     prepareHeights(xOffs, zOffs, blocks);
     buildSurfaces(xOffs, zOffs, blocks);
 
     caveFeature.apply(this, level, xOffs, zOffs, blocks, CHUNK_BLOCK_COUNT);
+
+    LevelChunk* levelChunk = new LevelChunk(level, blocks, xOffs, zOffs);
+    chunkMap.insert(std::make_pair(hashedPos, levelChunk));
     levelChunk->recalcHeightmap();
 
     return levelChunk;
@@ -87,11 +89,11 @@ LevelChunk* HellRandomLevelSource::getChunkDontCreate(int x, int z)
     if (it != chunkMap.end())
         return it->second;
 
-    static unsigned char* emptyBlocks = nullptr;
+    static uint16_t* emptyBlocks = nullptr;
     static LevelChunk* dummyChunk = nullptr;
     if (!dummyChunk) {
-        emptyBlocks = new unsigned char[CHUNK_BLOCK_COUNT];
-        memset(emptyBlocks, 0, CHUNK_BLOCK_COUNT);
+        emptyBlocks = new uint16_t[CHUNK_BLOCK_COUNT];
+        memset(emptyBlocks, 0, CHUNK_BLOCK_COUNT * sizeof(uint16_t));
         dummyChunk = new LevelChunk(level, emptyBlocks, 0, 0);
     }
     return dummyChunk;
@@ -293,7 +295,7 @@ float* HellRandomLevelSource::getHeights(float* buffer, int x, int y, int z, int
     return buffer;
 }
 
-void HellRandomLevelSource::prepareHeights(int xOffs, int zOffs, unsigned char* blocks)
+void HellRandomLevelSource::prepareHeights(int xOffs, int zOffs, uint16_t* blocks)
 {
     int xChunks = 16 / 4;
     int xSize = xChunks + 1;
@@ -332,14 +334,14 @@ void HellRandomLevelSource::prepareHeights(int xOffs, int zOffs, unsigned char* 
 
                         for (int z = 0; z < 4; z++) {
                             int globalY = yc * 8 + y;
-                            unsigned char tileId = 0;
+                            uint16_t tileId = 0;
 
                             if (globalY < 32 && Tile::calmLava) {
-                                tileId = (unsigned char)Tile::calmLava->id;
+                                tileId = (uint16_t)Tile::calmLava->id;
                             }
 
                             if (val > 0.0f && Tile::netherrack) {
-                                tileId = (unsigned char)Tile::netherrack->id;
+                                tileId = (uint16_t)Tile::netherrack->id;
                             }
 
                             blocks[offs] = tileId;
@@ -359,7 +361,7 @@ void HellRandomLevelSource::prepareHeights(int xOffs, int zOffs, unsigned char* 
     }
 }
 
-void HellRandomLevelSource::buildSurfaces(int xOffs, int zOffs, unsigned char* blocks)
+void HellRandomLevelSource::buildSurfaces(int xOffs, int zOffs, uint16_t* blocks)
 {
     float s = 1.0f / 32.0f;
     perlinNoise2.getRegion(sandBuffer, (float)(xOffs * 16), (float)(zOffs * 16), 0, 16, 16, 1, s, s, 1);
@@ -380,46 +382,46 @@ void HellRandomLevelSource::buildSurfaces(int xOffs, int zOffs, unsigned char* b
             int i1 = (int)(depthBuffer[k + l * 16] / 3.0 + 3.0 + random.nextDouble() * 0.25);
             int j1 = -1;
 
-            unsigned char topBlock = (unsigned char)netherrackId;
-            unsigned char fillerBlock = (unsigned char)netherrackId;
+            uint16_t topBlock = (uint16_t)netherrackId;
+            uint16_t fillerBlock = (uint16_t)netherrackId;
 
             for (int k1 = 127; k1 >= 0; k1--) {
                 int l1 = (k * 16 + l) * 128 + k1;
 
                 if (k1 >= 127 - random.nextInt(5) || k1 <= random.nextInt(5)) {
-                    blocks[l1] = (unsigned char)bedrockId;
+                    blocks[l1] = (uint16_t)bedrockId;
                     continue;
                 }
 
-                unsigned char byte3 = blocks[l1];
+                uint16_t byte3 = blocks[l1];
                 if (byte3 == 0) {
                     j1 = -1;
                     continue;
                 }
 
-                if (byte3 != (unsigned char)netherrackId)
+                if (byte3 != (uint16_t)netherrackId)
                     continue;
 
                 if (j1 == -1) {
                     if (i1 <= 0) {
                         topBlock = 0;
-                        fillerBlock = (unsigned char)netherrackId;
+                        fillerBlock = (uint16_t)netherrackId;
                     }
                     else if (k1 >= byte0 - 4 && k1 <= byte0 + 1) {
-                        topBlock = (unsigned char)netherrackId;
-                        fillerBlock = (unsigned char)netherrackId;
+                        topBlock = (uint16_t)netherrackId;
+                        fillerBlock = (uint16_t)netherrackId;
                         if (hasGravelNoise) {
-                            topBlock = (unsigned char)gravelId;
-                            fillerBlock = (unsigned char)netherrackId;
+                            topBlock = (uint16_t)gravelId;
+                            fillerBlock = (uint16_t)netherrackId;
                         }
                         if (hasSurfaceNoise) {
-                            topBlock = (unsigned char)soulSandId;
-                            fillerBlock = (unsigned char)soulSandId;
+                            topBlock = (uint16_t)soulSandId;
+                            fillerBlock = (uint16_t)soulSandId;
                         }
                     }
 
                     if (k1 < byte0 && topBlock == 0)
-                        topBlock = (unsigned char)lavaId;
+                        topBlock = (uint16_t)lavaId;
 
                     j1 = i1;
 

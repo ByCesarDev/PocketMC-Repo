@@ -7,12 +7,12 @@
 #include "../../../util/Random.h"
 #include "../../../util/Mth.h"
 
-void DungeonFeature::addRoom( int xOffs, int zOffs, unsigned char* blocks, float xRoom, float yRoom, float zRoom )
+void DungeonFeature::addRoom( int xOffs, int zOffs, uint16_t* blocks, float xRoom, float yRoom, float zRoom )
 {
 	addTunnel(xOffs, zOffs, blocks, xRoom, yRoom, zRoom, 1 + random.nextFloat() * 6, 0, 0, -1, -1, 0.5);
 }
 
-void DungeonFeature::addTunnel( int xOffs, int zOffs, unsigned char* blocks, float xCave, float yCave, float zCave, float thickness, float yRot, float xRot, int step, int dist, float yScale )
+void DungeonFeature::addTunnel( int xOffs, int zOffs, uint16_t* blocks, float xCave, float yCave, float zCave, float thickness, float yRot, float xRot, int step, int dist, float yScale )
 {
 	float xMid = xOffs * 16 + 8;
 	float zMid = zOffs * 16 + 8;
@@ -144,7 +144,7 @@ void DungeonFeature::addTunnel( int xOffs, int zOffs, unsigned char* blocks, flo
 	}
 }
 
-void DungeonFeature::addFeature( Level level, int x, int z, int xOffs, int zOffs, unsigned char* blocks )
+void DungeonFeature::addFeature( Level level, int x, int z, int xOffs, int zOffs, uint16_t* blocks )
 {
 	int caves = random.nextInt(random.nextInt(random.nextInt(40) + 1) + 1);
 	if (random.nextInt(15) != 0) caves = 0;

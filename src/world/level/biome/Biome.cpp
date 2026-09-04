@@ -116,8 +116,8 @@ void Biome::recalc()
 		}
 	}
 
-	Biome::desert->topMaterial = Biome::desert->material = (char) Tile::sand->id;
-	Biome::iceDesert->topMaterial = Biome::iceDesert->material = (char) Tile::sand->id;
+	Biome::desert->topMaterial = Biome::desert->material = (uint16_t) Tile::sand->id;
+	Biome::iceDesert->topMaterial = Biome::iceDesert->material = (uint16_t) Tile::sand->id;
 }
 
 /*static*/
@@ -140,8 +140,8 @@ void Biome::initBiomes() {
 	recalc();
 
 	if (Tile::netherrack) {
-		hell->topMaterial = (char) Tile::netherrack->id;
-		hell->material = (char) Tile::netherrack->id;
+		hell->topMaterial = (uint16_t) Tile::netherrack->id;
+		hell->material = (uint16_t) Tile::netherrack->id;
 	}
 }
 /*static*/

@@ -5,7 +5,7 @@
 #include "../../../util/Random.h"
 #include "../../../util/Mth.h"
 
-void CanyonFeature::addTunnel( int xOffs, int zOffs, unsigned char* blocks, float xCave, float yCave, float zCave, float thickness, float yRot, float xRot, int step, int dist, float yScale )
+void CanyonFeature::addTunnel( int xOffs, int zOffs, uint16_t* blocks, float xCave, float yCave, float zCave, float thickness, float yRot, float xRot, int step, int dist, float yScale )
 {
 	float xMid = xOffs * 16 + 8;
 	float zMid = zOffs * 16 + 8;
@@ -73,14 +73,14 @@ void CanyonFeature::addTunnel( int xOffs, int zOffs, unsigned char* blocks, floa
 
 		if (xCave < xMid - 16 - rad * 2 || zCave < zMid - 16 - rad * 2 || xCave > xMid + 16 + rad * 2 || zCave > zMid + 16 + rad * 2) continue;
 
-		int x0 = floor(xCave - rad) - xOffs * 16 - 1;
-		int x1 = floor(xCave + rad) - xOffs * 16 + 1;
+		int x0 = (int)floor(xCave - rad) - xOffs * 16 - 1;
+		int x1 = (int)floor(xCave + rad) - xOffs * 16 + 1;
 
-		int y0 = floor(yCave - yRad) - 1;
-		int y1 = floor(yCave + yRad) + 1;
+		int y0 = (int)floor(yCave - yRad) - 1;
+		int y1 = (int)floor(yCave + yRad) + 1;
 
-		int z0 = floor(zCave - rad) - zOffs * 16 - 1;
-		int z1 = floor(zCave + rad) - zOffs * 16 + 1;
+		int z0 = (int)floor(zCave - rad) - zOffs * 16 - 1;
+		int z1 = (int)floor(zCave + rad) - zOffs * 16 + 1;
 
 		if (x0 < 0) x0 = 0;
 		if (x1 > 16) x1 = 16;
@@ -114,29 +114,31 @@ void CanyonFeature::addTunnel( int xOffs, int zOffs, unsigned char* blocks, floa
 				float zd = ((zz + zOffs * 16 + 0.5) - zCave) / rad;
 				int p = (xx * 16 + zz) * 128 + y1;
 				bool hasGrass = false;
-				for (int yy = y1 - 1; yy >= y0; yy--) {
-					float yd = (yy + 0.5 - yCave) / yRad;
-					if (yd > -0.7 && xd * xd + yd * yd + zd * zd < 1) {
-						unsigned char block = blocks[p];
-						if (block == (unsigned char)Tile::grass->id) hasGrass = true;
-						
-						// Comprobamos si el bloque es piedra, deepslate o algún mineral de deepslate para poder excavar el cañón
-						bool isReplaceable = (block == Tile::rock->id || block == Tile::deepslate->id || 
-											  block == Tile::dirt->id || block == Tile::grass->id ||
-											  block == Tile::deepslateIronOre->id || block == Tile::deepslateGoldOre->id ||
-											  block == Tile::deepslateRedstoneOre->id || block == Tile::deepslateLapisOre->id ||
-											  block == Tile::deepslateDiamondOre->id);
+				if (xd * xd + zd * zd < 1) {
+					for (int yy = y1 - 1; yy >= y0; yy--) {
+						float yd = (yy + 0.5 - yCave) / yRad;
+						if (yd > -0.7 && xd * xd + yd * yd + zd * zd < 1) {
+							uint16_t block = blocks[p];
+							if (block == (uint16_t)Tile::grass->id) hasGrass = true;
+							
+							// Comprobamos si el bloque es piedra, deepslate o algún mineral de deepslate para poder excavar el cañón
+							bool isReplaceable = (block == Tile::rock->id || block == Tile::deepslate->id || 
+												  block == Tile::dirt->id || block == Tile::grass->id ||
+												  block == Tile::deepslateIronOre->id || block == Tile::deepslateGoldOre->id ||
+												  block == Tile::deepslateRedstoneOre->id || block == Tile::deepslateLapisOre->id ||
+												  block == Tile::deepslateDiamondOre->id);
 
-						if (isReplaceable) {
-							if (yy < 10) {
-								blocks[p] = (unsigned char) Tile::lava->id;
-							} else {
-								blocks[p] = (unsigned char) 0;
-								if (hasGrass && blocks[p - 1] == Tile::dirt->id) blocks[p - 1] = (unsigned char) Tile::grass->id;
+							if (isReplaceable) {
+								if (yy < 10) {
+									blocks[p] = (uint16_t) Tile::lava->id;
+								} else {
+									blocks[p] = (uint16_t) 0;
+									if (hasGrass && blocks[p - 1] == Tile::dirt->id) blocks[p - 1] = (uint16_t) Tile::grass->id;
+								}
 							}
 						}
+						p--;
 					}
-					p--;
 				}
 			}
 		}
@@ -144,7 +146,7 @@ void CanyonFeature::addTunnel( int xOffs, int zOffs, unsigned char* blocks, floa
 	}
 }
 
-void CanyonFeature::addFeature( Level level, int x, int z, int xOffs, int zOffs, unsigned char* blocks )
+void CanyonFeature::addFeature( Level level, int x, int z, int xOffs, int zOffs, uint16_t* blocks )
 {
 	if (random.nextInt(15) != 0) return;
 

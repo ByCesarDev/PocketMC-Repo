@@ -26,7 +26,6 @@ public:
 
     LevelChunk(Level* level, int x, int z);
     LevelChunk(Level* level, uint16_t* blocks, int x, int z);
-    LevelChunk(Level* level, unsigned char* blocks, int x, int z);
     LevelChunk(Level* level, std::nullptr_t, int x, int z);
 	virtual ~LevelChunk();
 

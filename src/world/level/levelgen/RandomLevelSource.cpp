@@ -65,7 +65,7 @@ static const int LEGACY_GENERATION_HEIGHT = 128;
 static const int LEGACY_SEA_LEVEL = 64;
 
 /*public*/
-void RandomLevelSource::prepareHeights(int xOffs, int zOffs, unsigned char* blocks, /*Biome*/void* biomes, float* temperatures) {
+void RandomLevelSource::prepareHeights(int xOffs, int zOffs, uint16_t* blocks, /*Biome*/void* biomes, float* temperatures) {
 	
 	int xChunks = 16 / CHUNK_WIDTH;
     int waterHeight = LEGACY_SEA_LEVEL;
@@ -131,7 +131,7 @@ void RandomLevelSource::prepareHeights(int xOffs, int zOffs, unsigned char* bloc
                             } else {
                             }
 
-                            blocks[offs] = (unsigned char) tileId;
+                            blocks[offs] = (uint16_t) tileId;
                             offs += step;
                             val += vala;
                         }
@@ -149,7 +149,7 @@ void RandomLevelSource::prepareHeights(int xOffs, int zOffs, unsigned char* bloc
     }
 }
 
-void RandomLevelSource::buildSurfaces(int xOffs, int zOffs, unsigned char* blocks, Biome** biomes) {
+void RandomLevelSource::buildSurfaces(int xOffs, int zOffs, uint16_t* blocks, Biome** biomes) {
     int waterHeight = LEGACY_SEA_LEVEL;
 
     float s = 1 / 32.0f;
@@ -167,14 +167,14 @@ void RandomLevelSource::buildSurfaces(int xOffs, int zOffs, unsigned char* block
 
             int run = -1;
 
-            char top = b->topMaterial;
-            char material = b->material;
+            uint16_t top = b->topMaterial;
+            uint16_t material = b->material;
 
             for (int y = LEGACY_GENERATION_HEIGHT - 1; y >= 0; y--) {
                 int offs = (x << 12) | (z << 8) | y;
 
                 if (y <= 0 + random.nextInt(5)) {
-                    blocks[offs] = (char) Tile::unbreakable->id;
+                    blocks[offs] = (uint16_t) Tile::unbreakable->id;
                 } else {
                     int old = blocks[offs];
 
@@ -184,25 +184,25 @@ void RandomLevelSource::buildSurfaces(int xOffs, int zOffs, unsigned char* block
                         if (run == -1) {
                             if (runDepth <= 0) {
                                 top = 0;
-                                material = (char) old;
+                                material = (uint16_t) old;
                             } else if (y >= waterHeight - 4 && y <= waterHeight + 3) {
                                 top = b->topMaterial;
                                 material = b->material;
                                 if (gravel) {
                                     top = 0;
-                                    material = (char) Tile::gravel->id;
+                                    material = (uint16_t) Tile::gravel->id;
                                 }
                                 if (sand) {
-                                    top = (char) Tile::sand->id;
-                                    material = (char) Tile::sand->id;
+                                    top = (uint16_t) Tile::sand->id;
+                                    material = (uint16_t) Tile::sand->id;
                                 }
                             }
 
                             if (y < waterHeight && top == 0) {
                                 if (temp < 0.15f)
-                                    top = (char) Tile::ice->id;
+                                    top = (uint16_t) Tile::ice->id;
                                 else
-                                    top = (char) Tile::calmWater->id;
+                                    top = (uint16_t) Tile::calmWater->id;
                             }
 
                             run = runDepth;
@@ -214,7 +214,7 @@ void RandomLevelSource::buildSurfaces(int xOffs, int zOffs, unsigned char* block
 
                             if (run == 0 && material == Tile::sand->id) {
                                 run = random.nextInt(4);
-                                material = (char) Tile::sandStone->id;
+                                material = (uint16_t) Tile::sandStone->id;
                             }
                         }
                     }
@@ -523,10 +523,8 @@ LevelChunk* RandomLevelSource::getChunk(int xOffs, int zOffs) {
 
     random.setSeed((long)(xOffs * 341872712l + zOffs * 132899541l)); //@fix
 
-    unsigned char* blocks = new unsigned char[LevelChunk::ChunkBlockCount];
-    memset(blocks, 0, LevelChunk::ChunkBlockCount);
-    LevelChunk* levelChunk = new LevelChunk(level, blocks, xOffs, zOffs);
-	chunkMap.insert(std::make_pair(hashedPos, levelChunk));
+    uint16_t* blocks = new uint16_t[LevelChunk::ChunkBlockCount];
+    memset(blocks, 0, LevelChunk::ChunkBlockCount * sizeof(uint16_t));
 
 	Biome** biomes = level->getBiomeSource()->getBiomeBlock(/*biomes, */xOffs * 16, zOffs * 16, 16, 16);
     float* temperatures = level->getBiomeSource()->temperatures;
@@ -535,6 +533,9 @@ LevelChunk* RandomLevelSource::getChunk(int xOffs, int zOffs) {
 
 	// Carve caves into the chunk
 	caveFeature.apply(this, level, xOffs, zOffs, blocks, LevelChunk::ChunkBlockCount);
+
+    LevelChunk* levelChunk = new LevelChunk(level, blocks, xOffs, zOffs);
+	chunkMap.insert(std::make_pair(hashedPos, levelChunk));
     levelChunk->recalcHeightmap();
 
     return levelChunk;
@@ -717,8 +718,8 @@ Biome::MobList RandomLevelSource::getMobsAt(const MobCategory& mobCategory, int 
 
 LevelChunk* PerformanceTestChunkSource::create(int x, int z)
 {
-	unsigned char* blocks = new unsigned char[LevelChunk::ChunkBlockCount];
-	memset(blocks, 0, LevelChunk::ChunkBlockCount);
+	uint16_t* blocks = new uint16_t[LevelChunk::ChunkBlockCount];
+	memset(blocks, 0, LevelChunk::ChunkBlockCount * sizeof(uint16_t));
 
 	for (int y = 0; y < 65; y++)
 	{

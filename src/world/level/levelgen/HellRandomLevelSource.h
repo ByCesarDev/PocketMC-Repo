@@ -26,8 +26,8 @@ public:
     std::string gatherStats() override;
     Biome::MobList getMobsAt(const MobCategory& mobCategory, int x, int y, int z) override;
 
-    void prepareHeights(int xOffs, int zOffs, unsigned char* blocks);
-    void buildSurfaces(int xOffs, int zOffs, unsigned char* blocks);
+    void prepareHeights(int xOffs, int zOffs, uint16_t* blocks);
+    void buildSurfaces(int xOffs, int zOffs, uint16_t* blocks);
 
 private:
     float* getHeights(float* buffer, int x, int y, int z, int xSize, int ySize, int zSize);

@@ -29,7 +29,7 @@ public:
 	Biome::MobList getMobsAt(const MobCategory& mobCategory, int x, int y, int z) override;
 
 private:
-	void prepareHeights(unsigned char* blocks);
+	void prepareHeights(uint16_t* blocks);
 
 	Level* level;
 	Random random;

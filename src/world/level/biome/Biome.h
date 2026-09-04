@@ -92,8 +92,8 @@ public:
 
 	std::string name;
 	int color;
-	char topMaterial;
-	char material;
+	uint16_t topMaterial;
+	uint16_t material;
 	int leafColor;
 	float temperature;
 	float downfall;

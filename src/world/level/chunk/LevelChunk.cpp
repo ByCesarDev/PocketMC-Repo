@@ -51,29 +51,6 @@ LevelChunk::LevelChunk( Level* level, uint16_t* blocks, int x, int z )
 	init();
 }
 
-LevelChunk::LevelChunk( Level* level, unsigned char* blocks8, int x, int z )
-:	level(level),
-	x(x),
-	z(z),
-	xt(x * CHUNK_WIDTH),
-	zt(z * CHUNK_DEPTH),
-	blocks(new uint16_t[ChunkBlockCount]()),
-	data(ChunkBlockCount),
-	skyLight(ChunkBlockCount),
-	blockLight(ChunkBlockCount),
-	blocksLength(ChunkBlockCount)
-{
-	if (blocks8 != NULL) {
-		for (int i = 0; i < ChunkBlockCount; ++i) {
-			int lx = (i >> 12) & 15;
-			int lz = (i >> 8) & 15;
-			int ly = i & 255;
-			this->blocks[i] = (uint16_t)Tile::transformToValidBlockId(blocks8[i], xt + lx, ly, zt + lz);
-		}
-		delete [] blocks8;
-	}
-	init();
-}
 
 LevelChunk::LevelChunk( Level* level, std::nullptr_t, int x, int z )
 :	LevelChunk(level, (uint16_t*)NULL, x, z)
@@ -333,7 +310,7 @@ void LevelChunk::setBlocks(unsigned char* newBlocks, int sub) { //@byte[]
 		int x = (local >> 12) & 15;
 		int z = (local >> 8) & 15;
 		int y = local & 255;
-        blocks[local] = (unsigned char)Tile::transformToValidBlockId(newBlocks[i], xt + x, y, zt + z);
+        blocks[local] = (uint16_t)Tile::transformToValidBlockId(newBlocks[i], xt + x, y, zt + z);
     }
 
     for (int x = sub * 4; x < sub * 4 + 4; x++) {
