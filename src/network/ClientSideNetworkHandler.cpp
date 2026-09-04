@@ -488,7 +488,7 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, ChunkDat
 	int rx = packet->x << 4;
 	int rz = packet->z << 4;
 
-	unsigned char readBlockBuffer[setSize];
+	uint16_t readBlockBuffer[setSize];
 	unsigned char readDataBuffer[setSize / 2];
 
 	for (int i = 0; i < CHUNK_COLUMNS; i++)
@@ -508,7 +508,7 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, ChunkDat
 			{
 				if ((updateBits & (1 << set)) != 0) 
 				{
-					packet->chunkData.Read((char*)readBlockBuffer, setSize);
+					packet->chunkData.Read((char*)readBlockBuffer, setSize * sizeof(uint16_t));
 					packet->chunkData.Read((char*)readDataBuffer, setSize / 2);
 
 					for (int part = 0; part < setSize; part++)

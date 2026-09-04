@@ -32,11 +32,11 @@ public:
 	// Replacing old Cloth (id based) with new Cloth (data based)
 	static bool v1_ClothIdToClothData(LevelChunk* c) {
 		bool changed = false;
-		unsigned char* blocks = c->getBlockData();
-		unsigned char newTile = Tile::cloth->id;
+		uint16_t* blocks = c->getBlockData();
+		uint16_t newTile = Tile::cloth->id;
 
 		for (int i = 0; i < 16*16*128; ++i) {
-			unsigned char oldTile = blocks[i];
+			uint16_t oldTile = blocks[i];
 			//Tile::cloth_00 to Tile::cloth_61
 			if (oldTile >= 101 && oldTile <= 115) {
 				int color = 0xf - (oldTile - 101);
@@ -53,11 +53,11 @@ public:
 		//int st = getTimeMs();
 		
 		bool changed = false;
-		unsigned char* blocks = c->getBlockData();
+		uint16_t* blocks = c->getBlockData();
 
 		for (int i = 0; i < 16*16*128; ++i) {
-			unsigned char oldTile = blocks[i];
-			unsigned char newTile = Tile::transformToValidBlockId(oldTile);
+			uint16_t oldTile = blocks[i];
+			uint16_t newTile = (uint16_t)Tile::transformToValidBlockId(oldTile);
 			if (oldTile != newTile) {
 				blocks[i] = newTile;
 				changed = true;
@@ -357,9 +357,9 @@ void ExternalFileLevelStorage::save(Level* level, LevelChunk* levelChunk)
 		return;
 	}
 
-	// Write chunk
+	// Write chunk (16-bit block buffer: CHUNK_BLOCK_COUNT * sizeof(uint16_t))
 	RakNet::BitStream chunkData;
-	chunkData.Write((const char*)levelChunk->getBlockData(), CHUNK_BLOCK_COUNT);
+	chunkData.Write((const char*)levelChunk->getBlockData(), CHUNK_BLOCK_COUNT * sizeof(uint16_t));
 	chunkData.Write((const char*)levelChunk->data.data, CHUNK_BLOCK_COUNT / 2);
 
 	chunkData.Write((const char*)levelChunk->skyLight.data, CHUNK_BLOCK_COUNT / 2);
@@ -391,16 +391,33 @@ LevelChunk* ExternalFileLevelStorage::load(Level* level, int x, int z)
 
 	chunkData->ResetReadPointer();
 
-	unsigned char* blockIds = new unsigned char[CHUNK_BLOCK_COUNT];
-	chunkData->Read((char*)blockIds, CHUNK_BLOCK_COUNT);
+	uint16_t* blockIds = new uint16_t[CHUNK_BLOCK_COUNT];
+	int totalBytes = chunkData->GetNumberOfBytesUsed();
 	bool sanitizedBlockIdsOnRead = false;
-	for (int i = 0; i < CHUNK_BLOCK_COUNT; ++i) {
-		unsigned char oldTile = blockIds[i];
-		unsigned char newTile = (unsigned char)Tile::transformToValidBlockId(oldTile);
-		if (oldTile != newTile) {
-			blockIds[i] = newTile;
-			sanitizedBlockIdsOnRead = true;
+
+	// If total chunk size >= 200KB, it's modern 16-bit block format; otherwise legacy 8-bit format
+	if (totalBytes >= (int)(CHUNK_BLOCK_COUNT * sizeof(uint16_t))) {
+		chunkData->Read((char*)blockIds, CHUNK_BLOCK_COUNT * sizeof(uint16_t));
+		for (int i = 0; i < CHUNK_BLOCK_COUNT; ++i) {
+			uint16_t oldTile = blockIds[i];
+			uint16_t newTile = (uint16_t)Tile::transformToValidBlockId(oldTile);
+			if (oldTile != newTile) {
+				blockIds[i] = newTile;
+				sanitizedBlockIdsOnRead = true;
+			}
 		}
+	} else {
+		unsigned char* blockIds8 = new unsigned char[CHUNK_BLOCK_COUNT];
+		chunkData->Read((char*)blockIds8, CHUNK_BLOCK_COUNT);
+		for (int i = 0; i < CHUNK_BLOCK_COUNT; ++i) {
+			uint16_t oldTile = blockIds8[i];
+			uint16_t newTile = (uint16_t)Tile::transformToValidBlockId(oldTile);
+			blockIds[i] = newTile;
+			if (oldTile != newTile) {
+				sanitizedBlockIdsOnRead = true;
+			}
+		}
+		delete [] blockIds8;
 	}
 
 	LevelChunk* levelChunk = new LevelChunk(level, blockIds, x, z);

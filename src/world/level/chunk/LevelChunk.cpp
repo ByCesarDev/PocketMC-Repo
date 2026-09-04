@@ -19,7 +19,7 @@ LevelChunk::LevelChunk( Level* level, int x, int z )
 	z(z),
 	xt(x * CHUNK_WIDTH),
 	zt(z * CHUNK_DEPTH),
-	blocks(new unsigned char[ChunkBlockCount]()),
+	blocks(new uint16_t[ChunkBlockCount]()),
 	data(ChunkBlockCount),
 	skyLight(ChunkBlockCount),
 	blockLight(ChunkBlockCount),
@@ -28,7 +28,7 @@ LevelChunk::LevelChunk( Level* level, int x, int z )
 	init();
 }
 
-LevelChunk::LevelChunk( Level* level, unsigned char* blocks, int x, int z )
+LevelChunk::LevelChunk( Level* level, uint16_t* blocks, int x, int z )
 :	level(level),
 	x(x),
 	z(z),
@@ -45,10 +45,39 @@ LevelChunk::LevelChunk( Level* level, unsigned char* blocks, int x, int z )
 			int lx = (i >> 12) & 15;
 			int lz = (i >> 8) & 15;
 			int ly = i & 255;
-			this->blocks[i] = (unsigned char)Tile::transformToValidBlockId(this->blocks[i], xt + lx, ly, zt + lz);
+			this->blocks[i] = (uint16_t)Tile::transformToValidBlockId(this->blocks[i], xt + lx, ly, zt + lz);
 		}
 	}
 	init();
+}
+
+LevelChunk::LevelChunk( Level* level, unsigned char* blocks8, int x, int z )
+:	level(level),
+	x(x),
+	z(z),
+	xt(x * CHUNK_WIDTH),
+	zt(z * CHUNK_DEPTH),
+	blocks(new uint16_t[ChunkBlockCount]()),
+	data(ChunkBlockCount),
+	skyLight(ChunkBlockCount),
+	blockLight(ChunkBlockCount),
+	blocksLength(ChunkBlockCount)
+{
+	if (blocks8 != NULL) {
+		for (int i = 0; i < ChunkBlockCount; ++i) {
+			int lx = (i >> 12) & 15;
+			int lz = (i >> 8) & 15;
+			int ly = i & 255;
+			this->blocks[i] = (uint16_t)Tile::transformToValidBlockId(blocks8[i], xt + lx, ly, zt + lz);
+		}
+		delete [] blocks8;
+	}
+	init();
+}
+
+LevelChunk::LevelChunk( Level* level, std::nullptr_t, int x, int z )
+:	LevelChunk(level, (uint16_t*)NULL, x, z)
+{
 }
 
 LevelChunk::~LevelChunk()
@@ -79,7 +108,7 @@ bool LevelChunk::setTileAndData(int x, int y, int z, int tile_, int data_) {
     if (old == tile && data.get(x, y, z) == data_) return false;
     int xOffs = xt + x;
     int zOffs = zt + z;
-    blocks[x << 12 | z << 8 | y] = (unsigned char) tile;
+    blocks[x << 12 | z << 8 | y] = (uint16_t) tile;
     if (old != 0 && Tile::tiles[old] != NULL) {
 		if (!level->isClientSide) {
 			Tile::tiles[old]->onRemove(level, xOffs, y, zOffs);
@@ -121,17 +150,17 @@ bool LevelChunk::setTile(int x, int y, int z, int tile_) {
     int tile = Tile::transformToValidBlockId(tile_, xt + x, y, zt + z);
     int oldHeight = heightmap[z << 4 | x];
 
-    int old = blocks[x << 12 | z << 8 | y] & 0xff;
+    int old = blocks[x << 12 | z << 8 | y];
     if (old == tile) return false;
     int xOffs = xt + x;
     int zOffs = zt + z;
-    blocks[x << 12 | z << 8 | y] = (unsigned char) (tile & 0xff);
+    blocks[x << 12 | z << 8 | y] = (uint16_t) tile;
     if (old != 0 && Tile::tiles[old] != NULL) {
         Tile::tiles[old]->onRemove(level, xOffs, y, zOffs);
     }
     data.set(x, y, z, 0);
 
-    if (Tile::lightBlock[tile & 0xff] != 0) {
+    if (Tile::lightBlock[tile] != 0) {
         if (y >= oldHeight) {
             recalcHeight(x, y + 1, z);
         }
@@ -155,7 +184,7 @@ bool LevelChunk::setTile(int x, int y, int z, int tile_) {
 }
 
 void LevelChunk::setTileRaw(int x, int y, int z, int tile) {
-	blocks[x << 12 | z << 8 | y] = (unsigned char)Tile::transformToValidBlockId(tile, xt + x, y, zt + z);
+	blocks[x << 12 | z << 8 | y] = (uint16_t)Tile::transformToValidBlockId(tile, xt + x, y, zt + z);
 }
 
 /*public*/
@@ -170,7 +199,7 @@ void LevelChunk::recalcHeightmapOnly() {
         for (int z = 0; z < 16; z++) {
             int y = Level::DEPTH;
             int p = x << 12 | z << 8;
-            while (y > 0 && Tile::lightBlock[blocks[p + y - 1] & 0xff] == 0)
+            while (y > 0 && Tile::lightBlock[blocks[p + y - 1]] == 0)
                 y--;
             heightmap[z << 4 | x] = (unsigned short) y;
             if (y < min) min = y;
@@ -187,7 +216,7 @@ void LevelChunk::recalcHeightmap() {
         for (int z = 0; z < 16; z++) {
             int y = Level::DEPTH;
             int p = x << 12 | z << 8;
-            while (y > 0 && Tile::lightBlock[blocks[p + y - 1] & 0xff] == 0)
+            while (y > 0 && Tile::lightBlock[blocks[p + y - 1]] == 0)
                 y--;
             heightmap[z << 4 | x] = (unsigned short) y;
             if (y < min) min = y;
@@ -195,7 +224,7 @@ void LevelChunk::recalcHeightmap() {
             if (!level->dimension->hasCeiling) { 
                 int br = Level::MAX_BRIGHTNESS;
                 for (int yy = Level::DEPTH - 1; yy >= 0; yy--) {
-                    br -= Tile::lightBlock[blocks[p + yy] & 0xff];
+                    br -= Tile::lightBlock[blocks[p + yy]];
                     if (br < 0) br = 0;
                     skyLight.set(x, yy, z, br);
                 }
@@ -220,7 +249,7 @@ void LevelChunk::recalcHeight(int x, int yStart, int z) {
     if (y > Level::DEPTH) y = Level::DEPTH;
 
     int p = x << 12 | z << 8;
-    while (y > 0 && Tile::lightBlock[blocks[p + y - 1] & 0xff] == 0)
+    while (y > 0 && Tile::lightBlock[blocks[p + y - 1]] == 0)
         y--;
     if (y == yOld) return;
 
@@ -381,7 +410,7 @@ void LevelChunk::lightGaps( int x, int z )
 
 int LevelChunk::getTile( int x, int y, int z )
 {
-	return blocks[x << 12 | z << 8 | y] & 0xff;
+	return blocks[x << 12 | z << 8 | y];
 }
 
 void LevelChunk::setData( int x, int y, int z, int val )
@@ -646,8 +675,9 @@ int LevelChunk::getBlocksAndData( unsigned char* data, int x0, int y0, int z0, i
 	int len = y1 - y0;
 	for (int x = x0; x < x1; x++)
 	for (int z = z0; z < z1; z++) {
-		int slot = x << 12 | z << 8 | y0;
-		memcpy(data + p, blocks + slot, len); //System.arraycopy(blocks, slot, data, p, len);
+		for (int y = y0; y < y1; ++y) {
+			data[p + y - y0] = (unsigned char)(blocks[x << 12 | z << 8 | y] & 0xff);
+		}
 		p += len;
 	}
 
@@ -684,7 +714,7 @@ int LevelChunk::setBlocksAndData( unsigned char* data, int x0, int y0, int z0, i
 	for (int x = x0; x < x1; x++)
 	for (int z = z0; z < z1; z++) {
 		for (int y = y0; y < y1; ++y)
-			blocks[x << 12 | z << 8 | y] = (unsigned char)Tile::transformToValidBlockId(data[p + y - y0], xt + x, y, zt + z);
+			blocks[x << 12 | z << 8 | y] = (uint16_t)Tile::transformToValidBlockId(data[p + y - y0], xt + x, y, zt + z);
 		p += len;
 	}
 

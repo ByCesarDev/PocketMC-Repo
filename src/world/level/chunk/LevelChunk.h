@@ -25,7 +25,9 @@ public:
     typedef TEMap::const_iterator TEMapCIterator;
 
     LevelChunk(Level* level, int x, int z);
+    LevelChunk(Level* level, uint16_t* blocks, int x, int z);
     LevelChunk(Level* level, unsigned char* blocks, int x, int z);
+    LevelChunk(Level* level, std::nullptr_t, int x, int z);
 	virtual ~LevelChunk();
 
 	void init(); // @todo virtual?;
@@ -44,7 +46,7 @@ public:
 	virtual void recalcHeightmap();
     virtual void recalcHeightmapOnly();
 
-	unsigned char* getBlockData() { return blocks; }
+	uint16_t* getBlockData() { return blocks; }
 
     virtual int getBrightness(const LightLayer& layer, int x, int y, int z);
     virtual void setBrightness(const LightLayer& layer, int x, int y, int z, int brightness);
@@ -132,7 +134,7 @@ public:
     bool lastSaveHadEntities;
     long lastSaveTime;
 protected:
-	unsigned char* blocks;
+	uint16_t* blocks;
 
 	static const int EntityBlocksArraySize = LEVEL_HEIGHT / 16;
 	std::vector<Entity*> entityBlocks[EntityBlocksArraySize];

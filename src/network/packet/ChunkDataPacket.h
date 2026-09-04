@@ -30,7 +30,7 @@ public:
 		bitStream->Write(x);
 		bitStream->Write(z);
 
-		unsigned char* blockIds = chunk->getBlockData();
+		uint16_t* blockIds = chunk->getBlockData();
 		DataLayer& blockData = chunk->data;
 
 		const int setSize = LEVEL_HEIGHT / 8;
@@ -50,7 +50,7 @@ public:
 				{
 					if ((updateBits & (1 << set)) != 0) 
 					{
-						chunkData.Write((const char*)(&blockIds[colDataPosition + (set << setShift)]), setSize);
+						chunkData.Write((const char*)(&blockIds[colDataPosition + (set << setShift)]), setSize * sizeof(uint16_t));
 						// block data is only 4 bits per block
 						chunkData.Write((const char*)(&blockData.data[(colDataPosition + (set << setShift)) >> 1]), setSize >> 1);
 					}

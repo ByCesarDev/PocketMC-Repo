@@ -30,7 +30,7 @@ public:
 		source(source_)
 	{
 		isChunkCache = true;
-		emptyChunk = new EmptyLevelChunk(level_, NULL, 0, 0);
+		emptyChunk = new EmptyLevelChunk(level_, 0, 0);
     }
 
 	~ChunkCache() {

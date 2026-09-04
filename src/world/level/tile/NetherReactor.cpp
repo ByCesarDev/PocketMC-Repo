@@ -14,7 +14,7 @@ static bool existsReactorOrPortalElsewhere(Level* level, int x, int y, int z) {
 		for (int cz = centerCz - r; cz <= centerCz + r; cz++) {
 			LevelChunk* chunk = level->getChunk(cx, cz);
 			if (!chunk) continue;
-			unsigned char* blocks = chunk->getBlockData();
+			uint16_t* blocks = chunk->getBlockData();
 			if (!blocks) continue;
 			for (int lx = 0; lx < 16; lx++) {
 				for (int lz = 0; lz < 16; lz++) {

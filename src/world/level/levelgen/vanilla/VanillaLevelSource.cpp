@@ -83,8 +83,8 @@ LevelChunk* VanillaLevelSource::getChunk(int chunkX, int chunkZ)
 	auto it = chunkMap.find(hashedPos);
 	if (it != chunkMap.end()) return it->second;
 
-	unsigned char* blocks = new unsigned char[LevelChunk::ChunkBlockCount];
-	std::memset(blocks, 0, LevelChunk::ChunkBlockCount);
+	uint16_t* blocks = new uint16_t[LevelChunk::ChunkBlockCount];
+	std::memset(blocks, 0, LevelChunk::ChunkBlockCount * sizeof(uint16_t));
 
 	LevelChunk* chunk = new LevelChunk(level, blocks, chunkX, chunkZ);
 	chunkMap[hashedPos] = chunk;
@@ -194,7 +194,7 @@ void VanillaLevelSource::generateRawTerrain(LevelChunk* chunk, int chunkX, int c
 	auto density = generateTerrainDensity(chunkX, chunkZ, lowResBiomes);
 	int seaLevel = 64;
 
-	unsigned char* blocks = chunk->getBlockData();
+	uint16_t* blocks = chunk->getBlockData();
 	int stoneId = Tile::rock->id;
 	int waterId = Tile::calmWater->id;
 
@@ -223,9 +223,9 @@ void VanillaLevelSource::generateRawTerrain(LevelChunk* chunk, int chunkX, int c
 							int bz = n + (j << 2);
 
 							if (dens > 0.0) {
-								blocks[bx << 12 | bz << 8 | yPos] = (unsigned char)stoneId;
+								blocks[bx << 12 | bz << 8 | yPos] = (uint16_t)stoneId;
 							} else if (yPos < seaLevel) {
-								blocks[bx << 12 | bz << 8 | yPos] = (unsigned char)waterId;
+								blocks[bx << 12 | bz << 8 | yPos] = (uint16_t)waterId;
 							}
 
 							dens += (d10 - d9) / 4.0;

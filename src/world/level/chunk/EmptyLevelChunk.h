@@ -18,13 +18,25 @@ class EmptyLevelChunk: public LevelChunk
 {
 public:
     EmptyLevelChunk(Level* level, int x, int z)
-	:	LevelChunk(level, x, z)
+	:	LevelChunk(level, (uint16_t*)NULL, x, z)
+	{
+        dontSave = true;
+    }
+
+    EmptyLevelChunk(Level* level, uint16_t* blocks, int x, int z)
+	:	LevelChunk(level, blocks, x, z)
 	{
         dontSave = true;
     }
 
     EmptyLevelChunk(Level* level, unsigned char* blocks, int x, int z)
 	:	LevelChunk(level, blocks, x, z)
+	{
+        dontSave = true;
+    }
+
+    EmptyLevelChunk(Level* level, std::nullptr_t, int x, int z)
+	:	LevelChunk(level, (uint16_t*)NULL, x, z)
 	{
         dontSave = true;
     }

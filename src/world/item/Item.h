@@ -19,7 +19,7 @@ class Item
 {
     static const int MAX_STACK_SIZE = 64;//Container::LARGE_MAX_STACK_SIZE;
 public:
-	static const int MAX_ITEMS = 512;//32000;
+	static const int MAX_ITEMS = 4096;
     static const int ICON_COLUMNS = 16;
     static const std::string ICON_DESCRIPTION_PREFIX;
 
