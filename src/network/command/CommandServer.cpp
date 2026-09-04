@@ -190,8 +190,7 @@ std::string CommandServer::parse(ConnectedClient& client, const std::string& s) 
 		if (!inRange(c, 4, 5)) return Fail;
 		if (c == 4) hasData = false;
 
-		id &= 255;
-		if (id > 0 && !Tile::tiles[id])
+		if (id < 0 || id >= Tile::NUM_BLOCK_TYPES || (id > 0 && !Tile::tiles[id]))
 			return Fail;
 
 		apiPosTranslate.from(x, y, z);
@@ -221,9 +220,7 @@ std::string CommandServer::parse(ConnectedClient& client, const std::string& s) 
 		if (!inRange(c, 7, 8)) return Fail;
 		if (c == 7) hasData = false;
 
-		id &= 255;
-
-		if (id > 0 && !Tile::tiles[id])
+		if (id < 0 || id >= Tile::NUM_BLOCK_TYPES || (id > 0 && !Tile::tiles[id]))
 			return Fail;
 
 		if (x0 > x1) std::swap(x0, x1);
