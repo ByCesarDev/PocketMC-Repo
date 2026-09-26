@@ -31,7 +31,12 @@ public:
         int targetType = level->getTile(x, y, z);
         if (targetType == 0) {
             level->playSound(x + 0.5, y + 0.5, z + 0.5, "fire.ignite", 1, level->random.nextFloat() * 0.4f + 0.8f);
-            level->setTile(x, y, z, Tile::fire->id);
+            int under = level->getTile(x, y - 1, z);
+            if (Tile::soulFire != NULL && Tile::soulSand != NULL && under == Tile::soulSand->id) {
+                level->setTile(x, y, z, Tile::soulFire->id);
+            } else {
+                level->setTile(x, y, z, Tile::fire->id);
+            }
         }
 
         instance->hurt(1);

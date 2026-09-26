@@ -1873,10 +1873,33 @@ bool Level::containsFireTile(const AABB& box) {
                     int t = getTile(x, y, z);
 
                     if (t == ((Tile*)(Tile::fire))->id
+					 || (Tile::soulFire != NULL && t == Tile::soulFire->id)
 					 || t == Tile::lava->id
 					 || t == Tile::calmLava->id) {
  						 return true;
 					}
+                }
+    }
+    return false;
+}
+
+bool Level::containsSoulFireTile(const AABB& box) {
+    if (Tile::soulFire == NULL) return false;
+    int x0 = Mth::floor(box.x0);
+    int x1 = Mth::floor(box.x1 + 1);
+    int y0 = Mth::floor(box.y0);
+    int y1 = Mth::floor(box.y1 + 1);
+    int z0 = Mth::floor(box.z0);
+    int z1 = Mth::floor(box.z1 + 1);
+
+    if (hasChunksAt(x0, y0, z0, x1, y1, z1)) {
+        for (int x = x0; x < x1; x++)
+            for (int y = y0; y < y1; y++)
+                for (int z = z0; z < z1; z++) {
+                    int t = getTile(x, y, z);
+                    if (t == Tile::soulFire->id) {
+                        return true;
+                    }
                 }
     }
     return false;

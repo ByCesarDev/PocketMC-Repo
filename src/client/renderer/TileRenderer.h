@@ -37,6 +37,14 @@ public:
 	bool tesselateBedInWorld(Tile *tt, int x, int y, int z);
 	bool tesselateRowInWorld(Tile* tt, int x, int y, int z);
 	bool tesselateFireInWorld(Tile* tt, int x, int y, int z);
+	bool tesselateLanternInWorld(Tile* tt, int x, int y, int z);
+	bool tesselateCampfireInWorld(Tile* tt, int x, int y, int z);
+	bool tesselateGrindstoneInWorld(Tile* tt, int x, int y, int z);
+	bool tesselateLecternInWorld(Tile* tt, int x, int y, int z);
+	bool tesselateComposterInWorld(Tile* tt, int x, int y, int z);
+	bool tesselateStonecutterInWorld(Tile* tt, int x, int y, int z);
+	bool tesselateChainInWorld(Tile* tt, int x, int y, int z);
+	bool tesselateScaffoldingInWorld(Tile* tt, int x, int y, int z);
 
 
     void tesselateTorch(Tile* tt, float x, float y, float z, float xxa, float zza);

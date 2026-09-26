@@ -57,10 +57,12 @@ void ItemInHandRenderer::tick()
 	oHeight = height;
 	item.id = 0;
 
-	ItemInstance* itemInHand = mc->player->inventory->getSelected();
-	if (itemInHand && itemInHand->count > 0) {
-		item.id = itemInHand->id;
-		item.setAuxValue(itemInHand->getAuxValue());
+	if (mc && mc->player && mc->player->inventory) {
+		ItemInstance* itemInHand = mc->player->inventory->getSelected();
+		if (itemInHand && itemInHand->count > 0) {
+			item.id = itemInHand->id;
+			item.setAuxValue(itemInHand->getAuxValue());
+		}
 	}
 
 	float max = 0.4f;
@@ -297,6 +299,8 @@ void ItemInHandRenderer::render( float a )
 	//Stopwatch& w = handler.get("render");
 	//w.start();
 
+	if (!mc || !mc->player || !mc->level) return;
+
 	float h = oHeight + (height - oHeight) * a;
 	Player* player = mc->player;
 	// if (selectedTile==NULL) return;
@@ -441,10 +445,17 @@ void ItemInHandRenderer::render( float a )
 
 void ItemInHandRenderer::renderScreenEffect( float a )
 {
+	if (!mc || !mc->player || !mc->level) return;
+
 	glDisable2(GL_ALPHA_TEST);
 	if (mc->player->isOnFire()) {
-		mc->textures->loadAndBindTexture("terrain.png");
-		renderFire(a);
+		if (mc->player->isOnSoulFire()) {
+			mc->textures->loadAndBindTexture("terrain2.png");
+			renderFire(a, true);
+		} else {
+			mc->textures->loadAndBindTexture("terrain.png");
+			renderFire(a, false);
+		}
 	}
 
 	if (mc->player->isInWall()) // Inside a tile
@@ -511,6 +522,8 @@ void ItemInHandRenderer::renderTex( float a, int tex )
 
 void ItemInHandRenderer::renderWater( float a )
 {
+	if (!mc || !mc->player) return;
+
 	Tesselator& t = Tesselator::instance;
 
 	float br = mc->player->getBrightness(a);
@@ -544,7 +557,7 @@ void ItemInHandRenderer::renderWater( float a )
 	glDisable2(GL_BLEND);
 }
 
-void ItemInHandRenderer::renderFire( float a )
+void ItemInHandRenderer::renderFire( float a, bool isSoul )
 {
 	Tesselator& t = Tesselator::instance;
 	glColor4f2(1, 1, 1, 0.9f);
@@ -554,7 +567,12 @@ void ItemInHandRenderer::renderFire( float a )
 	float size = 1;
 	for (int i = 0; i < 2; i++) {
 		glPushMatrix2();
-		int tex = ((Tile*)Tile::fire)->tex + i * 16;
+		int tex;
+		if (isSoul && Tile::soulFire) {
+			tex = (Tile::soulFire->tex & ~Tile::TEXTURE_ALT_FLAG);
+		} else {
+			tex = ((Tile*)Tile::fire)->tex + i * 16;
+		}
 		int xt = (tex & 0xf) << 4;
 		int yt = tex & 0xf0;
 

@@ -37,7 +37,7 @@ public:
 private:
 	void renderTex(float a, int tex);
     void renderWater(float a);
-    void renderFire(float a);
+    void renderFire(float a, bool isSoul = false);
 
 private:
 	int lastIconRendered;

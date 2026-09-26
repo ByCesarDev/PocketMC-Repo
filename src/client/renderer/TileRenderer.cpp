@@ -267,6 +267,22 @@ bool TileRenderer::tesselateInWorld( Tile* tt, int x, int y, int z )
 		return tesselateThinFenceInWorld((ThinFenceTile*) tt, x, y, z);
 	} else if(shape == Tile::SHAPE_BED) {
 		return tesselateBedInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_LANTERN) {
+		return tesselateLanternInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_CAMPFIRE) {
+		return tesselateCampfireInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_GRINDSTONE) {
+		return tesselateGrindstoneInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_LECTERN) {
+		return tesselateLecternInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_COMPOSTER) {
+		return tesselateComposterInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_STONECUTTER) {
+		return tesselateStonecutterInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_CHAIN) {
+		return tesselateChainInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_SCAFFOLDING) {
+		return tesselateScaffoldingInWorld(tt, x, y, z);
 	} else {
 		return false;
 	}
@@ -320,8 +336,9 @@ bool TileRenderer::tesselateFireInWorld( Tile* tt, int x, int y, int z )
 	if (Tile::lightEmission[tt->id] > 0) br = 1.0f;
 	t.color( br, br, br );
 
-	int xt = ((tex & 0xf) << 4);
-	int yt = tex & 0xf0;
+	int cleanTex = tex & ~Tile::TEXTURE_ALT_FLAG;
+	int xt = ((cleanTex & 0xf) << 4);
+	int yt = cleanTex & 0xf0;
 
 	float u0 = (xt) / 256.0f;
 	float u1 = (xt + 15.99f) / 256.0f;
@@ -329,7 +346,7 @@ bool TileRenderer::tesselateFireInWorld( Tile* tt, int x, int y, int z )
 	float v1 = (yt + 15.99f) / 256.0f;
 	float h = 1.4f;
 
-	if ( level->isSolidBlockingTile( x, y - 1, z ) || Tile::fire->canBurn( level, x, y - 1, z ) )
+	if ( level->isSolidBlockingTile( x, y - 1, z ) || (Tile::fire && Tile::fire->canBurn( level, x, y - 1, z )) || (Tile::soulSand && level->getTile(x, y - 1, z) == Tile::soulSand->id) )
 	{
 		float	x0 = x + 0.5f + 0.2f;
 		float	x1 = x + 0.5f - 0.2f;
@@ -2254,20 +2271,19 @@ void TileRenderer::renderFaceDown( Tile* tt, float x, float y, float z, int tex 
 	int yt = tex & 0xf0;
 
 	const float atlasSize = 256.0f;
-	const float epsilon = 0.5f / atlasSize;
 
-	float u0 = (xt + tt->xx0 * 16.0f) / atlasSize + epsilon;
-	float u1 = (xt + tt->xx1 * 16.0f) / atlasSize - epsilon;
-	float v0 = (yt + tt->zz0 * 16.0f) / atlasSize + epsilon;
-	float v1 = (yt + tt->zz1 * 16.0f) / atlasSize - epsilon;
+	float u0 = (xt + tt->xx0 * 15.99f) / atlasSize;
+	float u1 = (xt + tt->xx1 * 15.99f) / atlasSize;
+	float v0 = (yt + tt->zz0 * 15.99f) / atlasSize;
+	float v1 = (yt + tt->zz1 * 15.99f) / atlasSize;
 
 	if (tt->xx0 < 0 || tt->xx1 > 1) {
-		u0 = (xt + 0.5f) / atlasSize;
-		u1 = (xt + 15.5f) / atlasSize;
+		u0 = (xt + 0.0f) / atlasSize;
+		u1 = (xt + 15.99f) / atlasSize;
 	}
 	if (tt->zz0 < 0 || tt->zz1 > 1) {
-		v0 = (yt + 0.5f) / atlasSize;
-		v1 = (yt + 15.5f) / atlasSize;
+		v0 = (yt + 0.0f) / atlasSize;
+		v1 = (yt + 15.99f) / atlasSize;
 	}
 
 	float x0 = x + tt->xx0;
@@ -2313,20 +2329,19 @@ void TileRenderer::renderFaceUp( Tile* tt, float x, float y, float z, int tex )
 	int yt = tex & 0xf0;
 
 	const float atlasSize = 256.0f;
-	const float epsilon = 0.5f / atlasSize;
 
-	float u0 = (xt + tt->xx0 * 16.0f) / atlasSize + epsilon;
-	float u1 = (xt + tt->xx1 * 16.0f) / atlasSize - epsilon;
-	float v0 = (yt + tt->zz0 * 16.0f) / atlasSize + epsilon;
-	float v1 = (yt + tt->zz1 * 16.0f) / atlasSize - epsilon;
+	float u0 = (xt + tt->xx0 * 15.99f) / atlasSize;
+	float u1 = (xt + tt->xx1 * 15.99f) / atlasSize;
+	float v0 = (yt + tt->zz0 * 15.99f) / atlasSize;
+	float v1 = (yt + tt->zz1 * 15.99f) / atlasSize;
 
 	if (tt->xx0 < 0 || tt->xx1 > 1) {
-		u0 = (xt + 0.5f) / atlasSize;
-		u1 = (xt + 15.5f) / atlasSize;
+		u0 = (xt + 0.0f) / atlasSize;
+		u1 = (xt + 15.99f) / atlasSize;
 	}
 	if (tt->zz0 < 0 || tt->zz1 > 1) {
-		v0 = (yt + 0.5f) / atlasSize;
-		v1 = (yt + 15.5f) / atlasSize;
+		v0 = (yt + 0.0f) / atlasSize;
+		v1 = (yt + 15.99f) / atlasSize;
 	}
 
 	float x0 = x + tt->xx0;
@@ -2372,12 +2387,11 @@ void TileRenderer::renderNorth( Tile* tt, float x, float y, float z, int tex )
 	int yt = tex & 0xf0;
 
 	const float atlasSize = 256.0f;
-	const float epsilon = 0.5f / atlasSize;
 
-	float u0 = (xt + tt->xx0 * 16.0f) / atlasSize + epsilon;
-	float u1 = (xt + tt->xx1 * 16.0f) / atlasSize - epsilon;
-	float v0 = (yt + 16.0f - tt->yy1 * 16.0f) / atlasSize + epsilon;
-	float v1 = (yt + 16.0f - tt->yy0 * 16.0f) / atlasSize - epsilon;
+	float u0 = (xt + tt->xx0 * 15.99f) / atlasSize;
+	float u1 = (xt + tt->xx1 * 15.99f) / atlasSize;
+	float v0 = (yt + (1.0f - tt->yy1) * 15.99f) / atlasSize;
+	float v1 = (yt + (1.0f - tt->yy0) * 15.99f) / atlasSize;
 	if (xFlipTexture) {
 		float tmp = u0;
 		u0 = u1;
@@ -2385,12 +2399,12 @@ void TileRenderer::renderNorth( Tile* tt, float x, float y, float z, int tex )
 	}
 
 	if (tt->xx0 < 0 || tt->xx1 > 1) {
-		u0 = (xt + 0.5f) / atlasSize;
-		u1 = (xt + 15.5f) / atlasSize;
+		u0 = (xt + 0.0f) / atlasSize;
+		u1 = (xt + 15.99f) / atlasSize;
 	}
 	if (tt->yy0 < 0 || tt->yy1 > 1) {
-		v0 = (yt + 0.5f) / atlasSize;
-		v1 = (yt + 15.5f) / atlasSize;
+		v0 = (yt + 0.0f) / atlasSize;
+		v1 = (yt + 15.99f) / atlasSize;
 	}
 
 	float x0 = x + tt->xx0;
@@ -2436,12 +2450,11 @@ void TileRenderer::renderSouth( Tile* tt, float x, float y, float z, int tex )
 	int yt = tex & 0xf0;
 
 	const float atlasSize = 256.0f;
-	const float epsilon = 0.5f / atlasSize;
 
-	float u0 = (xt + tt->xx0 * 16.0f) / atlasSize + epsilon;
-	float u1 = (xt + tt->xx1 * 16.0f) / atlasSize - epsilon;
-	float v0 = (yt + 16.0f - tt->yy1 * 16.0f) / atlasSize + epsilon;
-	float v1 = (yt + 16.0f - tt->yy0 * 16.0f) / atlasSize - epsilon;
+	float u0 = (xt + tt->xx0 * 15.99f) / atlasSize;
+	float u1 = (xt + tt->xx1 * 15.99f) / atlasSize;
+	float v0 = (yt + (1.0f - tt->yy1) * 15.99f) / atlasSize;
+	float v1 = (yt + (1.0f - tt->yy0) * 15.99f) / atlasSize;
 	if (xFlipTexture) {
 		float tmp = u0;
 		u0 = u1;
@@ -2449,12 +2462,12 @@ void TileRenderer::renderSouth( Tile* tt, float x, float y, float z, int tex )
 	}
 
 	if (tt->xx0 < 0 || tt->xx1 > 1) {
-		u0 = (xt + 0.5f) / atlasSize;
-		u1 = (xt + 15.5f) / atlasSize;
+		u0 = (xt + 0.0f) / atlasSize;
+		u1 = (xt + 15.99f) / atlasSize;
 	}
 	if (tt->yy0 < 0 || tt->yy1 > 1) {
-		v0 = (yt + 0.5f) / atlasSize;
-		v1 = (yt + 15.5f) / atlasSize;
+		v0 = (yt + 0.0f) / atlasSize;
+		v1 = (yt + 15.99f) / atlasSize;
 	}
 
 	float x0 = x + tt->xx0;
@@ -2500,12 +2513,11 @@ void TileRenderer::renderWest( Tile* tt, float x, float y, float z, int tex )
 	int yt = tex & 0xf0;
 
 	const float atlasSize = 256.0f;
-	const float epsilon = 0.5f / atlasSize;
 
-	float u0 = (xt + tt->zz0 * 16.0f) / atlasSize + epsilon;
-	float u1 = (xt + tt->zz1 * 16.0f) / atlasSize - epsilon;
-	float v0 = (yt + 16.0f - tt->yy1 * 16.0f) / atlasSize + epsilon;
-	float v1 = (yt + 16.0f - tt->yy0 * 16.0f) / atlasSize - epsilon;
+	float u0 = (xt + tt->zz0 * 15.99f) / atlasSize;
+	float u1 = (xt + tt->zz1 * 15.99f) / atlasSize;
+	float v0 = (yt + (1.0f - tt->yy1) * 15.99f) / atlasSize;
+	float v1 = (yt + (1.0f - tt->yy0) * 15.99f) / atlasSize;
 	if (xFlipTexture) {
 		float tmp = u0;
 		u0 = u1;
@@ -2513,12 +2525,12 @@ void TileRenderer::renderWest( Tile* tt, float x, float y, float z, int tex )
 	}
 
 	if (tt->zz0 < 0 || tt->zz1 > 1) {
-		u0 = (xt + 0.5f) / atlasSize;
-		u1 = (xt + 15.5f) / atlasSize;
+		u0 = (xt + 0.0f) / atlasSize;
+		u1 = (xt + 15.99f) / atlasSize;
 	}
 	if (tt->yy0 < 0 || tt->yy1 > 1) {
-		v0 = (yt + 0.5f) / atlasSize;
-		v1 = (yt + 15.5f) / atlasSize;
+		v0 = (yt + 0.0f) / atlasSize;
+		v1 = (yt + 15.99f) / atlasSize;
 	}
 
 	float x0 = x + tt->xx0;
@@ -2564,12 +2576,11 @@ void TileRenderer::renderEast( Tile* tt, float x, float y, float z, int tex )
 	int yt = tex & 0xf0;
 
 	const float atlasSize = 256.0f;
-	const float epsilon = 0.5f / atlasSize;
 
-	float u0 = (xt + tt->zz0 * 16.0f) / atlasSize + epsilon;
-	float u1 = (xt + tt->zz1 * 16.0f) / atlasSize - epsilon;
-	float v0 = (yt + 16.0f - tt->yy1 * 16.0f) / atlasSize + epsilon;
-	float v1 = (yt + 16.0f - tt->yy0 * 16.0f) / atlasSize - epsilon;
+	float u0 = (xt + tt->zz0 * 15.99f) / atlasSize;
+	float u1 = (xt + tt->zz1 * 15.99f) / atlasSize;
+	float v0 = (yt + (1.0f - tt->yy1) * 15.99f) / atlasSize;
+	float v1 = (yt + (1.0f - tt->yy0) * 15.99f) / atlasSize;
 	if (xFlipTexture) {
 		float tmp = u0;
 		u0 = u1;
@@ -2577,12 +2588,12 @@ void TileRenderer::renderEast( Tile* tt, float x, float y, float z, int tex )
 	}
 
 	if (tt->zz0 < 0 || tt->zz1 > 1) {
-		u0 = (xt + 0.5f) / atlasSize;
-		u1 = (xt + 15.5f) / atlasSize;
+		u0 = (xt + 0.0f) / atlasSize;
+		u1 = (xt + 15.99f) / atlasSize;
 	}
 	if (tt->yy0 < 0 || tt->yy1 > 1) {
-		v0 = (yt + 0.5f) / atlasSize;
-		v1 = (yt + 15.5f) / atlasSize;
+		v0 = (yt + 0.0f) / atlasSize;
+		v1 = (yt + 15.99f) / atlasSize;
 	}
 
 	float x1 = x + tt->xx1;
@@ -2926,8 +2937,6 @@ bool TileRenderer::canRender( int renderShape )
 	if (renderShape == Tile::SHAPE_STAIRS) return true;
 	if (renderShape == Tile::SHAPE_FENCE) return true;
 	if (renderShape == Tile::SHAPE_FENCE_GATE) return true;
-	//if (renderShape == Tile::SHAPE_CROSS_TEXTURE) return true;
-	//if (renderShape == Tile::SHAPE_ENTITYTILE_ANIMATED) return true;
 
 	return false;
 }
@@ -3891,3 +3900,222 @@ bool TileRenderer::renderWithMaterialInstances(Tile* tile, int x, int y, int z, 
 
 	return changed;
 }
+
+bool TileRenderer::tesselateLanternInWorld(Tile* tt, int x, int y, int z) {
+	bool hanging = level && (level->isSolidBlockingTile(x, y + 1, z) || 
+		(Tile::ironChain && level->getTile(x, y + 1, z) == Tile::ironChain->id) || 
+		(Tile::fence && level->getTile(x, y + 1, z) == Tile::fence->id) || 
+		(Tile::ironBars && level->getTile(x, y + 1, z) == Tile::ironBars->id) || 
+		(Tile::lantern && level->getTile(x, y + 1, z) == Tile::lantern->id) || 
+		(Tile::soulLantern && level->getTile(x, y + 1, z) == Tile::soulLantern->id) ||
+		(level->getTile(x, y + 1, z) != 0 && !level->isSolidRenderTile(x, y - 1, z)));
+
+	if (hanging) {
+		tt->setShape(5.0f / 16.0f, 1.0f / 16.0f, 5.0f / 16.0f, 11.0f / 16.0f, 8.0f / 16.0f, 11.0f / 16.0f);
+		tesselateBlockInWorld(tt, x, y, z);
+		tt->setShape(6.0f / 16.0f, 8.0f / 16.0f, 6.0f / 16.0f, 10.0f / 16.0f, 10.0f / 16.0f, 10.0f / 16.0f);
+		tesselateBlockInWorld(tt, x, y, z);
+		tt->setShape(6.5f / 16.0f, 10.0f / 16.0f, 6.5f / 16.0f, 9.5f / 16.0f, 1.0f, 9.5f / 16.0f);
+		tesselateBlockInWorld(tt, x, y, z);
+	} else {
+		tt->setShape(5.0f / 16.0f, 0.0f, 5.0f / 16.0f, 11.0f / 16.0f, 7.0f / 16.0f, 11.0f / 16.0f);
+		tesselateBlockInWorld(tt, x, y, z);
+		tt->setShape(6.0f / 16.0f, 7.0f / 16.0f, 6.0f / 16.0f, 10.0f / 16.0f, 9.0f / 16.0f, 10.0f / 16.0f);
+		tesselateBlockInWorld(tt, x, y, z);
+		tt->setShape(6.5f / 16.0f, 9.0f / 16.0f, 6.5f / 16.0f, 9.5f / 16.0f, 11.0f / 16.0f, 9.5f / 16.0f);
+		tesselateBlockInWorld(tt, x, y, z);
+	}
+
+	tt->setShape(5.0f / 16.0f, 0.0f, 5.0f / 16.0f, 11.0f / 16.0f, 9.0f / 16.0f, 11.0f / 16.0f);
+	return true;
+}
+
+bool TileRenderer::tesselateCampfireInWorld(Tile* tt, int x, int y, int z) {
+	tt->setShape(1.0f / 16.0f, 0.0f, 0.0f, 5.0f / 16.0f, 4.0f / 16.0f, 1.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(11.0f / 16.0f, 0.0f, 0.0f, 15.0f / 16.0f, 4.0f / 16.0f, 1.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(0.0f, 3.0f / 16.0f, 1.0f / 16.0f, 1.0f, 7.0f / 16.0f, 5.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(0.0f, 3.0f / 16.0f, 11.0f / 16.0f, 1.0f, 7.0f / 16.0f, 15.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(5.0f / 16.0f, 0.0f, 0.0f, 11.0f / 16.0f, 1.0f / 16.0f, 1.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 7.0f / 16.0f, 1.0f);
+	return true;
+}
+
+bool TileRenderer::tesselateGrindstoneInWorld(Tile* tt, int x, int y, int z) {
+	float xf = (float)x;
+	float yf = (float)y;
+	float zf = (float)z;
+	Tesselator& t = Tesselator::instance;
+	float br = tt->getBrightness(level, x, y, z);
+
+	// Left and Right legs (wood / pivot 151)
+	tt->setShape(2.0f / 16.0f, 0.0f, 6.0f / 16.0f, 4.0f / 16.0f, 7.0f / 16.0f, 10.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(12.0f / 16.0f, 0.0f, 6.0f / 16.0f, 14.0f / 16.0f, 7.0f / 16.0f, 10.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	// Left and Right pivot brackets (grindstone_pivot 151)
+	tt->setShape(2.0f / 16.0f, 7.0f / 16.0f, 5.0f / 16.0f, 4.0f / 16.0f, 13.0f / 16.0f, 11.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(12.0f / 16.0f, 7.0f / 16.0f, 5.0f / 16.0f, 14.0f / 16.0f, 13.0f / 16.0f, 11.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	// Central circular stone wheel:
+	// Up, Down, North, South use grindstone_round (17)
+	// West, East use grindstone_side (21)
+	tt->setShape(4.0f / 16.0f, 4.0f / 16.0f, 2.0f / 16.0f, 12.0f / 16.0f, 1.0f, 14.0f / 16.0f);
+	t.color(1.0f * br, 1.0f * br, 1.0f * br);
+	renderFaceUp(tt, xf, yf, zf, 17);
+	t.color(0.5f * br, 0.5f * br, 0.5f * br);
+	renderFaceDown(tt, xf, yf, zf, 17);
+	t.color(0.8f * br, 0.8f * br, 0.8f * br);
+	renderNorth(tt, xf, yf, zf, 17);
+	renderSouth(tt, xf, yf, zf, 17);
+	t.color(0.6f * br, 0.6f * br, 0.6f * br);
+	renderWest(tt, xf, yf, zf, 21);
+	renderEast(tt, xf, yf, zf, 21);
+
+	tt->setShape(2.0f / 16.0f, 0.0f, 2.0f / 16.0f, 14.0f / 16.0f, 1.0f, 14.0f / 16.0f);
+	return true;
+}
+
+bool TileRenderer::tesselateLecternInWorld(Tile* tt, int x, int y, int z) {
+	float xf = (float)x;
+	float yf = (float)y;
+	float zf = (float)z;
+	Tesselator& t = Tesselator::instance;
+	float br = tt->getBrightness(level, x, y, z);
+
+	// 1. Base pedestal (lectern_base 162)
+	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 2.0f / 16.0f, 1.0f);
+	t.color(1.0f * br, 1.0f * br, 1.0f * br);
+	renderFaceUp(tt, xf, yf, zf, 162);
+	t.color(0.5f * br, 0.5f * br, 0.5f * br);
+	renderFaceDown(tt, xf, yf, zf, 162);
+	t.color(0.8f * br, 0.8f * br, 0.8f * br);
+	renderNorth(tt, xf, yf, zf, 162);
+	renderSouth(tt, xf, yf, zf, 162);
+	t.color(0.6f * br, 0.6f * br, 0.6f * br);
+	renderWest(tt, xf, yf, zf, 162);
+	renderEast(tt, xf, yf, zf, 162);
+
+	// 2. Central pillar (North/South = lectern_front 22, West/East = lectern_sides 106)
+	tt->setShape(4.0f / 16.0f, 2.0f / 16.0f, 4.0f / 16.0f, 12.0f / 16.0f, 14.0f / 16.0f, 12.0f / 16.0f);
+	t.color(1.0f * br, 1.0f * br, 1.0f * br);
+	renderFaceUp(tt, xf, yf, zf, 162);
+	t.color(0.8f * br, 0.8f * br, 0.8f * br);
+	renderNorth(tt, xf, yf, zf, 22);
+	renderSouth(tt, xf, yf, zf, 22);
+	t.color(0.6f * br, 0.6f * br, 0.6f * br);
+	renderWest(tt, xf, yf, zf, 106);
+	renderEast(tt, xf, yf, zf, 106);
+
+	// 3. Reading Desk Tray (Top = lectern_top 107, Sides = lectern_sides 106, Bottom = lectern_base 162)
+	tt->setShape(0.0f, 12.0f / 16.0f, 2.0f / 16.0f, 1.0f, 15.0f / 16.0f, 1.0f);
+	t.color(1.0f * br, 1.0f * br, 1.0f * br);
+	renderFaceUp(tt, xf, yf, zf, 107);
+	t.color(0.5f * br, 0.5f * br, 0.5f * br);
+	renderFaceDown(tt, xf, yf, zf, 162);
+	t.color(0.8f * br, 0.8f * br, 0.8f * br);
+	renderNorth(tt, xf, yf, zf, 106);
+	renderSouth(tt, xf, yf, zf, 106);
+	t.color(0.6f * br, 0.6f * br, 0.6f * br);
+	renderWest(tt, xf, yf, zf, 106);
+	renderEast(tt, xf, yf, zf, 106);
+
+	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+	return true;
+}
+
+bool TileRenderer::tesselateComposterInWorld(Tile* tt, int x, int y, int z) {
+	bool origNoCulling = noCulling;
+	noCulling = true;
+
+	// Bottom floor plate
+	tt->setShape(2.0f / 16.0f, 0.0f, 2.0f / 16.0f, 14.0f / 16.0f, 2.0f / 16.0f, 14.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	// 4 outer and inner wall boxes
+	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 2.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(0.0f, 0.0f, 14.0f / 16.0f, 1.0f, 1.0f, 1.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(0.0f, 0.0f, 2.0f / 16.0f, 2.0f / 16.0f, 1.0f, 14.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(14.0f / 16.0f, 0.0f, 2.0f / 16.0f, 1.0f, 1.0f, 14.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	noCulling = origNoCulling;
+	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+	return true;
+}
+
+bool TileRenderer::tesselateStonecutterInWorld(Tile* tt, int x, int y, int z) {
+	float xf = (float)x;
+	float yf = (float)y;
+	float zf = (float)z;
+	Tesselator& t = Tesselator::instance;
+	float br = tt->getBrightness(level, x, y, z);
+
+	// Base stone table (height 9/16, top = stonecutter_top 251, bottom = 252, sides = 253)
+	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 9.0f / 16.0f, 1.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	// Saw blade standing vertically in the middle (stonecutter_saw 254)
+	bool origNoCulling = noCulling;
+	noCulling = true;
+	tt->setShape(1.0f / 16.0f, 9.0f / 16.0f, 7.5f / 16.0f, 15.0f / 16.0f, 1.0f, 8.5f / 16.0f);
+	t.color(0.9f * br, 0.9f * br, 0.9f * br);
+	renderNorth(tt, xf, yf, zf, 254);
+	renderSouth(tt, xf, yf, zf, 254);
+	renderFaceUp(tt, xf, yf, zf, 254);
+	renderWest(tt, xf, yf, zf, 254);
+	renderEast(tt, xf, yf, zf, 254);
+	noCulling = origNoCulling;
+
+	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 9.0f / 16.0f, 1.0f);
+	return true;
+}
+
+bool TileRenderer::tesselateChainInWorld(Tile* tt, int x, int y, int z) {
+	tt->setShape(6.5f / 16.0f, 0.0f, 6.5f / 16.0f, 9.5f / 16.0f, 1.0f, 9.5f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(6.5f / 16.0f, 0.0f, 6.5f / 16.0f, 9.5f / 16.0f, 1.0f, 9.5f / 16.0f);
+	return true;
+}
+
+bool TileRenderer::tesselateScaffoldingInWorld(Tile* tt, int x, int y, int z) {
+	tt->setShape(0.0f, 0.0f, 0.0f, 2.0f / 16.0f, 1.0f, 2.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(14.0f / 16.0f, 0.0f, 0.0f, 1.0f, 1.0f, 2.0f / 16.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(0.0f, 0.0f, 14.0f / 16.0f, 2.0f / 16.0f, 1.0f, 1.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(14.0f / 16.0f, 0.0f, 14.0f / 16.0f, 1.0f, 1.0f, 1.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(0.0f, 15.0f / 16.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+	tesselateBlockInWorld(tt, x, y, z);
+
+	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+	return true;
+}
+

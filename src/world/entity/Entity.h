@@ -88,6 +88,7 @@ public:
 
 	virtual bool isAlive();
 	virtual bool isOnFire();
+	virtual bool isOnSoulFire();
 
 	virtual bool isPlayer();
 	virtual bool isCreativeModeAllowed();
@@ -183,6 +184,7 @@ public:
 	int airSupply;
 	int onFire;
 	int flameTime;
+	bool onSoulFire;
 
 	EntityRendererId entityRendererId;
 

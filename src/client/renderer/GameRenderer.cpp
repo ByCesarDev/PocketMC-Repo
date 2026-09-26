@@ -417,7 +417,7 @@ void GameRenderer::renderLevel(float a) {
 }
 
 void GameRenderer::tickFov() {
-	if (mc->cameraTargetPlayer != mc->player)
+	if (!mc || !mc->player || mc->cameraTargetPlayer != mc->player)
 		return;
 
 	oFov = fov;
@@ -426,24 +426,27 @@ void GameRenderer::tickFov() {
 
 /*private*/
 float GameRenderer::getFov(float a, bool applyEffects) {
-    Mob* player = mc->cameraTargetPlayer;
-    float fov = mc->options.getProgressValue(OPTIONS_FOV);
+    Mob* player = mc ? mc->cameraTargetPlayer : NULL;
+    float fov = mc ? mc->options.getProgressValue(OPTIONS_FOV) : 70.0f;
 
 	if (applyEffects)
 		fov *= this->oFov + (this->fov - this->oFov) * a;
 
-    if (player->isUnderLiquid(Material::water)) fov = 60;
-    if (player->health <= 0) {
-        float duration = player->deathTime + a;
+    if (player) {
+        if (player->isUnderLiquid(Material::water)) fov = 60;
+        if (player->health <= 0) {
+            float duration = player->deathTime + a;
 
-        fov /= ((1 - 500 / (duration + 500)) * 2.0f + 1);
+            fov /= ((1 - 500 / (duration + 500)) * 2.0f + 1);
+        }
     }
     return fov + fovOffsetO + (fovOffset - fovOffsetO) * a;
 }
 
 /*private*/
 void GameRenderer::moveCameraToPlayer(float a) {
-    Entity* player = mc->cameraTargetPlayer;
+    Entity* player = mc ? mc->cameraTargetPlayer : NULL;
+    if (!player) return;
 
     float heightOffset = player->heightOffset - 1.62f;
 
@@ -536,7 +539,8 @@ void GameRenderer::moveCameraToPlayer(float a) {
 
 /*private*/
 void GameRenderer::bobHurt(float a) {
-    Mob* player = mc->cameraTargetPlayer;
+    Mob* player = mc ? mc->cameraTargetPlayer : NULL;
+    if (!player) return;
 
     float hurt = player->hurtTime - a;
 
@@ -560,7 +564,7 @@ void GameRenderer::bobHurt(float a) {
 /*private*/
 void GameRenderer::bobView(float a) {
     //if (mc->options.thirdPersonView) return;
-	if (!(mc->cameraTargetPlayer->isPlayer())) {
+	if (!mc || !mc->cameraTargetPlayer || !(mc->cameraTargetPlayer->isPlayer())) {
         return;
     }
     Player* player = (Player*) mc->cameraTargetPlayer;
@@ -835,9 +839,12 @@ void GameRenderer::tick(int nTick, int maxTick) {
 
 	tickFov();
 
-    float brr = mc->level->getBrightness(	Mth::floor(mc->cameraTargetPlayer->x),
+    float brr = 1.0f;
+    if (mc->level && mc->cameraTargetPlayer) {
+        brr = mc->level->getBrightness(	Mth::floor(mc->cameraTargetPlayer->x),
 											Mth::floor(mc->cameraTargetPlayer->y),
 											Mth::floor(mc->cameraTargetPlayer->z));
+    }
 
     int vDist = mc->options.getIntValue(OPTIONS_VIEW_DISTANCE);
     if (vDist > 3) vDist = 3;
@@ -855,7 +862,9 @@ void GameRenderer::tick(int nTick, int maxTick) {
 
     _tick++;
 
-    itemInHandRenderer->tick();
+    if (itemInHandRenderer) {
+        itemInHandRenderer->tick();
+    }
 	if (weatherRenderer) {
 		weatherRenderer->tick();
 	}
@@ -994,7 +1003,7 @@ void GameRenderer::renderItemInHand(float a, int eye) {
     bobHurt(a);
     if (mc->options.getBooleanValue(OPTIONS_VIEW_BOBBING)) bobView(a);
 
-    if (mc->options.getIntValue(OPTIONS_THIRD_PERSON_VIEW) == 0 && (mc->cameraTargetPlayer->isPlayer() && !((Player*)mc->cameraTargetPlayer)->isSleeping())) {
+    if (mc->options.getIntValue(OPTIONS_THIRD_PERSON_VIEW) == 0 && (mc->cameraTargetPlayer && mc->cameraTargetPlayer->isPlayer() && !((Player*)mc->cameraTargetPlayer)->isSleeping())) {
         if (!mc->options.getBooleanValue(OPTIONS_HIDEGUI)) {
 			float fov = getFov(a, false);
 			if (fov != _setupCameraFov) {
@@ -1008,7 +1017,7 @@ void GameRenderer::renderItemInHand(float a, int eye) {
     }
 
     glPopMatrix2();
-    if (mc->options.getIntValue(OPTIONS_THIRD_PERSON_VIEW) == 0 && (mc->cameraTargetPlayer->isPlayer() && !((Player*)mc->cameraTargetPlayer)->isSleeping())) {
+    if (mc->options.getIntValue(OPTIONS_THIRD_PERSON_VIEW) == 0 && (mc->cameraTargetPlayer && mc->cameraTargetPlayer->isPlayer() && !((Player*)mc->cameraTargetPlayer)->isSleeping())) {
         itemInHandRenderer->renderScreenEffect(a);
         bobHurt(a);
     }

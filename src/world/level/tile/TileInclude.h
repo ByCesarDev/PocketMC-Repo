@@ -63,5 +63,13 @@
 #include "WorkbenchTile.h"
 #include "NetherStalkTile.h"
 #include "AncientDebrisTile.h"
+#include "LanternTile.h"
+#include "CampfireTile.h"
+#include "GrindstoneTile.h"
+#include "LecternTile.h"
+#include "ComposterTile.h"
+#include "ChainTile.h"
+#include "ScaffoldingTile.h"
+#include "SoulFireTile.h"
 
 #endif /* TILE_INCLUDE_H__ */

@@ -135,7 +135,21 @@ int transformKey(int glfwkey) {
 		case GLFW_KEY_ENTER: return Keyboard::KEY_RETURN;
 		case GLFW_KEY_LEFT_CONTROL:
 		case GLFW_KEY_RIGHT_CONTROL: return Keyboard::KEY_LEFT_CTRL;
-		default: return glfwkey;
+		case GLFW_KEY_SPACE: return Keyboard::KEY_SPACE;
+		case GLFW_KEY_LEFT_SUPER:
+		case GLFW_KEY_RIGHT_SUPER:
+		case GLFW_KEY_LEFT_ALT:
+		case GLFW_KEY_RIGHT_ALT:
+		case GLFW_KEY_MENU:
+		case GLFW_KEY_CAPS_LOCK:
+		case GLFW_KEY_SCROLL_LOCK:
+		case GLFW_KEY_NUM_LOCK:
+		case GLFW_KEY_PRINT_SCREEN:
+		case GLFW_KEY_PAUSE:
+			return 0;
+		default:
+			if (glfwkey < 0 || glfwkey >= 256) return 0;
+			return glfwkey;
 	}
 }
 
@@ -156,7 +170,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		return;
 	}
 
-	Keyboard::feed(transformKey(key), action);
+	int transformed = transformKey(key);
+	if (transformed > 0) {
+		Keyboard::feed((unsigned char)transformed, action);
+	}
 }
 
 void character_callback(GLFWwindow* window, unsigned int codepoint) {

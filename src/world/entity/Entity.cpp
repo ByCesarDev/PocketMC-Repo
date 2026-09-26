@@ -55,6 +55,7 @@ Entity::Entity( Level* level )
 	fireImmune(false),
 	onFire(0),
 	flameTime(1),
+	onSoulFire(false),
 	walkDist(0), walkDistO(0),
 	tickCount(0),
 	entityRendererId(ER_DEFAULT_RENDERER),
@@ -338,8 +339,14 @@ void Entity::move(float xa, float ya, float za) {
     ySlideOffset *= 0.4f;
 
     bool water = this->isInWater();
-    if (level->containsFireTile(bb)) {
-        burn(1);
+    bool inSoulFire = level->containsSoulFireTile(bb);
+    if (inSoulFire || level->containsFireTile(bb)) {
+        if (inSoulFire) {
+            onSoulFire = true;
+            burn(2);
+        } else {
+            burn(1);
+        }
         if (!water) {
             onFire++;
             if (onFire == 0) onFire = 20 * 15;
@@ -347,12 +354,14 @@ void Entity::move(float xa, float ya, float za) {
     } else {
         if (onFire <= 0) {
             onFire = -flameTime;
+            onSoulFire = false;
         }
     }
 
     if (water && onFire > 0) {
         //level.playSound(this-> "random.fizz", 0.7f, 1.6f + (random.nextFloat() - random.nextFloat()) * 0.4f);
         onFire = -flameTime;
+        onSoulFire = false;
     }
 
 	TIMER_POP();
@@ -919,6 +928,10 @@ ItemEntity* Entity::spawnAtLocation(ItemInstance* itemInstance, float yOffs) {
 
 bool Entity::isOnFire() {
 	return onFire > 0;// || getSharedFlag(FLAG_ONFIRE);
+}
+
+bool Entity::isOnSoulFire() {
+	return isOnFire() && onSoulFire;
 }
 
 bool Entity::interactPreventDefault() {

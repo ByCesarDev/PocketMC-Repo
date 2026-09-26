@@ -1,33 +1,26 @@
 #ifndef NET_MINECRAFT_WORLD_LEVEL_TILE__StonecutterTile_H__
 #define NET_MINECRAFT_WORLD_LEVEL_TILE__StonecutterTile_H__
 
-#include "Tile.h"
-#include "../Level.h"
 #include "../material/Material.h"
-#include "../../entity/player/Player.h"
-#include "../../Facing.h"
+#include "Tile.h"
 
-class StonecutterTile: public Tile
-{
-	typedef Tile super;
+class StonecutterTile : public Tile {
+    typedef Tile super;
 public:
-    StonecutterTile(int id)
-	:   super(id, Material::stone)
-	{
-        tex = 13 + 16 * 2;
+    StonecutterTile(int id, int tex, const Material* mat = Material::stone)
+        : super(id, tex, mat) {
+        setShape(0.0f, 0.0f, 0.0f, 1.0f, 9.0f / 16.0f, 1.0f);
     }
 
-    int getTexture(int face) {
-		if (face == Facing::UP) return 9 + 10 * 16;
-		if (face == Facing::DOWN) return 14 + 3 * 16;
-		if (face == Facing::NORTH || face == Facing::SOUTH) return 8 + 10 * 16;
-		return tex;
+    StonecutterTile(int id, const Material* mat = Material::stone)
+        : super(id, mat) {
+        setShape(0.0f, 0.0f, 0.0f, 1.0f, 9.0f / 16.0f, 1.0f);
     }
 
-	bool use(Level* level, int x, int y, int z, Player* player) {
-		player->startStonecutting(x, y, z);
-        return true;
-    }
+    bool isSolidRender() override { return false; }
+    bool isCubeShaped() override { return false; }
+    int getRenderShape() override { return Tile::SHAPE_STONECUTTER; }
+    int getRenderLayer() override { return Tile::RENDERLAYER_ALPHATEST; }
 };
 
-#endif /*NET_MINECRAFT_WORLD_LEVEL_TILE__StonecutterTile_H__*/
+#endif /* NET_MINECRAFT_WORLD_LEVEL_TILE__StonecutterTile_H__ */

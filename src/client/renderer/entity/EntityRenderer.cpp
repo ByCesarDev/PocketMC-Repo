@@ -134,7 +134,8 @@ void EntityRenderer::postRender(Entity* entity, float x, float y, float z, float
 
 void EntityRenderer::renderFlame(Entity* e, float x, float y, float z, float a) {
 	glDisable2(GL_LIGHTING);
-	int tex = ((Tile*)Tile::fire)->tex;
+	bool isSoul = e->isOnSoulFire();
+	int tex = (isSoul && Tile::soulFire) ? (Tile::soulFire->tex & ~Tile::TEXTURE_ALT_FLAG) : ((Tile*)Tile::fire)->tex;
 
 	int xt = (tex & 0xf) << 4;
 	int yt = tex & 0xf0;
@@ -149,7 +150,7 @@ void EntityRenderer::renderFlame(Entity* e, float x, float y, float z, float a) 
 
 	float s = e->bbWidth * 1.4f;
 	glScalef2(s, s, s);
-	bindTexture("terrain.png");
+	bindTexture(isSoul ? "terrain2.png" : "terrain.png");
 	Tesselator& t = Tesselator::instance;
 
 	float r = 0.5f;

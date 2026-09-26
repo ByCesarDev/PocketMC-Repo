@@ -137,10 +137,7 @@ static const std::vector<BlockAtlasStitcher::TextureMapping> s_mappings = {
     { "crafting_table_front.png", 60, "terrain.png" },
     { "crafting_table_side.png", 60, "terrain.png" },
     { "crafting_table_back.png", 59, "terrain.png" },
-    { "stonecutter_top.png", 169, "terrain.png" },
-    { "stonecutter_bottom.png", 62, "terrain.png" },
-    { "stonecutter_front.png", 168, "terrain.png" },
-    { "stonecutter_side.png", 45, "terrain.png" },
+
     { "sandstone_top.png", 176, "terrain.png" },
     { "sandstone_bottom.png", 208, "terrain.png" },
     { "sandstone_normal.png", 192, "terrain.png" },
@@ -291,7 +288,97 @@ static const std::vector<BlockAtlasStitcher::TextureMapping> s_mappings = {
     { "flower_paeonia.png", 102, "terrain2.png" },
     { "flower_rose_blue.png", 103, "terrain2.png" },
     { "flower_lily_of_the_valley.png", 104, "terrain2.png" },
-    { "flower_wither_rose.png", 105, "terrain2.png" }
+    { "flower_wither_rose.png", 105, "terrain2.png" },
+
+    // 3D Blocks, Torches & Workstations (FutureMC Authentic Textures)
+    // Lanterns, Chains & Torches
+    { "lantern.png", 160, "terrain2.png" },
+    { "soul_lantern.png", 217, "terrain2.png" },
+    { "soul_fire_lantern.png", 217, "terrain2.png" },
+    { "soul_torch.png", 250, "terrain2.png" },
+    { "soul_fire_torch.png", 250, "terrain2.png" },
+    { "soul_fire_0.png", 216, "terrain2.png" },
+    { "soul_fire_1.png", 216, "terrain2.png" },
+    { "soul_fire.png", 216, "terrain2.png" },
+    { "redstone_torch_on.png", 205, "terrain2.png" },
+    { "redstone_torch_off.png", 231, "terrain2.png" },
+    { "chain.png", 155, "terrain2.png" },
+
+    // Stonecutter (251..254)
+    { "stonecutter_top.png", 251, "terrain2.png" },
+    { "stonecutter_bottom.png", 252, "terrain2.png" },
+    { "stonecutter_side.png", 253, "terrain2.png" },
+    { "stonecutter_saw.png", 254, "terrain2.png" },
+
+    // Composter (131, 255, 14..16)
+    { "composter_top.png", 131, "terrain2.png" },
+    { "composter_bottom.png", 255, "terrain2.png" },
+    { "composter_side.png", 14, "terrain2.png" },
+    { "composter_compost.png", 15, "terrain2.png" },
+    { "composter_ready.png", 16, "terrain2.png" },
+
+    // Grindstone (151, 17, 21)
+    { "grindstone_pivot.png", 151, "terrain2.png" },
+    { "grindstone_round.png", 17, "terrain2.png" },
+    { "grindstone_side.png", 21, "terrain2.png" },
+
+    // Lectern (162, 22, 106, 107)
+    { "lectern_base.png", 162, "terrain2.png" },
+    { "lectern_front.png", 22, "terrain2.png" },
+    { "lectern_sides.png", 106, "terrain2.png" },
+    { "lectern_top.png", 107, "terrain2.png" },
+
+    // Campfire (118, 108..112)
+    { "campfire_log.png", 118, "terrain2.png" },
+    { "campfire_side.png", 108, "terrain2.png" },
+    { "campfire_fire.png", 109, "terrain2.png" },
+    { "campfire_log_lit.png", 110, "terrain2.png" },
+    { "soul_campfire_fire.png", 111, "terrain2.png" },
+    { "soul_campfire_log_lit.png", 112, "terrain2.png" },
+
+    // Blast Furnace (113..115)
+    { "blast_furnace_top.png", 113, "terrain2.png" },
+    { "blast_furnace_front.png", 114, "terrain2.png" },
+    { "blast_furnace_side.png", 115, "terrain2.png" },
+
+    // Smoker (212, 116, 117, 119)
+    { "smoker_top.png", 212, "terrain2.png" },
+    { "smoker_bottom.png", 116, "terrain2.png" },
+    { "smoker_front.png", 117, "terrain2.png" },
+    { "smoker_side.png", 119, "terrain2.png" },
+
+    // Cartography Table (120..123)
+    { "cartography_table_top.png", 120, "terrain2.png" },
+    { "cartography_table_side1.png", 121, "terrain2.png" },
+    { "cartography_table_side2.png", 122, "terrain2.png" },
+    { "cartography_table_side3.png", 123, "terrain2.png" },
+
+    // Fletching Table (145, 124, 125)
+    { "fletching_table_top.png", 145, "terrain2.png" },
+    { "fletching_table_front.png", 124, "terrain2.png" },
+    { "fletching_table_side.png", 125, "terrain2.png" },
+
+    // Smithing Table (211, 126..128)
+    { "smithing_table_top.png", 211, "terrain2.png" },
+    { "smithing_table_bottom.png", 126, "terrain2.png" },
+    { "smithing_table_front.png", 127, "terrain2.png" },
+    { "smithing_table_side.png", 128, "terrain2.png" },
+
+    // Loom (169, 129, 130, 132)
+    { "loom_top.png", 169, "terrain2.png" },
+    { "loom_bottom.png", 129, "terrain2.png" },
+    { "loom_front.png", 130, "terrain2.png" },
+    { "loom_side.png", 132, "terrain2.png" },
+
+    // Barrel (133..135)
+    { "barrel_top.png", 133, "terrain2.png" },
+    { "barrel_bottom.png", 134, "terrain2.png" },
+    { "barrel_side.png", 135, "terrain2.png" },
+
+    // Bell (136..138)
+    { "bell_top.png", 136, "terrain2.png" },
+    { "bell_bottom.png", 137, "terrain2.png" },
+    { "bell_side.png", 138, "terrain2.png" }
 };
 
 const std::vector<BlockAtlasStitcher::TextureMapping>& BlockAtlasStitcher::getTextureMappings() {
@@ -310,10 +397,14 @@ bool BlockAtlasStitcher::insertTile(TextureData& dstAtlas, int slotIndex, const 
     int startX = tileX * cellW;
     int startY = tileY * cellH;
 
+    // Si la imagen es una tira vertical animada (ej: 16x48, 16x128), extraemos solo el primer cuadro cuadrado (16x16)
+    int frameH = srcTile.w;
+    if (frameH > srcTile.h) frameH = srcTile.h;
+
     for (int y = 0; y < cellH && (startY + y) < dstAtlas.h; ++y) {
         for (int x = 0; x < cellW && (startX + x) < dstAtlas.w; ++x) {
             int srcX = (x * srcTile.w) / cellW;
-            int srcY = (y * srcTile.h) / cellH;
+            int srcY = (y * frameH) / cellH;
             int srcIdx = (srcY * srcTile.w + srcX) * 4;
             int dstIdx = ((startY + y) * dstAtlas.w + (startX + x)) * 4;
 
@@ -417,6 +508,9 @@ TextureCategory BlockAtlasStitcher::getTextureCategory(const std::string& filena
         name.find("reeds") != std::string::npos ||
         name.find("fire") != std::string::npos ||
         name.find("torch") != std::string::npos ||
+        name.find("lantern") != std::string::npos ||
+        name.find("chain") != std::string::npos ||
+        name.find("saw") != std::string::npos ||
         name.find("cactus") != std::string::npos) {
         return CAT_CUTOUT;
     }

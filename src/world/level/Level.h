@@ -198,6 +198,7 @@ public:
 
     bool containsAnyLiquid(const AABB& box);
     bool containsFireTile(const AABB& box);
+    bool containsSoulFireTile(const AABB& box);
 	bool containsMaterial(const AABB& box, const Material* material);
     bool containsLiquid(const AABB& box, const Material* material);
 

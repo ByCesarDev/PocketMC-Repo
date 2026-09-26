@@ -43,6 +43,14 @@ static const char* categoryIconPaths[5] = {
 };
 static const int categoryBitmasks[5] = { 1, 2, 4, 8, -1 };
 
+static std::string toLowerString(const std::string& str) {
+    std::string lower = str;
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) {
+        return static_cast<char>(std::tolower(c));
+    });
+    return lower;
+}
+
 namespace Touch {
 class UnifiedCategoryButton : public ImageButton {
     typedef ImageButton super;
@@ -208,6 +216,10 @@ void UnifiedInventoryScreen::init() {
     }
     selectedCategoryButton = categoryButtons[currentCategory];
 
+    searchBox = TextBox(300, 0, 0, 126, 16, "");
+    textBoxes.clear();
+    textBoxes.push_back(&searchBox);
+
     if (player && player->inventory) {
         selectedHotbarSlot = player->inventory->selected;
     }
@@ -264,7 +276,16 @@ void UnifiedInventoryScreen::setupPositions() {
             button->setImageDef(def, false);
         }
 
-        catalogPaneRect = IntRectangle(leftPanelRect.x + 6, leftPanelRect.y + 18, 126, 144);
+        if (currentCategory == 4) {
+            searchBox.x = leftPanelRect.x + 6;
+            searchBox.y = leftPanelRect.y + 17;
+            searchBox.width = 126;
+            searchBox.height = 16;
+            catalogPaneRect = IntRectangle(leftPanelRect.x + 6, leftPanelRect.y + 36, 126, 126);
+        } else {
+            searchBox.x = searchBox.y = searchBox.width = searchBox.height = 0;
+            catalogPaneRect = IntRectangle(leftPanelRect.x + 6, leftPanelRect.y + 18, 126, 144);
+        }
     } else {
         // Single Survival Panel centered (174 x 168 px)
         int pW = 174;
@@ -335,6 +356,10 @@ void UnifiedInventoryScreen::setupPositions() {
 }
 
 void UnifiedInventoryScreen::tick() {
+    super::tick();
+    if (isCreative && isDualPane && currentCategory == 4) {
+        searchBox.tick(minecraft);
+    }
 }
 
 void UnifiedInventoryScreen::updateItems() {
@@ -346,55 +371,81 @@ void UnifiedInventoryScreen::updateItems() {
     if (isCreative && isDualPane) {
         int targetMask = categoryBitmasks[currentCategory];
         bool showAll = (targetMask == -1);
+        std::string query = (currentCategory == 4) ? toLowerString(searchBox.text) : "";
 
-        int catOrder[4] = { ItemCategory::Structures, ItemCategory::Tools, ItemCategory::FoodArmor, ItemCategory::Decorations };
-        int numCatOrder = showAll ? 4 : 1;
-
-        for (int ci = 0; ci < numCatOrder; ++ci) {
-            int mask = showAll ? catOrder[ci] : targetMask;
-
+        if (currentCategory == 4 && !query.empty()) {
             for (int i = 0; i < Tile::NUM_BLOCK_TYPES; ++i) {
                 if (Tile::isTileAllowedInCreative(i)) {
-                    Item* it = Item::items[i];
-                    int cat = it ? it->category : 1;
-                    if (cat <= 0) cat = 8;
-                    bool match = showAll ? (cat == mask) : ((mask == 8) ? (cat == 8 || cat >= 16) : (cat == mask));
-                    if (!match) continue;
                     Tile* tile = Tile::tiles[i];
-                    catalogItems.push_back(new ItemInstance(tile, 1));
-                }
-            }
-            for (int i = 256; i < 512; ++i) {
-                if (Item::items[i] != NULL) {
-                    Item* it = Item::items[i];
-                    int cat = it->category;
-                    if (cat <= 0) cat = 8;
-                    bool match = showAll ? (cat == mask) : ((mask == 8) ? (cat == 8 || cat >= 16) : (cat == mask));
-                    if (match)
-                        catalogItems.push_back(new ItemInstance(Item::items[i], 1));
-                }
-            }
-        }
-
-        if (showAll) {
-            for (int i = 0; i < Tile::NUM_BLOCK_TYPES; ++i) {
-                if (Tile::isTileAllowedInCreative(i)) {
-                    Item* it = Item::items[i];
-                    int cat = it ? it->category : 1;
-                    if (cat <= 0) cat = 8;
-                    if (cat >= 16) {
-                        Tile* tile = Tile::tiles[i];
+                    if (!tile) continue;
+                    ItemInstance inst(tile, 1);
+                    std::string name = toLowerString(inst.getName());
+                    std::string descId = toLowerString(inst.getDescriptionId());
+                    if (name.find(query) != std::string::npos || descId.find(query) != std::string::npos) {
                         catalogItems.push_back(new ItemInstance(tile, 1));
                     }
                 }
             }
-            for (int i = 256; i < 512; ++i) {
+            for (int i = 256; i < Item::MAX_ITEMS; ++i) {
                 if (Item::items[i] != NULL) {
-                    Item* it = Item::items[i];
-                    int cat = it->category;
-                    if (cat <= 0) cat = 8;
-                    if (cat >= 16)
+                    ItemInstance inst(Item::items[i], 1);
+                    std::string name = toLowerString(inst.getName());
+                    std::string descId = toLowerString(inst.getDescriptionId());
+                    if (name.find(query) != std::string::npos || descId.find(query) != std::string::npos) {
                         catalogItems.push_back(new ItemInstance(Item::items[i], 1));
+                    }
+                }
+            }
+        } else {
+            int catOrder[4] = { ItemCategory::Structures, ItemCategory::Tools, ItemCategory::FoodArmor, ItemCategory::Decorations };
+            int numCatOrder = showAll ? 4 : 1;
+
+            for (int ci = 0; ci < numCatOrder; ++ci) {
+                int mask = showAll ? catOrder[ci] : targetMask;
+
+                for (int i = 0; i < Tile::NUM_BLOCK_TYPES; ++i) {
+                    if (Tile::isTileAllowedInCreative(i)) {
+                        Item* it = Item::items[i];
+                        int cat = it ? it->category : 1;
+                        if (cat <= 0) cat = 8;
+                        bool match = showAll ? (cat == mask) : ((mask == 8) ? (cat == 8 || cat >= 16) : (cat == mask));
+                        if (!match) continue;
+                        Tile* tile = Tile::tiles[i];
+                        catalogItems.push_back(new ItemInstance(tile, 1));
+                    }
+                }
+                for (int i = 256; i < Item::MAX_ITEMS; ++i) {
+                    if (Item::items[i] != NULL) {
+                        Item* it = Item::items[i];
+                        int cat = it->category;
+                        if (cat <= 0) cat = 8;
+                        bool match = showAll ? (cat == mask) : ((mask == 8) ? (cat == 8 || cat >= 16) : (cat == mask));
+                        if (match)
+                            catalogItems.push_back(new ItemInstance(Item::items[i], 1));
+                    }
+                }
+            }
+
+            if (showAll) {
+                for (int i = 0; i < Tile::NUM_BLOCK_TYPES; ++i) {
+                    if (Tile::isTileAllowedInCreative(i)) {
+                        Item* it = Item::items[i];
+                        int cat = it ? it->category : 1;
+                        if (cat <= 0) cat = 8;
+                        if (cat >= 16) {
+                            Tile* tile = Tile::tiles[i];
+                            catalogItems.push_back(new ItemInstance(tile, 1));
+                        }
+                    }
+                }
+                for (int i = 256; i < Item::MAX_ITEMS; ++i) {
+                    if (Item::items[i] != NULL) {
+                        Item* it = Item::items[i];
+                        int cat = it->category;
+                        if (cat <= 0) cat = 8;
+                        if (cat >= 16)
+                            catalogItems.push_back(new ItemInstance(Item::items[i], 1));
+                    }
                 }
             }
         }
@@ -592,10 +643,49 @@ void UnifiedInventoryScreen::renderLeftPanel(Tesselator& t, int xm, int ym, floa
         case 1: catName = I18n::get("itemGroup.equipment"); break;
         case 2: catName = I18n::get("itemGroup.items"); break;
         case 3: catName = I18n::get("itemGroup.nature"); break;
-        case 4: catName = I18n::get("itemGroup.all"); break;
-        default: catName = I18n::get("itemGroup.all"); break;
+        case 4: catName = "Todos los objetos"; break;
+        default: catName = "Todos los objetos"; break;
     }
     minecraft->font->draw(catName, static_cast<float>(leftPanelRect.x + 8), static_cast<float>(leftPanelRect.y + 6), 0x404040);
+
+    // Bedrock Search Bar (Search tab only)
+    if (currentCategory == 4) {
+        fill(searchBox.x, searchBox.y, searchBox.x + searchBox.width, searchBox.y + searchBox.height, 0xFF5E5E5E);
+        uint32_t borderColor = searchBox.focused ? 0xFFFFFFFF : 0xFF222222;
+        fill(searchBox.x, searchBox.y, searchBox.x + searchBox.width, searchBox.y + 1, borderColor);
+        fill(searchBox.x, searchBox.y + searchBox.height - 1, searchBox.x + searchBox.width, searchBox.y + searchBox.height, borderColor);
+        fill(searchBox.x, searchBox.y, searchBox.x + 1, searchBox.y + searchBox.height, borderColor);
+        fill(searchBox.x + searchBox.width - 1, searchBox.y, searchBox.x + searchBox.width, searchBox.y + searchBox.height, borderColor);
+
+        minecraft->textures->loadAndBindTexture("gui/inv_icons/icon_search_inv.png");
+        glColor4f2(1, 1, 1, 1);
+        t.begin();
+        t.colorABGR(0xFFFFFFFF);
+        float iconX = static_cast<float>(searchBox.x + 3);
+        float iconY = static_cast<float>(searchBox.y + 3);
+        float iconS = 10.0f;
+        t.vertexUV(iconX,         iconY + iconS, 0, 0.0f, 1.0f);
+        t.vertexUV(iconX + iconS, iconY + iconS, 0, 1.0f, 1.0f);
+        t.vertexUV(iconX + iconS, iconY,         0, 1.0f, 0.0f);
+        t.vertexUV(iconX,         iconY,         0, 0.0f, 0.0f);
+        t.draw();
+
+        glEnable2(GL_SCISSOR_TEST);
+        IntRectangle textRect(searchBox.x + 15, searchBox.y + 1, searchBox.width - 17, searchBox.height - 2);
+        minecraft->gui.setScissorRect(textRect);
+
+        int textY = searchBox.y + (searchBox.height - Font::DefaultLineHeight) / 2;
+        std::string disp = searchBox.text;
+        if (searchBox.focused && searchBox.blink) {
+            disp.push_back('_');
+        }
+
+        if (!disp.empty()) {
+            minecraft->font->draw(disp, static_cast<float>(searchBox.x + 16), static_cast<float>(textY), 0xFFFFFF);
+        }
+
+        glDisable2(GL_SCISSOR_TEST);
+    }
 
     SlotLocation hoveredLoc = SLOT_LOC_NONE;
     int hoveredIndex = -1;
@@ -864,6 +954,12 @@ void UnifiedInventoryScreen::buttonClicked(Button* button) {
         currentCategory = button->id - 100;
         selectedCategoryButton = categoryButtons[currentCategory];
         catalogScrollY = 0.0f;
+        if (currentCategory == 4) {
+            searchBox.setFocus(minecraft);
+        } else {
+            searchBox.loseFocus(minecraft);
+        }
+        setupPositions();
         updateItems();
         return;
     }
@@ -1604,6 +1700,14 @@ void UnifiedInventoryScreen::mouseClicked(int x, int y, int buttonNum) {
                 return;
             }
         }
+        if (currentCategory == 4) {
+            if (searchBox.pointInside(x, y)) {
+                searchBox.setFocus(minecraft);
+                return;
+            } else {
+                searchBox.loseFocus(minecraft);
+            }
+        }
     }
 
     SlotLocation loc = SLOT_LOC_NONE;
@@ -1784,7 +1888,34 @@ void UnifiedInventoryScreen::removed() {
     }
 }
 
+void UnifiedInventoryScreen::charPressed(char c) {
+    if (isCreative && isDualPane && currentCategory == 4 && searchBox.focused) {
+        std::string oldText = searchBox.text;
+        searchBox.charPressed(minecraft, c);
+        if (searchBox.text != oldText) {
+            catalogScrollY = 0.0f;
+            updateItems();
+        }
+        return;
+    }
+    super::charPressed(c);
+}
+
 void UnifiedInventoryScreen::keyPressed(int eventKey) {
+    if (isCreative && isDualPane && currentCategory == 4 && searchBox.focused) {
+        if (eventKey == 27 || eventKey == Keyboard::KEY_ESCAPE) {
+            searchBox.loseFocus(minecraft);
+            return;
+        }
+        std::string oldText = searchBox.text;
+        searchBox.keyPressed(minecraft, eventKey);
+        if (searchBox.text != oldText) {
+            catalogScrollY = 0.0f;
+            updateItems();
+        }
+        return;
+    }
+
     if (eventKey == 27 || eventKey == 69 || eventKey == 101 || eventKey == Keyboard::KEY_ESCAPE || eventKey == Keyboard::KEY_E) { // ESC, E, e
         minecraft->setScreen(NULL);
         return;

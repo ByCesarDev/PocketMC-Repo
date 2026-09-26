@@ -75,6 +75,7 @@ protected:
     void mouseMoved(int x, int y, int dx, int dy) override;
     void mouseWheel(int dx, int dy, int xm, int ym) override;
     void keyPressed(int eventKey) override;
+    void charPressed(char c) override;
 
 private:
     void renderPlayer(float xo, float yo, int xm, int ym);

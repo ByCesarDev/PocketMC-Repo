@@ -105,6 +105,14 @@ public:
 	static const int SHAPE_STEM = 19;
     static const int SHAPE_FENCE_GATE = 21;
 	static const int SHAPE_ENTITYTILE_ANIMATED = 22;
+	static const int SHAPE_LANTERN = 23;
+	static const int SHAPE_CAMPFIRE = 24;
+	static const int SHAPE_GRINDSTONE = 25;
+	static const int SHAPE_LECTERN = 26;
+	static const int SHAPE_COMPOSTER = 27;
+	static const int SHAPE_STONECUTTER = 28;
+	static const int SHAPE_CHAIN = 29;
+	static const int SHAPE_SCAFFOLDING = 30;
 
 	// Enumeración de caras del bloque para material_instances
 	enum BlockFace {

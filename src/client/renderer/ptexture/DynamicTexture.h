@@ -106,12 +106,27 @@ class FireTexture: public DynamicTexture
 	float* next;
 	float* heat;
 	float* heata;
-
 public:
     FireTexture(int id);
 	~FireTexture();
 
     void tick() override;
+};
+
+class SoulFireTexture: public DynamicTexture
+{
+	typedef DynamicTexture super;
+	int _frame;
+	int _frameCount;
+	unsigned char* _sheetData;
+
+public:
+	SoulFireTexture(int textureSlot = 216);
+	~SoulFireTexture();
+
+	void loadSheet(AppPlatform* platform);
+	void tick() override;
+	void bindTexture(Textures* tex) override;
 };
 
 #endif /*NET_MINECRAFT_CLIENT_RENDERER_PTEXTURE__DynamicTexture_H__*/

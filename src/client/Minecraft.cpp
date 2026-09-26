@@ -1404,6 +1404,10 @@ void Minecraft::init()
 	classicPortalTex->loadSheet(platform());
 	textures->addDynamicTexture(classicPortalTex);
 
+	SoulFireTexture* soulFireTex = new SoulFireTexture(216);
+	soulFireTex->loadSheet(platform());
+	textures->addDynamicTexture(soulFireTex);
+
 	gui.texturesLoaded(textures);
 
 	levelRenderer = new LevelRenderer(this);
