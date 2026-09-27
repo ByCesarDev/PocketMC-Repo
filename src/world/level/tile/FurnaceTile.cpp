@@ -46,7 +46,7 @@ int FurnaceTile::getTexture( int face )
 {
 	if (face == 1) return tex + 17;
 	if (face == 0) return tex + 17;
-	if (face == 2) return tex - 1;
+	if (face == 2 || face == 3) return lit ? tex + 16 : tex - 1;
 	return tex;
 }
 

@@ -74,22 +74,38 @@ static const std::vector<BlockAtlasStitcher::TextureMapping> s_mappings = {
     { "bed_foot_end.png", 167, "terrain.png" },
 
     // Wool / Cloth (16 colors)
+    { "wool_colored_white.png", 64, "terrain.png" },
     { "wool_white.png", 64, "terrain.png" },
-    { "wool_silver.png", 113, "terrain.png" },
+    { "wool_colored_black.png", 113, "terrain.png" },
+    { "wool_black.png", 113, "terrain.png" },
+    { "wool_colored_gray.png", 114, "terrain.png" },
     { "wool_gray.png", 114, "terrain.png" },
-    { "wool_cyan.png", 129, "terrain.png" },
+    { "wool_colored_red.png", 129, "terrain.png" },
+    { "wool_red.png", 129, "terrain.png" },
+    { "wool_colored_pink.png", 130, "terrain.png" },
     { "wool_pink.png", 130, "terrain.png" },
-    { "wool_purple.png", 145, "terrain.png" },
+    { "wool_colored_green.png", 145, "terrain.png" },
+    { "wool_green.png", 145, "terrain.png" },
+    { "wool_colored_lime.png", 146, "terrain.png" },
     { "wool_lime.png", 146, "terrain.png" },
-    { "wool_blue.png", 161, "terrain.png" },
+    { "wool_colored_brown.png", 161, "terrain.png" },
+    { "wool_brown.png", 161, "terrain.png" },
+    { "wool_colored_yellow.png", 162, "terrain.png" },
     { "wool_yellow.png", 162, "terrain.png" },
-    { "wool_brown.png", 177, "terrain.png" },
+    { "wool_colored_blue.png", 177, "terrain.png" },
+    { "wool_blue.png", 177, "terrain.png" },
+    { "wool_colored_light_blue.png", 178, "terrain.png" },
     { "wool_light_blue.png", 178, "terrain.png" },
-    { "wool_green.png", 193, "terrain.png" },
+    { "wool_colored_purple.png", 193, "terrain.png" },
+    { "wool_purple.png", 193, "terrain.png" },
+    { "wool_colored_magenta.png", 194, "terrain.png" },
     { "wool_magenta.png", 194, "terrain.png" },
-    { "wool_red.png", 209, "terrain.png" },
+    { "wool_colored_cyan.png", 209, "terrain.png" },
+    { "wool_cyan.png", 209, "terrain.png" },
+    { "wool_colored_orange.png", 210, "terrain.png" },
     { "wool_orange.png", 210, "terrain.png" },
-    { "wool_black.png", 225, "terrain.png" },
+    { "wool_colored_silver.png", 225, "terrain.png" },
+    { "wool_silver.png", 225, "terrain.png" },
 
     { "fence_oak.png", 4, "terrain.png" },
     { "wheat.png", 88, "terrain.png" },
@@ -378,7 +394,32 @@ static const std::vector<BlockAtlasStitcher::TextureMapping> s_mappings = {
     // Bell (136..138)
     { "bell_top.png", 136, "terrain2.png" },
     { "bell_bottom.png", 137, "terrain2.png" },
-    { "bell_side.png", 138, "terrain2.png" }
+    { "bell_side.png", 138, "terrain2.png" },
+
+    // Candles (139..141)
+    { "candle.png", 139, "terrain2.png" },
+    { "candle_lit.png", 139, "terrain2.png" },
+    { "red_candle.png", 140, "terrain2.png" },
+    { "red_candle_lit.png", 140, "terrain2.png" },
+    { "white_candle.png", 141, "terrain2.png" },
+    { "white_candle_lit.png", 141, "terrain2.png" },
+
+    // Cauldron (149, 150, 163, 165)
+    { "cauldron_top.png", 149, "terrain2.png" },
+    { "cauldron_inner.png", 150, "terrain2.png" },
+    { "cauldron_side.png", 163, "terrain2.png" },
+    { "cauldron_bottom.png", 165, "terrain2.png" },
+
+    // Anvil (166, 170, 180, 185)
+    { "anvil_base.png", 166, "terrain2.png" },
+    { "anvil_top_damaged_0.png", 170, "terrain2.png" },
+    { "anvil_top_damaged_1.png", 180, "terrain2.png" },
+    { "anvil_top_damaged_2.png", 185, "terrain2.png" },
+
+    // Hopper (195, 199, 200)
+    { "hopper_top.png", 195, "terrain2.png" },
+    { "hopper_inside.png", 199, "terrain2.png" },
+    { "hopper_outside.png", 200, "terrain2.png" }
 };
 
 const std::vector<BlockAtlasStitcher::TextureMapping>& BlockAtlasStitcher::getTextureMappings() {
@@ -509,8 +550,16 @@ TextureCategory BlockAtlasStitcher::getTextureCategory(const std::string& filena
         name.find("fire") != std::string::npos ||
         name.find("torch") != std::string::npos ||
         name.find("lantern") != std::string::npos ||
+        name.find("campfire") != std::string::npos ||
+        name.find("lectern") != std::string::npos ||
+        name.find("composter") != std::string::npos ||
+        name.find("grindstone") != std::string::npos ||
+        name.find("scaffolding") != std::string::npos ||
         name.find("chain") != std::string::npos ||
+        name.find("candle") != std::string::npos ||
         name.find("saw") != std::string::npos ||
+        name.find("cauldron") != std::string::npos ||
+        name.find("hopper") != std::string::npos ||
         name.find("cactus") != std::string::npos) {
         return CAT_CUTOUT;
     }

@@ -48,6 +48,15 @@ std::string I18n::get( const std::string& id )
 	if (lowId == "tile.logspruce.name") return "Spruce Log";
 	if (lowId == "tile.logbirch.name") return "Birch Log";
 	if (lowId == "tile.chest.name") return "Chest";
+	if (lowId == "tile.lantern.name") return "Lantern";
+	if (lowId == "tile.soullantern.name") return "Soul Lantern";
+	if (lowId == "tile.campfire.name") return "Campfire";
+	if (lowId == "tile.lectern.name") return "Lectern";
+	if (lowId == "tile.grindstone.name") return "Grindstone";
+	if (lowId == "tile.composter.name") return "Composter";
+	if (lowId == "tile.stonecutter.name") return "Stonecutter";
+	if (lowId == "tile.ironchain.name") return "Chain";
+	if (lowId == "tile.scaffolding.name") return "Scaffolding";
 
 	return id + '<';//lang.getElement(id);
 }

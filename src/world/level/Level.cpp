@@ -1874,6 +1874,7 @@ bool Level::containsFireTile(const AABB& box) {
 
                     if (t == ((Tile*)(Tile::fire))->id
 					 || (Tile::soulFire != NULL && t == Tile::soulFire->id)
+					 || (Tile::campfire != NULL && t == Tile::campfire->id)
 					 || t == Tile::lava->id
 					 || t == Tile::calmLava->id) {
  						 return true;

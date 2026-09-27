@@ -71,5 +71,10 @@
 #include "ChainTile.h"
 #include "ScaffoldingTile.h"
 #include "SoulFireTile.h"
+#include "CarpetTile.h"
+#include "CandleTile.h"
+#include "CauldronTile.h"
+#include "AnvilTile.h"
+#include "HopperTile.h"
 
 #endif /* TILE_INCLUDE_H__ */

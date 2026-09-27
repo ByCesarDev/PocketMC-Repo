@@ -1408,6 +1408,29 @@ void Minecraft::init()
 	soulFireTex->loadSheet(platform());
 	textures->addDynamicTexture(soulFireTex);
 
+	// Campfire animated fire (109) and animated coals (110)
+	AnimatedBlockTexture* campfireFireTex = new AnimatedBlockTexture(109, "blocks/campfire_fire.png", "terrain2.png", 2);
+	campfireFireTex->loadSheet(platform());
+	textures->addDynamicTexture(campfireFireTex);
+
+	AnimatedBlockTexture* campfireLitLogTex = new AnimatedBlockTexture(110, "blocks/campfire_log_lit.png", "terrain2.png", 2);
+	campfireLitLogTex->loadSheet(platform());
+	textures->addDynamicTexture(campfireLitLogTex);
+
+	// Soul Campfire animated fire (111) and animated coals (112)
+	AnimatedBlockTexture* soulCampfireFireTex = new AnimatedBlockTexture(111, "blocks/soul_campfire_fire.png", "terrain2.png", 2);
+	soulCampfireFireTex->loadSheet(platform());
+	textures->addDynamicTexture(soulCampfireFireTex);
+
+	AnimatedBlockTexture* soulCampfireLitLogTex = new AnimatedBlockTexture(112, "blocks/soul_campfire_log_lit.png", "terrain2.png", 2);
+	soulCampfireLitLogTex->loadSheet(platform());
+	textures->addDynamicTexture(soulCampfireLitLogTex);
+
+	// Stonecutter animated rotating saw (254)
+	AnimatedBlockTexture* stonecutterSawTex = new AnimatedBlockTexture(254, "blocks/stonecutter_saw.png", "terrain2.png", 1);
+	stonecutterSawTex->loadSheet(platform());
+	textures->addDynamicTexture(stonecutterSawTex);
+
 	gui.texturesLoaded(textures);
 
 	levelRenderer = new LevelRenderer(this);

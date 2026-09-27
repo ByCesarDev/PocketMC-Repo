@@ -113,6 +113,10 @@ public:
 	static const int SHAPE_STONECUTTER = 28;
 	static const int SHAPE_CHAIN = 29;
 	static const int SHAPE_SCAFFOLDING = 30;
+	static const int SHAPE_CANDLE = 31;
+	static const int SHAPE_CAULDRON = 32;
+	static const int SHAPE_ANVIL = 33;
+	static const int SHAPE_HOPPER = 34;
 
 	// Enumeración de caras del bloque para material_instances
 	enum BlockFace {
@@ -471,6 +475,8 @@ public:
 	static Tile* cutSandstone;
 	static Tile* cyanCarpet;
 	static Tile* cyanGlazedTerracotta;
+	static Tile* anvil;
+	static Tile* chippedAnvil;
 	static Tile* damagedAnvil;
 	static Tile* darkOakDoor;
 	static Tile* darkOakLog;
@@ -665,7 +671,7 @@ public:
 
 	static bool isTileAllowedInCreative(int id);
 	static inline bool isTile(int id) {
-		return (id >= 0 && id < NUM_BLOCK_TYPES && (id < 256 || id >= 512) && tiles[id] != NULL);
+		return (id >= 0 && id < NUM_BLOCK_TYPES && tiles[id] != NULL);
 	}
 
 	static int getOreVariant(int oreTileId, int replacedTileId);

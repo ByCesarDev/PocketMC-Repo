@@ -436,3 +436,71 @@ void SoulFireTexture::tick() {
 	_frame++;
 }
 
+// ──────────────────────────────────────────────────────────────────────────────
+// AnimatedBlockTexture – general animated vertical sprite sheet texture
+// ──────────────────────────────────────────────────────────────────────────────
+AnimatedBlockTexture::AnimatedBlockTexture(int textureSlot, const std::string& imagePath, const std::string& atlasName, int ticksPerFrame)
+:	super(textureSlot),
+	_frame(0),
+	_frameCount(1),
+	_ticksPerFrame(ticksPerFrame < 1 ? 1 : ticksPerFrame),
+	_tickCounter(0),
+	_sheetData(nullptr),
+	_imagePath(imagePath),
+	_atlasName(atlasName)
+{
+}
+
+AnimatedBlockTexture::~AnimatedBlockTexture() {
+	delete[] _sheetData;
+}
+
+void AnimatedBlockTexture::bindTexture(Textures* tex) {
+	tex->loadAndBindTexture(_atlasName);
+}
+
+void AnimatedBlockTexture::loadSheet(AppPlatform* platform) {
+	TextureData td = platform->loadTexture(_imagePath, true);
+	if (td.data && td.format == TEXF_UNCOMPRESSED_8888 && td.w > 0 && td.h > 0) {
+		_frameCount = td.h / td.w;
+		if (_frameCount < 1) _frameCount = 1;
+		const int totalBytes = 16 * 16 * _frameCount * 4;
+		_sheetData = new unsigned char[totalBytes];
+
+		if (td.w == 16) {
+			memcpy(_sheetData, td.data, totalBytes);
+		} else {
+			int frameH = td.w;
+			for (int f = 0; f < _frameCount; f++) {
+				for (int y = 0; y < 16; y++) {
+					for (int x = 0; x < 16; x++) {
+						int srcX = (x * td.w) / 16;
+						int srcY = f * frameH + (y * frameH) / 16;
+						int srcIdx = (srcY * td.w + srcX) * 4;
+						int dstIdx = (f * 16 * 16 + y * 16 + x) * 4;
+						memcpy(_sheetData + dstIdx, td.data + srcIdx, 4);
+					}
+				}
+			}
+		}
+	}
+	if (td.data && !td.memoryHandledExternally)
+		delete[] td.data;
+
+	if (_sheetData)
+		memcpy(pixels, _sheetData, 16 * 16 * 4);
+}
+
+void AnimatedBlockTexture::tick() {
+	if (!_sheetData || _frameCount <= 1) return;
+
+	_tickCounter++;
+	if (_tickCounter >= _ticksPerFrame) {
+		_tickCounter = 0;
+		_frame = (_frame + 1) % _frameCount;
+		const int frameOffset = _frame * 16 * 16 * 4;
+		memcpy(pixels, _sheetData + frameOffset, 16 * 16 * 4);
+	}
+}
+
+

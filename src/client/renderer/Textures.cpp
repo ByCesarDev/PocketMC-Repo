@@ -337,7 +337,7 @@ void Textures::tick(bool uploadToGraphicsCard)
 					glTexSubImage2D2(GL_TEXTURE_2D, 0, tileX * 16, tileY * 16, 16, 16, GL_RGBA, GL_UNSIGNED_BYTE, tex->pixels);
 
 					if (MIPMAP_LEVELS > 0) {
-						TextureCategory cat = (dynamic_cast<WaterTexture*>(tex) || dynamic_cast<WaterSideTexture*>(tex)) ? CAT_TRANSLUCENT : ((dynamic_cast<SoulFireTexture*>(tex) || dynamic_cast<FireTexture*>(tex) || dynamic_cast<PortalTexture*>(tex) || dynamic_cast<ClassicPortalTexture*>(tex)) ? CAT_CUTOUT : CAT_OPAQUE);
+						TextureCategory cat = (dynamic_cast<WaterTexture*>(tex) || dynamic_cast<WaterSideTexture*>(tex)) ? CAT_TRANSLUCENT : ((dynamic_cast<SoulFireTexture*>(tex) || dynamic_cast<FireTexture*>(tex) || dynamic_cast<PortalTexture*>(tex) || dynamic_cast<ClassicPortalTexture*>(tex) || dynamic_cast<AnimatedBlockTexture*>(tex)) ? CAT_CUTOUT : CAT_OPAQUE);
 						unsigned char* bufList[5] = { tex->pixels, s_animL1, s_animL2, s_animL3, s_animL4 };
 
 						for (int lvl = 1; lvl <= MIPMAP_LEVELS && lvl <= 4; lvl++) {

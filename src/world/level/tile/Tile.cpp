@@ -354,6 +354,8 @@ Tile* Tile::crackedStoneBricks = NULL;
 Tile* Tile::cutSandstone = NULL;
 Tile* Tile::cyanCarpet = NULL;
 Tile* Tile::cyanGlazedTerracotta = NULL;
+Tile* Tile::anvil = NULL;
+Tile* Tile::chippedAnvil = NULL;
 Tile* Tile::damagedAnvil = NULL;
 Tile* Tile::darkOakDoor = NULL;
 Tile* Tile::darkOakLog = NULL;
@@ -608,15 +610,17 @@ void Tile::initTiles() {
 	crops		= (new CropTile(59, 8 + 5 * 16))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("crops");
 	farmland    = (new FarmTile(60))->init()->setDestroyTime(0.6f)->setSoundType(SOUND_GRAVEL)->setCategory(ItemCategory::Decorations)->setDescriptionId("farmland");
 	furnace		= (new FurnaceTile(61, false))->init()->setDestroyTime(3.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("furnace")
+					->setSideTexture("furnace_side")
 					->setFaceTexture(FACE_UP, "furnace_top")
 					->setFaceTexture(FACE_DOWN, "furnace_bottom")
 					->setFaceTexture(FACE_NORTH, "furnace_front")
-					->setSideTexture("furnace_side");
+					->setFaceTexture(FACE_SOUTH, "furnace_front");
 	furnace_lit = (new FurnaceTile(62, true))->init()->setDestroyTime(3.5f)->setSoundType(SOUND_STONE)->setLightEmission(14 / 16.0f)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("furnace")
+					->setSideTexture("furnace_side")
 					->setFaceTexture(FACE_UP, "furnace_top")
 					->setFaceTexture(FACE_DOWN, "furnace_bottom")
 					->setFaceTexture(FACE_NORTH, "furnace_front_lit")
-					->setSideTexture("furnace_side");
+					->setFaceTexture(FACE_SOUTH, "furnace_front_lit");
     sign        = (new SignTile(63, TileEntityType::Sign, true))->init()->setDestroyTime(1.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("sign");
 	door_wood   = (new DoorTile(64, Material::wood))->init()->setDestroyTime(3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("doorWood");
 	ladder      = (new LadderTile(65, 3 + 5 * 16))->init()->setDestroyTime(0.4f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("ladder")->setAllFacesTexture("ladder");
@@ -1008,80 +1012,95 @@ void Tile::initExtraTiles()
 	// ============================================
 	// Bedrock Generator / Structures Block Initializations (IDs 512..745)
 	// ============================================
-	acaciaDoor = (new DoorTile(512, 106 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("acaciaDoor")->setAllFacesTexture("door_acacia_lower", 106 | Tile::TEXTURE_ALT_FLAG);
+	acaciaDoor = (new DoorTile(512, 106, Material::wood))->init()->setDestroyTime(3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("acaciaDoor")->setAllFacesTexture("door_acacia_lower", 106);
 	acaciaPressurePlate = (new Tile(513, 37 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("acaciaPressurePlate")->setAllFacesTexture("planks_acacia", 37 | Tile::TEXTURE_ALT_FLAG);
 	acaciaWood = (new Tile(514, 34 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("acaciaWood")->setAllFacesTexture("log_acacia", 34 | Tile::TEXTURE_ALT_FLAG);
 	barrel = (new Tile(515, 135 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("barrel")
 		->setFaceTexture(FACE_UP, "barrel_top", 133 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_DOWN, "barrel_bottom", 134 | Tile::TEXTURE_ALT_FLAG)
 		->setSideTexture("barrel_side", 135 | Tile::TEXTURE_ALT_FLAG);
-	basalt = (new Tile(516, 108 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("basalt")->setAllFacesTexture("basalt_side", 108 | Tile::TEXTURE_ALT_FLAG);
+	basalt = (new Tile(516, 107, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("basalt")->setAllFacesTexture("basalt_side", 107);
 	bell = (new Tile(517, 138 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Decorations)->setDescriptionId("bell")
 		->setFaceTexture(FACE_UP, "bell_top", 136 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_DOWN, "bell_bottom", 137 | Tile::TEXTURE_ALT_FLAG)
 		->setSideTexture("bell_side", 138 | Tile::TEXTURE_ALT_FLAG);
-	blackCarpet = (new Tile(518, 110 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("blackCarpet")->setAllFacesTexture("wool_colored_black", 110 | Tile::TEXTURE_ALT_FLAG);
-	blackGlazedTerracotta = (new Tile(519, 111 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("blackGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_black", 111 | Tile::TEXTURE_ALT_FLAG);
+	blackCarpet = (new CarpetTile(518, 113, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("blackCarpet")->setAllFacesTexture("wool_colored_black", 113);
+	blackGlazedTerracotta = (new Tile(519, 108, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("blackGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_black", 108);
 	blackStainedGlass = (new Tile(520, 49, Material::glass))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("blackStainedGlass")->setAllFacesTexture("glass", 49);
-	blackstone = (new Tile(521, 112 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("blackstone")->setAllFacesTexture("blackstone", 112 | Tile::TEXTURE_ALT_FLAG);
-	blackstoneSlab = (new SlabTile(522, 112 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("blackstoneSlab")->setAllFacesTexture("blackstone", 112 | Tile::TEXTURE_ALT_FLAG);
-	blackstoneStairs = (new StairTile(523, 112 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("blackstoneStairs")->setAllFacesTexture("blackstone", 112 | Tile::TEXTURE_ALT_FLAG);
-	blackstoneWall = (new FenceTile(524, 112 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("blackstoneWall")->setAllFacesTexture("blackstone", 112 | Tile::TEXTURE_ALT_FLAG);
-	blastFurnace = (new Tile(525, 115 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("blastFurnace")
+	blackstone = (new Tile(521, 109, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("blackstone")->setAllFacesTexture("blackstone", 109);
+	blackstoneSlab = (new SlabTile(522, 109, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("blackstoneSlab")->setAllFacesTexture("blackstone", 109);
+	blackstoneStairs = (new StairTile(523, 109, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("blackstoneStairs")->setAllFacesTexture("blackstone", 109);
+	blackstoneWall = (new FenceTile(524, 109, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("blackstoneWall")->setAllFacesTexture("blackstone", 109);
+	blastFurnace = (new Tile(525, 115 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("blastFurnace")
+		->setSideTexture("blast_furnace_side", 115 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_UP, "blast_furnace_top", 113 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_DOWN, "blast_furnace_top", 113 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_NORTH, "blast_furnace_front", 114 | Tile::TEXTURE_ALT_FLAG)
-		->setSideTexture("blast_furnace_side", 115 | Tile::TEXTURE_ALT_FLAG);
-	blueCarpet = (new Tile(526, 114 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("blueCarpet")->setAllFacesTexture("wool_colored_blue", 114 | Tile::TEXTURE_ALT_FLAG);
-	boneBlock = (new Tile(527, 115 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("boneBlock")->setAllFacesTexture("bone_block_side", 115 | Tile::TEXTURE_ALT_FLAG);
-	brewingStand = (new Tile(528, 116 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("brewingStand")->setAllFacesTexture("brewing_stand", 116 | Tile::TEXTURE_ALT_FLAG);
+		->setFaceTexture(FACE_SOUTH, "blast_furnace_front", 114 | Tile::TEXTURE_ALT_FLAG);
+	blueCarpet = (new CarpetTile(526, 177, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("blueCarpet")->setAllFacesTexture("wool_colored_blue", 177);
+	boneBlock = (new Tile(527, 110, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("boneBlock")->setAllFacesTexture("bone_block_side", 110);
+	brewingStand = (new Tile(528, 112, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("brewingStand")->setAllFacesTexture("brewing_stand", 112);
 	brickWall = (new FenceTile(529, 7, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("brickWall")->setAllFacesTexture("brick", 7);
-	brownCarpet = (new Tile(530, 117 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("brownCarpet")->setAllFacesTexture("wool_colored_brown", 117 | Tile::TEXTURE_ALT_FLAG);
+	brownCarpet = (new CarpetTile(530, 161, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("brownCarpet")->setAllFacesTexture("wool_colored_brown", 161);
 	brownStainedGlass = (new Tile(531, 49, Material::glass))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("brownStainedGlass")->setAllFacesTexture("glass", 49);
 	campfire = (new CampfireTile(532, 118 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("campfire")->setLightEmission(1.0f)
 		->setFaceTexture(FACE_UP, "campfire_log", 118 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_DOWN, "campfire_log", 118 | Tile::TEXTURE_ALT_FLAG)
-		->setSideTexture("campfire_side", 108 | Tile::TEXTURE_ALT_FLAG);
-	candle = (new Tile(533, 119 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("candle")->setLightEmission(3 / 16.0f)->setAllFacesTexture("candle", 119 | Tile::TEXTURE_ALT_FLAG);
+		->setSideTexture("campfire_log", 118 | Tile::TEXTURE_ALT_FLAG);
+	candle = (new CandleTile(533, 139 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(0.1f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("candle")->setLightEmission(3 / 16.0f)->setAllFacesTexture("candle", 139 | Tile::TEXTURE_ALT_FLAG);
 	cartographyTable = (new Tile(534, 120 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("cartographyTable")
 		->setFaceTexture(FACE_UP, "cartography_table_top", 120 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_DOWN, "planks_big_oak", 38 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_NORTH, "cartography_table_side1", 121 | Tile::TEXTURE_ALT_FLAG)
-		->setFaceTexture(FACE_SOUTH, "cartography_table_side2", 122 | Tile::TEXTURE_ALT_FLAG)
-		->setFaceTexture(FACE_WEST, "cartography_table_side3", 123 | Tile::TEXTURE_ALT_FLAG)
+		->setFaceTexture(FACE_SOUTH, "cartography_table_side1", 121 | Tile::TEXTURE_ALT_FLAG)
+		->setFaceTexture(FACE_WEST, "cartography_table_side2", 122 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_EAST, "cartography_table_side3", 123 | Tile::TEXTURE_ALT_FLAG);
-	carvedPumpkin = (new Tile(535, 121 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("carvedPumpkin")->setAllFacesTexture("pumpkin_face_off", 121 | Tile::TEXTURE_ALT_FLAG);
-	cauldron = (new Tile(536, 122 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("cauldron")->setAllFacesTexture("cauldron_side", 122 | Tile::TEXTURE_ALT_FLAG);
-	chiseledDeepslate = (new Tile(537, 123 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("chiseledDeepslate")->setAllFacesTexture("chiseled_deepslate", 123 | Tile::TEXTURE_ALT_FLAG);
-	chiseledPolishedBlackstone = (new Tile(538, 124 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("chiseledPolishedBlackstone")->setAllFacesTexture("chiseled_polished_blackstone", 124 | Tile::TEXTURE_ALT_FLAG);
+	carvedPumpkin = (new Tile(535, 115, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("carvedPumpkin")->setAllFacesTexture("pumpkin_face_off", 115);
+	cauldron = (new CauldronTile(536, 163 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(2.0f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("cauldron")
+		->setFaceTexture(FACE_UP, "cauldron_top", 149 | Tile::TEXTURE_ALT_FLAG)
+		->setFaceTexture(FACE_DOWN, "cauldron_bottom", 165 | Tile::TEXTURE_ALT_FLAG)
+		->setSideTexture("cauldron_side", 163 | Tile::TEXTURE_ALT_FLAG);
+	chiseledDeepslate = (new Tile(537, 117, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("chiseledDeepslate")->setAllFacesTexture("chiseled_deepslate", 117);
+	chiseledPolishedBlackstone = (new Tile(538, 121, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("chiseledPolishedBlackstone")->setAllFacesTexture("chiseled_polished_blackstone", 121);
 	chiseledSandstone = (new Tile(539, 229, Material::sand))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_SAND)->setCategory(ItemCategory::Decorations)->setDescriptionId("chiseledSandstone")->setAllFacesTexture("sandstone_chiseled", 229);
 	chiseledStoneBricks = (new Tile(540, 16, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("chiseledStoneBricks")->setAllFacesTexture("stone_brick", 16);
-	chiseledTuff = (new Tile(541, 125 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("chiseledTuff")->setAllFacesTexture("tuff", 125 | Tile::TEXTURE_ALT_FLAG);
-	chiseledTuffBricks = (new Tile(542, 126 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("chiseledTuffBricks")->setAllFacesTexture("tuff_bricks", 126 | Tile::TEXTURE_ALT_FLAG);
-	cinnabar = (new Tile(543, 127 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("cinnabar")->setAllFacesTexture("cinnabar", 127 | Tile::TEXTURE_ALT_FLAG);
-	coalBlock = (new Tile(544, 128 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("coalBlock")->setAllFacesTexture("coal_block", 128 | Tile::TEXTURE_ALT_FLAG);
-	coarseDirt = (new Tile(545, 129 | Tile::TEXTURE_ALT_FLAG, Material::dirt))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRAVEL)->setCategory(ItemCategory::Decorations)->setDescriptionId("coarseDirt")->setAllFacesTexture("coarse_dirt", 129 | Tile::TEXTURE_ALT_FLAG);
+	chiseledTuff = (new Tile(541, 122, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("chiseledTuff")->setAllFacesTexture("tuff", 122);
+	chiseledTuffBricks = (new Tile(542, 123, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("chiseledTuffBricks")->setAllFacesTexture("tuff_bricks", 123);
+	cinnabar = (new Tile(543, 124, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("cinnabar")->setAllFacesTexture("cinnabar", 124);
+	coalBlock = (new Tile(544, 125, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("coalBlock")->setAllFacesTexture("coal_block", 125);
+	coarseDirt = (new Tile(545, 126, Material::dirt))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRAVEL)->setCategory(ItemCategory::Decorations)->setDescriptionId("coarseDirt")->setAllFacesTexture("coarse_dirt", 126);
 	cobbledDeepslateSlab = (new SlabTile(546, 7 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("cobbledDeepslateSlab")->setAllFacesTexture("cobbled_deepslate", 7 | Tile::TEXTURE_ALT_FLAG);
 	cobbledDeepslateStairs = (new StairTile(547, 7 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("cobbledDeepslateStairs")->setAllFacesTexture("cobbled_deepslate", 7 | Tile::TEXTURE_ALT_FLAG);
 	cobbledDeepslateWall = (new FenceTile(548, 7 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("cobbledDeepslateWall")->setAllFacesTexture("cobbled_deepslate", 7 | Tile::TEXTURE_ALT_FLAG);
-	cobblestoneWall = (new FenceTile(549, 130 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("cobblestoneWall")->setAllFacesTexture("cobblestone", 130 | Tile::TEXTURE_ALT_FLAG);
+	cobblestoneWall = (new FenceTile(549, 16, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("cobblestoneWall")->setAllFacesTexture("cobblestone", 16);
 	composter = (new ComposterTile(550, 131 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("composter")
 		->setFaceTexture(FACE_UP, "composter_top", 131 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_DOWN, "composter_bottom", 255 | Tile::TEXTURE_ALT_FLAG)
 		->setSideTexture("composter_side", 14 | Tile::TEXTURE_ALT_FLAG);
-	copperBlock = (new Tile(551, 132 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("copperBlock")->setAllFacesTexture("copper_block", 132 | Tile::TEXTURE_ALT_FLAG);
+	copperBlock = (new Tile(551, 128, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("copperBlock")->setAllFacesTexture("copper_block", 128);
 	crackedDeepslateBricks = (new Tile(552, 20 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("crackedDeepslateBricks")->setAllFacesTexture("deepslate_bricks", 20 | Tile::TEXTURE_ALT_FLAG);
 	crackedDeepslateTiles = (new Tile(553, 19 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("crackedDeepslateTiles")->setAllFacesTexture("deepslate_tiles", 19 | Tile::TEXTURE_ALT_FLAG);
-	crackedPolishedBlackstoneBricks = (new Tile(554, 112 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("crackedPolishedBlackstoneBricks")->setAllFacesTexture("blackstone", 112 | Tile::TEXTURE_ALT_FLAG);
+	crackedPolishedBlackstoneBricks = (new Tile(554, 109, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("crackedPolishedBlackstoneBricks")->setAllFacesTexture("blackstone", 109);
 	crackedStoneBricks = (new Tile(555, 101, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("crackedStoneBricks")->setAllFacesTexture("stonebrick_cracked", 101);
 	cutSandstone = (new Tile(556, 192, Material::sand))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_SAND)->setCategory(ItemCategory::Decorations)->setDescriptionId("cutSandstone")->setAllFacesTexture("sandstone_normal", 192);
-	cyanCarpet = (new Tile(557, 133 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("cyanCarpet")->setAllFacesTexture("wool_colored_cyan", 133 | Tile::TEXTURE_ALT_FLAG);
-	cyanGlazedTerracotta = (new Tile(558, 134 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("cyanGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_cyan", 134 | Tile::TEXTURE_ALT_FLAG);
-	damagedAnvil = (new Tile(559, 135 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("damagedAnvil")->setAllFacesTexture("anvil_top_damaged_1", 135 | Tile::TEXTURE_ALT_FLAG);
-	darkOakDoor = (new DoorTile(560, 136 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("darkOakDoor")->setAllFacesTexture("door_dark_oak_lower", 136 | Tile::TEXTURE_ALT_FLAG);
-	darkOakLog = (new Tile(561, 137 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("darkOakLog")->setAllFacesTexture("stripped_dark_oak_log", 137 | Tile::TEXTURE_ALT_FLAG);
-	deadbush = (new FlowerTile(562, 138 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("deadbush")->setAllFacesTexture("deadbush", 138 | Tile::TEXTURE_ALT_FLAG);
-	decoratedPot = (new Tile(563, 139 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("decoratedPot")->setAllFacesTexture("decorated_pot_side", 139 | Tile::TEXTURE_ALT_FLAG);
+	cyanCarpet = (new CarpetTile(557, 209, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("cyanCarpet")->setAllFacesTexture("wool_colored_cyan", 209);
+	cyanGlazedTerracotta = (new Tile(558, 131, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("cyanGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_cyan", 131);
+	anvil = (new AnvilTile(510, 170 | Tile::TEXTURE_ALT_FLAG, 0))->init()->setDestroyTime(5.0f)->setExplodeable(1200.0f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("anvil")
+		->setFaceTexture(FACE_UP, "anvil_top_damaged_0", 170 | Tile::TEXTURE_ALT_FLAG)
+		->setFaceTexture(FACE_DOWN, "anvil_base", 166 | Tile::TEXTURE_ALT_FLAG)
+		->setSideTexture("anvil_base", 166 | Tile::TEXTURE_ALT_FLAG);
+	chippedAnvil = (new AnvilTile(511, 180 | Tile::TEXTURE_ALT_FLAG, 1))->init()->setDestroyTime(5.0f)->setExplodeable(1200.0f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("anvilChipped")
+		->setFaceTexture(FACE_UP, "anvil_top_damaged_1", 180 | Tile::TEXTURE_ALT_FLAG)
+		->setFaceTexture(FACE_DOWN, "anvil_base", 166 | Tile::TEXTURE_ALT_FLAG)
+		->setSideTexture("anvil_base", 166 | Tile::TEXTURE_ALT_FLAG);
+	damagedAnvil = (new AnvilTile(559, 185 | Tile::TEXTURE_ALT_FLAG, 2))->init()->setDestroyTime(5.0f)->setExplodeable(1200.0f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("damagedAnvil")
+		->setFaceTexture(FACE_UP, "anvil_top_damaged_2", 185 | Tile::TEXTURE_ALT_FLAG)
+		->setFaceTexture(FACE_DOWN, "anvil_base", 166 | Tile::TEXTURE_ALT_FLAG)
+		->setSideTexture("anvil_base", 166 | Tile::TEXTURE_ALT_FLAG);
+	darkOakDoor = (new DoorTile(560, 139, Material::wood))->init()->setDestroyTime(3.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Structures)->setDescriptionId("darkOakDoor")->setAllFacesTexture("door_dark_oak_lower", 139);
+	darkOakLog = (new Tile(561, 140, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("darkOakLog")->setAllFacesTexture("stripped_dark_oak_log", 140);
+	deadbush = (new FlowerTile(562, 141))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("deadbush")->setAllFacesTexture("deadbush", 141);
+	decoratedPot = (new Tile(563, 142, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("decoratedPot")->setAllFacesTexture("decorated_pot_side", 142);
 	deepslateBrickSlab = (new SlabTile(564, 20 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("deepslateBrickSlab")->setAllFacesTexture("deepslate_bricks", 20 | Tile::TEXTURE_ALT_FLAG);
 	deepslateBrickStairs = (new StairTile(565, 20 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("deepslateBrickStairs")->setAllFacesTexture("deepslate_bricks", 20 | Tile::TEXTURE_ALT_FLAG);
 	deepslateBrickWall = (new FenceTile(566, 20 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("deepslateBrickWall")->setAllFacesTexture("deepslate_bricks", 20 | Tile::TEXTURE_ALT_FLAG);
@@ -1092,32 +1111,36 @@ void Tile::initExtraTiles()
 	dioriteDoubleSlab = (new Tile(571, 58 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("dioriteDoubleSlab")->setAllFacesTexture("stone_diorite", 58 | Tile::TEXTURE_ALT_FLAG);
 	dioriteStairs = (new StairTile(572, 58 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("dioriteStairs")->setAllFacesTexture("stone_diorite", 58 | Tile::TEXTURE_ALT_FLAG);
 	dioriteWall = (new FenceTile(573, 58 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("dioriteWall")->setAllFacesTexture("stone_diorite", 58 | Tile::TEXTURE_ALT_FLAG);
-	dragonHead = (new Tile(574, 140 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("dragonHead")->setAllFacesTexture("dragon_egg", 140 | Tile::TEXTURE_ALT_FLAG);
-	endBricks = (new Tile(575, 141 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("endBricks")->setAllFacesTexture("end_bricks", 141 | Tile::TEXTURE_ALT_FLAG);
+	dragonHead = (new Tile(574, 143, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("dragonHead")->setAllFacesTexture("dragon_egg", 143);
+	endBricks = (new Tile(575, 147, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("endBricks")->setAllFacesTexture("end_bricks", 147);
 	endRod = (new Tile(576, 142 | Tile::TEXTURE_ALT_FLAG, Material::glass))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("endRod")->setLightEmission(14 / 16.0f)->setAllFacesTexture("end_rod", 142 | Tile::TEXTURE_ALT_FLAG);
 	enderChest = (new Tile(577, 143 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("enderChest")->setAllFacesTexture("ender_chest_front", 143 | Tile::TEXTURE_ALT_FLAG);
 	fern = (new FlowerTile(578, 144 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("fern")->setAllFacesTexture("fern", 144 | Tile::TEXTURE_ALT_FLAG);
 	fletchingTable = (new Tile(579, 145 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("fletchingTable")
+		->setSideTexture("fletching_table_side", 125 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_UP, "fletching_table_top", 145 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_DOWN, "planks_birch", 5 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_NORTH, "fletching_table_front", 124 | Tile::TEXTURE_ALT_FLAG)
-		->setFaceTexture(FACE_SOUTH, "fletching_table_front", 124 | Tile::TEXTURE_ALT_FLAG)
-		->setSideTexture("fletching_table_side", 125 | Tile::TEXTURE_ALT_FLAG);
+		->setFaceTexture(FACE_SOUTH, "fletching_table_front", 124 | Tile::TEXTURE_ALT_FLAG);
 	flowerPot = (new FlowerTile(580, 146 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("flowerPot")->setAllFacesTexture("flower_pot", 146 | Tile::TEXTURE_ALT_FLAG);
 	gildedBlackstone = (new Tile(581, 147 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("gildedBlackstone")->setAllFacesTexture("gilded_blackstone", 147 | Tile::TEXTURE_ALT_FLAG);
 	graniteStairs = (new StairTile(582, 56 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("graniteStairs")->setAllFacesTexture("stone_granite", 56 | Tile::TEXTURE_ALT_FLAG);
 	graniteWall = (new FenceTile(583, 56 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("graniteWall")->setAllFacesTexture("stone_granite", 56 | Tile::TEXTURE_ALT_FLAG);
 	grassPath = (new Tile(584, 148 | Tile::TEXTURE_ALT_FLAG, Material::dirt))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("grassPath")->setAllFacesTexture("grass_path_side", 148 | Tile::TEXTURE_ALT_FLAG);
-	grayCarpet = (new Tile(585, 149 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("grayCarpet")->setAllFacesTexture("wool_colored_gray", 149 | Tile::TEXTURE_ALT_FLAG);
-	greenCarpet = (new Tile(586, 150 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("greenCarpet")->setAllFacesTexture("wool_colored_green", 150 | Tile::TEXTURE_ALT_FLAG);
+	grassPath->setShape(0.0f, 0.0f, 0.0f, 1.0f, 15.0f / 16.0f, 1.0f);
+	grayCarpet = (new CarpetTile(585, 114, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("grayCarpet")->setAllFacesTexture("wool_colored_gray", 114);
+	greenCarpet = (new CarpetTile(586, 145, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("greenCarpet")->setAllFacesTexture("wool_colored_green", 145);
 	grindstone = (new GrindstoneTile(587, 151 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("grindstone")
 		->setFaceTexture(FACE_UP, "grindstone_pivot", 151 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_DOWN, "grindstone_pivot", 151 | Tile::TEXTURE_ALT_FLAG)
 		->setSideTexture("grindstone_pivot", 151 | Tile::TEXTURE_ALT_FLAG);
 	hayBlock = (new Tile(588, 152 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("hayBlock")->setAllFacesTexture("hay_block_side", 152 | Tile::TEXTURE_ALT_FLAG);
-	hopper = (new Tile(589, 153 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("hopper")->setAllFacesTexture("hopper_top", 153 | Tile::TEXTURE_ALT_FLAG);
+	hopper = (new HopperTile(589, 195 | Tile::TEXTURE_ALT_FLAG))->init()->setDestroyTime(3.0f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("hopper")
+		->setFaceTexture(FACE_UP, "hopper_top", 195 | Tile::TEXTURE_ALT_FLAG)
+		->setFaceTexture(FACE_DOWN, "hopper_outside", 200 | Tile::TEXTURE_ALT_FLAG)
+		->setSideTexture("hopper_outside", 200 | Tile::TEXTURE_ALT_FLAG);
 	infestedChiseledStoneBricks = (new Tile(590, 16, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("infestedChiseledStoneBricks")->setAllFacesTexture("stone_brick", 16);
-	infestedCobblestone = (new Tile(591, 130 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("infestedCobblestone")->setAllFacesTexture("cobblestone", 130 | Tile::TEXTURE_ALT_FLAG);
+	infestedCobblestone = (new Tile(591, 16, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("infestedCobblestone")->setAllFacesTexture("cobblestone", 16);
 	infestedMossyStoneBricks = (new Tile(592, 100, Material::plant))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("infestedMossyStoneBricks")->setAllFacesTexture("stonebrick_mossy", 100);
 	infestedStoneBricks = (new Tile(593, 16, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("infestedStoneBricks")->setAllFacesTexture("stone_brick", 16);
 	ironBars = (new ThinFenceTile(594, 154 | Tile::TEXTURE_ALT_FLAG, 154 | Tile::TEXTURE_ALT_FLAG, Material::metal, true))->init()->setDestroyTime(5.0f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("ironBars")->setAllFacesTexture("iron_bars", 154 | Tile::TEXTURE_ALT_FLAG);
@@ -1136,19 +1159,20 @@ void Tile::initExtraTiles()
 		->setFaceTexture(FACE_SOUTH, "lectern_front", 22 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_WEST, "lectern_sides", 106 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_EAST, "lectern_sides", 106 | Tile::TEXTURE_ALT_FLAG);
-	lightBlueCarpet = (new Tile(604, 163 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("lightBlueCarpet")->setAllFacesTexture("wool_colored_light_blue", 163 | Tile::TEXTURE_ALT_FLAG);
+	lightBlueCarpet = (new CarpetTile(604, 178, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("lightBlueCarpet")->setAllFacesTexture("wool_colored_light_blue", 178);
 	lightBlueGlazedTerracotta = (new Tile(605, 164 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("lightBlueGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_light_blue", 164 | Tile::TEXTURE_ALT_FLAG);
-	lightGrayCarpet = (new Tile(606, 165 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("lightGrayCarpet")->setAllFacesTexture("wool_colored_silver", 165 | Tile::TEXTURE_ALT_FLAG);
+	lightGrayCarpet = (new CarpetTile(606, 225, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("lightGrayCarpet")->setAllFacesTexture("wool_colored_silver", 225);
 	lightGrayStainedGlass = (new Tile(607, 49, Material::glass))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("lightGrayStainedGlass")->setAllFacesTexture("glass", 49);
-	limeCarpet = (new Tile(608, 166 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("limeCarpet")->setAllFacesTexture("wool_colored_lime", 166 | Tile::TEXTURE_ALT_FLAG);
+	limeCarpet = (new CarpetTile(608, 146, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("limeCarpet")->setAllFacesTexture("wool_colored_lime", 146);
 	limeGlazedTerracotta = (new Tile(609, 167 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("limeGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_lime", 167 | Tile::TEXTURE_ALT_FLAG);
 	litRedstoneLamp = (new Tile(610, 168 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("litRedstoneLamp")->setLightEmission(1.0f)->setAllFacesTexture("redstone_lamp_on", 168 | Tile::TEXTURE_ALT_FLAG);
 	loom = (new Tile(611, 169 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("loom")
+		->setSideTexture("loom_side", 132 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_UP, "loom_top", 169 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_DOWN, "loom_bottom", 129 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_NORTH, "loom_front", 130 | Tile::TEXTURE_ALT_FLAG)
-		->setSideTexture("loom_side", 132 | Tile::TEXTURE_ALT_FLAG);
-	magentaCarpet = (new Tile(612, 170 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("magentaCarpet")->setAllFacesTexture("wool_colored_magenta", 170 | Tile::TEXTURE_ALT_FLAG);
+		->setFaceTexture(FACE_SOUTH, "loom_front", 130 | Tile::TEXTURE_ALT_FLAG);
+	magentaCarpet = (new CarpetTile(612, 194, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("magentaCarpet")->setAllFacesTexture("wool_colored_magenta", 194);
 	magentaStainedGlass = (new Tile(613, 49, Material::glass))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("magentaStainedGlass")->setAllFacesTexture("glass", 49);
 	magma = (new Tile(614, 171 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("magma")->setLightEmission(3 / 16.0f)->setAllFacesTexture("magma", 171 | Tile::TEXTURE_ALT_FLAG);
 	mangroveLeaves = (new Tile(615, 172 | Tile::TEXTURE_ALT_FLAG, Material::leaves))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("mangroveLeaves")->setAllFacesTexture("mangrove_leaves", 172 | Tile::TEXTURE_ALT_FLAG);
@@ -1156,7 +1180,7 @@ void Tile::initExtraTiles()
 	mangroveRoots = (new FlowerTile(617, 174 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("mangroveRoots")->setAllFacesTexture("mangrove_roots_side", 174 | Tile::TEXTURE_ALT_FLAG);
 	mangroveWood = (new Tile(618, 173 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("mangroveWood")->setAllFacesTexture("mangrove_log_side", 173 | Tile::TEXTURE_ALT_FLAG);
 	mossBlock = (new Tile(619, 175 | Tile::TEXTURE_ALT_FLAG, Material::plant))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("mossBlock")->setAllFacesTexture("moss_block", 175 | Tile::TEXTURE_ALT_FLAG);
-	mossCarpet = (new Tile(620, 176 | Tile::TEXTURE_ALT_FLAG, Material::plant))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("mossCarpet")->setAllFacesTexture("pale_moss_carpet_side_base", 176 | Tile::TEXTURE_ALT_FLAG);
+	mossCarpet = (new CarpetTile(620, 176 | Tile::TEXTURE_ALT_FLAG, Material::plant))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("mossCarpet")->setAllFacesTexture("pale_moss_carpet_side_base", 176 | Tile::TEXTURE_ALT_FLAG);
 	mossyCobblestoneSlab = (new SlabTile(621, 36, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("mossyCobblestoneSlab")->setAllFacesTexture("mossy_cobblestone", 36);
 	mossyCobblestoneStairs = (new StairTile(622, 36, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("mossyCobblestoneStairs")->setAllFacesTexture("mossy_cobblestone", 36);
 	mossyCobblestoneWall = (new FenceTile(623, 36, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("mossyCobblestoneWall")->setAllFacesTexture("mossy_cobblestone", 36);
@@ -1168,14 +1192,14 @@ void Tile::initExtraTiles()
 	mudBricks = (new Tile(629, 178 | Tile::TEXTURE_ALT_FLAG, Material::dirt))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("mudBricks")->setAllFacesTexture("mud_bricks", 178 | Tile::TEXTURE_ALT_FLAG);
 	muddyMangroveRoots = (new Tile(630, 177 | Tile::TEXTURE_ALT_FLAG, Material::dirt))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("muddyMangroveRoots")->setAllFacesTexture("mud", 177 | Tile::TEXTURE_ALT_FLAG);
 	noteblock = (new Tile(631, 179 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("noteblock")->setAllFacesTexture("noteblock", 179 | Tile::TEXTURE_ALT_FLAG);
-	orangeCarpet = (new Tile(632, 180 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("orangeCarpet")->setAllFacesTexture("wool_colored_orange", 180 | Tile::TEXTURE_ALT_FLAG);
+	orangeCarpet = (new CarpetTile(632, 210, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("orangeCarpet")->setAllFacesTexture("wool_colored_orange", 210);
 	orangeGlazedTerracotta = (new Tile(633, 181 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("orangeGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_orange", 181 | Tile::TEXTURE_ALT_FLAG);
 	orangeStainedGlassPane = (new ThinFenceTile(634, 49, 49, Material::glass, false))->init()->setDestroyTime(0.3f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Structures)->setDescriptionId("orangeStainedGlassPane")->setAllFacesTexture("glass", 49);
 	oxidizedCopperTrapdoor = (new TrapDoorTile(635, 182 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(5.0f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("oxidizedCopperTrapdoor")->setAllFacesTexture("oxidized_copper_trapdoor", 182 | Tile::TEXTURE_ALT_FLAG);
 	oxidizedCutCopper = (new Tile(636, 183 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("oxidizedCutCopper")->setAllFacesTexture("oxidized_cut_copper", 183 | Tile::TEXTURE_ALT_FLAG);
 	packedMud = (new Tile(637, 184 | Tile::TEXTURE_ALT_FLAG, Material::dirt))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("packedMud")->setAllFacesTexture("packed_mud", 184 | Tile::TEXTURE_ALT_FLAG);
-	pinkCarpet = (new Tile(638, 185 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("pinkCarpet")->setAllFacesTexture("wool_colored_pink", 185 | Tile::TEXTURE_ALT_FLAG);
-	pointedDripstone = (new Tile(639, 186 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("pointedDripstone")->setAllFacesTexture("pointed_dripstone_down_tip", 186 | Tile::TEXTURE_ALT_FLAG);
+	pinkCarpet = (new CarpetTile(638, 130, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("pinkCarpet")->setAllFacesTexture("wool_colored_pink", 130);
+	pointedDripstone = (new FlowerTile(639, 186 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("pointedDripstone")->setAllFacesTexture("pointed_dripstone_down_tip", 186 | Tile::TEXTURE_ALT_FLAG);
 	polishedBasalt = (new Tile(640, 187 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("polishedBasalt")->setAllFacesTexture("polished_basalt_side", 187 | Tile::TEXTURE_ALT_FLAG);
 	polishedBlackstoneBrickStairs = (new StairTile(641, 188 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("polishedBlackstoneBrickStairs")->setAllFacesTexture("polished_blackstone_bricks", 188 | Tile::TEXTURE_ALT_FLAG);
 	polishedBlackstoneBricks = (new Tile(642, 188 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("polishedBlackstoneBricks")->setAllFacesTexture("polished_blackstone_bricks", 188 | Tile::TEXTURE_ALT_FLAG);
@@ -1189,14 +1213,14 @@ void Tile::initExtraTiles()
 	poweredComparator = (new Tile(650, 192 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("poweredComparator")->setAllFacesTexture("comparator_on", 192 | Tile::TEXTURE_ALT_FLAG);
 	poweredRepeater = (new Tile(651, 193 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("poweredRepeater")->setAllFacesTexture("repeater_on", 193 | Tile::TEXTURE_ALT_FLAG);
 	prismarine = (new Tile(652, 194 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("prismarine")->setAllFacesTexture("prismarine_bricks", 194 | Tile::TEXTURE_ALT_FLAG);
-	purpleCarpet = (new Tile(653, 195 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("purpleCarpet")->setAllFacesTexture("wool_colored_purple", 195 | Tile::TEXTURE_ALT_FLAG);
+	purpleCarpet = (new CarpetTile(653, 193, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("purpleCarpet")->setAllFacesTexture("wool_colored_purple", 193);
 	purpleGlazedTerracotta = (new Tile(654, 196 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("purpleGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_purple", 196 | Tile::TEXTURE_ALT_FLAG);
 	purpurBlock = (new Tile(655, 197 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("purpurBlock")->setAllFacesTexture("purpur_block", 197 | Tile::TEXTURE_ALT_FLAG);
 	purpurPillar = (new Tile(656, 198 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("purpurPillar")->setAllFacesTexture("purpur_pillar", 198 | Tile::TEXTURE_ALT_FLAG);
 	purpurSlab = (new SlabTile(657, 197 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("purpurSlab")->setAllFacesTexture("purpur_block", 197 | Tile::TEXTURE_ALT_FLAG);
 	purpurStairs = (new StairTile(658, 197 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("purpurStairs")->setAllFacesTexture("purpur_block", 197 | Tile::TEXTURE_ALT_FLAG);
-	redCandle = (new Tile(659, 199 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("redCandle")->setLightEmission(3 / 16.0f)->setAllFacesTexture("red_candle", 199 | Tile::TEXTURE_ALT_FLAG);
-	redCarpet = (new Tile(660, 200 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("redCarpet")->setAllFacesTexture("wool_colored_red", 200 | Tile::TEXTURE_ALT_FLAG);
+	redCandle = (new CandleTile(659, 140 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(0.1f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("redCandle")->setLightEmission(3 / 16.0f)->setAllFacesTexture("red_candle", 140 | Tile::TEXTURE_ALT_FLAG);
+	redCarpet = (new CarpetTile(660, 129, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("redCarpet")->setAllFacesTexture("wool_colored_red", 129);
 	redConcrete = (new Tile(661, 201 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("redConcrete")->setAllFacesTexture("concrete_red", 201 | Tile::TEXTURE_ALT_FLAG);
 	redGlazedTerracotta = (new Tile(662, 202 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("redGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_red", 202 | Tile::TEXTURE_ALT_FLAG);
 	redstoneBlock = (new Tile(663, 203 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("redstoneBlock")->setAllFacesTexture("redstone_block", 203 | Tile::TEXTURE_ALT_FLAG);
@@ -1211,16 +1235,17 @@ void Tile::initExtraTiles()
 	silverGlazedTerracotta = (new Tile(672, 210 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("silverGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_silver", 210 | Tile::TEXTURE_ALT_FLAG);
 	skeletonSkull = (new Tile(673, 25 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("skeletonSkull")->setAllFacesTexture("soul_sand", 25 | Tile::TEXTURE_ALT_FLAG);
 	smithingTable = (new Tile(674, 211 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("smithingTable")
+		->setSideTexture("smithing_table_side", 128 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_UP, "smithing_table_top", 211 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_DOWN, "smithing_table_bottom", 126 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_NORTH, "smithing_table_front", 127 | Tile::TEXTURE_ALT_FLAG)
-		->setFaceTexture(FACE_SOUTH, "smithing_table_front", 127 | Tile::TEXTURE_ALT_FLAG)
-		->setSideTexture("smithing_table_side", 128 | Tile::TEXTURE_ALT_FLAG);
-	smoker = (new Tile(675, 119 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("smoker")
+		->setFaceTexture(FACE_SOUTH, "smithing_table_front", 127 | Tile::TEXTURE_ALT_FLAG);
+	smoker = (new Tile(675, 119 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::FoodArmor)->setDescriptionId("smoker")
+		->setSideTexture("smoker_side", 119 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_UP, "smoker_top", 212 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_DOWN, "smoker_bottom", 116 | Tile::TEXTURE_ALT_FLAG)
 		->setFaceTexture(FACE_NORTH, "smoker_front", 117 | Tile::TEXTURE_ALT_FLAG)
-		->setSideTexture("smoker_side", 119 | Tile::TEXTURE_ALT_FLAG);
+		->setFaceTexture(FACE_SOUTH, "smoker_front", 117 | Tile::TEXTURE_ALT_FLAG);
 	smoothBasalt = (new Tile(676, 213 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("smoothBasalt")->setAllFacesTexture("smooth_basalt", 213 | Tile::TEXTURE_ALT_FLAG);
 	smoothQuartz = (new Tile(677, 214 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("smoothQuartz")->setAllFacesTexture("quartz_block_bottom", 214 | Tile::TEXTURE_ALT_FLAG);
 	smoothQuartzSlab = (new SlabTile(678, 214 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("smoothQuartzSlab")->setAllFacesTexture("quartz_block_bottom", 214 | Tile::TEXTURE_ALT_FLAG);
@@ -1250,22 +1275,22 @@ void Tile::initExtraTiles()
 	strippedSpruceWood = (new Tile(702, 223 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("strippedSpruceWood")->setAllFacesTexture("stripped_spruce_log", 223 | Tile::TEXTURE_ALT_FLAG);
 	structureBlock = (new Tile(703, 224 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("structureBlock")->setAllFacesTexture("structure_block_corner", 224 | Tile::TEXTURE_ALT_FLAG);
 	sulfur = (new Tile(704, 18, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("sulfur")->setAllFacesTexture("sand", 18);
-	sulfurSpike = (new Tile(705, 176, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("sulfurSpike")->setAllFacesTexture("sandstone_top", 176);
-	tallGrass = (new Tile(706, 225 | Tile::TEXTURE_ALT_FLAG, Material::plant))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GRASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("tallGrass")->setAllFacesTexture("double_plant_grass_top", 225 | Tile::TEXTURE_ALT_FLAG);
+	sulfurSpike = (new FlowerTile(705, 176))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("sulfurSpike")->setAllFacesTexture("sandstone_top", 176);
+	tallGrass = (new FlowerTile(706, 225 | Tile::TEXTURE_ALT_FLAG))->init()->setCategory(ItemCategory::Decorations)->setDescriptionId("tallGrass")->setAllFacesTexture("double_plant_grass_top", 225 | Tile::TEXTURE_ALT_FLAG);
 	target = (new Tile(707, 226 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("target")->setAllFacesTexture("target_side", 226 | Tile::TEXTURE_ALT_FLAG);
 	trappedChest = (new Tile(708, 227 | Tile::TEXTURE_ALT_FLAG, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("trappedChest")->setAllFacesTexture("trapped_chest_front", 227 | Tile::TEXTURE_ALT_FLAG);
 	trialSpawner = (new Tile(709, 228 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Decorations)->setDescriptionId("trialSpawner")->setAllFacesTexture("trial_spawner_bottom", 228 | Tile::TEXTURE_ALT_FLAG);
 	tripWire = (new Tile(710, 229 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("tripWire")->setAllFacesTexture("trip_wire", 229 | Tile::TEXTURE_ALT_FLAG);
 	tripwireHook = (new Tile(711, 230 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("tripwireHook")->setAllFacesTexture("trip_wire_source", 230 | Tile::TEXTURE_ALT_FLAG);
-	tuff = (new Tile(712, 125 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("tuff")->setAllFacesTexture("tuff", 125 | Tile::TEXTURE_ALT_FLAG);
-	tuffBricks = (new Tile(713, 126 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("tuffBricks")->setAllFacesTexture("tuff_bricks", 126 | Tile::TEXTURE_ALT_FLAG);
+	tuff = (new Tile(712, 122, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("tuff")->setAllFacesTexture("tuff", 122);
+	tuffBricks = (new Tile(713, 123, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("tuffBricks")->setAllFacesTexture("tuff_bricks", 123);
 	unlitRedstoneTorch = (new TorchTile(714, 231 | Tile::TEXTURE_ALT_FLAG))->init()->setDestroyTime(0.0f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("unlitRedstoneTorch")->setAllFacesTexture("redstone_torch_off", 231 | Tile::TEXTURE_ALT_FLAG);
 	unpoweredComparator = (new Tile(715, 232 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("unpoweredComparator")->setAllFacesTexture("comparator_off", 232 | Tile::TEXTURE_ALT_FLAG);
 	unpoweredRepeater = (new Tile(716, 233 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("unpoweredRepeater")->setAllFacesTexture("repeater_off", 233 | Tile::TEXTURE_ALT_FLAG);
 	vault = (new Tile(717, 234 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Decorations)->setDescriptionId("vault")->setAllFacesTexture("vault_bottom", 234 | Tile::TEXTURE_ALT_FLAG);
 	wallBanner = (new Tile(718, 235 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("wallBanner")->setAllFacesTexture("wool_colored_white", 235 | Tile::TEXTURE_ALT_FLAG);
 	waxedChiseledCopper = (new Tile(719, 236 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("waxedChiseledCopper")->setAllFacesTexture("chiseled_copper", 236 | Tile::TEXTURE_ALT_FLAG);
-	waxedCopper = (new Tile(720, 132 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("waxedCopper")->setAllFacesTexture("copper_block", 132 | Tile::TEXTURE_ALT_FLAG);
+	waxedCopper = (new Tile(720, 128, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("waxedCopper")->setAllFacesTexture("copper_block", 128);
 	waxedCopperBulb = (new Tile(721, 237 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("waxedCopperBulb")->setLightEmission(1.0f)->setAllFacesTexture("copper_bulb", 237 | Tile::TEXTURE_ALT_FLAG);
 	waxedCopperDoor = (new DoorTile(722, 238 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(5.0f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("waxedCopperDoor")->setAllFacesTexture("copper_door_bottom", 238 | Tile::TEXTURE_ALT_FLAG);
 	waxedCopperGrate = (new Tile(723, 239 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("waxedCopperGrate")->setAllFacesTexture("copper_grate", 239 | Tile::TEXTURE_ALT_FLAG);
@@ -1280,15 +1305,15 @@ void Tile::initExtraTiles()
 	waxedOxidizedCutCopper = (new Tile(732, 183 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("waxedOxidizedCutCopper")->setAllFacesTexture("oxidized_cut_copper", 183 | Tile::TEXTURE_ALT_FLAG);
 	waxedOxidizedCutCopperSlab = (new SlabTile(733, 183 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("waxedOxidizedCutCopperSlab")->setAllFacesTexture("oxidized_cut_copper", 183 | Tile::TEXTURE_ALT_FLAG);
 	waxedOxidizedCutCopperStairs = (new StairTile(734, 183 | Tile::TEXTURE_ALT_FLAG, Material::metal))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_METAL)->setCategory(ItemCategory::Structures)->setDescriptionId("waxedOxidizedCutCopperStairs")->setAllFacesTexture("oxidized_cut_copper", 183 | Tile::TEXTURE_ALT_FLAG);
-	whiteCandle = (new Tile(735, 245 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("whiteCandle")->setLightEmission(3 / 16.0f)->setAllFacesTexture("white_candle", 245 | Tile::TEXTURE_ALT_FLAG);
-	whiteCarpet = (new Tile(736, 235 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("whiteCarpet")->setAllFacesTexture("wool_colored_white", 235 | Tile::TEXTURE_ALT_FLAG);
+	whiteCandle = (new CandleTile(735, 141 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(0.1f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("whiteCandle")->setLightEmission(3 / 16.0f)->setAllFacesTexture("white_candle", 141 | Tile::TEXTURE_ALT_FLAG);
+	whiteCarpet = (new CarpetTile(736, 64, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("whiteCarpet")->setAllFacesTexture("wool_colored_white", 64);
 	whiteConcrete = (new Tile(737, 246 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("whiteConcrete")->setAllFacesTexture("concrete_white", 246 | Tile::TEXTURE_ALT_FLAG);
 	whiteGlazedTerracotta = (new Tile(738, 247 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("whiteGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_white", 247 | Tile::TEXTURE_ALT_FLAG);
 	whiteStainedGlass = (new Tile(739, 49, Material::glass))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Decorations)->setDescriptionId("whiteStainedGlass")->setAllFacesTexture("glass", 49);
 	whiteStainedGlassPane = (new ThinFenceTile(740, 49, 49, Material::glass, false))->init()->setDestroyTime(0.3f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Structures)->setDescriptionId("whiteStainedGlassPane")->setAllFacesTexture("glass", 49);
 	woodenButton = (new Tile(741, 4, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("woodenButton")->setAllFacesTexture("planks_oak", 4);
 	woodenPressurePlate = (new Tile(742, 4, Material::wood))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_WOOD)->setCategory(ItemCategory::Decorations)->setDescriptionId("woodenPressurePlate")->setAllFacesTexture("planks_oak", 4);
-	yellowCarpet = (new Tile(743, 248 | Tile::TEXTURE_ALT_FLAG, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("yellowCarpet")->setAllFacesTexture("wool_colored_yellow", 248 | Tile::TEXTURE_ALT_FLAG);
+	yellowCarpet = (new CarpetTile(743, 162, Material::cloth))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_CLOTH)->setCategory(ItemCategory::Decorations)->setDescriptionId("yellowCarpet")->setAllFacesTexture("wool_colored_yellow", 162);
 	yellowGlazedTerracotta = (new Tile(744, 249 | Tile::TEXTURE_ALT_FLAG, Material::stone))->init()->setDestroyTime(1.5f)->setSoundType(SOUND_STONE)->setCategory(ItemCategory::Structures)->setDescriptionId("yellowGlazedTerracotta")->setAllFacesTexture("glazed_terracotta_yellow", 249 | Tile::TEXTURE_ALT_FLAG);
 	yellowStainedGlassPane = (new ThinFenceTile(745, 49, 49, Material::glass, false))->init()->setDestroyTime(0.3f)->setSoundType(SOUND_GLASS)->setCategory(ItemCategory::Structures)->setDescriptionId("yellowStainedGlassPane")->setAllFacesTexture("glass", 49);
 }

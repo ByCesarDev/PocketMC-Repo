@@ -1,0 +1,256 @@
+0 -> s:log_spruce_side.png, spruceWood:log_spruce_side.png
+1 -> s:log_spruce_top.png
+2 -> s:log_birch_side.png
+3 -> s:log_birch_top.png
+4 -> s:planks_spruce.png, s:fence_spruce.png, sprucePlanks:planks_spruce.png, spruceSlab:planks_spruce.png, fenceSpruce:fence_spruce.png, fenceGateSpruce:fence_spruce.png, sprucePressurePlate:planks_spruce.png, spruceWallSign:planks_spruce.png
+5 -> s:planks_birch.png, s:fence_birch.png, birchPlanks:planks_birch.png, birchSlab:planks_birch.png, fenceBirch:fence_birch.png, fenceGateBirch:fence_birch.png
+6 -> s:deepslate.png, deepslate:deepslate.png, reinforcedDeepslate:deepslate.png
+7 -> s:cobbled_deepslate.png, cobbledDeepslate:cobbled_deepslate.png, cobbledDeepslateSlab:cobbled_deepslate.png, cobbledDeepslateStairs:cobbled_deepslate.png, cobbledDeepslateWall:cobbled_deepslate.png
+8 -> s:deepslate_coal_ore.png, deepslateCoalOre:deepslate_coal_ore.png
+9 -> s:deepslate_diamond_ore.png, deepslateDiamondOre:deepslate_diamond_ore.png
+10 -> s:deepslate_gold_ore.png, deepslateGoldOre:deepslate_gold_ore.png
+11 -> s:deepslate_iron_ore.png, deepslateIronOre:deepslate_iron_ore.png
+12 -> s:deepslate_lapis_ore.png, deepslateLapisOre:deepslate_lapis_ore.png
+13 -> s:deepslate_redstone_ore.png, s:deepslate_redstone_ore_lit.png, deepslateRedstoneOre:deepslate_redstone_ore.png, deepslateRedstoneOre_lit:deepslate_redstone_ore_lit.png
+14 -> s:composter_side.png
+15 -> s:composter_compost.png
+16 -> s:composter_ready.png
+17 -> s:grindstone_round.png
+18 -> s:polished_deepslate.png, deepslatePolished:polished_deepslate.png, polishedDeepslateSlab:polished_deepslate.png, polishedDeepslateStairs:polished_deepslate.png, polishedDeepslateWall:polished_deepslate.png
+19 -> s:deepslate_tiles.png, deepslateTiles:deepslate_tiles.png, crackedDeepslateTiles:deepslate_tiles.png, deepslateTileDoubleSlab:deepslate_tiles.png, deepslateTileSlab:deepslate_tiles.png, deepslateTileStairs:deepslate_tiles.png, deepslateTileWall:deepslate_tiles.png
+20 -> s:deepslate_bricks.png, deepslateBricks:deepslate_bricks.png, crackedDeepslateBricks:deepslate_bricks.png, deepslateBrickSlab:deepslate_bricks.png, deepslateBrickStairs:deepslate_bricks.png, deepslateBrickWall:deepslate_bricks.png
+21 -> s:grindstone_side.png
+22 -> s:lectern_front.png
+23 -> s:nether_quartz_ore.png, netherQuartzOre:nether_quartz_ore.png
+24 -> s:end_stone.png, endStone:end_stone.png
+25 -> s:soul_sand.png, soulSand:soul_sand.png, skeletonSkull:soul_sand.png
+26 -> s:nether_wart_stage_0.png
+27 -> s:nether_wart_stage_1.png
+28 -> s:nether_wart_stage_2.png
+29 -> s:nether_wart_block.png, netherWartBlock:nether_wart_block.png
+30 -> s:ancient_debris_side.png
+31 -> s:ancient_debris_top.png
+32 -> s:log_jungle.png
+33 -> s:log_jungle_top.png
+34 -> s:log_acacia.png, acaciaWood:log_acacia.png
+35 -> s:log_acacia_top.png
+36 -> s:planks_jungle.png, junglePlanks:planks_jungle.png, jungleSlab:planks_jungle.png, fenceJungle:planks_jungle.png, fenceGateJungle:planks_jungle.png, jungleButton:planks_jungle.png
+37 -> s:planks_acacia.png, acaciaPlanks:planks_acacia.png, acaciaSlab:planks_acacia.png, fenceAcacia:planks_acacia.png, fenceGateAcacia:planks_acacia.png, acaciaPressurePlate:planks_acacia.png
+38 -> s:planks_big_oak.png, darkOakPlanks:planks_big_oak.png, darkOakSlab:planks_big_oak.png, fenceDarkOak:planks_big_oak.png, fenceGateDarkOak:planks_big_oak.png
+39 -> s:sapling_jungle.png, jungleSapling:sapling_jungle.png
+40 -> s:sapling_acacia.png, acaciaSapling:sapling_acacia.png
+41 -> s:leaves_birch.png
+42 -> s:leaves_birch_opaque.png
+43 -> s:leaves_jungle.png
+44 -> s:leaves_jungle_opaque.png
+45 -> s:leaves_acacia.png
+46 -> s:leaves_acacia_opaque.png
+47 -> s:leaves_big_oak.png
+48 -> s:leaves_big_oak_opaque.png
+49 -> s:leaves_spruce_carried.png
+50 -> s:leaves_birch_carried.png
+51 -> s:leaves_jungle_carried.png
+52 -> s:leaves_acacia_carried.png
+53 -> s:leaves_big_oak_carried.png
+54 -> s:sapling_big_oak.png, darkOakSapling:sapling_big_oak.png
+55 -> s:leaves_jungle_fruits.png
+56 -> s:stone_granite.png, granite:stone_granite.png, graniteStairs:stone_granite.png, graniteWall:stone_granite.png
+57 -> s:stone_granite_smooth.png, graniteSmooth:stone_granite_smooth.png
+58 -> s:stone_diorite.png, diorite:stone_diorite.png, dioriteDoubleSlab:stone_diorite.png, dioriteStairs:stone_diorite.png, dioriteWall:stone_diorite.png
+59 -> s:stone_diorite_smooth.png, dioriteSmooth:stone_diorite_smooth.png
+60 -> s:stone_andesite.png, andesite:stone_andesite.png
+61 -> s:stone_andesite_smooth.png, andesiteSmooth:stone_andesite_smooth.png
+62 -> s:dirt_podzol_top.png
+63 -> s:dirt_podzol_side.png
+64 -> s:mycelium_top.png
+65 -> s:mycelium_side.png
+66 -> s:ice_packed.png, packedIce:ice_packed.png
+67 -> s:blue_ice.png, blueIce:blue_ice.png
+68 -> s:frosted_ice_0.png, frostedIce:frosted_ice_0.png
+69 -> s:hardened_clay.png, hardenedClay:hardened_clay.png
+70 -> s:hardened_clay_stained_white.png, stainedClay_white:hardened_clay_stained_white.png
+71 -> s:hardened_clay_stained_orange.png, stainedClay_orange:hardened_clay_stained_orange.png
+72 -> s:hardened_clay_stained_magenta.png, stainedClay_magenta:hardened_clay_stained_magenta.png
+73 -> s:hardened_clay_stained_light_blue.png, stainedClay_lightBlue:hardened_clay_stained_light_blue.png
+74 -> s:hardened_clay_stained_yellow.png, stainedClay_yellow:hardened_clay_stained_yellow.png
+75 -> s:hardened_clay_stained_lime.png, stainedClay_lime:hardened_clay_stained_lime.png
+76 -> s:hardened_clay_stained_pink.png, stainedClay_pink:hardened_clay_stained_pink.png
+77 -> s:hardened_clay_stained_gray.png, stainedClay_gray:hardened_clay_stained_gray.png
+78 -> s:hardened_clay_stained_silver.png, stainedClay_silver:hardened_clay_stained_silver.png
+79 -> s:hardened_clay_stained_cyan.png, stainedClay_cyan:hardened_clay_stained_cyan.png
+80 -> s:hardened_clay_stained_purple.png, stainedClay_purple:hardened_clay_stained_purple.png
+81 -> s:hardened_clay_stained_blue.png, stainedClay_blue:hardened_clay_stained_blue.png
+82 -> s:hardened_clay_stained_brown.png, stainedClay_brown:hardened_clay_stained_brown.png
+83 -> s:hardened_clay_stained_green.png, stainedClay_green:hardened_clay_stained_green.png
+84 -> s:hardened_clay_stained_red.png, stainedClay_red:hardened_clay_stained_red.png
+85 -> s:hardened_clay_stained_black.png, stainedClay_black:hardened_clay_stained_black.png
+86 -> s:mushroom_block_skin_brown.png
+87 -> s:mushroom_block_skin_red.png
+88 -> s:mushroom_block_skin_stem.png
+89 -> s:mushroom_block_inside.png
+90 -> s:waterlily.png, waterlily:waterlily.png
+91 -> s:vine.png, vines:vine.png
+92 -> s:cocoa_stage_2.png, cocoa:cocoa_stage_2.png
+93 -> s:sweet_berry_bush_stage3.png, sweetBerryBush:sweet_berry_bush_stage3.png
+94 -> s:flower_allium.png, flower_allium:flower_allium.png
+95 -> s:flower_blue_orchid.png, flower_blueOrchid:flower_blue_orchid.png
+96 -> s:flower_houstonia.png, flower_houstonia:flower_houstonia.png
+97 -> s:flower_tulip_red.png, flower_tulipRed:flower_tulip_red.png
+98 -> s:flower_tulip_orange.png, flower_tulipOrange:flower_tulip_orange.png
+99 -> s:flower_tulip_white.png, flower_tulipWhite:flower_tulip_white.png
+100 -> s:flower_tulip_pink.png, flower_tulipPink:flower_tulip_pink.png
+101 -> s:flower_oxeye_daisy.png, flower_oxeyeDaisy:flower_oxeye_daisy.png
+102 -> s:flower_paeonia.png, flower_paeonia:flower_paeonia.png
+103 -> s:flower_rose_blue.png, flower_roseBlue:flower_rose_blue.png
+104 -> s:flower_lily_of_the_valley.png, flower_lilyOfTheValley:flower_lily_of_the_valley.png
+105 -> s:flower_wither_rose.png, flower_witherRose:flower_wither_rose.png
+106 -> s:lectern_sides.png, acaciaDoor:door_acacia_lower.png
+107 -> s:lectern_top.png
+108 -> s:campfire_side.png, basalt:basalt_side.png
+109 -> s:campfire_fire.png
+110 -> s:campfire_log_lit.png, blackCarpet:wool_colored_black.png
+111 -> s:soul_campfire_fire.png, blackGlazedTerracotta:glazed_terracotta_black.png
+112 -> s:soul_campfire_log_lit.png, blackstone:blackstone.png, blackstoneSlab:blackstone.png, blackstoneStairs:blackstone.png, blackstoneWall:blackstone.png, crackedPolishedBlackstoneBricks:blackstone.png
+113 -> s:blast_furnace_top.png
+114 -> s:blast_furnace_front.png, blueCarpet:wool_colored_blue.png
+115 -> s:blast_furnace_side.png, boneBlock:bone_block_side.png
+116 -> s:smoker_bottom.png, brewingStand:brewing_stand.png
+117 -> s:smoker_front.png, brownCarpet:wool_colored_brown.png
+118 -> s:campfire_log.png
+119 -> s:smoker_side.png
+120 -> s:cartography_table_top.png
+121 -> s:cartography_table_side1.png, carvedPumpkin:pumpkin_face_off.png
+122 -> s:cartography_table_side2.png, cauldron:cauldron_side.png
+123 -> s:cartography_table_side3.png, chiseledDeepslate:chiseled_deepslate.png
+124 -> s:fletching_table_front.png, chiseledPolishedBlackstone:chiseled_polished_blackstone.png
+125 -> s:fletching_table_side.png, chiseledTuff:tuff.png, tuff:tuff.png
+126 -> s:smithing_table_bottom.png, chiseledTuffBricks:tuff_bricks.png, tuffBricks:tuff_bricks.png
+127 -> s:smithing_table_front.png, cinnabar:cinnabar.png
+128 -> s:smithing_table_side.png, coalBlock:coal_block.png
+129 -> s:loom_bottom.png, coarseDirt:coarse_dirt.png
+130 -> s:loom_front.png, cobblestoneWall:cobblestone.png, infestedCobblestone:cobblestone.png
+131 -> s:composter_top.png
+132 -> s:loom_side.png, copperBlock:copper_block.png, waxedCopper:copper_block.png
+133 -> s:barrel_top.png, cyanCarpet:wool_colored_cyan.png
+134 -> s:barrel_bottom.png, cyanGlazedTerracotta:glazed_terracotta_cyan.png
+135 -> s:barrel_side.png, damagedAnvil:anvil_top_damaged_1.png
+136 -> s:bell_top.png, darkOakDoor:door_dark_oak_lower.png
+137 -> s:bell_bottom.png, darkOakLog:stripped_dark_oak_log.png
+138 -> s:bell_side.png, deadbush:deadbush.png
+139 -> s:candle.png, s:candle_lit.png, candle:candle.png, decoratedPot:decorated_pot_side.png
+140 -> s:red_candle.png, s:red_candle_lit.png, dragonHead:dragon_egg.png, redCandle:red_candle.png
+141 -> s:white_candle.png, s:white_candle_lit.png, endBricks:end_bricks.png, whiteCandle:white_candle.png
+142 -> endRod:end_rod.png
+143 -> enderChest:ender_chest_front.png
+144 -> fern:fern.png
+145 -> s:fletching_table_top.png
+146 -> flowerPot:flower_pot.png
+147 -> gildedBlackstone:gilded_blackstone.png
+148 -> grassPath:grass_path_side.png
+149 -> grayCarpet:wool_colored_gray.png
+150 -> greenCarpet:wool_colored_green.png
+151 -> s:grindstone_pivot.png
+152 -> hayBlock:hay_block_side.png
+153 -> hopper:hopper_top.png
+154 -> ironBars:iron_bars.png
+155 -> s:chain.png, ironChain:chain.png
+156 -> ironTrapdoor:iron_trapdoor.png
+157 -> jigsaw:jigsaw_side.png
+158 -> jungleDoor:door_jungle_lower.png
+159 -> jungleTrapdoor:jungle_trapdoor.png
+160 -> s:lantern.png, lantern:lantern.png
+161 -> largeFern:double_plant_fern_top.png
+162 -> s:lectern_base.png
+163 -> lightBlueCarpet:wool_colored_light_blue.png
+164 -> lightBlueGlazedTerracotta:glazed_terracotta_light_blue.png
+165 -> lightGrayCarpet:wool_colored_silver.png
+166 -> limeCarpet:wool_colored_lime.png
+167 -> limeGlazedTerracotta:glazed_terracotta_lime.png
+168 -> litRedstoneLamp:redstone_lamp_on.png
+169 -> s:loom_top.png
+170 -> magentaCarpet:wool_colored_magenta.png
+171 -> magma:magma.png
+172 -> mangroveLeaves:mangrove_leaves.png
+173 -> mangroveLog:mangrove_log_side.png, mangroveWood:mangrove_log_side.png
+174 -> mangroveRoots:mangrove_roots_side.png
+175 -> mossBlock:moss_block.png
+176 -> mossCarpet:pale_moss_carpet_side_base.png
+177 -> mud:mud.png, muddyMangroveRoots:mud.png
+178 -> mudBrickSlab:mud_bricks.png, mudBrickStairs:mud_bricks.png, mudBrickWall:mud_bricks.png, mudBricks:mud_bricks.png
+179 -> noteblock:noteblock.png
+180 -> orangeCarpet:wool_colored_orange.png
+181 -> orangeGlazedTerracotta:glazed_terracotta_orange.png
+182 -> oxidizedCopperTrapdoor:oxidized_copper_trapdoor.png, waxedOxidizedCopperTrapdoor:oxidized_copper_trapdoor.png
+183 -> oxidizedCutCopper:oxidized_cut_copper.png, waxedOxidizedCutCopper:oxidized_cut_copper.png, waxedOxidizedCutCopperSlab:oxidized_cut_copper.png, waxedOxidizedCutCopperStairs:oxidized_cut_copper.png
+184 -> packedMud:packed_mud.png
+185 -> pinkCarpet:wool_colored_pink.png
+186 -> pointedDripstone:pointed_dripstone_down_tip.png
+187 -> polishedBasalt:polished_basalt_side.png
+188 -> polishedBlackstoneBrickStairs:polished_blackstone_bricks.png, polishedBlackstoneBricks:polished_blackstone_bricks.png
+189 -> polishedTuff:polished_tuff.png, polishedTuffSlab:polished_tuff.png
+190 -> potentSulfur:potent_sulfur.png
+191 -> powderSnow:powder_snow.png
+192 -> poweredComparator:comparator_on.png
+193 -> poweredRepeater:repeater_on.png
+194 -> prismarine:prismarine_bricks.png
+195 -> purpleCarpet:wool_colored_purple.png
+196 -> purpleGlazedTerracotta:glazed_terracotta_purple.png
+197 -> purpurBlock:purpur_block.png, purpurSlab:purpur_block.png, purpurStairs:purpur_block.png
+198 -> purpurPillar:purpur_pillar.png
+199 -> FREE
+200 -> redCarpet:wool_colored_red.png
+201 -> redConcrete:concrete_red.png
+202 -> redGlazedTerracotta:glazed_terracotta_red.png
+203 -> redstoneBlock:redstone_block.png
+204 -> redstoneLamp:redstone_lamp_off.png
+205 -> s:redstone_torch_on.png, redstoneTorch:redstone_torch_on.png
+206 -> redstoneWire:redstone_dust_cross.png
+207 -> sculkSensor:calibrated_sculk_sensor_amethyst.png
+208 -> seaLantern:sea_lantern.png
+209 -> seaPickle:sea_pickle.png
+210 -> silverGlazedTerracotta:glazed_terracotta_silver.png
+211 -> s:smithing_table_top.png
+212 -> s:smoker_top.png
+213 -> smoothBasalt:smooth_basalt.png
+214 -> smoothQuartz:quartz_block_bottom.png, smoothQuartzSlab:quartz_block_bottom.png
+215 -> smoothStone:smooth_stone.png, smoothStoneDoubleSlab:smooth_stone.png, smoothStoneSlab:smooth_stone.png
+216 -> s:soul_fire_0.png, s:soul_fire_1.png, s:soul_fire.png, soulFire:soul_fire_0.png
+217 -> s:soul_lantern.png, s:soul_fire_lantern.png, soulLantern:soul_lantern.png
+218 -> spruceDoor:door_spruce_lower.png
+219 -> spruceTrapdoor:spruce_trapdoor.png
+220 -> stickyPiston:piston_top_sticky.png, stickyPistonArmCollision:piston_top_sticky.png
+221 -> strippedAcaciaLog:stripped_acacia_log.png
+222 -> strippedOakLog:stripped_oak_log.png, strippedOakWood:stripped_oak_log.png
+223 -> strippedSpruceLog:stripped_spruce_log.png, strippedSpruceWood:stripped_spruce_log.png
+224 -> structureBlock:structure_block_corner.png
+225 -> tallGrass:double_plant_grass_top.png
+226 -> target:target_side.png
+227 -> trappedChest:trapped_chest_front.png
+228 -> trialSpawner:trial_spawner_bottom.png
+229 -> tripWire:trip_wire.png
+230 -> tripwireHook:trip_wire_source.png
+231 -> s:redstone_torch_off.png, unlitRedstoneTorch:redstone_torch_off.png
+232 -> unpoweredComparator:comparator_off.png
+233 -> unpoweredRepeater:repeater_off.png
+234 -> vault:vault_bottom.png
+235 -> wallBanner:wool_colored_white.png, whiteCarpet:wool_colored_white.png
+236 -> waxedChiseledCopper:chiseled_copper.png
+237 -> waxedCopperBulb:copper_bulb.png
+238 -> waxedCopperDoor:copper_door_bottom.png
+239 -> waxedCopperGrate:copper_grate.png
+240 -> waxedCutCopper:cut_copper.png, waxedCutCopperSlab:cut_copper.png, waxedCutCopperStairs:cut_copper.png
+241 -> waxedOxidizedChiseledCopper:oxidized_chiseled_copper.png
+242 -> waxedOxidizedCopper:oxidized_copper.png
+243 -> waxedOxidizedCopperDoor:oxidized_copper_door_bottom.png
+244 -> waxedOxidizedCopperGrate:oxidized_copper_grate.png
+245 -> FREE
+246 -> whiteConcrete:concrete_white.png
+247 -> whiteGlazedTerracotta:glazed_terracotta_white.png
+248 -> yellowCarpet:wool_colored_yellow.png
+249 -> yellowGlazedTerracotta:glazed_terracotta_yellow.png
+250 -> s:soul_torch.png, s:soul_fire_torch.png
+251 -> s:stonecutter_top.png
+252 -> s:stonecutter_bottom.png
+253 -> s:stonecutter_side.png
+254 -> s:stonecutter_saw.png
+255 -> s:composter_bottom.png

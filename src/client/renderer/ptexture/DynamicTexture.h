@@ -1,6 +1,7 @@
 #ifndef NET_MINECRAFT_CLIENT_RENDERER_PTEXTURE__DynamicTexture_H__
 #define NET_MINECRAFT_CLIENT_RENDERER_PTEXTURE__DynamicTexture_H__
 
+#include <string>
 #include <vector>
 
 class Textures;
@@ -123,6 +124,26 @@ class SoulFireTexture: public DynamicTexture
 public:
 	SoulFireTexture(int textureSlot = 216);
 	~SoulFireTexture();
+
+	void loadSheet(AppPlatform* platform);
+	void tick() override;
+	void bindTexture(Textures* tex) override;
+};
+
+class AnimatedBlockTexture : public DynamicTexture
+{
+	typedef DynamicTexture super;
+	int _frame;
+	int _frameCount;
+	int _ticksPerFrame;
+	int _tickCounter;
+	unsigned char* _sheetData;
+	std::string _imagePath;
+	std::string _atlasName;
+
+public:
+	AnimatedBlockTexture(int textureSlot, const std::string& imagePath, const std::string& atlasName = "terrain2.png", int ticksPerFrame = 2);
+	virtual ~AnimatedBlockTexture();
 
 	void loadSheet(AppPlatform* platform);
 	void tick() override;

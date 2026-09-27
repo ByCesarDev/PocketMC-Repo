@@ -3,6 +3,7 @@
 
 #include "../material/Material.h"
 #include "Tile.h"
+#include "../../entity/Entity.h"
 
 class CampfireTile : public Tile {
     typedef Tile super;
@@ -21,6 +22,18 @@ public:
     bool isCubeShaped() override { return false; }
     int getRenderShape() override { return Tile::SHAPE_CAMPFIRE; }
     int getRenderLayer() override { return Tile::RENDERLAYER_ALPHATEST; }
+
+    void entityInside(Level* level, int x, int y, int z, Entity* entity) override {
+        if (entity) {
+            entity->hurt(NULL, 1);
+        }
+    }
+
+    void stepOn(Level* level, int x, int y, int z, Entity* entity) override {
+        if (entity) {
+            entity->hurt(NULL, 1);
+        }
+    }
 };
 
 #endif /* NET_MINECRAFT_WORLD_LEVEL_TILE__CampfireTile_H__ */

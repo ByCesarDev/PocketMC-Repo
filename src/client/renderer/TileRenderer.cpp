@@ -20,9 +20,22 @@
 #include "../../world/level/tile/FireTile.h"
 #include "../../world/Direction.h"
 #include "../../world/Facing.h"
+#include "../../world/level/tile/AnvilTile.h"
+#include "../../world/level/tile/CauldronTile.h"
+#include "../../world/level/tile/HopperTile.h"
 #include "EntityTileRenderer.h"
 
 bool TileRenderer::sideTinting = true;
+
+static inline float getAtlasU(int slot, float px) {
+	int tileX = slot & 0xf;
+	return (tileX * 16.0f + px) / 256.0f;
+}
+
+static inline float getAtlasV(int slot, float py) {
+	int tileY = slot >> 4;
+	return (tileY * 16.0f + py) / 256.0f;
+}
 
 TileRenderer::TileRenderer(LevelSource* level /* = NULL */, Textures* textures /* = nullptr */ )
 	:	level(level),
@@ -283,6 +296,14 @@ bool TileRenderer::tesselateInWorld( Tile* tt, int x, int y, int z )
 		return tesselateChainInWorld(tt, x, y, z);
 	} else if (shape == Tile::SHAPE_SCAFFOLDING) {
 		return tesselateScaffoldingInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_CANDLE) {
+		return tesselateCandleInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_CAULDRON) {
+		return tesselateCauldronInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_ANVIL) {
+		return tesselateAnvilInWorld(tt, x, y, z);
+	} else if (shape == Tile::SHAPE_HOPPER) {
+		return tesselateHopperInWorld(tt, x, y, z);
 	} else {
 		return false;
 	}
@@ -2926,6 +2947,978 @@ void TileRenderer::renderTile( Tile* tile, int data, int color )
 		t.draw();
 		t.addOffset(0.5f, 0.5f, 0.5f);
 		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_LANTERN) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		int tex = tile->getTexture(0, data) & ~Tile::TEXTURE_ALT_FLAG;
+		int xt = (tex & 0xf) << 4;
+		int yt = tex & 0xf0;
+		const float atlasSize = 256.0f;
+
+		float uSide0 = (xt + 0.0f) / atlasSize;
+		float uSide1 = (xt + 6.0f) / atlasSize;
+		float vSide0 = (yt + 2.0f) / atlasSize;
+		float vSide1 = (yt + 9.0f) / atlasSize;
+
+		float uLid0 = (xt + 0.0f) / atlasSize;
+		float uLid1 = (xt + 6.0f) / atlasSize;
+		float vLid0 = (yt + 9.0f) / atlasSize;
+		float vLid1 = (yt + 15.0f) / atlasSize;
+
+		float uCap0 = (xt + 1.0f) / atlasSize;
+		float uCap1 = (xt + 5.0f) / atlasSize;
+		float vCap0 = (yt + 0.0f) / atlasSize;
+		float vCap1 = (yt + 2.0f) / atlasSize;
+
+		float uCapTop0 = (xt + 1.0f) / atlasSize;
+		float uCapTop1 = (xt + 5.0f) / atlasSize;
+		float vCapTop0 = (yt + 9.0f) / atlasSize;
+		float vCapTop1 = (yt + 13.0f) / atlasSize;
+
+		float uRing0 = (xt + 11.0f) / atlasSize;
+		float uRing1 = (xt + 14.0f) / atlasSize;
+		float vRing0 = (yt + 1.0f) / atlasSize;
+		float vRing1 = (yt + 5.0f) / atlasSize;
+
+		float bx0 = 5.0f / 16.0f, bx1 = 11.0f / 16.0f;
+		float bz0 = 5.0f / 16.0f, bz1 = 11.0f / 16.0f;
+		float by0 = 0.0f / 16.0f, by1 = 7.0f / 16.0f;
+
+		// Up
+		t.color(tr, tg, tb);
+		t.vertexUV(bx0, by1, bz0, uLid0, vLid0);
+		t.vertexUV(bx0, by1, bz1, uLid0, vLid1);
+		t.vertexUV(bx1, by1, bz1, uLid1, vLid1);
+		t.vertexUV(bx1, by1, bz0, uLid1, vLid0);
+
+		// Down
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f);
+		t.vertexUV(bx0, by0, bz1, uLid0, vLid1);
+		t.vertexUV(bx0, by0, bz0, uLid0, vLid0);
+		t.vertexUV(bx1, by0, bz0, uLid1, vLid0);
+		t.vertexUV(bx1, by0, bz1, uLid1, vLid1);
+
+		// North & South
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f);
+		t.vertexUV(bx0, by1, bz0, uSide1, vSide0);
+		t.vertexUV(bx1, by1, bz0, uSide0, vSide0);
+		t.vertexUV(bx1, by0, bz0, uSide0, vSide1);
+		t.vertexUV(bx0, by0, bz0, uSide1, vSide1);
+		t.vertexUV(bx1, by1, bz0, uSide0, vSide0);
+		t.vertexUV(bx0, by1, bz0, uSide1, vSide0);
+		t.vertexUV(bx0, by0, bz0, uSide1, vSide1);
+		t.vertexUV(bx1, by0, bz0, uSide0, vSide1);
+
+		t.vertexUV(bx0, by1, bz1, uSide0, vSide0);
+		t.vertexUV(bx0, by0, bz1, uSide0, vSide1);
+		t.vertexUV(bx1, by0, bz1, uSide1, vSide1);
+		t.vertexUV(bx1, by1, bz1, uSide1, vSide0);
+		t.vertexUV(bx1, by1, bz1, uSide1, vSide0);
+		t.vertexUV(bx1, by0, bz1, uSide1, vSide1);
+		t.vertexUV(bx0, by0, bz1, uSide0, vSide1);
+		t.vertexUV(bx0, by1, bz1, uSide0, vSide0);
+
+		// West & East
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f);
+		t.vertexUV(bx0, by1, bz1, uSide1, vSide0);
+		t.vertexUV(bx0, by1, bz0, uSide0, vSide0);
+		t.vertexUV(bx0, by0, bz0, uSide0, vSide1);
+		t.vertexUV(bx0, by0, bz1, uSide1, vSide1);
+		t.vertexUV(bx0, by1, bz0, uSide0, vSide0);
+		t.vertexUV(bx0, by1, bz1, uSide1, vSide0);
+		t.vertexUV(bx0, by0, bz1, uSide1, vSide1);
+		t.vertexUV(bx0, by0, bz0, uSide0, vSide1);
+
+		t.vertexUV(bx1, by0, bz1, uSide0, vSide1);
+		t.vertexUV(bx1, by0, bz0, uSide1, vSide1);
+		t.vertexUV(bx1, by1, bz0, uSide1, vSide0);
+		t.vertexUV(bx1, by1, bz1, uSide0, vSide0);
+		t.vertexUV(bx1, by0, bz0, uSide1, vSide1);
+		t.vertexUV(bx1, by0, bz1, uSide0, vSide1);
+		t.vertexUV(bx1, by1, bz1, uSide0, vSide0);
+		t.vertexUV(bx1, by1, bz0, uSide1, vSide0);
+
+		// Cap
+		float cx0 = 6.0f / 16.0f, cx1 = 10.0f / 16.0f;
+		float cz0 = 6.0f / 16.0f, cz1 = 10.0f / 16.0f;
+		float cy0 = 7.0f / 16.0f, cy1 = 9.0f / 16.0f;
+
+		t.color(tr, tg, tb);
+		t.vertexUV(cx0, cy1, cz0, uCapTop0, vCapTop0);
+		t.vertexUV(cx0, cy1, cz1, uCapTop0, vCapTop1);
+		t.vertexUV(cx1, cy1, cz1, uCapTop1, vCapTop1);
+		t.vertexUV(cx1, cy1, cz0, uCapTop1, vCapTop0);
+
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f);
+		t.vertexUV(cx0, cy1, cz0, uCap1, vCap0);
+		t.vertexUV(cx1, cy1, cz0, uCap0, vCap0);
+		t.vertexUV(cx1, cy0, cz0, uCap0, vCap1);
+		t.vertexUV(cx0, cy0, cz0, uCap1, vCap1);
+
+		t.vertexUV(cx0, cy1, cz1, uCap0, vCap0);
+		t.vertexUV(cx0, cy0, cz1, uCap0, vCap1);
+		t.vertexUV(cx1, cy0, cz1, uCap1, vCap1);
+		t.vertexUV(cx1, cy1, cz1, uCap1, vCap0);
+
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f);
+		t.vertexUV(cx0, cy1, cz1, uCap1, vCap0);
+		t.vertexUV(cx0, cy1, cz0, uCap0, vCap0);
+		t.vertexUV(cx0, cy0, cz0, uCap0, vCap1);
+		t.vertexUV(cx0, cy0, cz1, uCap1, vCap1);
+
+		t.vertexUV(cx1, cy0, cz1, uCap0, vCap1);
+		t.vertexUV(cx1, cy0, cz0, uCap1, vCap1);
+		t.vertexUV(cx1, cy1, cz0, uCap1, vCap0);
+		t.vertexUV(cx1, cy1, cz1, uCap0, vCap0);
+
+		// Ring
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f);
+		float rx0 = 6.5f / 16.0f, rx1 = 9.5f / 16.0f;
+		float rz0 = 6.5f / 16.0f, rz1 = 9.5f / 16.0f;
+		float ry0 = 9.0f / 16.0f, ry1 = 13.0f / 16.0f;
+		float rxMid = 8.0f / 16.0f, rzMid = 8.0f / 16.0f;
+
+		t.vertexUV(rx0, ry1, rzMid, uRing0, vRing0);
+		t.vertexUV(rx1, ry1, rzMid, uRing1, vRing0);
+		t.vertexUV(rx1, ry0, rzMid, uRing1, vRing1);
+		t.vertexUV(rx0, ry0, rzMid, uRing0, vRing1);
+
+		t.vertexUV(rx1, ry1, rzMid, uRing1, vRing0);
+		t.vertexUV(rx0, ry1, rzMid, uRing0, vRing0);
+		t.vertexUV(rx0, ry0, rzMid, uRing0, vRing1);
+		t.vertexUV(rx1, ry0, rzMid, uRing1, vRing1);
+
+		t.vertexUV(rxMid, ry1, rz0, uRing0, vRing0);
+		t.vertexUV(rxMid, ry1, rz1, uRing1, vRing0);
+		t.vertexUV(rxMid, ry0, rz1, uRing1, vRing1);
+		t.vertexUV(rxMid, ry0, rz0, uRing0, vRing1);
+
+		t.vertexUV(rxMid, ry1, rz1, uRing1, vRing0);
+		t.vertexUV(rxMid, ry1, rz0, uRing0, vRing0);
+		t.vertexUV(rxMid, ry0, rz0, uRing0, vRing1);
+		t.vertexUV(rxMid, ry0, rz1, uRing1, vRing1);
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_CAMPFIRE) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		const int TEX_LOG = 118;
+		const int TEX_FIRE = 109;
+		const int TEX_LIT = 110;
+
+		float colUpR = tr, colUpG = tg, colUpB = tb;
+		float colDownR = tr * 0.5f, colDownG = tg * 0.5f, colDownB = tb * 0.5f;
+		float colNSR = tr * 0.8f, colNSG = tg * 0.8f, colNSB = tb * 0.8f;
+		float colWER = tr * 0.6f, colWEG = tg * 0.6f, colWEB = tb * 0.6f;
+
+		// 1. Bottom Left Log (West Log: x: 1..5, y: 0..4, z: 0..16)
+		float lx0 = 1.0f / 16.0f, lx1 = 5.0f / 16.0f;
+		float ly0 = 0.0f, ly1 = 4.0f / 16.0f;
+		float lz0 = 0.0f, lz1 = 1.0f;
+
+		// Up (rot 90)
+		t.color(colUpR, colUpG, colUpB);
+		t.vertexUV(lx0, ly1, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(lx0, ly1, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(lx1, ly1, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(lx1, ly1, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+
+		// Down (rot 90)
+		t.color(colDownR, colDownG, colDownB);
+		t.vertexUV(lx0, ly0, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(lx0, ly0, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(lx1, ly0, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(lx1, ly0, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+
+		// North (end cut)
+		t.color(colNSR, colNSG, colNSB);
+		t.vertexUV(lx0, ly1, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(lx1, ly1, lz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(lx1, ly0, lz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(lx0, ly0, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+
+		// South (end cut)
+		t.vertexUV(lx0, ly1, lz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(lx0, ly0, lz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(lx1, ly0, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(lx1, ly1, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+		// West (bark)
+		t.color(colWER, colWEG, colWEB);
+		t.vertexUV(lx0, ly1, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(lx0, ly1, lz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(lx0, ly0, lz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(lx0, ly0, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+		// East (lit log inner)
+		t.vertexUV(lx1, ly1, lz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 1));
+		t.vertexUV(lx1, ly1, lz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 1));
+		t.vertexUV(lx1, ly0, lz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 5));
+		t.vertexUV(lx1, ly0, lz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 5));
+
+		// 2. Bottom Right Log (East Log: x: 11..15, y: 0..4, z: 0..16)
+		float rx0 = 11.0f / 16.0f, rx1 = 15.0f / 16.0f;
+		float ry0 = 0.0f, ry1 = 4.0f / 16.0f;
+		float rz0 = 0.0f, rz1 = 1.0f;
+
+		// Up (rot 90)
+		t.color(colUpR, colUpG, colUpB);
+		t.vertexUV(rx0, ry1, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(rx0, ry1, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(rx1, ry1, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(rx1, ry1, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+
+		// Down (rot 90)
+		t.color(colDownR, colDownG, colDownB);
+		t.vertexUV(rx0, ry0, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(rx0, ry0, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(rx1, ry0, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(rx1, ry0, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+
+		// North (end cut)
+		t.color(colNSR, colNSG, colNSB);
+		t.vertexUV(rx0, ry1, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(rx1, ry1, rz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(rx1, ry0, rz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(rx0, ry0, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+
+		// South (end cut)
+		t.vertexUV(rx0, ry1, rz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(rx0, ry0, rz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(rx1, ry0, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(rx1, ry1, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+		// West (lit log inner)
+		t.color(colWER, colWEG, colWEB);
+		t.vertexUV(rx0, ry1, rz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 1));
+		t.vertexUV(rx0, ry1, rz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 1));
+		t.vertexUV(rx0, ry0, rz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 5));
+		t.vertexUV(rx0, ry0, rz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 5));
+
+		// East (bark)
+		t.vertexUV(rx1, ry1, rz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(rx1, ry1, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(rx1, ry0, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(rx1, ry0, rz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+
+		// 3. Top North Log (x: 0..16, y: 3..7, z: 1..5)
+		float nx0 = 0.0f, nx1 = 1.0f;
+		float ny0 = 3.0f / 16.0f, ny1 = 7.0f / 16.0f;
+		float nz0 = 1.0f / 16.0f, nz1 = 5.0f / 16.0f;
+
+		// Up (rot 180)
+		t.color(colUpR, colUpG, colUpB);
+		t.vertexUV(nx0, ny1, nz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(nx0, ny1, nz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(nx1, ny1, nz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(nx1, ny1, nz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+		// Down
+		t.color(colDownR, colDownG, colDownB);
+		t.vertexUV(nx0, ny0, nz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+		t.vertexUV(nx0, ny0, nz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 8));
+		t.vertexUV(nx1, ny0, nz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 8));
+		t.vertexUV(nx1, ny0, nz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+
+		// West (end cut)
+		t.color(colWER, colWEG, colWEB);
+		t.vertexUV(nx0, ny1, nz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(nx0, ny1, nz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(nx0, ny0, nz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(nx0, ny0, nz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+		// East (end cut)
+		t.vertexUV(nx1, ny1, nz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(nx1, ny1, nz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(nx1, ny0, nz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(nx1, ny0, nz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+		// North (outer lit side)
+		t.color(colNSR, colNSG, colNSB);
+		t.vertexUV(nx0, ny1, nz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+		t.vertexUV(nx1, ny1, nz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+		t.vertexUV(nx1, ny0, nz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+		t.vertexUV(nx0, ny0, nz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+
+		// South (inner lit side)
+		t.vertexUV(nx0, ny1, nz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+		t.vertexUV(nx0, ny0, nz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+		t.vertexUV(nx1, ny0, nz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+		t.vertexUV(nx1, ny1, nz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+
+		// 4. Top South Log (x: 0..16, y: 3..7, z: 11..15)
+		float sx0 = 0.0f, sx1 = 1.0f;
+		float sy0 = 3.0f / 16.0f, sy1 = 7.0f / 16.0f;
+		float sz0 = 11.0f / 16.0f, sz1 = 15.0f / 16.0f;
+
+		// Up (rot 180)
+		t.color(colUpR, colUpG, colUpB);
+		t.vertexUV(sx0, sy1, sz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(sx0, sy1, sz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(sx1, sy1, sz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+		t.vertexUV(sx1, sy1, sz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+		// Down
+		t.color(colDownR, colDownG, colDownB);
+		t.vertexUV(sx0, sy0, sz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+		t.vertexUV(sx0, sy0, sz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 8));
+		t.vertexUV(sx1, sy0, sz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 8));
+		t.vertexUV(sx1, sy0, sz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+
+		// West (end cut)
+		t.color(colWER, colWEG, colWEB);
+		t.vertexUV(sx0, sy1, sz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(sx0, sy1, sz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(sx0, sy0, sz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(sx0, sy0, sz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+		// East (end cut)
+		t.vertexUV(sx1, sy1, sz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(sx1, sy1, sz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+		t.vertexUV(sx1, sy0, sz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(sx1, sy0, sz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+		// North (inner lit side)
+		t.color(colNSR, colNSG, colNSB);
+		t.vertexUV(sx0, sy1, sz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+		t.vertexUV(sx1, sy1, sz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+		t.vertexUV(sx1, sy0, sz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+		t.vertexUV(sx0, sy0, sz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+
+		// South (outer lit side)
+		t.vertexUV(sx0, sy1, sz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+		t.vertexUV(sx0, sy0, sz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+		t.vertexUV(sx1, sy0, sz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+		t.vertexUV(sx1, sy1, sz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+
+		// 5. Coals / Ash bed (x: 5..11, y: 0..1, z: 0..16)
+		float ax0 = 5.0f / 16.0f, ax1 = 11.0f / 16.0f;
+		float ay0 = 0.0f, ay1 = 1.0f / 16.0f;
+		float az0 = 0.0f, az1 = 1.0f;
+
+		// Up (ash coals glowing)
+		t.color(colUpR, colUpG, colUpB);
+		t.vertexUV(ax0, ay1, az0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 14));
+		t.vertexUV(ax0, ay1, az1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 14));
+		t.vertexUV(ax1, ay1, az1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 8));
+		t.vertexUV(ax1, ay1, az0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 8));
+
+		// Down
+		t.color(colDownR, colDownG, colDownB);
+		t.vertexUV(ax0, ay0, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(ax0, ay0, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+		t.vertexUV(ax1, ay0, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 14));
+		t.vertexUV(ax1, ay0, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 14));
+
+		// North ash edge
+		t.color(colNSR, colNSG, colNSB);
+		t.vertexUV(ax0, ay1, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 15));
+		t.vertexUV(ax1, ay1, az0, getAtlasU(TEX_LOG, 6), getAtlasV(TEX_LOG, 15));
+		t.vertexUV(ax1, ay0, az0, getAtlasU(TEX_LOG, 6), getAtlasV(TEX_LOG, 16));
+		t.vertexUV(ax0, ay0, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 16));
+
+		// South ash edge
+		t.vertexUV(ax0, ay1, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 15));
+		t.vertexUV(ax0, ay0, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 16));
+		t.vertexUV(ax1, ay0, az1, getAtlasU(TEX_LOG, 10), getAtlasV(TEX_LOG, 16));
+		t.vertexUV(ax1, ay1, az1, getAtlasU(TEX_LOG, 10), getAtlasV(TEX_LOG, 15));
+
+		// 6. Fire Cross Planes (Full Brightness)
+		t.color(1.0f, 1.0f, 1.0f);
+		float fx0 = 0.8f / 16.0f, fx1 = 15.2f / 16.0f;
+		float fz0 = 0.8f / 16.0f, fz1 = 15.2f / 16.0f;
+		float fy0 = 1.0f / 16.0f, fy1 = 17.0f / 16.0f;
+
+		float fu0 = getAtlasU(TEX_FIRE, 0), fu1 = getAtlasU(TEX_FIRE, 16);
+		float fv0 = getAtlasV(TEX_FIRE, 0), fv1 = getAtlasV(TEX_FIRE, 16);
+
+		// Diagonal 1
+		t.vertexUV(fx0, fy1, fz0, fu0, fv0);
+		t.vertexUV(fx0, fy0, fz0, fu0, fv1);
+		t.vertexUV(fx1, fy0, fz1, fu1, fv1);
+		t.vertexUV(fx1, fy1, fz1, fu1, fv0);
+
+		t.vertexUV(fx1, fy1, fz1, fu1, fv0);
+		t.vertexUV(fx1, fy0, fz1, fu1, fv1);
+		t.vertexUV(fx0, fy0, fz0, fu0, fv1);
+		t.vertexUV(fx0, fy1, fz0, fu0, fv0);
+
+		// Diagonal 2
+		t.vertexUV(fx0, fy1, fz1, fu0, fv0);
+		t.vertexUV(fx0, fy0, fz1, fu0, fv1);
+		t.vertexUV(fx1, fy0, fz0, fu1, fv1);
+		t.vertexUV(fx1, fy1, fz0, fu1, fv0);
+
+		t.vertexUV(fx1, fy1, fz0, fu1, fv0);
+		t.vertexUV(fx1, fy0, fz0, fu1, fv1);
+		t.vertexUV(fx0, fy0, fz1, fu0, fv1);
+		t.vertexUV(fx0, fy1, fz1, fu0, fv0);
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_GRINDSTONE) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		// Left Leg (151)
+		tile->setShape(2.0f / 16.0f, 0.0f, 6.0f / 16.0f, 4.0f / 16.0f, 7.0f / 16.0f, 10.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 151);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 151);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 151); renderSouth(tile, 0, 0, 0, 151);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 151); renderEast(tile, 0, 0, 0, 151);
+
+		// Right Leg (151)
+		tile->setShape(12.0f / 16.0f, 0.0f, 6.0f / 16.0f, 14.0f / 16.0f, 7.0f / 16.0f, 10.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 151);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 151);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 151); renderSouth(tile, 0, 0, 0, 151);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 151); renderEast(tile, 0, 0, 0, 151);
+
+		// Left Pivot Bracket (151)
+		tile->setShape(2.0f / 16.0f, 7.0f / 16.0f, 5.0f / 16.0f, 4.0f / 16.0f, 13.0f / 16.0f, 11.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 151);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 151);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 151); renderSouth(tile, 0, 0, 0, 151);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 151); renderEast(tile, 0, 0, 0, 151);
+
+		// Right Pivot Bracket (151)
+		tile->setShape(12.0f / 16.0f, 7.0f / 16.0f, 5.0f / 16.0f, 14.0f / 16.0f, 13.0f / 16.0f, 11.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 151);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 151);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 151); renderSouth(tile, 0, 0, 0, 151);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 151); renderEast(tile, 0, 0, 0, 151);
+
+		// Wheel (Round 17 on Up/Down/North/South, Side 21 on West/East)
+		tile->setShape(4.0f / 16.0f, 4.0f / 16.0f, 2.0f / 16.0f, 12.0f / 16.0f, 1.0f, 14.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 17);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 17);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 17); renderSouth(tile, 0, 0, 0, 17);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 21); renderEast(tile, 0, 0, 0, 21);
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_LECTERN) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		const int TEX_BASE = 162;
+		const int TEX_FRONT = 22;
+		const int TEX_SIDES = 106;
+		const int TEX_TOP = 107;
+
+		float colUpR = tr, colUpG = tg, colUpB = tb;
+		float colDownR = tr * 0.5f, colDownG = tg * 0.5f, colDownB = tb * 0.5f;
+		float colNSR = tr * 0.8f, colNSG = tg * 0.8f, colNSB = tb * 0.8f;
+		float colWER = tr * 0.6f, colWEG = tg * 0.6f, colWEB = tb * 0.6f;
+
+		// 1. Base pedestal (x: 0..1, y: 0..2/16, z: 0..1)
+		float bx0 = 0.0f, bx1 = 1.0f;
+		float by0 = 0.0f, by1 = 2.0f / 16.0f;
+		float bz0 = 0.0f, bz1 = 1.0f;
+
+		// Base Up
+		t.color(colUpR, colUpG, colUpB);
+		t.vertexUV(bx0, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(bx0, by1, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 16));
+		t.vertexUV(bx1, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 16));
+		t.vertexUV(bx1, by1, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+
+		// Base Down
+		t.color(colDownR, colDownG, colDownB);
+		t.vertexUV(bx0, by0, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 16));
+		t.vertexUV(bx0, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(bx1, by0, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(bx1, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 16));
+
+		// Base North ([0, 14, 16, 16])
+		t.color(colNSR, colNSG, colNSB);
+		t.vertexUV(bx0, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 14));
+		t.vertexUV(bx1, by1, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 14));
+		t.vertexUV(bx1, by0, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 16));
+		t.vertexUV(bx0, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 16));
+
+		// Base South ([0, 6, 16, 8])
+		t.vertexUV(bx0, by1, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(bx0, by0, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 8));
+		t.vertexUV(bx1, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 8));
+		t.vertexUV(bx1, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+
+		// Base West ([0, 6, 16, 8])
+		t.color(colWER, colWEG, colWEB);
+		t.vertexUV(bx0, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(bx0, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(bx0, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 8));
+		t.vertexUV(bx0, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 8));
+
+		// Base East ([0, 6, 16, 8])
+		t.vertexUV(bx1, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(bx1, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(bx1, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 8));
+		t.vertexUV(bx1, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 8));
+
+		// 2. Central pillar (x: 4..12, y: 2..14, z: 4..12)
+		float px0 = 4.0f / 16.0f, px1 = 12.0f / 16.0f;
+		float py0 = 2.0f / 16.0f, py1 = 14.0f / 16.0f;
+		float pz0 = 4.0f / 16.0f, pz1 = 12.0f / 16.0f;
+
+		// Pillar North (front open face: [0, 0, 8, 12])
+		t.color(colNSR, colNSG, colNSB);
+		t.vertexUV(px0, py1, pz0, getAtlasU(TEX_FRONT, 0), getAtlasV(TEX_FRONT, 0));
+		t.vertexUV(px1, py1, pz0, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 0));
+		t.vertexUV(px1, py0, pz0, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 12));
+		t.vertexUV(px0, py0, pz0, getAtlasU(TEX_FRONT, 0), getAtlasV(TEX_FRONT, 12));
+
+		// Pillar South (back face: [8, 4, 16, 16])
+		t.vertexUV(px0, py1, pz1, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 4));
+		t.vertexUV(px0, py0, pz1, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 16));
+		t.vertexUV(px1, py0, pz1, getAtlasU(TEX_FRONT, 16), getAtlasV(TEX_FRONT, 16));
+		t.vertexUV(px1, py1, pz1, getAtlasU(TEX_FRONT, 16), getAtlasV(TEX_FRONT, 4));
+
+		// Pillar West (side face: [0, 2, 8, 14])
+		t.color(colWER, colWEG, colWEB);
+		t.vertexUV(px0, py1, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 2));
+		t.vertexUV(px0, py1, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 2));
+		t.vertexUV(px0, py0, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 14));
+		t.vertexUV(px0, py0, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 14));
+
+		// Pillar East (side face: [0, 2, 8, 14])
+		t.vertexUV(px1, py1, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 2));
+		t.vertexUV(px1, py1, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 2));
+		t.vertexUV(px1, py0, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 14));
+		t.vertexUV(px1, py0, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 14));
+
+		// 3. Top reading desk (x: 0..1, y: 12..15, z: 2..16)
+		float dx0 = 0.0f, dx1 = 1.0f;
+		float dy0 = 12.0f / 16.0f, dy1 = 15.0f / 16.0f;
+		float dz0 = 2.0f / 16.0f, dz1 = 1.0f;
+
+		// Top surface (the book/desk face: [0, 1, 16, 15] on TEX_TOP!)
+		t.color(colUpR, colUpG, colUpB);
+		t.vertexUV(dx0, dy1, dz0, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 1));
+		t.vertexUV(dx0, dy1, dz1, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 15));
+		t.vertexUV(dx1, dy1, dz1, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 15));
+		t.vertexUV(dx1, dy1, dz0, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 1));
+
+		// Bottom surface (wood bottom: [0, 0, 16, 14] on TEX_BASE)
+		t.color(colDownR, colDownG, colDownB);
+		t.vertexUV(dx0, dy0, dz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 14));
+		t.vertexUV(dx0, dy0, dz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(dx1, dy0, dz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(dx1, dy0, dz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 14));
+
+		// Desk North edge: [0, 0, 16, 3] on TEX_SIDES
+		t.color(colNSR, colNSG, colNSB);
+		t.vertexUV(dx0, dy1, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 0));
+		t.vertexUV(dx1, dy1, dz0, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 0));
+		t.vertexUV(dx1, dy0, dz0, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 3));
+		t.vertexUV(dx0, dy0, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 3));
+
+		// Desk South edge: [0, 4, 16, 7] on TEX_SIDES
+		t.vertexUV(dx0, dy1, dz1, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 4));
+		t.vertexUV(dx0, dy0, dz1, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 7));
+		t.vertexUV(dx1, dy0, dz1, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 7));
+		t.vertexUV(dx1, dy1, dz1, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 4));
+
+		// Desk West edge: [0, 4, 14, 7] on TEX_SIDES
+		t.color(colWER, colWEG, colWEB);
+		t.vertexUV(dx0, dy1, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 4));
+		t.vertexUV(dx0, dy1, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 4));
+		t.vertexUV(dx0, dy0, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 7));
+		t.vertexUV(dx0, dy0, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 7));
+
+		// Desk East edge: [0, 4, 14, 7] on TEX_SIDES
+		t.vertexUV(dx1, dy1, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 4));
+		t.vertexUV(dx1, dy1, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 4));
+		t.vertexUV(dx1, dy0, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 7));
+		t.vertexUV(dx1, dy0, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 7));
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_COMPOSTER) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		// Bottom
+		tile->setShape(2.0f / 16.0f, 0.0f, 2.0f / 16.0f, 14.0f / 16.0f, 2.0f / 16.0f, 14.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 14);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 255);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 14); renderSouth(tile, 0, 0, 0, 14);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 14); renderEast(tile, 0, 0, 0, 14);
+
+		// North wall
+		tile->setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 2.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 131);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 255);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 14); renderSouth(tile, 0, 0, 0, 14);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 14); renderEast(tile, 0, 0, 0, 14);
+
+		// South wall
+		tile->setShape(0.0f, 0.0f, 14.0f / 16.0f, 1.0f, 1.0f, 1.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 131);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 255);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 14); renderSouth(tile, 0, 0, 0, 14);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 14); renderEast(tile, 0, 0, 0, 14);
+
+		// West wall
+		tile->setShape(0.0f, 0.0f, 2.0f / 16.0f, 2.0f / 16.0f, 1.0f, 14.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 131);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 255);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 14); renderSouth(tile, 0, 0, 0, 14);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 14); renderEast(tile, 0, 0, 0, 14);
+
+		// East wall
+		tile->setShape(14.0f / 16.0f, 0.0f, 2.0f / 16.0f, 1.0f, 1.0f, 14.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 131);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 255);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 14); renderSouth(tile, 0, 0, 0, 14);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 14); renderEast(tile, 0, 0, 0, 14);
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_STONECUTTER) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		// 1. Table base
+		tile->setShape(0.0f, 0.0f, 0.0f, 1.0f, 9.0f / 16.0f, 1.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 251);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 252);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 253); renderSouth(tile, 0, 0, 0, 253);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 253); renderEast(tile, 0, 0, 0, 253);
+
+		// 2. Saw blade
+		tile->setShape(1.0f / 16.0f, 9.0f / 16.0f, 7.5f / 16.0f, 15.0f / 16.0f, 1.0f, 8.5f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 254);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 254);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 254); renderSouth(tile, 0, 0, 0, 254);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 254); renderEast(tile, 0, 0, 0, 254);
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_CHAIN) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		tile->setShape(6.5f / 16.0f, 0.0f, 6.5f / 16.0f, 9.5f / 16.0f, 1.0f, 9.5f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, 155);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, 155);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, 155); renderSouth(tile, 0, 0, 0, 155);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, 155); renderEast(tile, 0, 0, 0, 155);
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_SCAFFOLDING) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		int cleanTex = tile->getTexture(0, data) & ~Tile::TEXTURE_ALT_FLAG;
+		for (int i = 0; i < 5; i++) {
+			if (i == 0) tile->setShape(0.0f, 0.0f, 0.0f, 2.0f / 16.0f, 1.0f, 2.0f / 16.0f);
+			if (i == 1) tile->setShape(14.0f / 16.0f, 0.0f, 0.0f, 1.0f, 1.0f, 2.0f / 16.0f);
+			if (i == 2) tile->setShape(0.0f, 0.0f, 14.0f / 16.0f, 2.0f / 16.0f, 1.0f, 1.0f);
+			if (i == 3) tile->setShape(14.0f / 16.0f, 0.0f, 14.0f / 16.0f, 1.0f, 1.0f, 1.0f);
+			if (i == 4) tile->setShape(0.0f, 15.0f / 16.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+
+			t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, cleanTex);
+			t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, cleanTex);
+			t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, cleanTex); renderSouth(tile, 0, 0, 0, cleanTex);
+			t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, cleanTex); renderEast(tile, 0, 0, 0, cleanTex);
+		}
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_CANDLE) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		int tex = tile->getTexture(0, data) & ~Tile::TEXTURE_ALT_FLAG;
+		float tr = ((color >> 16) & 0xff) / 255.0f;
+		float tg = ((color >> 8) & 0xff) / 255.0f;
+		float tb = (color & 0xff) / 255.0f;
+
+		float colUpR = tr, colUpG = tg, colUpB = tb;
+		float colDownR = tr * 0.5f, colDownG = tg * 0.5f, colDownB = tb * 0.5f;
+		float colNSR = tr * 0.8f, colNSG = tg * 0.8f, colNSB = tb * 0.8f;
+		float colWER = tr * 0.6f, colWEG = tg * 0.6f, colWEB = tb * 0.6f;
+
+		float cx0 = 7.0f / 16.0f, cx1 = 9.0f / 16.0f;
+		float cy0 = 0.0f / 16.0f, cy1 = 6.0f / 16.0f;
+		float cz0 = 7.0f / 16.0f, cz1 = 9.0f / 16.0f;
+
+		float uTop0 = getAtlasU(tex, 0.0f), uTop1 = getAtlasU(tex, 2.0f);
+		float vTop0 = getAtlasV(tex, 6.0f), vTop1 = getAtlasV(tex, 8.0f);
+
+		float uSide0 = getAtlasU(tex, 0.0f), uSide1 = getAtlasU(tex, 2.0f);
+		float vSide0 = getAtlasV(tex, 6.0f), vSide1 = getAtlasV(tex, 12.0f);
+
+		// Top
+		t.color(colUpR, colUpG, colUpB);
+		t.vertexUV(cx0, cy1, cz0, uTop0, vTop0);
+		t.vertexUV(cx0, cy1, cz1, uTop0, vTop1);
+		t.vertexUV(cx1, cy1, cz1, uTop1, vTop1);
+		t.vertexUV(cx1, cy1, cz0, uTop1, vTop0);
+
+		// Down
+		t.color(colDownR, colDownG, colDownB);
+		t.vertexUV(cx0, cy0, cz1, uTop0, vTop1);
+		t.vertexUV(cx0, cy0, cz0, uTop0, vTop0);
+		t.vertexUV(cx1, cy0, cz0, uTop1, vTop0);
+		t.vertexUV(cx1, cy0, cz1, uTop1, vTop1);
+
+		// North & South
+		t.color(colNSR, colNSG, colNSB);
+		t.vertexUV(cx0, cy1, cz0, uSide1, vSide0);
+		t.vertexUV(cx1, cy1, cz0, uSide0, vSide0);
+		t.vertexUV(cx1, cy0, cz0, uSide0, vSide1);
+		t.vertexUV(cx0, cy0, cz0, uSide1, vSide1);
+		t.vertexUV(cx1, cy1, cz0, uSide0, vSide0);
+		t.vertexUV(cx0, cy1, cz0, uSide1, vSide0);
+		t.vertexUV(cx0, cy0, cz0, uSide1, vSide1);
+		t.vertexUV(cx1, cy0, cz0, uSide0, vSide1);
+
+		t.vertexUV(cx0, cy1, cz1, uSide0, vSide0);
+		t.vertexUV(cx0, cy0, cz1, uSide0, vSide1);
+		t.vertexUV(cx1, cy0, cz1, uSide1, vSide1);
+		t.vertexUV(cx1, cy1, cz1, uSide1, vSide0);
+		t.vertexUV(cx1, cy1, cz1, uSide1, vSide0);
+		t.vertexUV(cx1, cy0, cz1, uSide1, vSide1);
+		t.vertexUV(cx0, cy0, cz1, uSide0, vSide1);
+		t.vertexUV(cx0, cy1, cz1, uSide0, vSide0);
+
+		// West & East
+		t.color(colWER, colWEG, colWEB);
+		t.vertexUV(cx0, cy1, cz1, uSide1, vSide0);
+		t.vertexUV(cx0, cy1, cz0, uSide0, vSide0);
+		t.vertexUV(cx0, cy0, cz0, uSide0, vSide1);
+		t.vertexUV(cx0, cy0, cz1, uSide1, vSide1);
+		t.vertexUV(cx0, cy1, cz0, uSide0, vSide0);
+		t.vertexUV(cx0, cy1, cz1, uSide1, vSide0);
+		t.vertexUV(cx0, cy0, cz1, uSide1, vSide1);
+		t.vertexUV(cx0, cy0, cz0, uSide0, vSide1);
+
+		t.vertexUV(cx1, cy0, cz1, uSide0, vSide1);
+		t.vertexUV(cx1, cy0, cz0, uSide1, vSide1);
+		t.vertexUV(cx1, cy1, cz0, uSide1, vSide0);
+		t.vertexUV(cx1, cy1, cz1, uSide0, vSide0);
+		t.vertexUV(cx1, cy1, cz0, uSide1, vSide0);
+		t.vertexUV(cx1, cy0, cz0, uSide1, vSide1);
+		t.vertexUV(cx1, cy0, cz1, uSide0, vSide1);
+		t.vertexUV(cx1, cy1, cz1, uSide0, vSide0);
+
+		// Wick
+		float wu0 = getAtlasU(tex, 0.0f), wu1 = getAtlasU(tex, 1.0f);
+		float wv0 = getAtlasV(tex, 4.5f), wv1 = getAtlasV(tex, 6.0f);
+		float wy0 = 6.0f / 16.0f, wy1 = 8.5f / 16.0f;
+		float wx0 = 7.5f / 16.0f, wx1 = 8.5f / 16.0f;
+		float wz0 = 7.5f / 16.0f, wz1 = 8.5f / 16.0f;
+		float wMidX = 8.0f / 16.0f;
+		float wMidZ = 8.0f / 16.0f;
+
+		t.color(colUpR, colUpG, colUpB);
+		// Quad X (double sided)
+		t.vertexUV(wx0, wy1, wMidZ, wu0, wv0);
+		t.vertexUV(wx0, wy0, wMidZ, wu0, wv1);
+		t.vertexUV(wx1, wy0, wMidZ, wu1, wv1);
+		t.vertexUV(wx1, wy1, wMidZ, wu1, wv0);
+
+		t.vertexUV(wx1, wy1, wMidZ, wu1, wv0);
+		t.vertexUV(wx1, wy0, wMidZ, wu1, wv1);
+		t.vertexUV(wx0, wy0, wMidZ, wu0, wv1);
+		t.vertexUV(wx0, wy1, wMidZ, wu0, wv0);
+
+		// Quad Z (double sided)
+		t.vertexUV(wMidX, wy1, wz0, wu0, wv0);
+		t.vertexUV(wMidX, wy0, wz0, wu0, wv1);
+		t.vertexUV(wMidX, wy0, wz1, wu1, wv1);
+		t.vertexUV(wMidX, wy1, wz1, wu1, wv0);
+
+		t.vertexUV(wMidX, wy1, wz1, wu1, wv0);
+		t.vertexUV(wMidX, wy0, wz1, wu1, wv1);
+		t.vertexUV(wMidX, wy0, wz0, wu0, wv1);
+		t.vertexUV(wMidX, wy1, wz0, wu0, wv0);
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_CAULDRON) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		const int TEX_TOP = 149;
+		const int TEX_INNER = 150;
+		const int TEX_SIDE = 163;
+		const int TEX_BOTTOM = 165;
+
+		// 4 legs
+		tile->setShape(0.0f, 0.0f, 0.0f, 2.0f / 16.0f, 3.0f / 16.0f, 2.0f / 16.0f);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, TEX_SIDE); renderSouth(tile, 0, 0, 0, TEX_SIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+		tile->setShape(14.0f / 16.0f, 0.0f, 0.0f, 1.0f, 3.0f / 16.0f, 2.0f / 16.0f);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, TEX_SIDE); renderSouth(tile, 0, 0, 0, TEX_SIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+		tile->setShape(0.0f, 0.0f, 14.0f / 16.0f, 2.0f / 16.0f, 3.0f / 16.0f, 1.0f);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, TEX_SIDE); renderSouth(tile, 0, 0, 0, TEX_SIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+		tile->setShape(14.0f / 16.0f, 0.0f, 14.0f / 16.0f, 1.0f, 3.0f / 16.0f, 1.0f);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, TEX_SIDE); renderSouth(tile, 0, 0, 0, TEX_SIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+		// Bottom basin floor
+		tile->setShape(2.0f / 16.0f, 3.0f / 16.0f, 2.0f / 16.0f, 14.0f / 16.0f, 5.0f / 16.0f, 14.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_INNER);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+
+		// 4 walls
+		// North wall
+		tile->setShape(0.0f, 3.0f / 16.0f, 0.0f, 1.0f, 1.0f, 2.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, TEX_SIDE); renderSouth(tile, 0, 0, 0, TEX_INNER);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+		// South wall
+		tile->setShape(0.0f, 3.0f / 16.0f, 14.0f / 16.0f, 1.0f, 1.0f, 1.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, TEX_INNER); renderSouth(tile, 0, 0, 0, TEX_SIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+		// West wall
+		tile->setShape(0.0f, 3.0f / 16.0f, 2.0f / 16.0f, 2.0f / 16.0f, 1.0f, 14.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_INNER);
+
+		// East wall
+		tile->setShape(14.0f / 16.0f, 3.0f / 16.0f, 2.0f / 16.0f, 1.0f, 1.0f, 14.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_INNER); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_ANVIL) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		int dmg = 0;
+		AnvilTile* at = dynamic_cast<AnvilTile*>(tile);
+		if (at) dmg = at->damageType;
+		else if (tile == Tile::chippedAnvil) dmg = 1;
+		else if (tile == Tile::damagedAnvil) dmg = 2;
+
+		int topTex = (dmg == 0 ? 170 : (dmg == 1 ? 180 : 185));
+		int baseTex = 166;
+
+		// Base: (2..14, 0..4, 2..14)
+		tile->setShape(2.0f / 16.0f, 0.0f, 2.0f / 16.0f, 14.0f / 16.0f, 4.0f / 16.0f, 14.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, baseTex);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, baseTex);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, baseTex); renderSouth(tile, 0, 0, 0, baseTex);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, baseTex); renderEast(tile, 0, 0, 0, baseTex);
+
+		// Lower neck: (4..12, 4..5, 5..11)
+		tile->setShape(4.0f / 16.0f, 4.0f / 16.0f, 5.0f / 16.0f, 12.0f / 16.0f, 5.0f / 16.0f, 11.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, baseTex);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, baseTex);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, baseTex); renderSouth(tile, 0, 0, 0, baseTex);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, baseTex); renderEast(tile, 0, 0, 0, baseTex);
+
+		// Stem: (6..10, 5..10, 6..10)
+		tile->setShape(6.0f / 16.0f, 5.0f / 16.0f, 6.0f / 16.0f, 10.0f / 16.0f, 10.0f / 16.0f, 10.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, baseTex);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, baseTex);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, baseTex); renderSouth(tile, 0, 0, 0, baseTex);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, baseTex); renderEast(tile, 0, 0, 0, baseTex);
+
+		// Head: (3..13, 10..16, 0..16)
+		tile->setShape(3.0f / 16.0f, 10.0f / 16.0f, 0.0f, 13.0f / 16.0f, 1.0f, 1.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, topTex);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, baseTex);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, baseTex); renderSouth(tile, 0, 0, 0, baseTex);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, baseTex); renderEast(tile, 0, 0, 0, baseTex);
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
+	} else if (shape == Tile::SHAPE_HOPPER) {
+		t.addOffset(-0.5f, -0.5f, -0.5f);
+		t.begin();
+
+		const int TEX_TOP = 195;
+		const int TEX_INSIDE = 199;
+		const int TEX_OUTSIDE = 200;
+
+		// 1. Top basin floor
+		tile->setShape(2.0f / 16.0f, 10.0f / 16.0f, 2.0f / 16.0f, 14.0f / 16.0f, 11.0f / 16.0f, 14.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_INSIDE);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, TEX_OUTSIDE); renderSouth(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+		// 2. Basin 4 walls
+		// North wall
+		tile->setShape(0.0f, 10.0f / 16.0f, 0.0f, 1.0f, 1.0f, 2.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, TEX_OUTSIDE); renderSouth(tile, 0, 0, 0, TEX_INSIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+		// South wall
+		tile->setShape(0.0f, 10.0f / 16.0f, 14.0f / 16.0f, 1.0f, 1.0f, 1.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, TEX_INSIDE); renderSouth(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+		// West wall
+		tile->setShape(0.0f, 10.0f / 16.0f, 2.0f / 16.0f, 2.0f / 16.0f, 1.0f, 14.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_INSIDE);
+
+		// East wall
+		tile->setShape(14.0f / 16.0f, 10.0f / 16.0f, 2.0f / 16.0f, 1.0f, 1.0f, 14.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_INSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+		// 3. Middle funnel box (4..12, 4..10, 4..12)
+		tile->setShape(4.0f / 16.0f, 4.0f / 16.0f, 4.0f / 16.0f, 12.0f / 16.0f, 10.0f / 16.0f, 12.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, TEX_OUTSIDE); renderSouth(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+		// 4. Bottom spout (6..10, 0..4, 6..10)
+		tile->setShape(6.0f / 16.0f, 0.0f, 6.0f / 16.0f, 10.0f / 16.0f, 4.0f / 16.0f, 10.0f / 16.0f);
+		t.color(tr, tg, tb); renderFaceUp(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.5f, tg * 0.5f, tb * 0.5f); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.8f, tg * 0.8f, tb * 0.8f); renderNorth(tile, 0, 0, 0, TEX_OUTSIDE); renderSouth(tile, 0, 0, 0, TEX_OUTSIDE);
+		t.color(tr * 0.6f, tg * 0.6f, tb * 0.6f); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+		t.draw();
+		t.addOffset(0.5f, 0.5f, 0.5f);
+		tile->setShape(0, 0, 0, 1, 1, 1);
 	}
 
 }
@@ -2937,6 +3930,18 @@ bool TileRenderer::canRender( int renderShape )
 	if (renderShape == Tile::SHAPE_STAIRS) return true;
 	if (renderShape == Tile::SHAPE_FENCE) return true;
 	if (renderShape == Tile::SHAPE_FENCE_GATE) return true;
+	if (renderShape == Tile::SHAPE_LANTERN) return true;
+	if (renderShape == Tile::SHAPE_CAMPFIRE) return true;
+	if (renderShape == Tile::SHAPE_GRINDSTONE) return true;
+	if (renderShape == Tile::SHAPE_LECTERN) return true;
+	if (renderShape == Tile::SHAPE_COMPOSTER) return true;
+	if (renderShape == Tile::SHAPE_STONECUTTER) return true;
+	if (renderShape == Tile::SHAPE_CHAIN) return true;
+	if (renderShape == Tile::SHAPE_SCAFFOLDING) return true;
+	if (renderShape == Tile::SHAPE_CANDLE) return true;
+	if (renderShape == Tile::SHAPE_CAULDRON) return true;
+	if (renderShape == Tile::SHAPE_ANVIL) return true;
+	if (renderShape == Tile::SHAPE_HOPPER) return true;
 
 	return false;
 }
@@ -3168,6 +4173,1006 @@ void TileRenderer::renderGuiTile( Tile* tile, int data )
 		t.draw();
 		tile->setShape(0, 0, 0, 1, 1, 1);
 		t.addOffset(0.5f, 0.5f, 0.5f);
+	} else if (shape == Tile::SHAPE_LANTERN) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			int cleanTex = tex & ~Tile::TEXTURE_ALT_FLAG;
+			int xt = (cleanTex & 0xf) << 4;
+			int yt = cleanTex & 0xf0;
+			const float atlasSize = 256.0f;
+
+			float uSide0 = (xt + 0.0f) / atlasSize;
+			float uSide1 = (xt + 6.0f) / atlasSize;
+			float vSide0 = (yt + 2.0f) / atlasSize;
+			float vSide1 = (yt + 9.0f) / atlasSize;
+
+			float uLid0 = (xt + 0.0f) / atlasSize;
+			float uLid1 = (xt + 6.0f) / atlasSize;
+			float vLid0 = (yt + 9.0f) / atlasSize;
+			float vLid1 = (yt + 15.0f) / atlasSize;
+
+			float uCap0 = (xt + 1.0f) / atlasSize;
+			float uCap1 = (xt + 5.0f) / atlasSize;
+			float vCap0 = (yt + 0.0f) / atlasSize;
+			float vCap1 = (yt + 2.0f) / atlasSize;
+
+			float uCapTop0 = (xt + 1.0f) / atlasSize;
+			float uCapTop1 = (xt + 5.0f) / atlasSize;
+			float vCapTop0 = (yt + 9.0f) / atlasSize;
+			float vCapTop1 = (yt + 13.0f) / atlasSize;
+
+			float uRing0 = (xt + 11.0f) / atlasSize;
+			float uRing1 = (xt + 14.0f) / atlasSize;
+			float vRing0 = (yt + 1.0f) / atlasSize;
+			float vRing1 = (yt + 5.0f) / atlasSize;
+
+			float bx0 = 5.0f / 16.0f, bx1 = 11.0f / 16.0f;
+			float bz0 = 5.0f / 16.0f, bz1 = 11.0f / 16.0f;
+			float by0 = 0.0f / 16.0f, by1 = 7.0f / 16.0f;
+
+			// Up
+			t.color(0xff, 0xff, 0xff);
+			t.vertexUV(bx0, by1, bz0, uLid0, vLid0);
+			t.vertexUV(bx0, by1, bz1, uLid0, vLid1);
+			t.vertexUV(bx1, by1, bz1, uLid1, vLid1);
+			t.vertexUV(bx1, by1, bz0, uLid1, vLid0);
+
+			// Down
+			t.color(0x80, 0x80, 0x80);
+			t.vertexUV(bx0, by0, bz1, uLid0, vLid1);
+			t.vertexUV(bx0, by0, bz0, uLid0, vLid0);
+			t.vertexUV(bx1, by0, bz0, uLid1, vLid0);
+			t.vertexUV(bx1, by0, bz1, uLid1, vLid1);
+
+			// North & South
+			t.color(0xd0, 0xd0, 0xd0);
+			t.vertexUV(bx0, by1, bz0, uSide1, vSide0);
+			t.vertexUV(bx1, by1, bz0, uSide0, vSide0);
+			t.vertexUV(bx1, by0, bz0, uSide0, vSide1);
+			t.vertexUV(bx0, by0, bz0, uSide1, vSide1);
+			t.vertexUV(bx1, by1, bz0, uSide0, vSide0);
+			t.vertexUV(bx0, by1, bz0, uSide1, vSide0);
+			t.vertexUV(bx0, by0, bz0, uSide1, vSide1);
+			t.vertexUV(bx1, by0, bz0, uSide0, vSide1);
+
+			t.vertexUV(bx0, by1, bz1, uSide0, vSide0);
+			t.vertexUV(bx0, by0, bz1, uSide0, vSide1);
+			t.vertexUV(bx1, by0, bz1, uSide1, vSide1);
+			t.vertexUV(bx1, by1, bz1, uSide1, vSide0);
+			t.vertexUV(bx1, by1, bz1, uSide1, vSide0);
+			t.vertexUV(bx1, by0, bz1, uSide1, vSide1);
+			t.vertexUV(bx0, by0, bz1, uSide0, vSide1);
+			t.vertexUV(bx0, by1, bz1, uSide0, vSide0);
+
+			// West & East
+			t.color(0x90, 0x90, 0x90);
+			t.vertexUV(bx0, by1, bz1, uSide1, vSide0);
+			t.vertexUV(bx0, by1, bz0, uSide0, vSide0);
+			t.vertexUV(bx0, by0, bz0, uSide0, vSide1);
+			t.vertexUV(bx0, by0, bz1, uSide1, vSide1);
+			t.vertexUV(bx0, by1, bz0, uSide0, vSide0);
+			t.vertexUV(bx0, by1, bz1, uSide1, vSide0);
+			t.vertexUV(bx0, by0, bz1, uSide1, vSide1);
+			t.vertexUV(bx0, by0, bz0, uSide0, vSide1);
+
+			t.vertexUV(bx1, by0, bz1, uSide0, vSide1);
+			t.vertexUV(bx1, by0, bz0, uSide1, vSide1);
+			t.vertexUV(bx1, by1, bz0, uSide1, vSide0);
+			t.vertexUV(bx1, by1, bz1, uSide0, vSide0);
+			t.vertexUV(bx1, by0, bz0, uSide1, vSide1);
+			t.vertexUV(bx1, by0, bz1, uSide0, vSide1);
+			t.vertexUV(bx1, by1, bz1, uSide0, vSide0);
+			t.vertexUV(bx1, by1, bz0, uSide1, vSide0);
+
+			// Cap
+			float cx0 = 6.0f / 16.0f, cx1 = 10.0f / 16.0f;
+			float cz0 = 6.0f / 16.0f, cz1 = 10.0f / 16.0f;
+			float cy0 = 7.0f / 16.0f, cy1 = 9.0f / 16.0f;
+
+			t.color(0xff, 0xff, 0xff);
+			t.vertexUV(cx0, cy1, cz0, uCapTop0, vCapTop0);
+			t.vertexUV(cx0, cy1, cz1, uCapTop0, vCapTop1);
+			t.vertexUV(cx1, cy1, cz1, uCapTop1, vCapTop1);
+			t.vertexUV(cx1, cy1, cz0, uCapTop1, vCapTop0);
+
+			t.color(0xd0, 0xd0, 0xd0);
+			t.vertexUV(cx0, cy1, cz0, uCap1, vCap0);
+			t.vertexUV(cx1, cy1, cz0, uCap0, vCap0);
+			t.vertexUV(cx1, cy0, cz0, uCap0, vCap1);
+			t.vertexUV(cx0, cy0, cz0, uCap1, vCap1);
+
+			t.vertexUV(cx0, cy1, cz1, uCap0, vCap0);
+			t.vertexUV(cx0, cy0, cz1, uCap0, vCap1);
+			t.vertexUV(cx1, cy0, cz1, uCap1, vCap1);
+			t.vertexUV(cx1, cy1, cz1, uCap1, vCap0);
+
+			t.color(0x90, 0x90, 0x90);
+			t.vertexUV(cx0, cy1, cz1, uCap1, vCap0);
+			t.vertexUV(cx0, cy1, cz0, uCap0, vCap0);
+			t.vertexUV(cx0, cy0, cz0, uCap0, vCap1);
+			t.vertexUV(cx0, cy0, cz1, uCap1, vCap1);
+
+			t.vertexUV(cx1, cy0, cz1, uCap0, vCap1);
+			t.vertexUV(cx1, cy0, cz0, uCap1, vCap1);
+			t.vertexUV(cx1, cy1, cz0, uCap1, vCap0);
+			t.vertexUV(cx1, cy1, cz1, uCap0, vCap0);
+
+			// Ring
+			t.color(0xd0, 0xd0, 0xd0);
+			float rx0 = 6.5f / 16.0f, rx1 = 9.5f / 16.0f;
+			float rz0 = 6.5f / 16.0f, rz1 = 9.5f / 16.0f;
+			float ry0 = 9.0f / 16.0f, ry1 = 13.0f / 16.0f;
+			float rxMid = 8.0f / 16.0f, rzMid = 8.0f / 16.0f;
+
+			t.vertexUV(rx0, ry1, rzMid, uRing0, vRing0);
+			t.vertexUV(rx1, ry1, rzMid, uRing1, vRing0);
+			t.vertexUV(rx1, ry0, rzMid, uRing1, vRing1);
+			t.vertexUV(rx0, ry0, rzMid, uRing0, vRing1);
+
+			t.vertexUV(rx1, ry1, rzMid, uRing1, vRing0);
+			t.vertexUV(rx0, ry1, rzMid, uRing0, vRing0);
+			t.vertexUV(rx0, ry0, rzMid, uRing0, vRing1);
+			t.vertexUV(rx1, ry0, rzMid, uRing1, vRing1);
+
+			t.vertexUV(rxMid, ry1, rz0, uRing0, vRing0);
+			t.vertexUV(rxMid, ry1, rz1, uRing1, vRing0);
+			t.vertexUV(rxMid, ry0, rz1, uRing1, vRing1);
+			t.vertexUV(rxMid, ry0, rz0, uRing0, vRing1);
+
+			t.vertexUV(rxMid, ry1, rz1, uRing1, vRing0);
+			t.vertexUV(rxMid, ry1, rz0, uRing0, vRing0);
+			t.vertexUV(rxMid, ry0, rz0, uRing0, vRing1);
+			t.vertexUV(rxMid, ry0, rz1, uRing1, vRing1);
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+		}
+	} else if (shape == Tile::SHAPE_CAMPFIRE) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			const int TEX_LOG = 118;
+			const int TEX_FIRE = 109;
+			const int TEX_LIT = 110;
+
+			// 1. Bottom Left Log (West Log: x: 1..5, y: 0..4, z: 0..16)
+			float lx0 = 1.0f / 16.0f, lx1 = 5.0f / 16.0f;
+			float ly0 = 0.0f, ly1 = 4.0f / 16.0f;
+			float lz0 = 0.0f, lz1 = 1.0f;
+
+			// Up (rot 90)
+			t.color(0xff, 0xff, 0xff);
+			t.vertexUV(lx0, ly1, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(lx0, ly1, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(lx1, ly1, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(lx1, ly1, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+
+			// Down (rot 90)
+			t.color(0x80, 0x80, 0x80);
+			t.vertexUV(lx0, ly0, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(lx0, ly0, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(lx1, ly0, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(lx1, ly0, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+
+			// North (end cut)
+			t.color(0xd0, 0xd0, 0xd0);
+			t.vertexUV(lx0, ly1, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(lx1, ly1, lz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(lx1, ly0, lz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(lx0, ly0, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+
+			// South (end cut)
+			t.vertexUV(lx0, ly1, lz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(lx0, ly0, lz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(lx1, ly0, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(lx1, ly1, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+			// West (bark)
+			t.color(0x90, 0x90, 0x90);
+			t.vertexUV(lx0, ly1, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(lx0, ly1, lz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(lx0, ly0, lz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(lx0, ly0, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+			// East (lit log inner)
+			t.vertexUV(lx1, ly1, lz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 1));
+			t.vertexUV(lx1, ly1, lz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 1));
+			t.vertexUV(lx1, ly0, lz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 5));
+			t.vertexUV(lx1, ly0, lz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 5));
+
+			// 2. Bottom Right Log (East Log: x: 11..15, y: 0..4, z: 0..16)
+			float rx0 = 11.0f / 16.0f, rx1 = 15.0f / 16.0f;
+			float ry0 = 0.0f, ry1 = 4.0f / 16.0f;
+			float rz0 = 0.0f, rz1 = 1.0f;
+
+			// Up (rot 90)
+			t.color(0xff, 0xff, 0xff);
+			t.vertexUV(rx0, ry1, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(rx0, ry1, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(rx1, ry1, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(rx1, ry1, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+
+			// Down (rot 90)
+			t.color(0x80, 0x80, 0x80);
+			t.vertexUV(rx0, ry0, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(rx0, ry0, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(rx1, ry0, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(rx1, ry0, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+
+			// North (end cut)
+			t.color(0xd0, 0xd0, 0xd0);
+			t.vertexUV(rx0, ry1, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(rx1, ry1, rz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(rx1, ry0, rz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(rx0, ry0, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+
+			// South (end cut)
+			t.vertexUV(rx0, ry1, rz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(rx0, ry0, rz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(rx1, ry0, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(rx1, ry1, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+			// West (lit log inner)
+			t.color(0x90, 0x90, 0x90);
+			t.vertexUV(rx0, ry1, rz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 1));
+			t.vertexUV(rx0, ry1, rz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 1));
+			t.vertexUV(rx0, ry0, rz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 5));
+			t.vertexUV(rx0, ry0, rz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 5));
+
+			// East (bark)
+			t.vertexUV(rx1, ry1, rz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(rx1, ry1, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(rx1, ry0, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(rx1, ry0, rz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+
+			// 3. Top North Log (x: 0..16, y: 3..7, z: 1..5)
+			float nx0 = 0.0f, nx1 = 1.0f;
+			float ny0 = 3.0f / 16.0f, ny1 = 7.0f / 16.0f;
+			float nz0 = 1.0f / 16.0f, nz1 = 5.0f / 16.0f;
+
+			// Up (rot 180)
+			t.color(0xff, 0xff, 0xff);
+			t.vertexUV(nx0, ny1, nz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(nx0, ny1, nz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(nx1, ny1, nz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(nx1, ny1, nz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+			// Down
+			t.color(0x80, 0x80, 0x80);
+			t.vertexUV(nx0, ny0, nz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+			t.vertexUV(nx0, ny0, nz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 8));
+			t.vertexUV(nx1, ny0, nz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 8));
+			t.vertexUV(nx1, ny0, nz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+
+			// West (end cut)
+			t.color(0x90, 0x90, 0x90);
+			t.vertexUV(nx0, ny1, nz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(nx0, ny1, nz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(nx0, ny0, nz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(nx0, ny0, nz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+			// East (end cut)
+			t.vertexUV(nx1, ny1, nz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(nx1, ny1, nz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(nx1, ny0, nz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(nx1, ny0, nz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+			// North (outer lit side)
+			t.color(0xd0, 0xd0, 0xd0);
+			t.vertexUV(nx0, ny1, nz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+			t.vertexUV(nx1, ny1, nz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+			t.vertexUV(nx1, ny0, nz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+			t.vertexUV(nx0, ny0, nz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+
+			// South (inner lit side)
+			t.vertexUV(nx0, ny1, nz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+			t.vertexUV(nx0, ny0, nz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+			t.vertexUV(nx1, ny0, nz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+			t.vertexUV(nx1, ny1, nz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+
+			// 4. Top South Log (x: 0..16, y: 3..7, z: 11..15)
+			float sx0 = 0.0f, sx1 = 1.0f;
+			float sy0 = 3.0f / 16.0f, sy1 = 7.0f / 16.0f;
+			float sz0 = 11.0f / 16.0f, sz1 = 15.0f / 16.0f;
+
+			// Up (rot 180)
+			t.color(0xff, 0xff, 0xff);
+			t.vertexUV(sx0, sy1, sz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(sx0, sy1, sz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(sx1, sy1, sz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+			t.vertexUV(sx1, sy1, sz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+			// Down
+			t.color(0x80, 0x80, 0x80);
+			t.vertexUV(sx0, sy0, sz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+			t.vertexUV(sx0, sy0, sz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 8));
+			t.vertexUV(sx1, sy0, sz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 8));
+			t.vertexUV(sx1, sy0, sz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+
+			// West (end cut)
+			t.color(0x90, 0x90, 0x90);
+			t.vertexUV(sx0, sy1, sz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(sx0, sy1, sz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(sx0, sy0, sz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(sx0, sy0, sz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+			// East (end cut)
+			t.vertexUV(sx1, sy1, sz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(sx1, sy1, sz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+			t.vertexUV(sx1, sy0, sz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(sx1, sy0, sz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+			// North (inner lit side)
+			t.color(0xd0, 0xd0, 0xd0);
+			t.vertexUV(sx0, sy1, sz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+			t.vertexUV(sx1, sy1, sz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+			t.vertexUV(sx1, sy0, sz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+			t.vertexUV(sx0, sy0, sz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+
+			// South (outer lit side)
+			t.vertexUV(sx0, sy1, sz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+			t.vertexUV(sx0, sy0, sz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+			t.vertexUV(sx1, sy0, sz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+			t.vertexUV(sx1, sy1, sz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+
+			// 5. Coals / Ash bed (x: 5..11, y: 0..1, z: 0..16)
+			float ax0 = 5.0f / 16.0f, ax1 = 11.0f / 16.0f;
+			float ay0 = 0.0f, ay1 = 1.0f / 16.0f;
+			float az0 = 0.0f, az1 = 1.0f;
+
+			// Up (ash coals glowing)
+			t.color(0xff, 0xff, 0xff);
+			t.vertexUV(ax0, ay1, az0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 14));
+			t.vertexUV(ax0, ay1, az1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 14));
+			t.vertexUV(ax1, ay1, az1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 8));
+			t.vertexUV(ax1, ay1, az0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 8));
+
+			// Down
+			t.color(0x80, 0x80, 0x80);
+			t.vertexUV(ax0, ay0, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(ax0, ay0, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+			t.vertexUV(ax1, ay0, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 14));
+			t.vertexUV(ax1, ay0, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 14));
+
+			// North ash edge
+			t.color(0xd0, 0xd0, 0xd0);
+			t.vertexUV(ax0, ay1, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 15));
+			t.vertexUV(ax1, ay1, az0, getAtlasU(TEX_LOG, 6), getAtlasV(TEX_LOG, 15));
+			t.vertexUV(ax1, ay0, az0, getAtlasU(TEX_LOG, 6), getAtlasV(TEX_LOG, 16));
+			t.vertexUV(ax0, ay0, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 16));
+
+			// South ash edge
+			t.vertexUV(ax0, ay1, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 15));
+			t.vertexUV(ax0, ay0, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 16));
+			t.vertexUV(ax1, ay0, az1, getAtlasU(TEX_LOG, 10), getAtlasV(TEX_LOG, 16));
+			t.vertexUV(ax1, ay1, az1, getAtlasU(TEX_LOG, 10), getAtlasV(TEX_LOG, 15));
+
+			// 6. Fire Cross Planes (Full Brightness)
+			t.color(0xff, 0xff, 0xff);
+			float fx0 = 0.8f / 16.0f, fx1 = 15.2f / 16.0f;
+			float fz0 = 0.8f / 16.0f, fz1 = 15.2f / 16.0f;
+			float fy0 = 1.0f / 16.0f, fy1 = 17.0f / 16.0f;
+
+			float fu0 = getAtlasU(TEX_FIRE, 0), fu1 = getAtlasU(TEX_FIRE, 16);
+			float fv0 = getAtlasV(TEX_FIRE, 0), fv1 = getAtlasV(TEX_FIRE, 16);
+
+			// Diagonal 1
+			t.vertexUV(fx0, fy1, fz0, fu0, fv0);
+			t.vertexUV(fx0, fy0, fz0, fu0, fv1);
+			t.vertexUV(fx1, fy0, fz1, fu1, fv1);
+			t.vertexUV(fx1, fy1, fz1, fu1, fv0);
+
+			t.vertexUV(fx1, fy1, fz1, fu1, fv0);
+			t.vertexUV(fx1, fy0, fz1, fu1, fv1);
+			t.vertexUV(fx0, fy0, fz0, fu0, fv1);
+			t.vertexUV(fx0, fy1, fz0, fu0, fv0);
+
+			// Diagonal 2
+			t.vertexUV(fx0, fy1, fz1, fu0, fv0);
+			t.vertexUV(fx0, fy0, fz1, fu0, fv1);
+			t.vertexUV(fx1, fy0, fz0, fu1, fv1);
+			t.vertexUV(fx1, fy1, fz0, fu1, fv0);
+
+			t.vertexUV(fx1, fy1, fz0, fu1, fv0);
+			t.vertexUV(fx1, fy0, fz0, fu1, fv1);
+			t.vertexUV(fx0, fy0, fz1, fu0, fv1);
+			t.vertexUV(fx0, fy1, fz1, fu0, fv0);
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+			tile->setShape(0, 0, 0, 1, 1, 1);
+		}
+	} else if (shape == Tile::SHAPE_GRINDSTONE) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			// Left Leg (151)
+			tile->setShape(2.0f / 16.0f, 0.0f, 6.0f / 16.0f, 4.0f / 16.0f, 7.0f / 16.0f, 10.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 151);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 151);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 151); renderSouth(tile, 0, 0, 0, 151);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 151); renderEast(tile, 0, 0, 0, 151);
+
+			// Right Leg (151)
+			tile->setShape(12.0f / 16.0f, 0.0f, 6.0f / 16.0f, 14.0f / 16.0f, 7.0f / 16.0f, 10.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 151);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 151);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 151); renderSouth(tile, 0, 0, 0, 151);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 151); renderEast(tile, 0, 0, 0, 151);
+
+			// Left Pivot Bracket (151)
+			tile->setShape(2.0f / 16.0f, 7.0f / 16.0f, 5.0f / 16.0f, 4.0f / 16.0f, 13.0f / 16.0f, 11.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 151);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 151);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 151); renderSouth(tile, 0, 0, 0, 151);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 151); renderEast(tile, 0, 0, 0, 151);
+
+			// Right Pivot Bracket (151)
+			tile->setShape(12.0f / 16.0f, 7.0f / 16.0f, 5.0f / 16.0f, 14.0f / 16.0f, 13.0f / 16.0f, 11.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 151);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 151);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 151); renderSouth(tile, 0, 0, 0, 151);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 151); renderEast(tile, 0, 0, 0, 151);
+
+			// Wheel (Round 17 on Up/Down/North/South, Side 21 on West/East)
+			tile->setShape(4.0f / 16.0f, 4.0f / 16.0f, 2.0f / 16.0f, 12.0f / 16.0f, 1.0f, 14.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 17);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 17);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 17); renderSouth(tile, 0, 0, 0, 17);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 21); renderEast(tile, 0, 0, 0, 21);
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+			tile->setShape(0, 0, 0, 1, 1, 1);
+		}
+	} else if (shape == Tile::SHAPE_LECTERN) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			const int TEX_BASE = 162;
+			const int TEX_FRONT = 22;
+			const int TEX_SIDES = 106;
+			const int TEX_TOP = 107;
+
+			// 1. Base pedestal (x: 0..1, y: 0..2/16, z: 0..1)
+			float bx0 = 0.0f, bx1 = 1.0f;
+			float by0 = 0.0f, by1 = 2.0f / 16.0f;
+			float bz0 = 0.0f, bz1 = 1.0f;
+
+			// Base Up
+			t.color(0xff, 0xff, 0xff);
+			t.vertexUV(bx0, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+			t.vertexUV(bx0, by1, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 16));
+			t.vertexUV(bx1, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 16));
+			t.vertexUV(bx1, by1, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+
+			// Base Down
+			t.color(0x80, 0x80, 0x80);
+			t.vertexUV(bx0, by0, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 16));
+			t.vertexUV(bx0, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+			t.vertexUV(bx1, by0, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+			t.vertexUV(bx1, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 16));
+
+			// Base North ([0, 14, 16, 16])
+			t.color(0xd0, 0xd0, 0xd0);
+			t.vertexUV(bx0, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 14));
+			t.vertexUV(bx1, by1, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 14));
+			t.vertexUV(bx1, by0, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 16));
+			t.vertexUV(bx0, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 16));
+
+			// Base South ([0, 6, 16, 8])
+			t.vertexUV(bx0, by1, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+			t.vertexUV(bx0, by0, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 8));
+			t.vertexUV(bx1, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 8));
+			t.vertexUV(bx1, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+
+			// Base West ([0, 6, 16, 8])
+			t.color(0x90, 0x90, 0x90);
+			t.vertexUV(bx0, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+			t.vertexUV(bx0, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+			t.vertexUV(bx0, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 8));
+			t.vertexUV(bx0, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 8));
+
+			// Base East ([0, 6, 16, 8])
+			t.vertexUV(bx1, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+			t.vertexUV(bx1, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+			t.vertexUV(bx1, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 8));
+			t.vertexUV(bx1, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 8));
+
+			// 2. Central pillar (x: 4..12, y: 2..14, z: 4..12)
+			float px0 = 4.0f / 16.0f, px1 = 12.0f / 16.0f;
+			float py0 = 2.0f / 16.0f, py1 = 14.0f / 16.0f;
+			float pz0 = 4.0f / 16.0f, pz1 = 12.0f / 16.0f;
+
+			// Pillar North (front open face: [0, 0, 8, 12])
+			t.color(0xd0, 0xd0, 0xd0);
+			t.vertexUV(px0, py1, pz0, getAtlasU(TEX_FRONT, 0), getAtlasV(TEX_FRONT, 0));
+			t.vertexUV(px1, py1, pz0, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 0));
+			t.vertexUV(px1, py0, pz0, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 12));
+			t.vertexUV(px0, py0, pz0, getAtlasU(TEX_FRONT, 0), getAtlasV(TEX_FRONT, 12));
+
+			// Pillar South (back face: [8, 4, 16, 16])
+			t.vertexUV(px0, py1, pz1, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 4));
+			t.vertexUV(px0, py0, pz1, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 16));
+			t.vertexUV(px1, py0, pz1, getAtlasU(TEX_FRONT, 16), getAtlasV(TEX_FRONT, 16));
+			t.vertexUV(px1, py1, pz1, getAtlasU(TEX_FRONT, 16), getAtlasV(TEX_FRONT, 4));
+
+			// Pillar West (side face: [0, 2, 8, 14])
+			t.color(0x90, 0x90, 0x90);
+			t.vertexUV(px0, py1, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 2));
+			t.vertexUV(px0, py1, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 2));
+			t.vertexUV(px0, py0, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 14));
+			t.vertexUV(px0, py0, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 14));
+
+			// Pillar East (side face: [0, 2, 8, 14])
+			t.vertexUV(px1, py1, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 2));
+			t.vertexUV(px1, py1, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 2));
+			t.vertexUV(px1, py0, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 14));
+			t.vertexUV(px1, py0, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 14));
+
+			// 3. Top reading desk (x: 0..1, y: 12..15, z: 2..16)
+			float dx0 = 0.0f, dx1 = 1.0f;
+			float dy0 = 12.0f / 16.0f, dy1 = 15.0f / 16.0f;
+			float dz0 = 2.0f / 16.0f, dz1 = 1.0f;
+
+			// Top surface (the book/desk face: [0, 1, 16, 15] on TEX_TOP!)
+			t.color(0xff, 0xff, 0xff);
+			t.vertexUV(dx0, dy1, dz0, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 1));
+			t.vertexUV(dx0, dy1, dz1, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 15));
+			t.vertexUV(dx1, dy1, dz1, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 15));
+			t.vertexUV(dx1, dy1, dz0, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 1));
+
+			// Bottom surface (wood bottom: [0, 0, 16, 14] on TEX_BASE)
+			t.color(0x80, 0x80, 0x80);
+			t.vertexUV(dx0, dy0, dz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 14));
+			t.vertexUV(dx0, dy0, dz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+			t.vertexUV(dx1, dy0, dz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+			t.vertexUV(dx1, dy0, dz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 14));
+
+			// Desk North edge: [0, 0, 16, 3] on TEX_SIDES
+			t.color(0xd0, 0xd0, 0xd0);
+			t.vertexUV(dx0, dy1, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 0));
+			t.vertexUV(dx1, dy1, dz0, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 0));
+			t.vertexUV(dx1, dy0, dz0, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 3));
+			t.vertexUV(dx0, dy0, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 3));
+
+			// Desk South edge: [0, 4, 16, 7] on TEX_SIDES
+			t.vertexUV(dx0, dy1, dz1, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 4));
+			t.vertexUV(dx0, dy0, dz1, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 7));
+			t.vertexUV(dx1, dy0, dz1, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 7));
+			t.vertexUV(dx1, dy1, dz1, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 4));
+
+			// Desk West edge: [0, 4, 14, 7] on TEX_SIDES
+			t.color(0x90, 0x90, 0x90);
+			t.vertexUV(dx0, dy1, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 4));
+			t.vertexUV(dx0, dy1, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 4));
+			t.vertexUV(dx0, dy0, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 7));
+			t.vertexUV(dx0, dy0, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 7));
+
+			// Desk East edge: [0, 4, 14, 7] on TEX_SIDES
+			t.vertexUV(dx1, dy1, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 4));
+			t.vertexUV(dx1, dy1, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 4));
+			t.vertexUV(dx1, dy0, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 7));
+			t.vertexUV(dx1, dy0, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 7));
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+			tile->setShape(0, 0, 0, 1, 1, 1);
+		}
+	} else if (shape == Tile::SHAPE_COMPOSTER) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			// Bottom
+			tile->setShape(2.0f / 16.0f, 0.0f, 2.0f / 16.0f, 14.0f / 16.0f, 2.0f / 16.0f, 14.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 14);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 255);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 14); renderSouth(tile, 0, 0, 0, 14);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 14); renderEast(tile, 0, 0, 0, 14);
+
+			// North wall
+			tile->setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 2.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 131);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 255);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 14); renderSouth(tile, 0, 0, 0, 14);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 14); renderEast(tile, 0, 0, 0, 14);
+
+			// South wall
+			tile->setShape(0.0f, 0.0f, 14.0f / 16.0f, 1.0f, 1.0f, 1.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 131);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 255);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 14); renderSouth(tile, 0, 0, 0, 14);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 14); renderEast(tile, 0, 0, 0, 14);
+
+			// West wall
+			tile->setShape(0.0f, 0.0f, 2.0f / 16.0f, 2.0f / 16.0f, 1.0f, 14.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 131);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 255);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 14); renderSouth(tile, 0, 0, 0, 14);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 14); renderEast(tile, 0, 0, 0, 14);
+
+			// East wall
+			tile->setShape(14.0f / 16.0f, 0.0f, 2.0f / 16.0f, 1.0f, 1.0f, 14.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 131);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 255);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 14); renderSouth(tile, 0, 0, 0, 14);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 14); renderEast(tile, 0, 0, 0, 14);
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+			tile->setShape(0, 0, 0, 1, 1, 1);
+		}
+	} else if (shape == Tile::SHAPE_STONECUTTER) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			// 1. Table base
+			tile->setShape(0.0f, 0.0f, 0.0f, 1.0f, 9.0f / 16.0f, 1.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 251);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 252);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 253); renderSouth(tile, 0, 0, 0, 253);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 253); renderEast(tile, 0, 0, 0, 253);
+
+			// 2. Saw blade
+			tile->setShape(1.0f / 16.0f, 9.0f / 16.0f, 7.5f / 16.0f, 15.0f / 16.0f, 1.0f, 8.5f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 254);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 254);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 254); renderSouth(tile, 0, 0, 0, 254);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 254); renderEast(tile, 0, 0, 0, 254);
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+			tile->setShape(0, 0, 0, 1, 1, 1);
+		}
+	} else if (shape == Tile::SHAPE_CHAIN) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			tile->setShape(6.5f / 16.0f, 0.0f, 6.5f / 16.0f, 9.5f / 16.0f, 1.0f, 9.5f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, 155);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, 155);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, 155); renderSouth(tile, 0, 0, 0, 155);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, 155); renderEast(tile, 0, 0, 0, 155);
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+			tile->setShape(0, 0, 0, 1, 1, 1);
+		}
+	} else if (shape == Tile::SHAPE_SCAFFOLDING) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			int cleanTex = tex & ~Tile::TEXTURE_ALT_FLAG;
+			for (int i = 0; i < 5; i++) {
+				if (i == 0) tile->setShape(0.0f, 0.0f, 0.0f, 2.0f / 16.0f, 1.0f, 2.0f / 16.0f);
+				if (i == 1) tile->setShape(14.0f / 16.0f, 0.0f, 0.0f, 1.0f, 1.0f, 2.0f / 16.0f);
+				if (i == 2) tile->setShape(0.0f, 0.0f, 14.0f / 16.0f, 2.0f / 16.0f, 1.0f, 1.0f);
+				if (i == 3) tile->setShape(14.0f / 16.0f, 0.0f, 14.0f / 16.0f, 1.0f, 1.0f, 1.0f);
+				if (i == 4) tile->setShape(0.0f, 15.0f / 16.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+
+				t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, cleanTex);
+				t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, cleanTex);
+				t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, cleanTex); renderSouth(tile, 0, 0, 0, cleanTex);
+				t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, cleanTex); renderEast(tile, 0, 0, 0, cleanTex);
+			}
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+			tile->setShape(0, 0, 0, 1, 1, 1);
+		}
+	} else if (shape == Tile::SHAPE_CANDLE) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			int cleanTex = tex & ~Tile::TEXTURE_ALT_FLAG;
+			float cx0 = 7.0f / 16.0f, cx1 = 9.0f / 16.0f;
+			float cy0 = 0.0f / 16.0f, cy1 = 6.0f / 16.0f;
+			float cz0 = 7.0f / 16.0f, cz1 = 9.0f / 16.0f;
+
+			float uTop0 = getAtlasU(cleanTex, 0.0f), uTop1 = getAtlasU(cleanTex, 2.0f);
+			float vTop0 = getAtlasV(cleanTex, 6.0f), vTop1 = getAtlasV(cleanTex, 8.0f);
+
+			float uSide0 = getAtlasU(cleanTex, 0.0f), uSide1 = getAtlasU(cleanTex, 2.0f);
+			float vSide0 = getAtlasV(cleanTex, 6.0f), vSide1 = getAtlasV(cleanTex, 12.0f);
+
+			// Top
+			t.color(0xff, 0xff, 0xff);
+			t.vertexUV(cx0, cy1, cz0, uTop0, vTop0);
+			t.vertexUV(cx0, cy1, cz1, uTop0, vTop1);
+			t.vertexUV(cx1, cy1, cz1, uTop1, vTop1);
+			t.vertexUV(cx1, cy1, cz0, uTop1, vTop0);
+
+			// Down
+			t.color(0x80, 0x80, 0x80);
+			t.vertexUV(cx0, cy0, cz1, uTop0, vTop1);
+			t.vertexUV(cx0, cy0, cz0, uTop0, vTop0);
+			t.vertexUV(cx1, cy0, cz0, uTop1, vTop0);
+			t.vertexUV(cx1, cy0, cz1, uTop1, vTop1);
+
+			// North & South
+			t.color(0xd0, 0xd0, 0xd0);
+			t.vertexUV(cx0, cy1, cz0, uSide1, vSide0);
+			t.vertexUV(cx1, cy1, cz0, uSide0, vSide0);
+			t.vertexUV(cx1, cy0, cz0, uSide0, vSide1);
+			t.vertexUV(cx0, cy0, cz0, uSide1, vSide1);
+			t.vertexUV(cx1, cy1, cz0, uSide0, vSide0);
+			t.vertexUV(cx0, cy1, cz0, uSide1, vSide0);
+			t.vertexUV(cx0, cy0, cz0, uSide1, vSide1);
+			t.vertexUV(cx1, cy0, cz0, uSide0, vSide1);
+
+			t.vertexUV(cx0, cy1, cz1, uSide0, vSide0);
+			t.vertexUV(cx0, cy0, cz1, uSide0, vSide1);
+			t.vertexUV(cx1, cy0, cz1, uSide1, vSide1);
+			t.vertexUV(cx1, cy1, cz1, uSide1, vSide0);
+			t.vertexUV(cx1, cy1, cz1, uSide1, vSide0);
+			t.vertexUV(cx1, cy0, cz1, uSide1, vSide1);
+			t.vertexUV(cx0, cy0, cz1, uSide0, vSide1);
+			t.vertexUV(cx0, cy1, cz1, uSide0, vSide0);
+
+			// West & East
+			t.color(0x90, 0x90, 0x90);
+			t.vertexUV(cx0, cy1, cz1, uSide1, vSide0);
+			t.vertexUV(cx0, cy1, cz0, uSide0, vSide0);
+			t.vertexUV(cx0, cy0, cz0, uSide0, vSide1);
+			t.vertexUV(cx0, cy0, cz1, uSide1, vSide1);
+			t.vertexUV(cx0, cy1, cz0, uSide0, vSide0);
+			t.vertexUV(cx0, cy1, cz1, uSide1, vSide0);
+			t.vertexUV(cx0, cy0, cz1, uSide1, vSide1);
+			t.vertexUV(cx0, cy0, cz0, uSide0, vSide1);
+
+			t.vertexUV(cx1, cy0, cz1, uSide0, vSide1);
+			t.vertexUV(cx1, cy0, cz0, uSide1, vSide1);
+			t.vertexUV(cx1, cy1, cz0, uSide1, vSide0);
+			t.vertexUV(cx1, cy1, cz1, uSide0, vSide0);
+			t.vertexUV(cx1, cy1, cz0, uSide1, vSide0);
+			t.vertexUV(cx1, cy0, cz0, uSide1, vSide1);
+			t.vertexUV(cx1, cy0, cz1, uSide0, vSide1);
+			t.vertexUV(cx1, cy1, cz1, uSide0, vSide0);
+
+			// Wick
+			float wu0 = getAtlasU(cleanTex, 0.0f), wu1 = getAtlasU(cleanTex, 1.0f);
+			float wv0 = getAtlasV(cleanTex, 4.5f), wv1 = getAtlasV(cleanTex, 6.0f);
+			float wy0 = 6.0f / 16.0f, wy1 = 8.5f / 16.0f;
+			float wx0 = 7.5f / 16.0f, wx1 = 8.5f / 16.0f;
+			float wz0 = 7.5f / 16.0f, wz1 = 8.5f / 16.0f;
+			float wMidX = 8.0f / 16.0f;
+			float wMidZ = 8.0f / 16.0f;
+
+			t.color(0xff, 0xff, 0xff);
+			// Quad X (double sided)
+			t.vertexUV(wx0, wy1, wMidZ, wu0, wv0);
+			t.vertexUV(wx0, wy0, wMidZ, wu0, wv1);
+			t.vertexUV(wx1, wy0, wMidZ, wu1, wv1);
+			t.vertexUV(wx1, wy1, wMidZ, wu1, wv0);
+
+			t.vertexUV(wx1, wy1, wMidZ, wu1, wv0);
+			t.vertexUV(wx1, wy0, wMidZ, wu1, wv1);
+			t.vertexUV(wx0, wy0, wMidZ, wu0, wv1);
+			t.vertexUV(wx0, wy1, wMidZ, wu0, wv0);
+
+			// Quad Z (double sided)
+			t.vertexUV(wMidX, wy1, wz0, wu0, wv0);
+			t.vertexUV(wMidX, wy0, wz0, wu0, wv1);
+			t.vertexUV(wMidX, wy0, wz1, wu1, wv1);
+			t.vertexUV(wMidX, wy1, wz1, wu1, wv0);
+
+			t.vertexUV(wMidX, wy1, wz1, wu1, wv0);
+			t.vertexUV(wMidX, wy0, wz1, wu1, wv1);
+			t.vertexUV(wMidX, wy0, wz0, wu0, wv1);
+			t.vertexUV(wMidX, wy1, wz0, wu0, wv0);
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+			tile->setShape(0, 0, 0, 1, 1, 1);
+		}
+	} else if (shape == Tile::SHAPE_CAULDRON) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			const int TEX_TOP = 149;
+			const int TEX_INNER = 150;
+			const int TEX_SIDE = 163;
+			const int TEX_BOTTOM = 165;
+
+			// 4 legs
+			tile->setShape(0.0f, 0.0f, 0.0f, 2.0f / 16.0f, 3.0f / 16.0f, 2.0f / 16.0f);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, TEX_SIDE); renderSouth(tile, 0, 0, 0, TEX_SIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+			tile->setShape(14.0f / 16.0f, 0.0f, 0.0f, 1.0f, 3.0f / 16.0f, 2.0f / 16.0f);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, TEX_SIDE); renderSouth(tile, 0, 0, 0, TEX_SIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+			tile->setShape(0.0f, 0.0f, 14.0f / 16.0f, 2.0f / 16.0f, 3.0f / 16.0f, 1.0f);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, TEX_SIDE); renderSouth(tile, 0, 0, 0, TEX_SIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+			tile->setShape(14.0f / 16.0f, 0.0f, 14.0f / 16.0f, 1.0f, 3.0f / 16.0f, 1.0f);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, TEX_SIDE); renderSouth(tile, 0, 0, 0, TEX_SIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+			// Bottom basin floor
+			tile->setShape(2.0f / 16.0f, 3.0f / 16.0f, 2.0f / 16.0f, 14.0f / 16.0f, 5.0f / 16.0f, 14.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_INNER);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+
+			// 4 walls
+			// North wall
+			tile->setShape(0.0f, 3.0f / 16.0f, 0.0f, 1.0f, 1.0f, 2.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, TEX_SIDE); renderSouth(tile, 0, 0, 0, TEX_INNER);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+			// South wall
+			tile->setShape(0.0f, 3.0f / 16.0f, 14.0f / 16.0f, 1.0f, 1.0f, 1.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, TEX_INNER); renderSouth(tile, 0, 0, 0, TEX_SIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+			// West wall
+			tile->setShape(0.0f, 3.0f / 16.0f, 2.0f / 16.0f, 2.0f / 16.0f, 1.0f, 14.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_SIDE); renderEast(tile, 0, 0, 0, TEX_INNER);
+
+			// East wall
+			tile->setShape(14.0f / 16.0f, 3.0f / 16.0f, 2.0f / 16.0f, 1.0f, 1.0f, 14.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_BOTTOM);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_INNER); renderEast(tile, 0, 0, 0, TEX_SIDE);
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+			tile->setShape(0, 0, 0, 1, 1, 1);
+		}
+	} else if (shape == Tile::SHAPE_ANVIL) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			int dmg = 0;
+			AnvilTile* at = dynamic_cast<AnvilTile*>(tile);
+			if (at) dmg = at->damageType;
+			else if (tile == Tile::chippedAnvil) dmg = 1;
+			else if (tile == Tile::damagedAnvil) dmg = 2;
+
+			int topTex = (dmg == 0 ? 170 : (dmg == 1 ? 180 : 185));
+			int baseTex = 166;
+
+			// Base: (2..14, 0..4, 2..14)
+			tile->setShape(2.0f / 16.0f, 0.0f, 2.0f / 16.0f, 14.0f / 16.0f, 4.0f / 16.0f, 14.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, baseTex);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, baseTex);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, baseTex); renderSouth(tile, 0, 0, 0, baseTex);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, baseTex); renderEast(tile, 0, 0, 0, baseTex);
+
+			// Lower neck: (4..12, 4..5, 5..11)
+			tile->setShape(4.0f / 16.0f, 4.0f / 16.0f, 5.0f / 16.0f, 12.0f / 16.0f, 5.0f / 16.0f, 11.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, baseTex);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, baseTex);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, baseTex); renderSouth(tile, 0, 0, 0, baseTex);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, baseTex); renderEast(tile, 0, 0, 0, baseTex);
+
+			// Stem: (6..10, 5..10, 6..10)
+			tile->setShape(6.0f / 16.0f, 5.0f / 16.0f, 6.0f / 16.0f, 10.0f / 16.0f, 10.0f / 16.0f, 10.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, baseTex);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, baseTex);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, baseTex); renderSouth(tile, 0, 0, 0, baseTex);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, baseTex); renderEast(tile, 0, 0, 0, baseTex);
+
+			// Head: (3..13, 10..16, 0..16)
+			tile->setShape(3.0f / 16.0f, 10.0f / 16.0f, 0.0f, 13.0f / 16.0f, 1.0f, 1.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, topTex);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, baseTex);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, baseTex); renderSouth(tile, 0, 0, 0, baseTex);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, baseTex); renderEast(tile, 0, 0, 0, baseTex);
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+			tile->setShape(0, 0, 0, 1, 1, 1);
+		}
+	} else if (shape == Tile::SHAPE_HOPPER) {
+		int tex = tile->getTexture(0, data);
+		bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+		if (atlasFilter == -1 || (atlasFilter == 0 && !isAlt) || (atlasFilter == 1 && isAlt)) {
+			t.addOffset(-0.5f, -0.5f, -0.5f);
+			t.begin();
+
+			const int TEX_TOP = 195;
+			const int TEX_INSIDE = 199;
+			const int TEX_OUTSIDE = 200;
+
+			// 1. Top basin floor
+			tile->setShape(2.0f / 16.0f, 10.0f / 16.0f, 2.0f / 16.0f, 14.0f / 16.0f, 11.0f / 16.0f, 14.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_INSIDE);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, TEX_OUTSIDE); renderSouth(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+			// 2. Basin 4 walls
+			// North wall
+			tile->setShape(0.0f, 10.0f / 16.0f, 0.0f, 1.0f, 1.0f, 2.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, TEX_OUTSIDE); renderSouth(tile, 0, 0, 0, TEX_INSIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+			// South wall
+			tile->setShape(0.0f, 10.0f / 16.0f, 14.0f / 16.0f, 1.0f, 1.0f, 1.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, TEX_INSIDE); renderSouth(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+			// West wall
+			tile->setShape(0.0f, 10.0f / 16.0f, 2.0f / 16.0f, 2.0f / 16.0f, 1.0f, 14.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_INSIDE);
+
+			// East wall
+			tile->setShape(14.0f / 16.0f, 10.0f / 16.0f, 2.0f / 16.0f, 1.0f, 1.0f, 14.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_TOP);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_INSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+			// 3. Middle Funnel (4..12, 4..10, 4..12)
+			tile->setShape(4.0f / 16.0f, 4.0f / 16.0f, 4.0f / 16.0f, 12.0f / 16.0f, 10.0f / 16.0f, 12.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, TEX_OUTSIDE); renderSouth(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+			// 4. Spout (down) (6..10, 0..4, 6..10)
+			tile->setShape(6.0f / 16.0f, 0.0f, 6.0f / 16.0f, 10.0f / 16.0f, 4.0f / 16.0f, 10.0f / 16.0f);
+			t.color(0xff, 0xff, 0xff); renderFaceUp(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0x80, 0x80, 0x80); renderFaceDown(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0xd0, 0xd0, 0xd0); renderNorth(tile, 0, 0, 0, TEX_OUTSIDE); renderSouth(tile, 0, 0, 0, TEX_OUTSIDE);
+			t.color(0x90, 0x90, 0x90); renderWest(tile, 0, 0, 0, TEX_OUTSIDE); renderEast(tile, 0, 0, 0, TEX_OUTSIDE);
+
+			t.draw();
+			t.addOffset(0.5f, 0.5f, 0.5f);
+			tile->setShape(0, 0, 0, 1, 1, 1);
+		}
 	}
 }
 
@@ -3910,20 +5915,233 @@ bool TileRenderer::tesselateLanternInWorld(Tile* tt, int x, int y, int z) {
 		(Tile::soulLantern && level->getTile(x, y + 1, z) == Tile::soulLantern->id) ||
 		(level->getTile(x, y + 1, z) != 0 && !level->isSolidRenderTile(x, y - 1, z)));
 
+	Tesselator& t = Tesselator::instance;
+	float br = tt->getBrightness(level, x, y, z);
+	int tex = tt->getTexture(level, x, y, z, 0) & ~Tile::TEXTURE_ALT_FLAG;
+	int xt = (tex & 0xf) << 4;
+	int yt = tex & 0xf0;
+	const float atlasSize = 256.0f;
+
+	float xf = (float)x;
+	float yf = (float)y;
+	float zf = (float)z;
+
+	// UVs for lantern parts within the 16x16 tile
+	// Body sides: 6 wide, 7 high (x: 0..6, y: 2..9)
+	float uSide0 = (xt + 0.0f) / atlasSize;
+	float uSide1 = (xt + 6.0f) / atlasSize;
+	float vSide0 = (yt + 2.0f) / atlasSize;
+	float vSide1 = (yt + 9.0f) / atlasSize;
+
+	// Body top/bottom lid: 6x6 (x: 0..6, y: 9..15)
+	float uLid0 = (xt + 0.0f) / atlasSize;
+	float uLid1 = (xt + 6.0f) / atlasSize;
+	float vLid0 = (yt + 9.0f) / atlasSize;
+	float vLid1 = (yt + 15.0f) / atlasSize;
+
+	// Cap sides: 4 wide, 2 high (x: 1..5, y: 0..2)
+	float uCap0 = (xt + 1.0f) / atlasSize;
+	float uCap1 = (xt + 5.0f) / atlasSize;
+	float vCap0 = (yt + 0.0f) / atlasSize;
+	float vCap1 = (yt + 2.0f) / atlasSize;
+
+	// Cap top: 4x4 (x: 1..5, y: 9..13)
+	float uCapTop0 = (xt + 1.0f) / atlasSize;
+	float uCapTop1 = (xt + 5.0f) / atlasSize;
+	float vCapTop0 = (yt + 9.0f) / atlasSize;
+	float vCapTop1 = (yt + 13.0f) / atlasSize;
+
+	// Handle / Ring: 3 wide, 4 high (x: 11..14, y: 1..5)
+	float uRing0 = (xt + 11.0f) / atlasSize;
+	float uRing1 = (xt + 14.0f) / atlasSize;
+	float vRing0 = (yt + 1.0f) / atlasSize;
+	float vRing1 = (yt + 5.0f) / atlasSize;
+
+	// Hanging chain: 3 wide, 6 high (x: 11..14, y: 6..12)
+	float uChain0 = (xt + 11.0f) / atlasSize;
+	float uChain1 = (xt + 14.0f) / atlasSize;
+	float vChain0 = (yt + 6.0f) / atlasSize;
+	float vChain1 = (yt + 12.0f) / atlasSize;
+
+	// Colors for directional lighting
+	float colUp = 1.0f * br;
+	float colDown = 0.5f * br;
+	float colNorthSouth = 0.8f * br;
+	float colWestEast = 0.6f * br;
+
+	float bx0 = xf + 5.0f / 16.0f;
+	float bx1 = xf + 11.0f / 16.0f;
+	float bz0 = zf + 5.0f / 16.0f;
+	float bz1 = zf + 11.0f / 16.0f;
+	float by0 = hanging ? (yf + 1.0f / 16.0f) : (yf + 0.0f / 16.0f);
+	float by1 = hanging ? (yf + 8.0f / 16.0f) : (yf + 7.0f / 16.0f);
+
+	// 1. Lantern Main Body (6x7x6)
+	// Up
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(bx0, by1, bz0, uLid0, vLid0);
+	t.vertexUV(bx0, by1, bz1, uLid0, vLid1);
+	t.vertexUV(bx1, by1, bz1, uLid1, vLid1);
+	t.vertexUV(bx1, by1, bz0, uLid1, vLid0);
+
+	// Down
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(bx0, by0, bz1, uLid0, vLid1);
+	t.vertexUV(bx0, by0, bz0, uLid0, vLid0);
+	t.vertexUV(bx1, by0, bz0, uLid1, vLid0);
+	t.vertexUV(bx1, by0, bz1, uLid1, vLid1);
+
+	// North (Z-) & inside South
+	t.color(colNorthSouth, colNorthSouth, colNorthSouth);
+	t.vertexUV(bx0, by1, bz0, uSide1, vSide0);
+	t.vertexUV(bx1, by1, bz0, uSide0, vSide0);
+	t.vertexUV(bx1, by0, bz0, uSide0, vSide1);
+	t.vertexUV(bx0, by0, bz0, uSide1, vSide1);
+	// Interior face
+	t.vertexUV(bx1, by1, bz0, uSide0, vSide0);
+	t.vertexUV(bx0, by1, bz0, uSide1, vSide0);
+	t.vertexUV(bx0, by0, bz0, uSide1, vSide1);
+	t.vertexUV(bx1, by0, bz0, uSide0, vSide1);
+
+	// South (Z+) & inside North
+	t.vertexUV(bx0, by1, bz1, uSide0, vSide0);
+	t.vertexUV(bx0, by0, bz1, uSide0, vSide1);
+	t.vertexUV(bx1, by0, bz1, uSide1, vSide1);
+	t.vertexUV(bx1, by1, bz1, uSide1, vSide0);
+	// Interior face
+	t.vertexUV(bx1, by1, bz1, uSide1, vSide0);
+	t.vertexUV(bx1, by0, bz1, uSide1, vSide1);
+	t.vertexUV(bx0, by0, bz1, uSide0, vSide1);
+	t.vertexUV(bx0, by1, bz1, uSide0, vSide0);
+
+	// West (X-) & inside East
+	t.color(colWestEast, colWestEast, colWestEast);
+	t.vertexUV(bx0, by1, bz1, uSide1, vSide0);
+	t.vertexUV(bx0, by1, bz0, uSide0, vSide0);
+	t.vertexUV(bx0, by0, bz0, uSide0, vSide1);
+	t.vertexUV(bx0, by0, bz1, uSide1, vSide1);
+	// Interior face
+	t.vertexUV(bx0, by1, bz0, uSide0, vSide0);
+	t.vertexUV(bx0, by1, bz1, uSide1, vSide0);
+	t.vertexUV(bx0, by0, bz1, uSide1, vSide1);
+	t.vertexUV(bx0, by0, bz0, uSide0, vSide1);
+
+	// East (X+) & inside West
+	t.vertexUV(bx1, by0, bz1, uSide0, vSide1);
+	t.vertexUV(bx1, by0, bz0, uSide1, vSide1);
+	t.vertexUV(bx1, by1, bz0, uSide1, vSide0);
+	t.vertexUV(bx1, by1, bz1, uSide0, vSide0);
+	// Interior face
+	t.vertexUV(bx1, by0, bz0, uSide1, vSide1);
+	t.vertexUV(bx1, by0, bz1, uSide0, vSide1);
+	t.vertexUV(bx1, by1, bz1, uSide0, vSide0);
+	t.vertexUV(bx1, by1, bz0, uSide1, vSide0);
+
+	// 2. Top Cap (4x2x4)
+	float cx0 = xf + 6.0f / 16.0f;
+	float cx1 = xf + 10.0f / 16.0f;
+	float cz0 = zf + 6.0f / 16.0f;
+	float cz1 = zf + 10.0f / 16.0f;
+	float cy0 = hanging ? (yf + 8.0f / 16.0f) : (yf + 7.0f / 16.0f);
+	float cy1 = hanging ? (yf + 10.0f / 16.0f) : (yf + 9.0f / 16.0f);
+
+	// Cap Up
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(cx0, cy1, cz0, uCapTop0, vCapTop0);
+	t.vertexUV(cx0, cy1, cz1, uCapTop0, vCapTop1);
+	t.vertexUV(cx1, cy1, cz1, uCapTop1, vCapTop1);
+	t.vertexUV(cx1, cy1, cz0, uCapTop1, vCapTop0);
+
+	// Cap North
+	t.color(colNorthSouth, colNorthSouth, colNorthSouth);
+	t.vertexUV(cx0, cy1, cz0, uCap1, vCap0);
+	t.vertexUV(cx1, cy1, cz0, uCap0, vCap0);
+	t.vertexUV(cx1, cy0, cz0, uCap0, vCap1);
+	t.vertexUV(cx0, cy0, cz0, uCap1, vCap1);
+
+	// Cap South
+	t.vertexUV(cx0, cy1, cz1, uCap0, vCap0);
+	t.vertexUV(cx0, cy0, cz1, uCap0, vCap1);
+	t.vertexUV(cx1, cy0, cz1, uCap1, vCap1);
+	t.vertexUV(cx1, cy1, cz1, uCap1, vCap0);
+
+	// Cap West
+	t.color(colWestEast, colWestEast, colWestEast);
+	t.vertexUV(cx0, cy1, cz1, uCap1, vCap0);
+	t.vertexUV(cx0, cy1, cz0, uCap0, vCap0);
+	t.vertexUV(cx0, cy0, cz0, uCap0, vCap1);
+	t.vertexUV(cx0, cy0, cz1, uCap1, vCap1);
+
+	// Cap East
+	t.vertexUV(cx1, cy0, cz1, uCap0, vCap1);
+	t.vertexUV(cx1, cy0, cz0, uCap1, vCap1);
+	t.vertexUV(cx1, cy1, cz0, uCap1, vCap0);
+	t.vertexUV(cx1, cy1, cz1, uCap0, vCap0);
+
+	// 3. Handle / Chain Link
+	t.color(colNorthSouth, colNorthSouth, colNorthSouth);
 	if (hanging) {
-		tt->setShape(5.0f / 16.0f, 1.0f / 16.0f, 5.0f / 16.0f, 11.0f / 16.0f, 8.0f / 16.0f, 11.0f / 16.0f);
-		tesselateBlockInWorld(tt, x, y, z);
-		tt->setShape(6.0f / 16.0f, 8.0f / 16.0f, 6.0f / 16.0f, 10.0f / 16.0f, 10.0f / 16.0f, 10.0f / 16.0f);
-		tesselateBlockInWorld(tt, x, y, z);
-		tt->setShape(6.5f / 16.0f, 10.0f / 16.0f, 6.5f / 16.0f, 9.5f / 16.0f, 1.0f, 9.5f / 16.0f);
-		tesselateBlockInWorld(tt, x, y, z);
+		float hx0 = xf + 6.5f / 16.0f;
+		float hx1 = xf + 9.5f / 16.0f;
+		float hz0 = zf + 6.5f / 16.0f;
+		float hz1 = zf + 9.5f / 16.0f;
+		float hy0 = yf + 10.0f / 16.0f;
+		float hy1 = yf + 16.0f / 16.0f;
+		float hxMid = xf + 8.0f / 16.0f;
+		float hzMid = zf + 8.0f / 16.0f;
+
+		// Quad along X at z = hzMid (double sided)
+		t.vertexUV(hx0, hy1, hzMid, uChain0, vChain0);
+		t.vertexUV(hx1, hy1, hzMid, uChain1, vChain0);
+		t.vertexUV(hx1, hy0, hzMid, uChain1, vChain1);
+		t.vertexUV(hx0, hy0, hzMid, uChain0, vChain1);
+
+		t.vertexUV(hx1, hy1, hzMid, uChain1, vChain0);
+		t.vertexUV(hx0, hy1, hzMid, uChain0, vChain0);
+		t.vertexUV(hx0, hy0, hzMid, uChain0, vChain1);
+		t.vertexUV(hx1, hy0, hzMid, uChain1, vChain1);
+
+		// Quad along Z at x = hxMid (double sided)
+		t.vertexUV(hxMid, hy1, hz0, uChain0, vChain0);
+		t.vertexUV(hxMid, hy1, hz1, uChain1, vChain0);
+		t.vertexUV(hxMid, hy0, hz1, uChain1, vChain1);
+		t.vertexUV(hxMid, hy0, hz0, uChain0, vChain1);
+
+		t.vertexUV(hxMid, hy1, hz1, uChain1, vChain0);
+		t.vertexUV(hxMid, hy1, hz0, uChain0, vChain0);
+		t.vertexUV(hxMid, hy0, hz0, uChain0, vChain1);
+		t.vertexUV(hxMid, hy0, hz1, uChain1, vChain1);
 	} else {
-		tt->setShape(5.0f / 16.0f, 0.0f, 5.0f / 16.0f, 11.0f / 16.0f, 7.0f / 16.0f, 11.0f / 16.0f);
-		tesselateBlockInWorld(tt, x, y, z);
-		tt->setShape(6.0f / 16.0f, 7.0f / 16.0f, 6.0f / 16.0f, 10.0f / 16.0f, 9.0f / 16.0f, 10.0f / 16.0f);
-		tesselateBlockInWorld(tt, x, y, z);
-		tt->setShape(6.5f / 16.0f, 9.0f / 16.0f, 6.5f / 16.0f, 9.5f / 16.0f, 11.0f / 16.0f, 9.5f / 16.0f);
-		tesselateBlockInWorld(tt, x, y, z);
+		float rx0 = xf + 6.5f / 16.0f;
+		float rx1 = xf + 9.5f / 16.0f;
+		float rz0 = zf + 6.5f / 16.0f;
+		float rz1 = zf + 9.5f / 16.0f;
+		float ry0 = yf + 9.0f / 16.0f;
+		float ry1 = yf + 13.0f / 16.0f;
+		float rxMid = xf + 8.0f / 16.0f;
+		float rzMid = zf + 8.0f / 16.0f;
+
+		// Quad along X at z = rzMid (double sided)
+		t.vertexUV(rx0, ry1, rzMid, uRing0, vRing0);
+		t.vertexUV(rx1, ry1, rzMid, uRing1, vRing0);
+		t.vertexUV(rx1, ry0, rzMid, uRing1, vRing1);
+		t.vertexUV(rx0, ry0, rzMid, uRing0, vRing1);
+
+		t.vertexUV(rx1, ry1, rzMid, uRing1, vRing0);
+		t.vertexUV(rx0, ry1, rzMid, uRing0, vRing0);
+		t.vertexUV(rx0, ry0, rzMid, uRing0, vRing1);
+		t.vertexUV(rx1, ry0, rzMid, uRing1, vRing1);
+
+		// Quad along Z at x = rxMid (double sided)
+		t.vertexUV(rxMid, ry1, rz0, uRing0, vRing0);
+		t.vertexUV(rxMid, ry1, rz1, uRing1, vRing0);
+		t.vertexUV(rxMid, ry0, rz1, uRing1, vRing1);
+		t.vertexUV(rxMid, ry0, rz0, uRing0, vRing1);
+
+		t.vertexUV(rxMid, ry1, rz1, uRing1, vRing0);
+		t.vertexUV(rxMid, ry1, rz0, uRing0, vRing0);
+		t.vertexUV(rxMid, ry0, rz0, uRing0, vRing1);
+		t.vertexUV(rxMid, ry0, rz1, uRing1, vRing1);
 	}
 
 	tt->setShape(5.0f / 16.0f, 0.0f, 5.0f / 16.0f, 11.0f / 16.0f, 9.0f / 16.0f, 11.0f / 16.0f);
@@ -3931,20 +6149,265 @@ bool TileRenderer::tesselateLanternInWorld(Tile* tt, int x, int y, int z) {
 }
 
 bool TileRenderer::tesselateCampfireInWorld(Tile* tt, int x, int y, int z) {
-	tt->setShape(1.0f / 16.0f, 0.0f, 0.0f, 5.0f / 16.0f, 4.0f / 16.0f, 1.0f);
-	tesselateBlockInWorld(tt, x, y, z);
+	Tesselator& t = Tesselator::instance;
+	float br = tt->getBrightness(level, x, y, z);
+	if (Tile::lightEmission[tt->id] > 0) br = 1.0f;
 
-	tt->setShape(11.0f / 16.0f, 0.0f, 0.0f, 15.0f / 16.0f, 4.0f / 16.0f, 1.0f);
-	tesselateBlockInWorld(tt, x, y, z);
+	const int TEX_LOG = 118;
+	const int TEX_FIRE = 109;
+	const int TEX_LIT = 110;
 
-	tt->setShape(0.0f, 3.0f / 16.0f, 1.0f / 16.0f, 1.0f, 7.0f / 16.0f, 5.0f / 16.0f);
-	tesselateBlockInWorld(tt, x, y, z);
+	float colUp = 1.0f * br;
+	float colDown = 0.5f * br;
+	float colNS = 0.8f * br;
+	float colWE = 0.6f * br;
 
-	tt->setShape(0.0f, 3.0f / 16.0f, 11.0f / 16.0f, 1.0f, 7.0f / 16.0f, 15.0f / 16.0f);
-	tesselateBlockInWorld(tt, x, y, z);
+	float xf = (float)x;
+	float yf = (float)y;
+	float zf = (float)z;
 
-	tt->setShape(5.0f / 16.0f, 0.0f, 0.0f, 11.0f / 16.0f, 1.0f / 16.0f, 1.0f);
-	tesselateBlockInWorld(tt, x, y, z);
+	// 1. Bottom Left Log (West Log: x: 1..5, y: 0..4, z: 0..16)
+	float lx0 = xf + 1.0f / 16.0f, lx1 = xf + 5.0f / 16.0f;
+	float ly0 = yf + 0.0f, ly1 = yf + 4.0f / 16.0f;
+	float lz0 = zf + 0.0f, lz1 = zf + 1.0f;
+
+	// Up (rot 90)
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(lx0, ly1, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(lx0, ly1, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(lx1, ly1, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(lx1, ly1, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+
+	// Down (rot 90)
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(lx0, ly0, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(lx0, ly0, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(lx1, ly0, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(lx1, ly0, lz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+
+	// North (end cut)
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(lx0, ly1, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(lx1, ly1, lz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(lx1, ly0, lz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(lx0, ly0, lz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+
+	// South (end cut)
+	t.vertexUV(lx0, ly1, lz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(lx0, ly0, lz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(lx1, ly0, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(lx1, ly1, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+	// West (bark)
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(lx0, ly1, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(lx0, ly1, lz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(lx0, ly0, lz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(lx0, ly0, lz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+	// East (lit log inner)
+	t.vertexUV(lx1, ly1, lz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 1));
+	t.vertexUV(lx1, ly1, lz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 1));
+	t.vertexUV(lx1, ly0, lz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 5));
+	t.vertexUV(lx1, ly0, lz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 5));
+
+	// 2. Bottom Right Log (East Log: x: 11..15, y: 0..4, z: 0..16)
+	float rx0 = xf + 11.0f / 16.0f, rx1 = xf + 15.0f / 16.0f;
+	float ry0 = yf + 0.0f, ry1 = yf + 4.0f / 16.0f;
+	float rz0 = zf + 0.0f, rz1 = zf + 1.0f;
+
+	// Up (rot 90)
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(rx0, ry1, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(rx0, ry1, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(rx1, ry1, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(rx1, ry1, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+
+	// Down (rot 90)
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(rx0, ry0, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(rx0, ry0, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(rx1, ry0, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(rx1, ry0, rz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+
+	// North (end cut)
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(rx0, ry1, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(rx1, ry1, rz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(rx1, ry0, rz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(rx0, ry0, rz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+
+	// South (end cut)
+	t.vertexUV(rx0, ry1, rz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(rx0, ry0, rz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(rx1, ry0, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(rx1, ry1, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+	// West (lit log inner)
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(rx0, ry1, rz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 1));
+	t.vertexUV(rx0, ry1, rz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 1));
+	t.vertexUV(rx0, ry0, rz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 5));
+	t.vertexUV(rx0, ry0, rz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 5));
+
+	// East (bark)
+	t.vertexUV(rx1, ry1, rz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(rx1, ry1, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(rx1, ry0, rz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(rx1, ry0, rz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+
+	// 3. Top North Log (x: 0..16, y: 3..7, z: 1..5)
+	float nx0 = xf + 0.0f, nx1 = xf + 1.0f;
+	float ny0 = yf + 3.0f / 16.0f, ny1 = yf + 7.0f / 16.0f;
+	float nz0 = zf + 1.0f / 16.0f, nz1 = zf + 5.0f / 16.0f;
+
+	// Up (rot 180)
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(nx0, ny1, nz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(nx0, ny1, nz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(nx1, ny1, nz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(nx1, ny1, nz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+	// Down
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(nx0, ny0, nz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+	t.vertexUV(nx0, ny0, nz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 8));
+	t.vertexUV(nx1, ny0, nz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 8));
+	t.vertexUV(nx1, ny0, nz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+
+	// West (end cut)
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(nx0, ny1, nz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(nx0, ny1, nz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(nx0, ny0, nz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(nx0, ny0, nz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+	// East (end cut)
+	t.vertexUV(nx1, ny1, nz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(nx1, ny1, nz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(nx1, ny0, nz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(nx1, ny0, nz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+	// North (outer lit side)
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(nx0, ny1, nz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+	t.vertexUV(nx1, ny1, nz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+	t.vertexUV(nx1, ny0, nz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+	t.vertexUV(nx0, ny0, nz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+
+	// South (inner lit side)
+	t.vertexUV(nx0, ny1, nz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+	t.vertexUV(nx0, ny0, nz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+	t.vertexUV(nx1, ny0, nz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+	t.vertexUV(nx1, ny1, nz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+
+	// 4. Top South Log (x: 0..16, y: 3..7, z: 11..15)
+	float sx0 = xf + 0.0f, sx1 = xf + 1.0f;
+	float sy0 = yf + 3.0f / 16.0f, sy1 = yf + 7.0f / 16.0f;
+	float sz0 = zf + 11.0f / 16.0f, sz1 = zf + 15.0f / 16.0f;
+
+	// Up (rot 180)
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(sx0, sy1, sz0, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(sx0, sy1, sz1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(sx1, sy1, sz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 0));
+	t.vertexUV(sx1, sy1, sz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+
+	// Down
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(sx0, sy0, sz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+	t.vertexUV(sx0, sy0, sz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 8));
+	t.vertexUV(sx1, sy0, sz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 8));
+	t.vertexUV(sx1, sy0, sz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+
+	// West (end cut)
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(sx0, sy1, sz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(sx0, sy1, sz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(sx0, sy0, sz0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(sx0, sy0, sz1, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+	// East (end cut)
+	t.vertexUV(sx1, sy1, sz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(sx1, sy1, sz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 4));
+	t.vertexUV(sx1, sy0, sz1, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(sx1, sy0, sz0, getAtlasU(TEX_LOG, 4), getAtlasV(TEX_LOG, 8));
+
+	// North (inner lit side)
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(sx0, sy1, sz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+	t.vertexUV(sx1, sy1, sz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+	t.vertexUV(sx1, sy0, sz0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+	t.vertexUV(sx0, sy0, sz0, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+
+	// South (outer lit side)
+	t.vertexUV(sx0, sy1, sz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 0));
+	t.vertexUV(sx0, sy0, sz1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 4));
+	t.vertexUV(sx1, sy0, sz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 4));
+	t.vertexUV(sx1, sy1, sz1, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 0));
+
+	// 5. Coals / Ash bed (x: 5..11, y: 0..1, z: 0..16)
+	float ax0 = xf + 5.0f / 16.0f, ax1 = xf + 11.0f / 16.0f;
+	float ay0 = yf + 0.0f, ay1 = yf + 1.0f / 16.0f;
+	float az0 = zf + 0.0f, az1 = zf + 1.0f;
+
+	// Up (ash coals glowing)
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(ax0, ay1, az0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 14));
+	t.vertexUV(ax0, ay1, az1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 14));
+	t.vertexUV(ax1, ay1, az1, getAtlasU(TEX_LIT, 16), getAtlasV(TEX_LIT, 8));
+	t.vertexUV(ax1, ay1, az0, getAtlasU(TEX_LIT, 0), getAtlasV(TEX_LIT, 8));
+
+	// Down
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(ax0, ay0, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(ax0, ay0, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 8));
+	t.vertexUV(ax1, ay0, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 14));
+	t.vertexUV(ax1, ay0, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 14));
+
+	// North ash edge
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(ax0, ay1, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 15));
+	t.vertexUV(ax1, ay1, az0, getAtlasU(TEX_LOG, 6), getAtlasV(TEX_LOG, 15));
+	t.vertexUV(ax1, ay0, az0, getAtlasU(TEX_LOG, 6), getAtlasV(TEX_LOG, 16));
+	t.vertexUV(ax0, ay0, az0, getAtlasU(TEX_LOG, 0), getAtlasV(TEX_LOG, 16));
+
+	// South ash edge
+	t.vertexUV(ax0, ay1, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 15));
+	t.vertexUV(ax0, ay0, az1, getAtlasU(TEX_LOG, 16), getAtlasV(TEX_LOG, 16));
+	t.vertexUV(ax1, ay0, az1, getAtlasU(TEX_LOG, 10), getAtlasV(TEX_LOG, 16));
+	t.vertexUV(ax1, ay1, az1, getAtlasU(TEX_LOG, 10), getAtlasV(TEX_LOG, 15));
+
+	// 6. Fire Cross Planes (Full Brightness 1.0f)
+	t.color(1.0f, 1.0f, 1.0f);
+	float fx0 = xf + 0.8f / 16.0f, fx1 = xf + 15.2f / 16.0f;
+	float fz0 = zf + 0.8f / 16.0f, fz1 = zf + 15.2f / 16.0f;
+	float fy0 = yf + 1.0f / 16.0f, fy1 = yf + 17.0f / 16.0f;
+
+	float fu0 = getAtlasU(TEX_FIRE, 0), fu1 = getAtlasU(TEX_FIRE, 16);
+	float fv0 = getAtlasV(TEX_FIRE, 0), fv1 = getAtlasV(TEX_FIRE, 16);
+
+	// Diagonal 1
+	t.vertexUV(fx0, fy1, fz0, fu0, fv0);
+	t.vertexUV(fx0, fy0, fz0, fu0, fv1);
+	t.vertexUV(fx1, fy0, fz1, fu1, fv1);
+	t.vertexUV(fx1, fy1, fz1, fu1, fv0);
+
+	t.vertexUV(fx1, fy1, fz1, fu1, fv0);
+	t.vertexUV(fx1, fy0, fz1, fu1, fv1);
+	t.vertexUV(fx0, fy0, fz0, fu0, fv1);
+	t.vertexUV(fx0, fy1, fz0, fu0, fv0);
+
+	// Diagonal 2
+	t.vertexUV(fx0, fy1, fz1, fu0, fv0);
+	t.vertexUV(fx0, fy0, fz1, fu0, fv1);
+	t.vertexUV(fx1, fy0, fz0, fu1, fv1);
+	t.vertexUV(fx1, fy1, fz0, fu1, fv0);
+
+	t.vertexUV(fx1, fy1, fz0, fu1, fv0);
+	t.vertexUV(fx1, fy0, fz0, fu1, fv1);
+	t.vertexUV(fx0, fy0, fz1, fu0, fv1);
+	t.vertexUV(fx0, fy1, fz1, fu0, fv0);
 
 	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 7.0f / 16.0f, 1.0f);
 	return true;
@@ -3991,48 +6454,143 @@ bool TileRenderer::tesselateGrindstoneInWorld(Tile* tt, int x, int y, int z) {
 }
 
 bool TileRenderer::tesselateLecternInWorld(Tile* tt, int x, int y, int z) {
-	float xf = (float)x;
-	float yf = (float)y;
-	float zf = (float)z;
 	Tesselator& t = Tesselator::instance;
 	float br = tt->getBrightness(level, x, y, z);
 
-	// 1. Base pedestal (lectern_base 162)
-	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 2.0f / 16.0f, 1.0f);
-	t.color(1.0f * br, 1.0f * br, 1.0f * br);
-	renderFaceUp(tt, xf, yf, zf, 162);
-	t.color(0.5f * br, 0.5f * br, 0.5f * br);
-	renderFaceDown(tt, xf, yf, zf, 162);
-	t.color(0.8f * br, 0.8f * br, 0.8f * br);
-	renderNorth(tt, xf, yf, zf, 162);
-	renderSouth(tt, xf, yf, zf, 162);
-	t.color(0.6f * br, 0.6f * br, 0.6f * br);
-	renderWest(tt, xf, yf, zf, 162);
-	renderEast(tt, xf, yf, zf, 162);
+	const int TEX_BASE = 162;
+	const int TEX_FRONT = 22;
+	const int TEX_SIDES = 106;
+	const int TEX_TOP = 107;
 
-	// 2. Central pillar (North/South = lectern_front 22, West/East = lectern_sides 106)
-	tt->setShape(4.0f / 16.0f, 2.0f / 16.0f, 4.0f / 16.0f, 12.0f / 16.0f, 14.0f / 16.0f, 12.0f / 16.0f);
-	t.color(1.0f * br, 1.0f * br, 1.0f * br);
-	renderFaceUp(tt, xf, yf, zf, 162);
-	t.color(0.8f * br, 0.8f * br, 0.8f * br);
-	renderNorth(tt, xf, yf, zf, 22);
-	renderSouth(tt, xf, yf, zf, 22);
-	t.color(0.6f * br, 0.6f * br, 0.6f * br);
-	renderWest(tt, xf, yf, zf, 106);
-	renderEast(tt, xf, yf, zf, 106);
+	float colUp = 1.0f * br;
+	float colDown = 0.5f * br;
+	float colNS = 0.8f * br;
+	float colWE = 0.6f * br;
 
-	// 3. Reading Desk Tray (Top = lectern_top 107, Sides = lectern_sides 106, Bottom = lectern_base 162)
-	tt->setShape(0.0f, 12.0f / 16.0f, 2.0f / 16.0f, 1.0f, 15.0f / 16.0f, 1.0f);
-	t.color(1.0f * br, 1.0f * br, 1.0f * br);
-	renderFaceUp(tt, xf, yf, zf, 107);
-	t.color(0.5f * br, 0.5f * br, 0.5f * br);
-	renderFaceDown(tt, xf, yf, zf, 162);
-	t.color(0.8f * br, 0.8f * br, 0.8f * br);
-	renderNorth(tt, xf, yf, zf, 106);
-	renderSouth(tt, xf, yf, zf, 106);
-	t.color(0.6f * br, 0.6f * br, 0.6f * br);
-	renderWest(tt, xf, yf, zf, 106);
-	renderEast(tt, xf, yf, zf, 106);
+	float xf = (float)x;
+	float yf = (float)y;
+	float zf = (float)z;
+
+	// 1. Base pedestal (x: 0..1, y: 0..2/16, z: 0..1)
+	float bx0 = xf + 0.0f, bx1 = xf + 1.0f;
+	float by0 = yf + 0.0f, by1 = yf + 2.0f / 16.0f;
+	float bz0 = zf + 0.0f, bz1 = zf + 1.0f;
+
+	// Base Up
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(bx0, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+	t.vertexUV(bx0, by1, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 16));
+	t.vertexUV(bx1, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 16));
+	t.vertexUV(bx1, by1, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+
+	// Base Down
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(bx0, by0, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 16));
+	t.vertexUV(bx0, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+	t.vertexUV(bx1, by0, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+	t.vertexUV(bx1, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 16));
+
+	// Base North ([0, 14, 16, 16])
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(bx0, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 14));
+	t.vertexUV(bx1, by1, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 14));
+	t.vertexUV(bx1, by0, bz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 16));
+	t.vertexUV(bx0, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 16));
+
+	// Base South ([0, 6, 16, 8])
+	t.vertexUV(bx0, by1, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+	t.vertexUV(bx0, by0, bz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 8));
+	t.vertexUV(bx1, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 8));
+	t.vertexUV(bx1, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+
+	// Base West ([0, 6, 16, 8])
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(bx0, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+	t.vertexUV(bx0, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+	t.vertexUV(bx0, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 8));
+	t.vertexUV(bx0, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 8));
+
+	// Base East ([0, 6, 16, 8])
+	t.vertexUV(bx1, by1, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+	t.vertexUV(bx1, by1, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+	t.vertexUV(bx1, by0, bz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 8));
+	t.vertexUV(bx1, by0, bz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 8));
+
+	// 2. Central pillar (x: 4..12, y: 2..14, z: 4..12)
+	float px0 = xf + 4.0f / 16.0f, px1 = xf + 12.0f / 16.0f;
+	float py0 = yf + 2.0f / 16.0f, py1 = yf + 14.0f / 16.0f;
+	float pz0 = zf + 4.0f / 16.0f, pz1 = zf + 12.0f / 16.0f;
+
+	// Pillar North (front open face: [0, 0, 8, 12])
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(px0, py1, pz0, getAtlasU(TEX_FRONT, 0), getAtlasV(TEX_FRONT, 0));
+	t.vertexUV(px1, py1, pz0, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 0));
+	t.vertexUV(px1, py0, pz0, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 12));
+	t.vertexUV(px0, py0, pz0, getAtlasU(TEX_FRONT, 0), getAtlasV(TEX_FRONT, 12));
+
+	// Pillar South (back face: [8, 4, 16, 16])
+	t.vertexUV(px0, py1, pz1, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 4));
+	t.vertexUV(px0, py0, pz1, getAtlasU(TEX_FRONT, 8), getAtlasV(TEX_FRONT, 16));
+	t.vertexUV(px1, py0, pz1, getAtlasU(TEX_FRONT, 16), getAtlasV(TEX_FRONT, 16));
+	t.vertexUV(px1, py1, pz1, getAtlasU(TEX_FRONT, 16), getAtlasV(TEX_FRONT, 4));
+
+	// Pillar West (side face: [0, 2, 8, 14])
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(px0, py1, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 2));
+	t.vertexUV(px0, py1, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 2));
+	t.vertexUV(px0, py0, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 14));
+	t.vertexUV(px0, py0, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 14));
+
+	// Pillar East (side face: [0, 2, 8, 14])
+	t.vertexUV(px1, py1, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 2));
+	t.vertexUV(px1, py1, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 2));
+	t.vertexUV(px1, py0, pz1, getAtlasU(TEX_SIDES, 8), getAtlasV(TEX_SIDES, 14));
+	t.vertexUV(px1, py0, pz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 14));
+
+	// 3. Top reading desk (x: 0..1, y: 12..15, z: 2..16)
+	float dx0 = xf + 0.0f, dx1 = xf + 1.0f;
+	float dy0 = yf + 12.0f / 16.0f, dy1 = yf + 15.0f / 16.0f;
+	float dz0 = zf + 2.0f / 16.0f, dz1 = zf + 1.0f;
+
+	// Top surface (the book/desk face: [0, 1, 16, 15] on TEX_TOP)
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(dx0, dy1, dz0, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 1));
+	t.vertexUV(dx0, dy1, dz1, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 15));
+	t.vertexUV(dx1, dy1, dz1, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 15));
+	t.vertexUV(dx1, dy1, dz0, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 1));
+
+	// Bottom surface (wood bottom: [0, 0, 16, 14] on TEX_BASE)
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(dx0, dy0, dz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 14));
+	t.vertexUV(dx0, dy0, dz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+	t.vertexUV(dx1, dy0, dz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+	t.vertexUV(dx1, dy0, dz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 14));
+
+	// Desk North edge: [0, 0, 16, 3] on TEX_SIDES
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(dx0, dy1, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 0));
+	t.vertexUV(dx1, dy1, dz0, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 0));
+	t.vertexUV(dx1, dy0, dz0, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 3));
+	t.vertexUV(dx0, dy0, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 3));
+
+	// Desk South edge: [0, 4, 16, 7] on TEX_SIDES
+	t.vertexUV(dx0, dy1, dz1, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 4));
+	t.vertexUV(dx0, dy0, dz1, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 7));
+	t.vertexUV(dx1, dy0, dz1, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 7));
+	t.vertexUV(dx1, dy1, dz1, getAtlasU(TEX_SIDES, 16), getAtlasV(TEX_SIDES, 4));
+
+	// Desk West edge: [0, 4, 14, 7] on TEX_SIDES
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(dx0, dy1, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 4));
+	t.vertexUV(dx0, dy1, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 4));
+	t.vertexUV(dx0, dy0, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 7));
+	t.vertexUV(dx0, dy0, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 7));
+
+	// Desk East edge: [0, 4, 14, 7] on TEX_SIDES
+	t.vertexUV(dx1, dy1, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 4));
+	t.vertexUV(dx1, dy1, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 4));
+	t.vertexUV(dx1, dy0, dz1, getAtlasU(TEX_SIDES, 14), getAtlasV(TEX_SIDES, 7));
+	t.vertexUV(dx1, dy0, dz0, getAtlasU(TEX_SIDES, 0), getAtlasV(TEX_SIDES, 7));
 
 	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
 	return true;
@@ -4118,4 +6676,797 @@ bool TileRenderer::tesselateScaffoldingInWorld(Tile* tt, int x, int y, int z) {
 	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
 	return true;
 }
+
+bool TileRenderer::tesselateCandleInWorld(Tile* tt, int x, int y, int z) {
+	Tesselator& t = Tesselator::instance;
+	float br = tt->getBrightness(level, x, y, z);
+	if (Tile::lightEmission[tt->id] > 0) br = 1.0f;
+
+	int tex = tt->getTexture(level, x, y, z, 0);
+	bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+	if (atlasFilter != -1) {
+		if (atlasFilter == 0 && isAlt) return false;
+		if (atlasFilter == 1 && !isAlt) return false;
+	}
+
+	int cleanTex = tex & ~Tile::TEXTURE_ALT_FLAG;
+
+	float colUp = 1.0f * br;
+	float colDown = 0.5f * br;
+	float colNS = 0.8f * br;
+	float colWE = 0.6f * br;
+
+	float xf = (float)x;
+	float yf = (float)y;
+	float zf = (float)z;
+
+	float cx0 = xf + 7.0f / 16.0f, cx1 = xf + 9.0f / 16.0f;
+	float cy0 = yf + 0.0f / 16.0f, cy1 = yf + 6.0f / 16.0f;
+	float cz0 = zf + 7.0f / 16.0f, cz1 = zf + 9.0f / 16.0f;
+
+	float uTop0 = getAtlasU(cleanTex, 0.0f), uTop1 = getAtlasU(cleanTex, 2.0f);
+	float vTop0 = getAtlasV(cleanTex, 6.0f), vTop1 = getAtlasV(cleanTex, 8.0f);
+
+	float uSide0 = getAtlasU(cleanTex, 0.0f), uSide1 = getAtlasU(cleanTex, 2.0f);
+	float vSide0 = getAtlasV(cleanTex, 6.0f), vSide1 = getAtlasV(cleanTex, 12.0f);
+
+	// Top
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(cx0, cy1, cz0, uTop0, vTop0);
+	t.vertexUV(cx0, cy1, cz1, uTop0, vTop1);
+	t.vertexUV(cx1, cy1, cz1, uTop1, vTop1);
+	t.vertexUV(cx1, cy1, cz0, uTop1, vTop0);
+
+	// Down
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(cx0, cy0, cz1, uTop0, vTop1);
+	t.vertexUV(cx0, cy0, cz0, uTop0, vTop0);
+	t.vertexUV(cx1, cy0, cz0, uTop1, vTop0);
+	t.vertexUV(cx1, cy0, cz1, uTop1, vTop1);
+
+	// North & South
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(cx0, cy1, cz0, uSide1, vSide0);
+	t.vertexUV(cx1, cy1, cz0, uSide0, vSide0);
+	t.vertexUV(cx1, cy0, cz0, uSide0, vSide1);
+	t.vertexUV(cx0, cy0, cz0, uSide1, vSide1);
+	t.vertexUV(cx1, cy1, cz0, uSide0, vSide0);
+	t.vertexUV(cx0, cy1, cz0, uSide1, vSide0);
+	t.vertexUV(cx0, cy0, cz0, uSide1, vSide1);
+	t.vertexUV(cx1, cy0, cz0, uSide0, vSide1);
+
+	t.vertexUV(cx0, cy1, cz1, uSide0, vSide0);
+	t.vertexUV(cx0, cy0, cz1, uSide0, vSide1);
+	t.vertexUV(cx1, cy0, cz1, uSide1, vSide1);
+	t.vertexUV(cx1, cy1, cz1, uSide1, vSide0);
+	t.vertexUV(cx1, cy1, cz1, uSide1, vSide0);
+	t.vertexUV(cx1, cy0, cz1, uSide1, vSide1);
+	t.vertexUV(cx0, cy0, cz1, uSide0, vSide1);
+	t.vertexUV(cx0, cy1, cz1, uSide0, vSide0);
+
+	// West & East
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(cx0, cy1, cz1, uSide1, vSide0);
+	t.vertexUV(cx0, cy1, cz0, uSide0, vSide0);
+	t.vertexUV(cx0, cy0, cz0, uSide0, vSide1);
+	t.vertexUV(cx0, cy0, cz1, uSide1, vSide1);
+	t.vertexUV(cx0, cy1, cz0, uSide0, vSide0);
+	t.vertexUV(cx0, cy1, cz1, uSide1, vSide0);
+	t.vertexUV(cx0, cy0, cz1, uSide1, vSide1);
+	t.vertexUV(cx0, cy0, cz0, uSide0, vSide1);
+
+	t.vertexUV(cx1, cy0, cz1, uSide0, vSide1);
+	t.vertexUV(cx1, cy0, cz0, uSide1, vSide1);
+	t.vertexUV(cx1, cy1, cz0, uSide1, vSide0);
+	t.vertexUV(cx1, cy1, cz1, uSide0, vSide0);
+	t.vertexUV(cx1, cy1, cz0, uSide1, vSide0);
+	t.vertexUV(cx1, cy0, cz0, uSide1, vSide1);
+	t.vertexUV(cx1, cy0, cz1, uSide0, vSide1);
+	t.vertexUV(cx1, cy1, cz1, uSide0, vSide0);
+
+	// Wick (Full Brightness)
+	float wu0 = getAtlasU(cleanTex, 0.0f), wu1 = getAtlasU(cleanTex, 1.0f);
+	float wv0 = getAtlasV(cleanTex, 4.5f), wv1 = getAtlasV(cleanTex, 6.0f);
+	float wy0 = yf + 6.0f / 16.0f, wy1 = yf + 8.5f / 16.0f;
+	float wx0 = xf + 7.5f / 16.0f, wx1 = xf + 8.5f / 16.0f;
+	float wz0 = zf + 7.5f / 16.0f, wz1 = zf + 8.5f / 16.0f;
+	float wMidX = xf + 8.0f / 16.0f;
+	float wMidZ = zf + 8.0f / 16.0f;
+
+	t.color(1.0f, 1.0f, 1.0f);
+	// Quad X (double sided)
+	t.vertexUV(wx0, wy1, wMidZ, wu0, wv0);
+	t.vertexUV(wx0, wy0, wMidZ, wu0, wv1);
+	t.vertexUV(wx1, wy0, wMidZ, wu1, wv1);
+	t.vertexUV(wx1, wy1, wMidZ, wu1, wv0);
+
+	t.vertexUV(wx1, wy1, wMidZ, wu1, wv0);
+	t.vertexUV(wx1, wy0, wMidZ, wu1, wv1);
+	t.vertexUV(wx0, wy0, wMidZ, wu0, wv1);
+	t.vertexUV(wx0, wy1, wMidZ, wu0, wv0);
+
+	// Quad Z (double sided)
+	t.vertexUV(wMidX, wy1, wz0, wu0, wv0);
+	t.vertexUV(wMidX, wy0, wz0, wu0, wv1);
+	t.vertexUV(wMidX, wy0, wz1, wu1, wv1);
+	t.vertexUV(wMidX, wy1, wz1, wu1, wv0);
+
+	t.vertexUV(wMidX, wy1, wz1, wu1, wv0);
+	t.vertexUV(wMidX, wy0, wz1, wu1, wv1);
+	t.vertexUV(wMidX, wy0, wz0, wu0, wv1);
+	t.vertexUV(wMidX, wy1, wz0, wu0, wv0);
+
+	tt->setShape(7.0f / 16.0f, 0.0f, 7.0f / 16.0f, 9.0f / 16.0f, 6.0f / 16.0f, 9.0f / 16.0f);
+	return true;
+}
+
+bool TileRenderer::tesselateCauldronInWorld(Tile* tt, int x, int y, int z) {
+	Tesselator& t = Tesselator::instance;
+	float br = tt->getBrightness(level, x, y, z);
+
+	int tex = tt->getTexture(level, x, y, z, 0);
+	bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+	if (atlasFilter != -1) {
+		if (atlasFilter == 0 && isAlt) return false;
+		if (atlasFilter == 1 && !isAlt) return false;
+	}
+
+	const int TEX_TOP = 149;
+	const int TEX_INNER = 150;
+	const int TEX_SIDE = 163;
+	const int TEX_BOTTOM = 165;
+
+	float colUp = 1.0f * br;
+	float colDown = 0.5f * br;
+	float colNS = 0.8f * br;
+	float colWE = 0.6f * br;
+
+	float xf = (float)x;
+	float yf = (float)y;
+	float zf = (float)z;
+
+	// 1. 4 Corner Legs (y: 0..3/16, size 3x3)
+	// Leg NW (x: 0..3, z: 0..3)
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_BOTTOM, 0), getAtlasV(TEX_BOTTOM, 3));
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_BOTTOM, 0), getAtlasV(TEX_BOTTOM, 0));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_BOTTOM, 3), getAtlasV(TEX_BOTTOM, 0));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_BOTTOM, 3), getAtlasV(TEX_BOTTOM, 3));
+
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 16));
+
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 16));
+
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 3.0f / 16.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 13));
+
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 3.0f / 16.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 16));
+
+	// Leg NE (x: 13..16, z: 0..3)
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_BOTTOM, 13), getAtlasV(TEX_BOTTOM, 3));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_BOTTOM, 13), getAtlasV(TEX_BOTTOM, 0));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_BOTTOM, 16), getAtlasV(TEX_BOTTOM, 0));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_BOTTOM, 16), getAtlasV(TEX_BOTTOM, 3));
+
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 16));
+
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 16));
+
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 3.0f / 16.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 3.0f / 16.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 3.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 16));
+
+	// Leg SW (x: 0..3, z: 13..16)
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_BOTTOM, 0), getAtlasV(TEX_BOTTOM, 16));
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_BOTTOM, 0), getAtlasV(TEX_BOTTOM, 13));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_BOTTOM, 3), getAtlasV(TEX_BOTTOM, 13));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_BOTTOM, 3), getAtlasV(TEX_BOTTOM, 16));
+
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 13));
+
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 16));
+
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 3.0f / 16.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 3), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 0.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 16));
+
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 3.0f / 16.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 3.0f / 16.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 16));
+
+	// Leg SE (x: 13..16, z: 13..16)
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_BOTTOM, 13), getAtlasV(TEX_BOTTOM, 16));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_BOTTOM, 13), getAtlasV(TEX_BOTTOM, 13));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_BOTTOM, 16), getAtlasV(TEX_BOTTOM, 13));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_BOTTOM, 16), getAtlasV(TEX_BOTTOM, 16));
+
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 16));
+
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 3.0f / 16.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 1.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 16));
+
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 3.0f / 16.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 13.0f / 16.0f, getAtlasU(TEX_SIDE, 13), getAtlasV(TEX_SIDE, 16));
+	t.vertexUV(xf + 13.0f / 16.0f, yf + 0.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 16));
+
+	// 2. Cauldron Bottom Plate (y: 3..4/16)
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_BOTTOM, 0), getAtlasV(TEX_BOTTOM, 16));
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_BOTTOM, 0), getAtlasV(TEX_BOTTOM, 0));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_BOTTOM, 16), getAtlasV(TEX_BOTTOM, 0));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_BOTTOM, 16), getAtlasV(TEX_BOTTOM, 16));
+
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 4.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INNER, 2), getAtlasV(TEX_INNER, 2));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 4.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INNER, 2), getAtlasV(TEX_INNER, 14));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 4.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INNER, 14), getAtlasV(TEX_INNER, 14));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 4.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INNER, 14), getAtlasV(TEX_INNER, 2));
+
+	// 3. 4 Walls (y: 3/16..1.0, height 13/16)
+	// North Wall
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 0));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 0));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INNER, 2), getAtlasV(TEX_INNER, 0));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 4.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INNER, 2), getAtlasV(TEX_INNER, 12));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 4.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INNER, 14), getAtlasV(TEX_INNER, 12));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INNER, 14), getAtlasV(TEX_INNER, 0));
+
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 0));
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 2));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 2));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 0));
+
+	// South Wall
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 0));
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 0));
+
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INNER, 2), getAtlasV(TEX_INNER, 0));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INNER, 14), getAtlasV(TEX_INNER, 0));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 4.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INNER, 14), getAtlasV(TEX_INNER, 12));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 4.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INNER, 2), getAtlasV(TEX_INNER, 12));
+
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 14));
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 16));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 16));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 14));
+
+	// West Wall
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 0));
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 0));
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 0.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INNER, 2), getAtlasV(TEX_INNER, 0));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INNER, 14), getAtlasV(TEX_INNER, 0));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 4.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INNER, 14), getAtlasV(TEX_INNER, 12));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 4.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INNER, 2), getAtlasV(TEX_INNER, 12));
+
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 2));
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 14));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 2), getAtlasV(TEX_TOP, 14));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 2), getAtlasV(TEX_TOP, 2));
+
+	// East Wall
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 0));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 0));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_SIDE, 16), getAtlasV(TEX_SIDE, 13));
+	t.vertexUV(xf + 1.0f, yf + 3.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_SIDE, 0), getAtlasV(TEX_SIDE, 13));
+
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INNER, 14), getAtlasV(TEX_INNER, 0));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INNER, 2), getAtlasV(TEX_INNER, 0));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 4.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INNER, 2), getAtlasV(TEX_INNER, 12));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 4.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INNER, 14), getAtlasV(TEX_INNER, 12));
+
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 14), getAtlasV(TEX_TOP, 2));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 14), getAtlasV(TEX_TOP, 14));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 14));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 2));
+
+	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+	return true;
+}
+
+bool TileRenderer::tesselateAnvilInWorld(Tile* tt, int x, int y, int z) {
+	Tesselator& t = Tesselator::instance;
+	float br = tt->getBrightness(level, x, y, z);
+
+	int tex = tt->getTexture(level, x, y, z, 0);
+	bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+	if (atlasFilter != -1) {
+		if (atlasFilter == 0 && isAlt) return false;
+		if (atlasFilter == 1 && !isAlt) return false;
+	}
+
+	int dir = level ? (level->getData(x, y, z) & 3) : 0;
+	bool alongX = (dir == 1 || dir == 3);
+
+	int dmg = 0;
+	AnvilTile* at = dynamic_cast<AnvilTile*>(tt);
+	if (at) {
+		dmg = at->damageType;
+	} else if (tt->id == 511) {
+		dmg = 1;
+	} else if (tt->id == 559) {
+		dmg = 2;
+	}
+
+	const int TEX_BASE = 166;
+	const int TEX_TOP = (dmg == 0 ? 170 : (dmg == 1 ? 180 : 185));
+
+	float colUp = 1.0f * br;
+	float colDown = 0.5f * br;
+	float colNS = 0.8f * br;
+	float colWE = 0.6f * br;
+
+	float xf = (float)x;
+	float yf = (float)y;
+	float zf = (float)z;
+
+	auto renderBox = [&](float x0, float y0, float z0, float x1, float y1, float z1,
+	                     int tUp, float uUp0, float vUp0, float uUp1, float vUp1,
+	                     int tDown, float uD0, float vD0, float uD1, float vD1,
+	                     int tNorth, float uN0, float vN0, float uN1, float vN1,
+	                     int tSouth, float uS0, float vS0, float uS1, float vS1,
+	                     int tWest, float uW0, float vW0, float uW1, float vW1,
+	                     int tEast, float uE0, float vE0, float uE1, float vE1) {
+		// Up (+Y)
+		t.color(colUp, colUp, colUp);
+		t.vertexUV(x0, y1, z0, getAtlasU(tUp, uUp0), getAtlasV(tUp, vUp0));
+		t.vertexUV(x0, y1, z1, getAtlasU(tUp, uUp0), getAtlasV(tUp, vUp1));
+		t.vertexUV(x1, y1, z1, getAtlasU(tUp, uUp1), getAtlasV(tUp, vUp1));
+		t.vertexUV(x1, y1, z0, getAtlasU(tUp, uUp1), getAtlasV(tUp, vUp0));
+
+		// Down (-Y)
+		t.color(colDown, colDown, colDown);
+		t.vertexUV(x0, y0, z1, getAtlasU(tDown, uD0), getAtlasV(tDown, vD1));
+		t.vertexUV(x0, y0, z0, getAtlasU(tDown, uD0), getAtlasV(tDown, vD0));
+		t.vertexUV(x1, y0, z0, getAtlasU(tDown, uD1), getAtlasV(tDown, vD0));
+		t.vertexUV(x1, y0, z1, getAtlasU(tDown, uD1), getAtlasV(tDown, vD1));
+
+		// North (-Z)
+		t.color(colNS, colNS, colNS);
+		t.vertexUV(x0, y1, z0, getAtlasU(tNorth, uN0), getAtlasV(tNorth, vN0));
+		t.vertexUV(x1, y1, z0, getAtlasU(tNorth, uN1), getAtlasV(tNorth, vN0));
+		t.vertexUV(x1, y0, z0, getAtlasU(tNorth, uN1), getAtlasV(tNorth, vN1));
+		t.vertexUV(x0, y0, z0, getAtlasU(tNorth, uN0), getAtlasV(tNorth, vN1));
+
+		// South (+Z)
+		t.vertexUV(x1, y1, z1, getAtlasU(tSouth, uS1), getAtlasV(tSouth, vS0));
+		t.vertexUV(x0, y1, z1, getAtlasU(tSouth, uS0), getAtlasV(tSouth, vS0));
+		t.vertexUV(x0, y0, z1, getAtlasU(tSouth, uS0), getAtlasV(tSouth, vS1));
+		t.vertexUV(x1, y0, z1, getAtlasU(tSouth, uS1), getAtlasV(tSouth, vS1));
+
+		// West (-X)
+		t.color(colWE, colWE, colWE);
+		t.vertexUV(x0, y1, z1, getAtlasU(tWest, uW1), getAtlasV(tWest, vW0));
+		t.vertexUV(x0, y1, z0, getAtlasU(tWest, uW0), getAtlasV(tWest, vW0));
+		t.vertexUV(x0, y0, z0, getAtlasU(tWest, uW0), getAtlasV(tWest, vW1));
+		t.vertexUV(x0, y0, z1, getAtlasU(tWest, uW1), getAtlasV(tWest, vW1));
+
+		// East (+X)
+		t.vertexUV(x1, y1, z0, getAtlasU(tEast, uE0), getAtlasV(tEast, vE0));
+		t.vertexUV(x1, y1, z1, getAtlasU(tEast, uE1), getAtlasV(tEast, vE0));
+		t.vertexUV(x1, y0, z1, getAtlasU(tEast, uE1), getAtlasV(tEast, vE1));
+		t.vertexUV(x1, y0, z0, getAtlasU(tEast, uE0), getAtlasV(tEast, vE1));
+	};
+
+	// 1. Base (12x4x12 centered at [2..14, 0..4, 2..14])
+	renderBox(xf + 2.0f / 16.0f, yf + 0.0f, zf + 2.0f / 16.0f,
+	          xf + 14.0f / 16.0f, yf + 4.0f / 16.0f, zf + 14.0f / 16.0f,
+	          TEX_BASE, 2, 2, 14, 14,
+	          TEX_BASE, 2, 2, 14, 14,
+	          TEX_BASE, 2, 12, 14, 16,
+	          TEX_BASE, 2, 12, 14, 16,
+	          TEX_BASE, 2, 12, 14, 16,
+	          TEX_BASE, 2, 12, 14, 16);
+
+	// 2. Lower Neck (y: 4..5/16)
+	float lx0, lx1, lz0, lz1, mx0, mx1, mz0, mz1;
+	if (alongX) {
+		lx0 = xf + 3.0f / 16.0f; lx1 = xf + 13.0f / 16.0f;
+		lz0 = zf + 4.0f / 16.0f; lz1 = zf + 12.0f / 16.0f;
+
+		mx0 = xf + 4.0f / 16.0f; mx1 = xf + 12.0f / 16.0f;
+		mz0 = zf + 6.0f / 16.0f; mz1 = zf + 10.0f / 16.0f;
+	} else {
+		lx0 = xf + 4.0f / 16.0f; lx1 = xf + 12.0f / 16.0f;
+		lz0 = zf + 3.0f / 16.0f; lz1 = zf + 13.0f / 16.0f;
+
+		mx0 = xf + 6.0f / 16.0f; mx1 = xf + 10.0f / 16.0f;
+		mz0 = zf + 4.0f / 16.0f; mz1 = zf + 12.0f / 16.0f;
+	}
+
+	renderBox(lx0, yf + 4.0f / 16.0f, lz0, lx1, yf + 5.0f / 16.0f, lz1,
+	          TEX_BASE, 4, 4, 12, 12,
+	          TEX_BASE, 4, 4, 12, 12,
+	          TEX_BASE, 4, 15, 12, 16,
+	          TEX_BASE, 4, 15, 12, 16,
+	          TEX_BASE, 4, 15, 12, 16,
+	          TEX_BASE, 4, 15, 12, 16);
+
+	// 3. Middle Stem (y: 5..10/16)
+	renderBox(mx0, yf + 5.0f / 16.0f, mz0, mx1, yf + 10.0f / 16.0f, mz1,
+	          TEX_BASE, 6, 6, 10, 10,
+	          TEX_BASE, 6, 6, 10, 10,
+	          TEX_BASE, 6, 5, 10, 10,
+	          TEX_BASE, 6, 5, 10, 10,
+	          TEX_BASE, 6, 5, 10, 10,
+	          TEX_BASE, 6, 5, 10, 10);
+
+	// 4. Head (y: 10..16/16)
+	if (alongX) {
+		float hx0 = xf + 0.0f, hx1 = xf + 1.0f;
+		float hz0 = zf + 3.0f / 16.0f, hz1 = zf + 13.0f / 16.0f;
+		float hy0 = yf + 10.0f / 16.0f, hy1 = yf + 1.0f;
+
+		// Head Up face (Rotated 90 deg so length along X samples along V, width along Z samples along U)
+		t.color(colUp, colUp, colUp);
+		t.vertexUV(hx0, hy1, hz0, getAtlasU(TEX_TOP, 3), getAtlasV(TEX_TOP, 0));
+		t.vertexUV(hx0, hy1, hz1, getAtlasU(TEX_TOP, 13), getAtlasV(TEX_TOP, 0));
+		t.vertexUV(hx1, hy1, hz1, getAtlasU(TEX_TOP, 13), getAtlasV(TEX_TOP, 16));
+		t.vertexUV(hx1, hy1, hz0, getAtlasU(TEX_TOP, 3), getAtlasV(TEX_TOP, 16));
+
+		// Down
+		t.color(colDown, colDown, colDown);
+		t.vertexUV(hx0, hy0, hz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 13));
+		t.vertexUV(hx0, hy0, hz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 3));
+		t.vertexUV(hx1, hy0, hz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 3));
+		t.vertexUV(hx1, hy0, hz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 13));
+
+		// North (-Z)
+		t.color(colNS, colNS, colNS);
+		t.vertexUV(hx0, hy1, hz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx1, hy1, hz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx1, hy0, hz0, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(hx0, hy0, hz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+
+		// South (+Z)
+		t.vertexUV(hx1, hy1, hz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx0, hy1, hz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx0, hy0, hz1, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(hx1, hy0, hz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+
+		// West (-X)
+		t.color(colWE, colWE, colWE);
+		t.vertexUV(hx0, hy1, hz1, getAtlasU(TEX_BASE, 13), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx0, hy1, hz0, getAtlasU(TEX_BASE, 3), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx0, hy0, hz0, getAtlasU(TEX_BASE, 3), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(hx0, hy0, hz1, getAtlasU(TEX_BASE, 13), getAtlasV(TEX_BASE, 6));
+
+		// East (+X)
+		t.vertexUV(hx1, hy1, hz0, getAtlasU(TEX_BASE, 3), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx1, hy1, hz1, getAtlasU(TEX_BASE, 13), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx1, hy0, hz1, getAtlasU(TEX_BASE, 13), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(hx1, hy0, hz0, getAtlasU(TEX_BASE, 3), getAtlasV(TEX_BASE, 6));
+	} else {
+		float hx0 = xf + 3.0f / 16.0f, hx1 = xf + 13.0f / 16.0f;
+		float hz0 = zf + 0.0f, hz1 = zf + 1.0f;
+		float hy0 = yf + 10.0f / 16.0f, hy1 = yf + 1.0f;
+
+		// Head Up face (Length along Z from 0 to 16, width along X from 3 to 13)
+		t.color(colUp, colUp, colUp);
+		t.vertexUV(hx0, hy1, hz0, getAtlasU(TEX_TOP, 3), getAtlasV(TEX_TOP, 0));
+		t.vertexUV(hx0, hy1, hz1, getAtlasU(TEX_TOP, 3), getAtlasV(TEX_TOP, 16));
+		t.vertexUV(hx1, hy1, hz1, getAtlasU(TEX_TOP, 13), getAtlasV(TEX_TOP, 16));
+		t.vertexUV(hx1, hy1, hz0, getAtlasU(TEX_TOP, 13), getAtlasV(TEX_TOP, 0));
+
+		// Down
+		t.color(colDown, colDown, colDown);
+		t.vertexUV(hx0, hy0, hz1, getAtlasU(TEX_BASE, 3), getAtlasV(TEX_BASE, 16));
+		t.vertexUV(hx0, hy0, hz0, getAtlasU(TEX_BASE, 3), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx1, hy0, hz0, getAtlasU(TEX_BASE, 13), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx1, hy0, hz1, getAtlasU(TEX_BASE, 13), getAtlasV(TEX_BASE, 16));
+
+		// North (-Z)
+		t.color(colNS, colNS, colNS);
+		t.vertexUV(hx0, hy1, hz0, getAtlasU(TEX_BASE, 3), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx1, hy1, hz0, getAtlasU(TEX_BASE, 13), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx1, hy0, hz0, getAtlasU(TEX_BASE, 13), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(hx0, hy0, hz0, getAtlasU(TEX_BASE, 3), getAtlasV(TEX_BASE, 6));
+
+		// South (+Z)
+		t.vertexUV(hx1, hy1, hz1, getAtlasU(TEX_BASE, 13), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx0, hy1, hz1, getAtlasU(TEX_BASE, 3), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx0, hy0, hz1, getAtlasU(TEX_BASE, 3), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(hx1, hy0, hz1, getAtlasU(TEX_BASE, 13), getAtlasV(TEX_BASE, 6));
+
+		// West (-X)
+		t.color(colWE, colWE, colWE);
+		t.vertexUV(hx0, hy1, hz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx0, hy1, hz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx0, hy0, hz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(hx0, hy0, hz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+
+		// East (+X)
+		t.vertexUV(hx1, hy1, hz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx1, hy1, hz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 0));
+		t.vertexUV(hx1, hy0, hz1, getAtlasU(TEX_BASE, 16), getAtlasV(TEX_BASE, 6));
+		t.vertexUV(hx1, hy0, hz0, getAtlasU(TEX_BASE, 0), getAtlasV(TEX_BASE, 6));
+	}
+
+	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+	return true;
+}
+
+bool TileRenderer::tesselateHopperInWorld(Tile* tt, int x, int y, int z) {
+	Tesselator& t = Tesselator::instance;
+	float br = tt->getBrightness(level, x, y, z);
+
+	int tex = tt->getTexture(level, x, y, z, 0);
+	bool isAlt = (tex & Tile::TEXTURE_ALT_FLAG) != 0;
+	if (atlasFilter != -1) {
+		if (atlasFilter == 0 && isAlt) return false;
+		if (atlasFilter == 1 && !isAlt) return false;
+	}
+
+	int facing = level ? (level->getData(x, y, z)) : 0;
+
+	const int TEX_TOP = 195;
+	const int TEX_INSIDE = 199;
+	const int TEX_OUTSIDE = 200;
+
+	float colUp = 1.0f * br;
+	float colDown = 0.5f * br;
+	float colNS = 0.8f * br;
+	float colWE = 0.6f * br;
+
+	float xf = (float)x;
+	float yf = (float)y;
+	float zf = (float)z;
+
+	auto renderBox = [&](float x0, float y0, float z0, float x1, float y1, float z1,
+	                     int tUp, float uUp0, float vUp0, float uUp1, float vUp1,
+	                     int tDown, float uD0, float vD0, float uD1, float vD1,
+	                     int tNorth, float uN0, float vN0, float uN1, float vN1,
+	                     int tSouth, float uS0, float vS0, float uS1, float vS1,
+	                     int tWest, float uW0, float vW0, float uW1, float vW1,
+	                     int tEast, float uE0, float vE0, float uE1, float vE1) {
+		// Up (+Y)
+		t.color(colUp, colUp, colUp);
+		t.vertexUV(x0, y1, z0, getAtlasU(tUp, uUp0), getAtlasV(tUp, vUp0));
+		t.vertexUV(x0, y1, z1, getAtlasU(tUp, uUp0), getAtlasV(tUp, vUp1));
+		t.vertexUV(x1, y1, z1, getAtlasU(tUp, uUp1), getAtlasV(tUp, vUp1));
+		t.vertexUV(x1, y1, z0, getAtlasU(tUp, uUp1), getAtlasV(tUp, vUp0));
+
+		// Down (-Y)
+		t.color(colDown, colDown, colDown);
+		t.vertexUV(x0, y0, z1, getAtlasU(tDown, uD0), getAtlasV(tDown, vD1));
+		t.vertexUV(x0, y0, z0, getAtlasU(tDown, uD0), getAtlasV(tDown, vD0));
+		t.vertexUV(x1, y0, z0, getAtlasU(tDown, uD1), getAtlasV(tDown, vD0));
+		t.vertexUV(x1, y0, z1, getAtlasU(tDown, uD1), getAtlasV(tDown, vD1));
+
+		// North (-Z)
+		t.color(colNS, colNS, colNS);
+		t.vertexUV(x0, y1, z0, getAtlasU(tNorth, uN0), getAtlasV(tNorth, vN0));
+		t.vertexUV(x1, y1, z0, getAtlasU(tNorth, uN1), getAtlasV(tNorth, vN0));
+		t.vertexUV(x1, y0, z0, getAtlasU(tNorth, uN1), getAtlasV(tNorth, vN1));
+		t.vertexUV(x0, y0, z0, getAtlasU(tNorth, uN0), getAtlasV(tNorth, vN1));
+
+		// South (+Z)
+		t.vertexUV(x1, y1, z1, getAtlasU(tSouth, uS1), getAtlasV(tSouth, vS0));
+		t.vertexUV(x0, y1, z1, getAtlasU(tSouth, uS0), getAtlasV(tSouth, vS0));
+		t.vertexUV(x0, y0, z1, getAtlasU(tSouth, uS0), getAtlasV(tSouth, vS1));
+		t.vertexUV(x1, y0, z1, getAtlasU(tSouth, uS1), getAtlasV(tSouth, vS1));
+
+		// West (-X)
+		t.color(colWE, colWE, colWE);
+		t.vertexUV(x0, y1, z1, getAtlasU(tWest, uW1), getAtlasV(tWest, vW0));
+		t.vertexUV(x0, y1, z0, getAtlasU(tWest, uW0), getAtlasV(tWest, vW0));
+		t.vertexUV(x0, y0, z0, getAtlasU(tWest, uW0), getAtlasV(tWest, vW1));
+		t.vertexUV(x0, y0, z1, getAtlasU(tWest, uW1), getAtlasV(tWest, vW1));
+
+		// East (+X)
+		t.vertexUV(x1, y1, z0, getAtlasU(tEast, uE0), getAtlasV(tEast, vE0));
+		t.vertexUV(x1, y1, z1, getAtlasU(tEast, uE1), getAtlasV(tEast, vE0));
+		t.vertexUV(x1, y0, z1, getAtlasU(tEast, uE1), getAtlasV(tEast, vE1));
+		t.vertexUV(x1, y0, z0, getAtlasU(tEast, uE0), getAtlasV(tEast, vE1));
+	};
+
+	// 1. Top Basin (y: 10/16..1.0)
+	// Outer North Wall (Z: 0..2/16)
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_OUTSIDE, 0), getAtlasV(TEX_OUTSIDE, 0));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_OUTSIDE, 16), getAtlasV(TEX_OUTSIDE, 0));
+	t.vertexUV(xf + 1.0f, yf + 10.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_OUTSIDE, 16), getAtlasV(TEX_OUTSIDE, 6));
+	t.vertexUV(xf + 0.0f, yf + 10.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_OUTSIDE, 0), getAtlasV(TEX_OUTSIDE, 6));
+	// Inner South Wall (inside basin, facing South)
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INSIDE, 14), getAtlasV(TEX_INSIDE, 0));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INSIDE, 2), getAtlasV(TEX_INSIDE, 0));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 10.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INSIDE, 2), getAtlasV(TEX_INSIDE, 6));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 10.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INSIDE, 14), getAtlasV(TEX_INSIDE, 6));
+	// Top Rim North
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 0));
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 2));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 2));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 0));
+
+	// Outer South Wall (Z: 14/16..1)
+	t.color(colNS, colNS, colNS);
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_OUTSIDE, 16), getAtlasV(TEX_OUTSIDE, 0));
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_OUTSIDE, 0), getAtlasV(TEX_OUTSIDE, 0));
+	t.vertexUV(xf + 0.0f, yf + 10.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_OUTSIDE, 0), getAtlasV(TEX_OUTSIDE, 6));
+	t.vertexUV(xf + 1.0f, yf + 10.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_OUTSIDE, 16), getAtlasV(TEX_OUTSIDE, 6));
+	// Inner North Wall (inside basin, facing North)
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INSIDE, 2), getAtlasV(TEX_INSIDE, 0));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INSIDE, 14), getAtlasV(TEX_INSIDE, 0));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 10.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INSIDE, 14), getAtlasV(TEX_INSIDE, 6));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 10.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INSIDE, 2), getAtlasV(TEX_INSIDE, 6));
+	// Top Rim South
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 14));
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 16));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 16));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 14));
+
+	// Outer West Wall (X: 0..2/16)
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_OUTSIDE, 16), getAtlasV(TEX_OUTSIDE, 0));
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_OUTSIDE, 0), getAtlasV(TEX_OUTSIDE, 0));
+	t.vertexUV(xf + 0.0f, yf + 10.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_OUTSIDE, 0), getAtlasV(TEX_OUTSIDE, 6));
+	t.vertexUV(xf + 0.0f, yf + 10.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_OUTSIDE, 16), getAtlasV(TEX_OUTSIDE, 6));
+	// Inner East Wall (inside basin, facing East)
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 0.0f + 2.0f / 16.0f, getAtlasU(TEX_INSIDE, 2), getAtlasV(TEX_INSIDE, 0));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INSIDE, 14), getAtlasV(TEX_INSIDE, 0));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 10.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INSIDE, 14), getAtlasV(TEX_INSIDE, 6));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 10.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INSIDE, 2), getAtlasV(TEX_INSIDE, 6));
+	// Top Rim West
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 2));
+	t.vertexUV(xf + 0.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 0), getAtlasV(TEX_TOP, 14));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 2), getAtlasV(TEX_TOP, 14));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 2), getAtlasV(TEX_TOP, 2));
+
+	// Outer East Wall (X: 14/16..1)
+	t.color(colWE, colWE, colWE);
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 0.0f, getAtlasU(TEX_OUTSIDE, 0), getAtlasV(TEX_OUTSIDE, 0));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 1.0f, getAtlasU(TEX_OUTSIDE, 16), getAtlasV(TEX_OUTSIDE, 0));
+	t.vertexUV(xf + 1.0f, yf + 10.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_OUTSIDE, 16), getAtlasV(TEX_OUTSIDE, 6));
+	t.vertexUV(xf + 1.0f, yf + 10.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_OUTSIDE, 0), getAtlasV(TEX_OUTSIDE, 6));
+	// Inner West Wall (inside basin, facing West)
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INSIDE, 14), getAtlasV(TEX_INSIDE, 0));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INSIDE, 2), getAtlasV(TEX_INSIDE, 0));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 10.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INSIDE, 2), getAtlasV(TEX_INSIDE, 6));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 10.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INSIDE, 14), getAtlasV(TEX_INSIDE, 6));
+	// Top Rim East
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 14), getAtlasV(TEX_TOP, 2));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 14), getAtlasV(TEX_TOP, 14));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 14));
+	t.vertexUV(xf + 1.0f, yf + 1.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_TOP, 16), getAtlasV(TEX_TOP, 2));
+
+	// Basin Floor (y = 10/16)
+	t.color(colUp, colUp, colUp);
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 10.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INSIDE, 2), getAtlasV(TEX_INSIDE, 2));
+	t.vertexUV(xf + 2.0f / 16.0f, yf + 10.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INSIDE, 2), getAtlasV(TEX_INSIDE, 14));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 10.0f / 16.0f, zf + 14.0f / 16.0f, getAtlasU(TEX_INSIDE, 14), getAtlasV(TEX_INSIDE, 14));
+	t.vertexUV(xf + 14.0f / 16.0f, yf + 10.0f / 16.0f, zf + 2.0f / 16.0f, getAtlasU(TEX_INSIDE, 14), getAtlasV(TEX_INSIDE, 2));
+
+	t.color(colDown, colDown, colDown);
+	t.vertexUV(xf + 0.0f, yf + 10.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_OUTSIDE, 0), getAtlasV(TEX_OUTSIDE, 16));
+	t.vertexUV(xf + 0.0f, yf + 10.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_OUTSIDE, 0), getAtlasV(TEX_OUTSIDE, 0));
+	t.vertexUV(xf + 1.0f, yf + 10.0f / 16.0f, zf + 0.0f, getAtlasU(TEX_OUTSIDE, 16), getAtlasV(TEX_OUTSIDE, 0));
+	t.vertexUV(xf + 1.0f, yf + 10.0f / 16.0f, zf + 1.0f, getAtlasU(TEX_OUTSIDE, 16), getAtlasV(TEX_OUTSIDE, 16));
+
+	// 2. Middle Funnel (8x6x8 centered at [4..12, 4..10, 4..12])
+	renderBox(xf + 4.0f / 16.0f, yf + 4.0f / 16.0f, zf + 4.0f / 16.0f,
+	          xf + 12.0f / 16.0f, yf + 10.0f / 16.0f, zf + 12.0f / 16.0f,
+	          TEX_OUTSIDE, 4, 4, 12, 12,
+	          TEX_OUTSIDE, 4, 4, 12, 12,
+	          TEX_OUTSIDE, 4, 6, 12, 12,
+	          TEX_OUTSIDE, 4, 6, 12, 12,
+	          TEX_OUTSIDE, 4, 6, 12, 12,
+	          TEX_OUTSIDE, 4, 6, 12, 12);
+
+	// 3. Spout
+	float sx0, sx1, sy0, sy1, sz0, sz1;
+	if (facing == 2) { // North
+		sx0 = xf + 6.0f / 16.0f; sx1 = xf + 10.0f / 16.0f;
+		sy0 = yf + 4.0f / 16.0f; sy1 = yf + 8.0f / 16.0f;
+		sz0 = zf + 0.0f;         sz1 = zf + 4.0f / 16.0f;
+	} else if (facing == 3) { // South
+		sx0 = xf + 6.0f / 16.0f; sx1 = xf + 10.0f / 16.0f;
+		sy0 = yf + 4.0f / 16.0f; sy1 = yf + 8.0f / 16.0f;
+		sz0 = zf + 12.0f / 16.0f; sz1 = zf + 1.0f;
+	} else if (facing == 4) { // West
+		sx0 = xf + 0.0f;         sx1 = xf + 4.0f / 16.0f;
+		sy0 = yf + 4.0f / 16.0f; sy1 = yf + 8.0f / 16.0f;
+		sz0 = zf + 6.0f / 16.0f; sz1 = zf + 10.0f / 16.0f;
+	} else if (facing == 5) { // East
+		sx0 = xf + 12.0f / 16.0f; sx1 = xf + 1.0f;
+		sy0 = yf + 4.0f / 16.0f; sy1 = yf + 8.0f / 16.0f;
+		sz0 = zf + 6.0f / 16.0f; sz1 = zf + 10.0f / 16.0f;
+	} else { // Down (0 or default)
+		sx0 = xf + 6.0f / 16.0f; sx1 = xf + 10.0f / 16.0f;
+		sy0 = yf + 0.0f;         sy1 = yf + 4.0f / 16.0f;
+		sz0 = zf + 6.0f / 16.0f; sz1 = zf + 10.0f / 16.0f;
+	}
+
+	renderBox(sx0, sy0, sz0, sx1, sy1, sz1,
+	          TEX_OUTSIDE, 6, 6, 10, 10,
+	          TEX_OUTSIDE, 6, 6, 10, 10,
+	          TEX_OUTSIDE, 6, 12, 10, 16,
+	          TEX_OUTSIDE, 6, 12, 10, 16,
+	          TEX_OUTSIDE, 6, 12, 10, 16,
+	          TEX_OUTSIDE, 6, 12, 10, 16);
+
+	tt->setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+	return true;
+}
+
+
 
