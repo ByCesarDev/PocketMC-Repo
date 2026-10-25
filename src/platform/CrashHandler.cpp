@@ -11,7 +11,16 @@
     #define WIN32_LEAN_AND_MEAN
     #include <windows.h>
     #include <dbghelp.h>
-    #pragma comment(lib, "DbgHelp.lib")
+
+    // Function pointer types for dynamic loading from dbghelp.dll
+    typedef BOOL (WINAPI *pfn_MiniDumpWriteDump)(
+        HANDLE, DWORD, HANDLE, MINIDUMP_TYPE,
+        PMINIDUMP_EXCEPTION_INFORMATION,
+        PMINIDUMP_USER_STREAM_INFORMATION,
+        PMINIDUMP_CALLBACK_INFORMATION
+    );
+    typedef BOOL (WINAPI *pfn_SymInitialize)(HANDLE, PCSTR, BOOL);
+    typedef BOOL (WINAPI *pfn_SymFromAddr)(HANDLE, DWORD64, PDWORD64, PSYMBOL_INFO);
 #elif defined(__ANDROID__)
     #include <signal.h>
     #include <unistd.h>
@@ -53,6 +62,15 @@ static std::string GetTimestampString() {
 
 #if defined(_WIN32)
 static void WriteMiniDump(EXCEPTION_POINTERS* ep, const std::string& dumpPath) {
+    HMODULE hDbgHelp = LoadLibraryA("dbghelp.dll");
+    if (!hDbgHelp) return;
+
+    pfn_MiniDumpWriteDump pMiniDump = (pfn_MiniDumpWriteDump)GetProcAddress(hDbgHelp, "MiniDumpWriteDump");
+    if (!pMiniDump) {
+        FreeLibrary(hDbgHelp);
+        return;
+    }
+
     HANDLE hFile = CreateFileA(dumpPath.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile != INVALID_HANDLE_VALUE) {
         MINIDUMP_EXCEPTION_INFORMATION mei;
@@ -60,7 +78,7 @@ static void WriteMiniDump(EXCEPTION_POINTERS* ep, const std::string& dumpPath) {
         mei.ExceptionPointers = ep;
         mei.ClientPointers = FALSE;
 
-        MiniDumpWriteDump(
+        pMiniDump(
             GetCurrentProcess(),
             GetCurrentProcessId(),
             hFile,
@@ -71,6 +89,8 @@ static void WriteMiniDump(EXCEPTION_POINTERS* ep, const std::string& dumpPath) {
         );
         CloseHandle(hFile);
     }
+
+    FreeLibrary(hDbgHelp);
 }
 #elif defined(__ANDROID__)
 struct AndroidBacktraceState {
@@ -154,7 +174,18 @@ void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) 
     void* stack[64];
     USHORT frames = CaptureStackBackTrace(0, 64, stack, nullptr);
     HANDLE process = GetCurrentProcess();
-    SymInitialize(process, nullptr, TRUE);
+
+    HMODULE hDbgHelp = LoadLibraryA("dbghelp.dll");
+    pfn_SymInitialize pSymInit = nullptr;
+    pfn_SymFromAddr pSymAddr = nullptr;
+
+    if (hDbgHelp) {
+        pSymInit = (pfn_SymInitialize)GetProcAddress(hDbgHelp, "SymInitialize");
+        pSymAddr = (pfn_SymFromAddr)GetProcAddress(hDbgHelp, "SymFromAddr");
+        if (pSymInit) {
+            pSymInit(process, nullptr, TRUE);
+        }
+    }
 
     for (USHORT i = 0; i < frames; ++i) {
         DWORD64 address = (DWORD64)(stack[i]);
@@ -164,11 +195,15 @@ void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) 
         symbol->MaxNameLen = MAX_SYM_NAME;
 
         DWORD64 displacement = 0;
-        if (SymFromAddr(process, address, &displacement, symbol)) {
+        if (pSymAddr && pSymAddr(process, address, &displacement, symbol)) {
             out << "  [" << i << "] " << symbol->Name << " + 0x" << std::hex << displacement << std::dec << "\n";
         } else {
             out << "  [" << i << "] 0x" << std::hex << address << std::dec << "\n";
         }
+    }
+
+    if (hDbgHelp) {
+        FreeLibrary(hDbgHelp);
     }
 
     std::string dumpFile = "crash_" + timestamp + ".dmp";
@@ -176,7 +211,6 @@ void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) 
     out << "\n[Minidump]\n -> Written to: " << dumpFile << "\n";
 
 #elif defined(__ANDROID__)
-    // Android NDK stack unwind using _Unwind_Backtrace & dladdr
     const size_t maxFrames = 64;
     void* buffer[maxFrames];
     size_t count = CaptureAndroidBacktrace(buffer, maxFrames);
@@ -199,7 +233,6 @@ void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) 
     }
 
 #else
-    // Linux desktop POSIX glibc backtrace
     void* stack[64];
     int size = backtrace(stack, 64);
     char** symbols = backtrace_symbols(stack, size);
