@@ -4,11 +4,8 @@
 #include "client/Options.h"
 #include "client/player/input/IBuildInput.h"
 #include "platform/input/Keyboard.h"
-#include "platform/CrashHandler.hpp"
 #include "world/item/Item.h"
 #include "world/item/ItemInstance.h"
-#include <typeinfo>
-#include <cmath>
 #include <string>
 #include <cstdlib>
 
@@ -1282,6 +1279,7 @@ void Minecraft::popScreen()
 }
 
 void Minecraft::setScreen( Screen* screen )
+{
 if (screen) {
         PocketMC::CrashHandler::AddBreadcrumb("Switching screen to: " + std::string(typeid(*screen).name()));
     } else {
@@ -1379,7 +1377,7 @@ void Minecraft::init() {
         PocketMC::CrashContextSnapshot snap;
         
         // Active Screen
-        snap.activeScreen = this->currentScreen ? typeid(*this->currentScreen).name() : "In-Game (HUD)";
+        snap.activeScreen = this->screen ? typeid(*this->screen).name() : "In-Game (HUD)";
 
         // Player position & chunk coordinates
         if (this->player) {
@@ -1394,9 +1392,8 @@ void Minecraft::init() {
 
         // Engine tick & performance
         snap.gameTick = this->timer.ticks;
-        snap.fps = this->currentFPS;
-        if (this->level) {
-            snap.levelName = this->level->getLevelData().getLevelName();
+        if (this->level && this->level->getLevelData()) {
+            snap.levelName = this->level->getLevelData()->levelName;
         }
 
         return snap;
