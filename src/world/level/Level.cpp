@@ -686,7 +686,9 @@ void Level::changeDimension(int dimId) {
 			delete e;
 		}
 	}
-	updateProgress(60, statusBuilding, 150);
+#ifndef STANDALONE_SERVER
+    updateProgress(60, statusLoading, 150);
+#endif
 
 	Dimension* newDimension = Dimension::getNew(dimId);
 	if (!newDimension) return;
@@ -709,7 +711,9 @@ void Level::changeDimension(int dimId) {
 	for (unsigned int i = 0; i < _listeners.size(); i++) {
 		_listeners[i]->allChanged();
 	}
-	updateProgress(100, statusLoading, 200);
+#ifndef STANDALONE_SERVER
+    updateProgress(100, statusLoading, 150);
+#endif
 
 #ifndef STANDALONE_SERVER
 	if (mc) {
