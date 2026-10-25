@@ -37,7 +37,22 @@ void __gluMakeIdentityf(GLfloat m[16]) {
     m[3] = 0;  m[7] = 0;  m[11] = 0;  m[15] = 1;
 }
 
+#if defined(ANDROID) || defined(__ANDROID__)
+#include <EGL/egl.h>
+static inline void* android_get_proc_address(const char* name) {
+    void* proc = (void*)eglGetProcAddress(name);
+    if (!proc) {
+        // GLES 1.1 extension fallback (e.g., glGenerateMipmap -> glGenerateMipmapOES)
+        char oesName[128];
+        snprintf(oesName, sizeof(oesName), "%sOES", name);
+        proc = (void*)eglGetProcAddress(oesName);
+    }
+    return proc;
+}
+#define glfwGetProcAddress(x) android_get_proc_address(x)
+#else
 #include <GLFW/glfw3.h>
+#endif
 
 PFNGLGENERATEMIPMAPPROC glGenerateMipmapFuncPtr = nullptr;
 
