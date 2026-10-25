@@ -16,8 +16,8 @@
 	#define USE_VBO
 	#define GL_QUADS 0x0007
     #if defined(__APPLE__)
-        #import <OpenGLES/ES1/gl.height>
-        #import <OpenGLES/ES1/glext.height>
+        #import <OpenGLES/ES1/gl.h>
+        #import <OpenGLES/ES1/glext.h>
     #elif defined(ANDROID) || defined(__EMSCRIPTEN__)
         #include <GLES/gl.h>
         #include <GLES/glext.h>
@@ -37,6 +37,23 @@
 		#define glDepthRangef(a,b)      glDepthRange(a,b)
     #endif
 
+// Ensure APIENTRY and APIENTRYP are defined across both Desktop and GLES/Android
+#ifndef APIENTRY
+#  if defined(GL_APIENTRY)
+#    define APIENTRY GL_APIENTRY
+#  else
+#    define APIENTRY
+#  endif
+#endif
+
+#ifndef APIENTRYP
+#  if defined(GL_APIENTRYP)
+#    define APIENTRYP GL_APIENTRYP
+#  else
+#    define APIENTRYP APIENTRY *
+#  endif
+#endif
+
 #ifndef PFNGLGENERATEMIPMAPPROC
 typedef void (APIENTRYP PFNGLGENERATEMIPMAPPROC)(GLenum target);
 #endif
@@ -45,23 +62,9 @@ void glGenerateMipmap2(GLenum target);
 #ifndef glGenerateMipmap
 #define glGenerateMipmap(target) glGenerateMipmap2(target)
 #endif
-// #else
-//     // Uglyness to fix redeclaration issues
-//     #ifdef WIN32
-// 	   #include <winsock2.h>
-// 	   #include <Windows.h>
-// 	#endif
-// 	#include <gl/glew.h>
-// 	#include <gl/GL.h>
-
-// 	#define glFogx(a,b)	glFogi(a,b)
-// 	#define glOrthof(a,b,c,d,e,f) glOrtho(a,b,c,d,e,f)
-// #endif
-
 
 #define GLERRDEBUG 1
 #if GLERRDEBUG
-//#define GLERR(x) if((x) != 0) { LOGI("GLError: " #x "(%d)\n", __LINE__) }
 #define GLERR(x) do { const int errCode = glGetError(); if (errCode != 0) LOGE("OpenGL ERROR @%d: #%d @ (%s : %d)\n", x, errCode, __FILE__, __LINE__); } while (0)
 #else
 #define GLERR(x) x
@@ -105,8 +108,8 @@ int glhUnProjectf(	float winx, float winy, float winz,
 	#define glDrawArrays2(m, o, v) do{ if (Options::debugGl) LOGI("glDrawA @ %s:%d : %d\n", __FILE__, __LINE__, 0); glDrawArrays(m,o,v); GLERR(11); } while(0)
 
 	#define glTexParameteri2(m, o, v) do{ if (Options::debugGl) LOGI("glTexParameteri @ %s:%d : %d\n", __FILE__, __LINE__, v); glTexParameteri(m,o,v); GLERR(12); } while(0)
-	#define glTexImage2D2(a,b,c,d,e,f,g,height,i) do{ if (Options::debugGl) LOGI("glTexImage2D @ %s:%d : %d\n", __FILE__, __LINE__, 0); glTexImage2D(a,b,c,d,e,f,g,height,i); GLERR(13); } while(0)
-	#define glTexSubImage2D2(a,b,c,d,e,f,g,height,i) do{ if (Options::debugGl) LOGI("glTexSubImage2D @ %s:%d : %d\n", __FILE__, __LINE__, 0); glTexSubImage2D(a,b,c,d,e,f,g,height,i); GLERR(14); } while(0)
+	#define glTexImage2D2(a,b,c,d,e,f,g,h,i) do{ if (Options::debugGl) LOGI("glTexImage2D @ %s:%d : %d\n", __FILE__, __LINE__, 0); glTexImage2D(a,b,c,d,e,f,g,h,i); GLERR(13); } while(0)
+	#define glTexSubImage2D2(a,b,c,d,e,f,g,h,i) do{ if (Options::debugGl) LOGI("glTexSubImage2D @ %s:%d : %d\n", __FILE__, __LINE__, 0); glTexSubImage2D(a,b,c,d,e,f,g,h,i); GLERR(14); } while(0)
 	#define glGenBuffers2(s, id) do{ if (Options::debugGl) LOGI("glGenBuffers @ %s:%d : %d\n", __FILE__, __LINE__, id); anGenBuffers(s, id); GLERR(15); } while(0)
 	#define glBindBuffer2(s, id) do{ if (Options::debugGl) LOGI("glBindBuffer @ %s:%d : %d\n", __FILE__, __LINE__, id); glBindBuffer(s, id); GLERR(16); } while(0)
 	#define glBufferData2(a, b, c, d) do{ if (Options::debugGl) LOGI("glBufferData @ %s:%d : %d\n", __FILE__, __LINE__, d); glBufferData(a, b, c, d); GLERR(17); } while(0)
@@ -117,7 +120,6 @@ int glhUnProjectf(	float winx, float winy, float winz,
 	
 	#define glColor4f2(r, g, b, a) do{ if (Options::debugGl) LOGI("glColor4f2 @ %s:%d : (%f,%f,%f,%f)\n", __FILE__, __LINE__, r,g,b,a); glColor4f(r,g,b,a); GLERR(21); } while(0)
 
-	//#define glBlendMode2(s) do{ if (Options::debugGl) LOGI("glEnable @ %s:%d : %d\n", __FILE__, __LINE__, s); glEnable(s); GLERR(19); } while(0)
 	#define glBlendFunc2(src, dst) do{ if (Options::debugGl) LOGI("glBlendFunc @ %s:%d : %d - %d\n", __FILE__, __LINE__, src, dst); glBlendFunc(src, dst); GLERR(23); } while(0)
 	#define glShadeModel2(s) do{ if (Options::debugGl) LOGI("glShadeModel @ %s:%d : %d\n", __FILE__, __LINE__, s); glShadeModel(s); GLERR(25); } while(0)
 #else
@@ -160,6 +162,4 @@ int glhUnProjectf(	float winx, float winy, float winz,
 	#define glGetProcAddress(a) (void*(0))
 #endif
 
-
-
-#endif /*NET_MINECRAFT_CLIENT_RENDERER__gles_H__ */
+#endif /* NET_MINECRAFT_CLIENT_RENDERER__gles_H__ */
