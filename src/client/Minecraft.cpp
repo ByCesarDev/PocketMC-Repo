@@ -1200,6 +1200,7 @@ void Minecraft::popScreen()
 
 void Minecraft::setScreen( Screen* screen )
 {
+#ifndef	STANDALONE_SERVER
     if (screen) {
 #if defined(__RTTI) || defined(__GXX_RTTI) || defined(_CPPRTTI)
         PocketMC::CrashHandler::AddBreadcrumb("Switching screen to: " + std::string(typeid(*screen).name()));
@@ -1210,7 +1211,6 @@ void Minecraft::setScreen( Screen* screen )
         PocketMC::CrashHandler::AddBreadcrumb("Closing screen (returning to game)");
     }
 
-#ifndef	STANDALONE_SERVER
 	Mouse::reset();
 	Multitouch::reset();
 	Multitouch::resetThisUpdate();
@@ -1297,10 +1297,15 @@ void Minecraft::init() {
     PocketMC::CrashHandler::RegisterContextCallback([this]() -> PocketMC::CrashContextSnapshot {
         PocketMC::CrashContextSnapshot snap;
         
-#if defined(__RTTI) || defined(__GXX_RTTI) || defined(_CPPRTTI)
+// Active Screen
+#ifndef STANDALONE_SERVER
+    #if defined(__RTTI) || defined(__GXX_RTTI) || defined(_CPPRTTI)
         snap.activeScreen = this->screen ? typeid(*this->screen).name() : "In-Game (HUD)";
-#else
+    #else
         snap.activeScreen = this->screen ? "Screen Open" : "In-Game (HUD)";
+    #endif
+#else
+        snap.activeScreen = "Dedicated Server (Headless)";
 #endif
 
         if (this->player) {
