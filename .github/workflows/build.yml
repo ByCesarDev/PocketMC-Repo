@@ -131,11 +131,11 @@ jobs:
   build-android: # pray to god
     name: Build Android (${{ matrix.abi }})
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      github.event_name == 'pull_request' ||
-      contains(github.event.head_commit.message, 'release') ||
-      contains(github.event.head_commit.message, 'devtest')
+#    if: |
+#      github.event_name == 'workflow_dispatch' ||
+#      github.event_name == 'pull_request' ||
+#      contains(github.event.head_commit.message, 'release') ||
+#      contains(github.event.head_commit.message, 'devtest')
 
     strategy:
       # keep going with the other ABI if one fails so you at least get something useful
