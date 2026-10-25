@@ -4,8 +4,11 @@
 #include "client/Options.h"
 #include "client/player/input/IBuildInput.h"
 #include "platform/input/Keyboard.h"
+#include "platform/CrashHandler.hpp"
 #include "world/item/Item.h"
 #include "world/item/ItemInstance.h"
+#include <typeinfo>
+#include <cmath>
 #include <string>
 #include <cstdlib>
 
@@ -1279,6 +1282,12 @@ void Minecraft::popScreen()
 }
 
 void Minecraft::setScreen( Screen* screen )
+if (screen) {
+        PocketMC::CrashHandler::AddBreadcrumb("Switching screen to: " + std::string(typeid(*screen).name()));
+    } else {
+        PocketMC::CrashHandler::AddBreadcrumb("Closing screen (returning to game)");
+    }
+
 {
 #ifndef	STANDALONE_SERVER
 	Mouse::reset();
@@ -1361,8 +1370,41 @@ bool Minecraft::useTouchscreen() {
 bool Minecraft::supportNonTouchScreen() {
 	return _supportsNonTouchscreen;
 }
-void Minecraft::init()
-{
+void Minecraft::init() {
+    // Initialize the global crash handler system
+    PocketMC::CrashHandler::Initialize();
+
+    // Register the game state callback
+    PocketMC::CrashHandler::RegisterContextCallback([this]() -> PocketMC::CrashContextSnapshot {
+        PocketMC::CrashContextSnapshot snap;
+        
+        // Active Screen
+        snap.activeScreen = this->currentScreen ? typeid(*this->currentScreen).name() : "In-Game (HUD)";
+
+        // Player position & chunk coordinates
+        if (this->player) {
+            snap.playerPos = std::to_string(this->player->x) + ", " + 
+                             std::to_string(this->player->y) + ", " + 
+                             std::to_string(this->player->z);
+            
+            int cx = (int)std::floor(this->player->x / 16.0f);
+            int cz = (int)std::floor(this->player->z / 16.0f);
+            snap.currentChunk = "[" + std::to_string(cx) + ", " + std::to_string(cz) + "]";
+        }
+
+        // Engine tick & performance
+        snap.gameTick = this->timer.ticks;
+        snap.fps = this->currentFPS;
+        if (this->level) {
+            snap.levelName = this->level->getLevelData().getLevelName();
+        }
+
+        return snap;
+    });
+
+    // breadcrumb showing init finished
+    PocketMC::CrashHandler::AddBreadcrumb("Minecraft::init completed");
+
 	options.load();
 
 #ifndef STANDALONE_SERVER
