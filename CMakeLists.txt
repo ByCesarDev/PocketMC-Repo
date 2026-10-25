@@ -440,6 +440,11 @@ if(${PLATFORM} MATCHES "Web")
     target_compile_definitions(${PROJECT_NAME} PUBLIC "__EMSCRIPTEN__" "NO_SOUND" "NO_NETWORK")
 endif()
 
+# Dirty fix
+if(TARGET MinecraftPE-server)
+    target_sources(MinecraftPE-server PRIVATE src/platform/CrashHandler.cpp)
+endif()
+
 # Client
 target_compile_definitions(${PROJECT_NAME} PUBLIC "OPENGL_ES" "NO_EGL" ${PLATFORM})
 target_link_libraries(${PROJECT_NAME} zlib ${PNG_LIB} OpenAL::OpenAL glfw ${EXTRA_LIBS})
