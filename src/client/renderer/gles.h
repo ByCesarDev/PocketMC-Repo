@@ -37,6 +37,21 @@
 		#define glDepthRangef(a,b)      glDepthRange(a,b)
     #endif
 
+    #if defined(OPENGL_ES) || defined(ANDROID) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+        #ifndef glFogi
+            #define glFogi(a,b) glFogx(a,b)
+        #endif
+        #ifndef glOrtho
+            #define glOrtho(a,b,c,d,e,f) glOrthof(a,b,c,d,e,f)
+        #endif
+        #ifndef glClearDepth
+            #define glClearDepth(x) glClearDepthf(x)
+        #endif
+        #ifndef glDepthRange
+            #define glDepthRange(a,b) glDepthRangef(a,b)
+        #endif
+    #endif
+
 // Ensure APIENTRY and APIENTRYP are defined across both Desktop and GLES/Android
 #ifndef APIENTRY
 #  if defined(GL_APIENTRY)
