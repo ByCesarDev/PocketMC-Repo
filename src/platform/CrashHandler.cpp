@@ -5,12 +5,19 @@
 #include <ctime>
 #include <deque>
 #include <mutex>
+#include <cstring>
 
 #if defined(_WIN32)
     #define WIN32_LEAN_AND_MEAN
     #include <windows.h>
     #include <dbghelp.h>
     #pragma comment(lib, "DbgHelp.lib")
+#elif defined(__ANDROID__)
+    #include <signal.h>
+    #include <unistd.h>
+    #include <unwind.h>
+    #include <dlfcn.h>
+    #include <cxxabi.h>
 #else
     #include <signal.h>
     #include <execinfo.h>
@@ -65,12 +72,36 @@ static void WriteMiniDump(EXCEPTION_POINTERS* ep, const std::string& dumpPath) {
         CloseHandle(hFile);
     }
 }
+#elif defined(__ANDROID__)
+struct AndroidBacktraceState {
+    void** current;
+    void** end;
+};
+
+static _Unwind_Reason_Code AndroidUnwindCallback(struct _Unwind_Context* context, void* arg) {
+    AndroidBacktraceState* state = static_cast<AndroidBacktraceState*>(arg);
+    uintptr_t pc = _Unwind_GetIP(context);
+    if (pc) {
+        if (state->current == state->end) {
+            return _URC_END_OF_STACK;
+        } else {
+            *state->current++ = reinterpret_cast<void*>(pc);
+        }
+    }
+    return _URC_NO_REASON;
+}
+
+static size_t CaptureAndroidBacktrace(void** buffer, size_t maxFrames) {
+    AndroidBacktraceState state = {buffer, buffer + maxFrames};
+    _Unwind_Backtrace(AndroidUnwindCallback, &state);
+    return state.current - buffer;
+}
 #endif
 
 void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) {
     std::string timestamp = GetTimestampString();
     std::string fileName = "crash_" + timestamp + ".log";
-    std::ofstream out(fileName);
+    std::ofstream out(fileName.c_str());
 
     if (!out.is_open()) return;
 
@@ -80,21 +111,21 @@ void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) 
     out << "Timestamp:    " << timestamp << "\n";
     out << "Crash Reason: " << crashType << "\n";
 
-    // 1. Thread & OS Info
+    // 1. OS & Thread Info
 #if defined(_WIN32)
-    out << "Platform:     Windows (x86_64 / MSVC)\n";
+    out << "Platform:     Windows\n";
     out << "Thread ID:    " << GetCurrentThreadId() << "\n";
 #elif defined(__ANDROID__)
-    out << "Platform:     Android (Native NDK)\n";
+    out << "Platform:     Android (arm64-v8a / Bionic)\n";
+    out << "Thread ID:    " << (uint64_t)pthread_self() << "\n";
 #else
     out << "Platform:     Linux (POSIX)\n";
-    out << "Thread ID:    " << pthread_self() << "\n";
+    out << "Thread ID:    " << (uint64_t)pthread_self() << "\n";
 #endif
 
-    // 2. Engine & World Context Snapshot
+    // 2. Engine State Snapshot
     out << "\n[Game Engine State]\n";
     if (g_ContextCallback) {
-        // Run safely inside try-catch to avoid secondary crash
         try {
             CrashContextSnapshot ctx = g_ContextCallback();
             out << " - Active Screen:   " << ctx.activeScreen << "\n";
@@ -104,7 +135,7 @@ void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) 
             out << " - Tick Number:     " << ctx.gameTick << "\n";
             out << " - Average FPS:     " << ctx.fps << "\n";
         } catch (...) {
-            out << " ! Failed to retrieve engine context (corrupted memory state)\n";
+            out << " ! Failed to retrieve engine context\n";
         }
     } else {
         out << " - No engine callback registered.\n";
@@ -116,8 +147,9 @@ void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) 
         out << " > " << bc << "\n";
     }
 
-    // 4. Call Stack Extraction
+    // 4. Call Stack Unwinding
     out << "\n[Stack Trace]\n";
+
 #if defined(_WIN32)
     void* stack[64];
     USHORT frames = CaptureStackBackTrace(0, 64, stack, nullptr);
@@ -135,22 +167,44 @@ void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) 
         if (SymFromAddr(process, address, &displacement, symbol)) {
             out << "  [" << i << "] " << symbol->Name << " + 0x" << std::hex << displacement << std::dec << "\n";
         } else {
-            out << "  [" << i << "] 0x" << std::hex << address << std::dec << " (Unknown Symbol)\n";
+            out << "  [" << i << "] 0x" << std::hex << address << std::dec << "\n";
         }
     }
 
-    // Write Minidump
     std::string dumpFile = "crash_" + timestamp + ".dmp";
     WriteMiniDump((EXCEPTION_POINTERS*)contextRecord, dumpFile);
     out << "\n[Minidump]\n -> Written to: " << dumpFile << "\n";
+
+#elif defined(__ANDROID__)
+    // Android NDK stack unwind using _Unwind_Backtrace & dladdr
+    const size_t maxFrames = 64;
+    void* buffer[maxFrames];
+    size_t count = CaptureAndroidBacktrace(buffer, maxFrames);
+
+    for (size_t i = 0; i < count; ++i) {
+        const void* addr = buffer[i];
+        Dl_info info;
+        if (dladdr(addr, &info) && info.dli_sname) {
+            int status = 0;
+            char* demangled = abi::__cxa_demangle(info.dli_sname, nullptr, nullptr, &status);
+            const char* name = (status == 0 && demangled) ? demangled : info.dli_sname;
+
+            out << "  [" << i << "] " << (info.dli_fname ? info.dli_fname : "unknown")
+                << ": " << name << " + " << ((uintptr_t)addr - (uintptr_t)info.dli_saddr) << "\n";
+
+            if (demangled) free(demangled);
+        } else {
+            out << "  [" << i << "] " << addr << "\n";
+        }
+    }
+
 #else
-    // POSIX backtrace
+    // Linux desktop POSIX glibc backtrace
     void* stack[64];
     int size = backtrace(stack, 64);
     char** symbols = backtrace_symbols(stack, size);
     if (symbols) {
         for (int i = 0; i < size; ++i) {
-            // Attempt C++ demangle
             std::string line = symbols[i];
             size_t openParen = line.find('(');
             size_t plus = line.find('+', openParen);

@@ -5,7 +5,6 @@
 
 namespace PocketMC {
 
-// Functor to query engine state safely during a crash
 struct CrashContextSnapshot {
     std::string activeScreen = "None";
     std::string playerPos    = "N/A";
@@ -20,16 +19,11 @@ public:
     static void Initialize();
     static void Shutdown();
 
-    // Register a hook into the Minecraft instance to extract game state
     static void RegisterContextCallback(std::function<CrashContextSnapshot()> callback);
-
-    // Breadcrumb trail to track what happened leading up to the crash
     static void AddBreadcrumb(const std::string& message);
-
-    // Write manual crash log (e.g. fatal assertion)
     static void LogFatalError(const std::string& message);
 
-private:
+    // Moved to public so OS signal/exception handlers can call it
     static void WriteCrashReport(const char* crashType, void* contextRecord);
 };
 
