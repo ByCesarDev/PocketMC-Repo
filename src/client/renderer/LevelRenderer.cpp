@@ -8,7 +8,9 @@
 #include "../../world/entity/player/Player.h"
 #include "../../world/level/tile/LevelEvent.h"
 #include "../../world/level/tile/LeafTile.h"
+#if defined(_WIN32)
 #include <windows.h>
+#endif
 #include "../../client/particle/ParticleEngine.h"
 #include "../../client/particle/ParticleInclude.h"
 #include "../sound/SoundEngine.h"
