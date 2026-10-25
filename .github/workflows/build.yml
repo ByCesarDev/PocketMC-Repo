@@ -84,14 +84,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1. Add Swap so the runner never runs out of RAM
-      - name: Set up swap space
-        run: |
-          sudo fallocate -l 4G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
-
       - name: Setup caches
         uses: ./.github/actions/setup-cache
         with:
