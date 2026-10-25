@@ -20,11 +20,11 @@ jobs:
   build-windows:
     name: Build Windows
     runs-on: ubuntu-22.04
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      github.event_name == 'pull_request' ||
-      contains(github.event.head_commit.message, 'release') ||
-      contains(github.event.head_commit.message, 'devtest')
+#    if: |
+#      github.event_name == 'workflow_dispatch' ||
+#      github.event_name == 'pull_request' ||
+#      contains(github.event.head_commit.message, 'release') ||
+#      contains(github.event.head_commit.message, 'devtest')
 
     steps:
       - uses: actions/checkout@v4
