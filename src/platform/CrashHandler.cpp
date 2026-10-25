@@ -12,7 +12,6 @@
     #include <windows.h>
     #include <dbghelp.h>
 
-    // Function pointer types for dynamic loading from dbghelp.dll
     typedef BOOL (WINAPI *pfn_MiniDumpWriteDump)(
         HANDLE, DWORD, HANDLE, MINIDUMP_TYPE,
         PMINIDUMP_EXCEPTION_INFORMATION,
@@ -131,7 +130,6 @@ void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) 
     out << "Timestamp:    " << timestamp << "\n";
     out << "Crash Reason: " << crashType << "\n";
 
-    // 1. OS & Thread Info
 #if defined(_WIN32)
     out << "Platform:     Windows\n";
     out << "Thread ID:    " << GetCurrentThreadId() << "\n";
@@ -143,7 +141,6 @@ void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) 
     out << "Thread ID:    " << (uint64_t)pthread_self() << "\n";
 #endif
 
-    // 2. Engine State Snapshot
     out << "\n[Game Engine State]\n";
     if (g_ContextCallback) {
         try {
@@ -161,13 +158,11 @@ void CrashHandler::WriteCrashReport(const char* crashType, void* contextRecord) 
         out << " - No engine callback registered.\n";
     }
 
-    // 3. Breadcrumbs
     out << "\n[Recent Action Breadcrumbs (Last " << MAX_BREADCRUMBS << ")]\n";
     for (const auto& bc : g_Breadcrumbs) {
         out << " > " << bc << "\n";
     }
 
-    // 4. Call Stack Unwinding
     out << "\n[Stack Trace]\n";
 
 #if defined(_WIN32)
