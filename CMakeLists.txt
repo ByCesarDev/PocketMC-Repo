@@ -34,6 +34,10 @@ if (${PLATFORM} STREQUAL "Desktop")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-narrowing -Wno-narrowing -Wno-invalid-source-encoding -Wno-reserved-user-defined-literal")
     endif()
 
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include cstdint")
+    endif()
+
     if (WIN32)
         if (MSVC)
             add_compile_options(/FS)
