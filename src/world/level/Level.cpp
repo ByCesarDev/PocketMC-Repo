@@ -659,14 +659,18 @@ void Level::changeDimension(int dimId) {
 #endif
 
 	levelData.setDimension(dimId);
-	updateProgress(20, statusSaving, 150);
+#ifndef STANDALONE_SERVER
+    updateProgress(20, statusSaving, 150);
+#endif
 
 	_chunkSource->saveAll(true);
 
 	if (levelStorage) {
 		levelStorage->saveGame(this);
 	}
-	updateProgress(40, statusBuilding, 150);
+#ifndef STANDALONE_SERVER
+    updateProgress(40, statusBuilding, 150);
+#endif
 
 	for (int i = (int)entities.size() - 1; i >= 0; i--) {
 		Entity* e = entities[i];
@@ -694,7 +698,9 @@ void Level::changeDimension(int dimId) {
 	dimension->init(this);
 
 	_chunkSource = createChunkSource();
-	updateProgress(80, statusLoading, 150);
+#ifndef STANDALONE_SERVER
+    updateProgress(80, statusLoading, 150);
+#endif
 
 	if (levelStorage) {
 		levelStorage->loadEntities(this, NULL);
