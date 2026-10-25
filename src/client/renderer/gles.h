@@ -52,6 +52,14 @@
         #endif
     #endif
 
+#ifndef GL_TEXTURE_BASE_LEVEL
+#  define GL_TEXTURE_BASE_LEVEL 0x813C
+#endif
+
+#ifndef GL_TEXTURE_MAX_LEVEL
+#  define GL_TEXTURE_MAX_LEVEL 0x813D
+#endif
+
 // Ensure APIENTRY and APIENTRYP are defined across both Desktop and GLES/Android
 #ifndef APIENTRY
 #  if defined(GL_APIENTRY)
