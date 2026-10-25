@@ -1938,10 +1938,12 @@ void Minecraft::optionUpdated(OptionId option, int value ) {
         }
     }
     if(option == OPTIONS_MIPMAP_LEVEL) {
+#ifndef STANDALONE_SERVER
         Textures::MIPMAP_LEVELS = value;
         if (textures) {
             textures->reloadAll();
         }
+#endif
     }
 }
 
