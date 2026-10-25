@@ -6,7 +6,7 @@ on:
   push:
     branches:
     - '**'              # every branch
-    - '!no-build-**'    # unless marked as no-build
+    - '!no-build-**'    # unless marked as no-build it doesn't build
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
