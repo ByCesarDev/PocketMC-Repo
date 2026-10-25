@@ -574,9 +574,11 @@ void Level::changeDimension(int dimId) {
 	}
 
 	std::string dimTitle = "";
+#ifndef STANDALONE_SERVER
 	std::string statusSaving = "";
 	std::string statusBuilding = "";
 	std::string statusLoading = "";
+#endif
 
 	if (isCrossingToNether) {
 		if (!I18n::get("progressScreen.dimension.nether.title", dimTitle)) {
