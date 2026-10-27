@@ -27,7 +27,13 @@ if (${PLATFORM} STREQUAL "Desktop")
     set(PLATFORM_CPP "PLATFORM_DESKTOP")
 
     if (MINGW)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+        if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            # Statically link libc++ and libunwind for LLVM/Clang
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+        else()
+            # Statically link libstdc++ and libgcc for GCC
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+        endif()
     endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -386,6 +392,9 @@ if(WIN32)
 endif()
 
 add_executable(${PROJECT_NAME} ${CLIENT_SOURCES})
+if (WIN32 AND MINGW)
+    target_link_options(${PROJECT_NAME} PRIVATE -static)
+endif()
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC ${PLATFORM_CPP})
 
