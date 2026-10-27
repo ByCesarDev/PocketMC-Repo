@@ -2,33 +2,34 @@
 #include "Item.h"
 #include "../level/tile/Tile.h"
 #include "../../nbt/CompoundTag.h"
+#include <sstream>
 
 ItemInstance::ItemInstance() {
 	init(0, 0, 0);
 }
 
 ItemInstance::ItemInstance(const Tile* tile) {
-    init(tile->id, 1, 0);
+    init(tile ? tile->id : 0, 1, 0);
 }
 
 ItemInstance::ItemInstance(const Tile* tile, int count) {
-    init(tile->id, count, 0);
+    init(tile ? tile->id : 0, count, 0);
 }
 
 ItemInstance::ItemInstance(const Tile* tile, int count, int auxValue) {
-    init(tile->id, count, auxValue);
+    init(tile ? tile->id : 0, count, auxValue);
 }
 
 ItemInstance::ItemInstance(const Item* item) {
-    init(item->id, 1, 0);
+    init(item ? item->id : 0, 1, 0);
 }
 
 ItemInstance::ItemInstance(const Item* item, int count) {
-    init(item->id, count, 0);
+    init(item ? item->id : 0, count, 0);
 }
 
 ItemInstance::ItemInstance(const Item* item, int count, int auxValue) {
-    init(item->id, count, auxValue);
+    init(item ? item->id : 0, count, auxValue);
 }
 
 ItemInstance::ItemInstance(int id, int count, int damage) {
@@ -38,7 +39,6 @@ ItemInstance::ItemInstance(int id, int count, int damage) {
 ItemInstance::ItemInstance(const ItemInstance& rhs) {
 	this->auxValue	= rhs.auxValue;
 	this->count		= rhs.count;
-	//this->popTime	= rhs.popTime;
 	this->id		= rhs.id;
 }
 
@@ -49,40 +49,39 @@ void ItemInstance::init(int id, int count, int damage) {
 }
 
 bool ItemInstance::isNull() const {
-	return (id|count|auxValue) == 0;
+	return (id | count | auxValue) == 0;
 }
 
 void ItemInstance::setNull() {
 	id = count = auxValue = 0;
 }
 
-//ItemInstance::ItemInstance(CompoundTag itemTag) {
-//    load(itemTag);
-//}
-
 ItemInstance ItemInstance::remove(int count) {
     this->count -= count;
-    return /*new*/ ItemInstance(id, count, auxValue);
+    return ItemInstance(id, count, auxValue);
 }
 
 bool ItemInstance::useOn(Player* player, Level* level, int x, int y, int z, int face, float clickX, float clickY, float clickZ) {
-    if (getItem()->useOn(this, player, level, x, y, z, face, clickX, clickY, clickZ)) {
-		//player.awardStat(Stats.itemUsed[id], 1);
+    Item* it = getItem();
+    if (it && it->useOn(this, player, level, x, y, z, face, clickX, clickY, clickZ)) {
 		return true;
 	}
     return false;
 }
 
 float ItemInstance::getDestroySpeed(Tile* tile) {
-    return getItem()->getDestroySpeed(this, tile);
+    Item* it = getItem();
+    return it ? it->getDestroySpeed(this, tile) : 1.0f;
 }
 
 ItemInstance* ItemInstance::use(Level* level, Player* player) {
-    return getItem()->use(this, level, player);
+    Item* it = getItem();
+    return it ? it->use(this, level, player) : this;
 }
 
 int ItemInstance::getMaxStackSize() const {
-    return getItem()->getMaxStackSize();
+    Item* it = getItem();
+    return it ? it->getMaxStackSize() : 0;
 }
 
 bool ItemInstance::isStackable() const {
@@ -99,22 +98,23 @@ bool ItemInstance::isStackable( const ItemInstance* a, const ItemInstance* b ) {
 }
 
 bool ItemInstance::isDamageableItem() const {
-    return Item::items[id]->getMaxDamage() > 0;
+    Item* it = getItem();
+    return it ? (it->getMaxDamage() > 0) : false;
 }
 
 /**
  * Returns true if this item type only can be stacked with items that have
  * the same auxValue data.
- * 
- * @return
  */
 bool ItemInstance::isStackedByData() const {
-    return Item::items[id]->isStackedByData();
+    Item* it = getItem();
+    return it ? it->isStackedByData() : false;
 }
 
 bool ItemInstance::isLiquidClipItem() const {
     if (isNull()) return false;
-    return Item::items[id]->isLiquidClipItem(auxValue);
+    Item* it = getItem();
+    return it ? it->isLiquidClipItem(auxValue) : false;
 }
 
 bool ItemInstance::isDamaged() const {
@@ -128,12 +128,14 @@ int ItemInstance::getDamageValue() const {
 int ItemInstance::getAuxValue() const {
     return auxValue;
 }
+
 void ItemInstance::setAuxValue(int value) {
 	auxValue = value;
 }
 
 int ItemInstance::getMaxDamage() const {
-    return Item::items[id]->getMaxDamage();
+    Item* it = getItem();
+    return it ? it->getMaxDamage() : 0;
 }
 
 void ItemInstance::hurt(int i) {
@@ -149,26 +151,31 @@ void ItemInstance::hurt(int i) {
 }
 
 void ItemInstance::hurtEnemy(Mob* mob) {
-    Item::items[id]->hurtEnemy(this, mob);
+    Item* it = getItem();
+    if (it) it->hurtEnemy(this, mob);
 }
 
 void ItemInstance::mineBlock(int tile, int x, int y, int z) {
-    Item::items[id]->mineBlock(this, tile, x, y, z);
+    Item* it = getItem();
+    if (it) it->mineBlock(this, tile, x, y, z);
 }
 
 int ItemInstance::getAttackDamage(Entity* entity) {
-    return Item::items[id]->getAttackDamage(entity);
+    Item* it = getItem();
+    return it ? it->getAttackDamage(entity) : 0;
 }
 
 bool ItemInstance::canDestroySpecial(Tile* tile) {
-    return Item::items[id]->canDestroySpecial(tile);
+    Item* it = getItem();
+    return it ? it->canDestroySpecial(tile) : false;
 }
 
 void ItemInstance::snap(Player* player) {
 }
 
 void ItemInstance::interactEnemy(Mob* mob) {
-    Item::items[id]->interactEnemy(this, mob);
+    Item* it = getItem();
+    if (it) it->interactEnemy(this, mob);
 }
 
 ItemInstance* ItemInstance::copy() const {
@@ -191,19 +198,14 @@ bool ItemInstance::matchesNulls(const ItemInstance* a, const ItemInstance* b) {
 	return a->matches(b);
 }
 
-/**
- * Checks if this item is the same item as the other one, disregarding the
- * 'count' value.
- * 
- * @param b
- * @return
- */
 bool ItemInstance::sameItem(ItemInstance* b) {
+    if (!b) return false;
     return id == b->id && auxValue == b->auxValue;
 }
 
 std::string ItemInstance::getDescriptionId() const {
-    return id? Item::items[id]->getDescriptionId(this) : "EmptyItemInstance";
+    Item* it = getItem();
+    return it ? it->getDescriptionId(this) : "EmptyItemInstance";
 }
 
 ItemInstance* ItemInstance::setDescriptionId(const std::string& id) {
@@ -227,17 +229,19 @@ ItemInstance* ItemInstance::clone(const ItemInstance* item) {
 
 /*static*/
 ItemInstance ItemInstance::cloneSafe( const ItemInstance* item ) {
-	return item? *item : ItemInstance();
+	return item ? *item : ItemInstance();
 }
 
 /*private*/
 bool ItemInstance::matches(const ItemInstance* b) const {
+    if (!b) return false;
     return (id == b->id)
 		&& (count == b->count)
 		&& (auxValue == b->auxValue);
 }
 
 CompoundTag* ItemInstance::save(CompoundTag* compoundTag) {
+    if (!compoundTag) return NULL;
     compoundTag->putShort("id", (short) id);
     compoundTag->putByte("Count", (unsigned char) count);
     compoundTag->putShort("Damage", (short) auxValue);
@@ -245,6 +249,7 @@ CompoundTag* ItemInstance::save(CompoundTag* compoundTag) {
 }
 
 void ItemInstance::load(CompoundTag* compoundTag) {
+    if (!compoundTag) return;
     id = compoundTag->getShort("id");
     count = (unsigned char) compoundTag->getByte("Count");
     auxValue = compoundTag->getShort("Damage");
@@ -257,6 +262,7 @@ bool ItemInstance::operator==( const ItemInstance& rhs ) const {
 }
 
 ItemInstance* ItemInstance::fromTag( CompoundTag* tag ) {
+    if (!tag) return NULL;
 	ItemInstance* item = new ItemInstance();
 	item->load(tag);
 	if (item->getItem() == NULL) {
@@ -267,7 +273,7 @@ ItemInstance* ItemInstance::fromTag( CompoundTag* tag ) {
 }
 
 Item* ItemInstance::getItem() const {
-	if (id < 0 || id >= Item::MAX_ITEMS) return NULL;
+	if (id <= 0 || id >= Item::MAX_ITEMS) return NULL;
 	return Item::items[id];
 }
 
