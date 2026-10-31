@@ -44,6 +44,7 @@ public:
     int worldType = WorldType::INFINITE_SIZE;
     bool flatWorld = false;
     bool experimental = false;
+    bool woodlandEnabled = false;
 
 	//
 	// Those two should actually not be here

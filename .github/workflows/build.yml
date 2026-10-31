@@ -6,7 +6,7 @@ on:
   push:
     branches:
     - '**'              # every branch
-    - '!no-build-**'    # unless marked as no-build
+  #  - '!no-build-**'    # unless marked as no-build | for now disabled
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -20,11 +20,11 @@ jobs:
   build-windows:
     name: Build Windows
     runs-on: ubuntu-22.04
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      github.event_name == 'pull_request' ||
-      contains(github.event.head_commit.message, 'release') ||
-      contains(github.event.head_commit.message, 'devtest')
+#    if: |
+#      github.event_name == 'workflow_dispatch' ||
+#      github.event_name == 'pull_request' ||
+#      contains(github.event.head_commit.message, 'release') ||
+#      contains(github.event.head_commit.message, 'devtest')
 
     steps:
       - uses: actions/checkout@v4
@@ -80,11 +80,6 @@ jobs:
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      github.event_name == 'pull_request' ||
-      contains(github.event.head_commit.message, 'release') ||
-      contains(github.event.head_commit.message, 'devtest')
 
     steps:
       - uses: actions/checkout@v4
@@ -96,8 +91,6 @@ jobs:
           target: linux
 
       - name: Create Build Environment
-        # Some projects don't allow in-source building, so create a separate build directory
-        # We'll use this as our working directory for all subsequent commands
         run: cmake -E make_directory ${{github.workspace}}/build
 
       - name: Setup Environment
@@ -107,18 +100,17 @@ jobs:
           sudo apt-get install -y --no-install-recommends build-essential libgl-dev libwayland-dev xorg-dev libxkbcommon-dev
       
       - name: Configure CMake
-        # Use a bash shell so we can use the same syntax for environment variable
-        # access regardless of the host operating system
         shell: bash
         working-directory: ${{github.workspace}}/build
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
+      # 2. Limit parallel jobs to 2 so it doesn't spike RAM
       - name: Build
         working-directory: ${{github.workspace}}/build
         shell: bash
         run: |
-          cmake --build . --config $BUILD_TYPE --target MinecraftPE --parallel
-          cmake --build . --config $BUILD_TYPE --target MinecraftPE-server --parallel
+          cmake --build . --config $BUILD_TYPE --target MinecraftPE --parallel 2
+          cmake --build . --config $BUILD_TYPE --target MinecraftPE-server --parallel 2
       
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -131,11 +123,11 @@ jobs:
   build-android: # pray to god
     name: Build Android (${{ matrix.abi }})
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      github.event_name == 'pull_request' ||
-      contains(github.event.head_commit.message, 'release') ||
-      contains(github.event.head_commit.message, 'devtest')
+#    if: |
+#      github.event_name == 'workflow_dispatch' ||
+#      github.event_name == 'pull_request' ||
+#      contains(github.event.head_commit.message, 'release') ||
+#      contains(github.event.head_commit.message, 'devtest')
 
     strategy:
       # keep going with the other ABI if one fails so you at least get something useful

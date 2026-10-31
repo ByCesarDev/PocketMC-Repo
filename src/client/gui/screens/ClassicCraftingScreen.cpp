@@ -29,6 +29,7 @@ ClassicCraftingScreen::ClassicCraftingScreen() :
     btnClose(1),
     guiPanelBg(NULL),
     guiSlot(NULL),
+    guiSlotResult(NULL),
     panelX(0), panelY(0),
     panelWidth(196), panelHeight(180),
     craftGridX(0), craftGridY(0),
@@ -134,7 +135,6 @@ void ClassicCraftingScreen::render(int xm, int ym, float a) {
     getSlotAt(xm, ym, hoverLoc, hoverIndex);
 
     // 3. Draw 3x3 Crafting Grid
-    // Background under the 3x3 matrix
     fill(craftGridX - 1, craftGridY - 1, craftGridX + 3 * SLOT_SIZE + 1, craftGridY + 3 * SLOT_SIZE + 1, 0xFF373737);
     for (int row = 0; row < CRAFT_GRID_ROWS; ++row) {
         for (int col = 0; col < CRAFT_GRID_COLS; ++col) {
@@ -222,7 +222,7 @@ void ClassicCraftingScreen::render(int xm, int ym, float a) {
     renderCarriedItem(xm, ym);
 
     // 10. Render tooltip if not holding an item
-    if (!carriedItem || carriedItem->isNull()) {
+    if (!carriedItem || carriedItem->isNull() || carriedItem->count <= 0) {
         renderHoverTooltip(xm, ym);
     }
 }
@@ -235,7 +235,6 @@ void ClassicCraftingScreen::drawInventorySlot(Tesselator& t, int x, int y, const
         guiSlot->draw(t, xx, yy);
     }
 
-    // Bedrock-style hover highlight
     if (isHovered || isDragTarget) {
         minecraft->textures->loadAndBindTexture("gui/slot_disabled_hover.png");
         glColor4f2(1, 1, 1, 1);
@@ -249,8 +248,7 @@ void ClassicCraftingScreen::drawInventorySlot(Tesselator& t, int x, int y, const
         glColor4f2(1, 1, 1, 1);
     }
 
-    // Render Item inside slot
-    if (item && !item->isNull()) {
+    if (item && !item->isNull() && item->id > 0 && item->count > 0) {
         ItemRenderer::renderGuiItem(minecraft->font, minecraft->textures, item, xx + 1.0f, yy + 1.0f, true);
         ItemRenderer::renderGuiItemDecorations(minecraft->font, item, xx + 1.0f, yy + 1.0f);
     }
@@ -264,7 +262,6 @@ void ClassicCraftingScreen::drawResultSlot(Tesselator& t, int x, int y, const It
         guiSlotResult->draw(t, xx, yy);
     }
 
-    // Bedrock-style hover highlight for 26x26 slot
     if (isHovered) {
         minecraft->textures->loadAndBindTexture("gui/slot_disabled_hover.png");
         glColor4f2(1, 1, 1, 1);
@@ -278,15 +275,14 @@ void ClassicCraftingScreen::drawResultSlot(Tesselator& t, int x, int y, const It
         glColor4f2(1, 1, 1, 1);
     }
 
-    // Render Item inside slot (centered in 26x26 slot -> 5px offset)
-    if (item && !item->isNull()) {
+    if (item && !item->isNull() && item->id > 0 && item->count > 0) {
         ItemRenderer::renderGuiItem(minecraft->font, minecraft->textures, item, xx + 5.0f, yy + 5.0f, true);
         ItemRenderer::renderGuiItemDecorations(minecraft->font, item, xx + 5.0f, yy + 5.0f);
     }
 }
 
 void ClassicCraftingScreen::renderCarriedItem(int xm, int ym) {
-    if (carriedItem && !carriedItem->isNull()) {
+    if (carriedItem && !carriedItem->isNull() && carriedItem->id > 0 && carriedItem->count > 0) {
         int displayCount = carriedItem->count;
         if (dragMode != CLASSIC_DRAG_NONE && !draggedSlots.empty()) {
             if (dragMode == CLASSIC_DRAG_LEFT) {
@@ -304,8 +300,6 @@ void ClassicCraftingScreen::renderCarriedItem(int xm, int ym) {
             tempStack.count = displayCount;
             ItemRenderer::renderGuiItem(minecraft->font, minecraft->textures, &tempStack, (float)(xm - 8), (float)(ym - 8), true);
             ItemRenderer::renderGuiItemDecorations(minecraft->font, &tempStack, (float)(xm - 8), (float)(ym - 8));
-        } else {
-            ItemRenderer::renderGuiItem(minecraft->font, minecraft->textures, carriedItem, (float)(xm - 8), (float)(ym - 8), true);
         }
     }
 }
@@ -316,10 +310,10 @@ void ClassicCraftingScreen::renderHoverTooltip(int xm, int ym) {
     if (!getSlotAt(xm, ym, loc, index)) return;
 
     ItemInstance* item = getSlotItem(loc, index);
-    if (!item || item->isNull()) return;
+    if (!item || item->isNull() || item->id <= 0 || item->count <= 0) return;
 
     std::string name = item->getName();
-    if (name.empty()) return;
+    if (name.empty() || name == "EmptyItemInstance.name") return;
 
     int textW = minecraft->font->width(name);
     int boxX = xm + 10;
@@ -411,19 +405,40 @@ ItemInstance* ClassicCraftingScreen::getSlotItem(ClassicSlotLocation loc, int in
 }
 
 void ClassicCraftingScreen::setSlotItem(ClassicSlotLocation loc, int index, ItemInstance* item) {
+    bool hasValidItem = (item && !item->isNull() && item->id > 0 && item->count > 0);
+
     if (loc == CLASSIC_SLOT_CRAFT_INPUT) {
         if (index >= 0 && index < CRAFT_GRID_SIZE) {
+            // Guard against self-deletion if modifying slot directly
+            if (craftSlots[index] == item) {
+                if (!hasValidItem) {
+                    delete craftSlots[index];
+                    craftSlots[index] = NULL;
+                }
+                updateCraftingResult();
+                return;
+            }
+
             delete craftSlots[index];
-            craftSlots[index] = (item && !item->isNull()) ? new ItemInstance(*item) : NULL;
+            craftSlots[index] = hasValidItem ? new ItemInstance(*item) : NULL;
             updateCraftingResult();
         }
     } else if (loc == CLASSIC_SLOT_CRAFT_RESULT) {
+        if (craftResult == item) return;
         delete craftResult;
-        craftResult = (item && !item->isNull()) ? new ItemInstance(*item) : NULL;
+        craftResult = hasValidItem ? new ItemInstance(*item) : NULL;
     } else if (loc == CLASSIC_SLOT_INVENTORY || loc == CLASSIC_SLOT_HOTBAR) {
         if (player && player->inventory && index >= 0 && index < player->inventory->getContainerSize()) {
-            if (item && !item->isNull()) {
-                player->inventory->setItem(index, item);
+            ItemInstance* cur = player->inventory->getItem(index);
+            if (cur == item) {
+                if (!hasValidItem) {
+                    player->inventory->clearSlot(index);
+                }
+                return;
+            }
+
+            if (hasValidItem) {
+                player->inventory->setItem(index, new ItemInstance(*item));
             } else {
                 player->inventory->clearSlot(index);
             }
@@ -437,7 +452,7 @@ void ClassicCraftingScreen::clearSlot(ClassicSlotLocation loc, int index) {
 
 int ClassicCraftingScreen::getSlotCapacity(ClassicSlotLocation loc, int index, const ItemInstance* item) {
     if (loc == CLASSIC_SLOT_CRAFT_RESULT) return 0;
-    if (!item || item->isNull()) return 64;
+    if (!item || item->isNull() || item->id <= 0) return 64;
     return item->getMaxStackSize();
 }
 
@@ -449,12 +464,12 @@ bool ClassicCraftingScreen::canPlaceInSlot(ClassicSlotLocation loc, int index, c
 void ClassicCraftingScreen::updateCraftingResult() {
     CraftingContainer container(3, 3);
     for (int i = 0; i < CRAFT_GRID_SIZE; ++i) {
-        if (craftSlots[i] && !craftSlots[i]->isNull()) {
+        if (craftSlots[i] && !craftSlots[i]->isNull() && craftSlots[i]->id > 0 && craftSlots[i]->count > 0) {
             container.setItem(i, *craftSlots[i]);
         }
     }
     ItemInstance result = Recipes::getInstance()->getItemFor(&container);
-    if (!result.isNull()) {
+    if (!result.isNull() && result.id > 0 && result.count > 0) {
         if (!craftResult) craftResult = new ItemInstance(result);
         else *craftResult = result;
     } else {
@@ -465,7 +480,7 @@ void ClassicCraftingScreen::updateCraftingResult() {
 
 void ClassicCraftingScreen::consumeCraftingIngredients() {
     for (int i = 0; i < CRAFT_GRID_SIZE; ++i) {
-        if (craftSlots[i] && !craftSlots[i]->isNull()) {
+        if (craftSlots[i] && !craftSlots[i]->isNull() && craftSlots[i]->count > 0) {
             craftSlots[i]->count--;
             if (craftSlots[i]->count <= 0) {
                 delete craftSlots[i];
@@ -478,9 +493,10 @@ void ClassicCraftingScreen::consumeCraftingIngredients() {
 
 void ClassicCraftingScreen::handleLeftClick(ClassicSlotLocation loc, int index) {
     if (loc == CLASSIC_SLOT_CRAFT_RESULT) {
-        if (!craftResult || craftResult->isNull()) return;
+        if (!craftResult || craftResult->isNull() || craftResult->count <= 0) return;
 
-        if (!carriedItem || carriedItem->isNull()) {
+        if (!carriedItem || carriedItem->isNull() || carriedItem->count <= 0) {
+            delete carriedItem;
             carriedItem = new ItemInstance(*craftResult);
             consumeCraftingIngredients();
         } else if (ItemInstance::isStackable(carriedItem, craftResult)) {
@@ -495,15 +511,16 @@ void ClassicCraftingScreen::handleLeftClick(ClassicSlotLocation loc, int index) 
 
     ItemInstance* slotItem = getSlotItem(loc, index);
 
-    if (!carriedItem || carriedItem->isNull()) {
-        if (slotItem && !slotItem->isNull()) {
+    if (!carriedItem || carriedItem->isNull() || carriedItem->count <= 0) {
+        if (slotItem && !slotItem->isNull() && slotItem->count > 0) {
+            delete carriedItem;
             carriedItem = new ItemInstance(*slotItem);
             clearSlot(loc, index);
         }
     } else {
         if (!canPlaceInSlot(loc, index, carriedItem)) return;
 
-        if (!slotItem || slotItem->isNull()) {
+        if (!slotItem || slotItem->isNull() || slotItem->count <= 0) {
             int cap = getSlotCapacity(loc, index, carriedItem);
             if (carriedItem->count <= cap) {
                 setSlotItem(loc, index, carriedItem);
@@ -530,10 +547,9 @@ void ClassicCraftingScreen::handleLeftClick(ClassicSlotLocation loc, int index) 
             }
         } else {
             if (slotItem->count <= getSlotCapacity(loc, index, carriedItem)) {
-                ItemInstance* temp = new ItemInstance(*slotItem);
+                ItemInstance temp = *slotItem;
                 setSlotItem(loc, index, carriedItem);
-                delete carriedItem;
-                carriedItem = temp;
+                *carriedItem = temp;
             }
         }
     }
@@ -547,11 +563,12 @@ void ClassicCraftingScreen::handleRightClick(ClassicSlotLocation loc, int index)
 
     ItemInstance* slotItem = getSlotItem(loc, index);
 
-    if (!carriedItem || carriedItem->isNull()) {
-        if (slotItem && !slotItem->isNull()) {
+    if (!carriedItem || carriedItem->isNull() || carriedItem->count <= 0) {
+        if (slotItem && !slotItem->isNull() && slotItem->count > 0) {
             int takeCount = (slotItem->count + 1) / 2;
             int remainCount = slotItem->count - takeCount;
 
+            delete carriedItem;
             carriedItem = new ItemInstance(slotItem->id, takeCount, slotItem->getAuxValue());
 
             if (remainCount > 0) {
@@ -564,7 +581,7 @@ void ClassicCraftingScreen::handleRightClick(ClassicSlotLocation loc, int index)
     } else {
         if (!canPlaceInSlot(loc, index, carriedItem)) return;
 
-        if (!slotItem || slotItem->isNull()) {
+        if (!slotItem || slotItem->isNull() || slotItem->count <= 0) {
             ItemInstance single = *carriedItem;
             single.count = 1;
             setSlotItem(loc, index, &single);
@@ -589,10 +606,10 @@ void ClassicCraftingScreen::handleRightClick(ClassicSlotLocation loc, int index)
 }
 
 bool ClassicCraftingScreen::moveStackToRange(ItemInstance*& source, int begin, int end) {
-    if (!source || source->isNull()) return false;
+    if (!source || source->isNull() || source->count <= 0) return false;
     bool changed = false;
 
-    // Phase 1: Merge into existing stacks
+    // Merge into existing stacks
     for (int i = begin; i < end && source && source->count > 0; ++i) {
         ItemInstance* target = player->inventory->getItem(i);
         if (target && !target->isNull() && ItemInstance::isStackable(target, source)) {
@@ -601,37 +618,30 @@ bool ClassicCraftingScreen::moveStackToRange(ItemInstance*& source, int begin, i
                 int toAdd = std::min(space, source->count);
                 target->count += toAdd;
                 source->count -= toAdd;
-                player->inventory->setItem(i, target);
                 changed = true;
             }
         }
     }
 
-    // Phase 2: Place into empty slots
+    //Place into empty slots
     for (int i = begin; i < end && source && source->count > 0; ++i) {
         ItemInstance* target = player->inventory->getItem(i);
-        if (!target || target->isNull()) {
-            player->inventory->setItem(i, source);
+        if (!target || target->isNull() || target->count <= 0) {
+            player->inventory->setItem(i, new ItemInstance(*source));
             source->count = 0;
             changed = true;
             break;
         }
     }
 
-    if (source && source->count <= 0) {
-        delete source;
-        source = NULL;
-    }
     return changed;
 }
 
 void ClassicCraftingScreen::quickMove(ClassicSlotLocation loc, int index) {
     if (loc == CLASSIC_SLOT_CRAFT_RESULT) {
-        while (craftResult && !craftResult->isNull()) {
+        while (craftResult && !craftResult->isNull() && craftResult->count > 0) {
             ItemInstance* resultStack = new ItemInstance(*craftResult);
-            int origCount = resultStack->count;
 
-            // Try hotbar first, then main inventory
             bool moved = moveStackToRange(resultStack, 0, 9);
             if (resultStack && resultStack->count > 0) {
                 moved |= moveStackToRange(resultStack, 9, 36);
@@ -639,18 +649,17 @@ void ClassicCraftingScreen::quickMove(ClassicSlotLocation loc, int index) {
 
             if (moved) {
                 consumeCraftingIngredients();
-                delete resultStack;
-            } else {
-                delete resultStack;
-                break;
             }
+            delete resultStack;
+
+            if (!moved) break;
         }
         return;
     }
 
     if (loc == CLASSIC_SLOT_CRAFT_INPUT) {
         ItemInstance* item = craftSlots[index];
-        if (!item || item->isNull()) return;
+        if (!item || item->isNull() || item->count <= 0) return;
 
         ItemInstance* copy = new ItemInstance(*item);
         bool moved = moveStackToRange(copy, 0, 9);
@@ -671,14 +680,14 @@ void ClassicCraftingScreen::quickMove(ClassicSlotLocation loc, int index) {
 
     if (loc == CLASSIC_SLOT_INVENTORY) {
         ItemInstance* item = player->inventory->getItem(index);
-        if (!item || item->isNull()) return;
+        if (!item || item->isNull() || item->count <= 0) return;
 
         ItemInstance* copy = new ItemInstance(*item);
         if (moveStackToRange(copy, 0, 9)) {
             if (!copy || copy->count <= 0) {
                 player->inventory->clearSlot(index);
             } else {
-                player->inventory->setItem(index, copy);
+                player->inventory->setItem(index, new ItemInstance(*copy));
             }
         }
         delete copy;
@@ -687,14 +696,14 @@ void ClassicCraftingScreen::quickMove(ClassicSlotLocation loc, int index) {
 
     if (loc == CLASSIC_SLOT_HOTBAR) {
         ItemInstance* item = player->inventory->getItem(index);
-        if (!item || item->isNull()) return;
+        if (!item || item->isNull() || item->count <= 0) return;
 
         ItemInstance* copy = new ItemInstance(*item);
         if (moveStackToRange(copy, 9, 36)) {
             if (!copy || copy->count <= 0) {
                 player->inventory->clearSlot(index);
             } else {
-                player->inventory->setItem(index, copy);
+                player->inventory->setItem(index, new ItemInstance(*copy));
             }
         }
         delete copy;
@@ -707,14 +716,11 @@ void ClassicCraftingScreen::swapInventorySlots(int slotA, int slotB) {
     ItemInstance* a = player->inventory->getItem(slotA);
     ItemInstance* b = player->inventory->getItem(slotB);
 
-    ItemInstance* copyA = (a && !a->isNull()) ? new ItemInstance(*a) : NULL;
-    ItemInstance* copyB = (b && !b->isNull()) ? new ItemInstance(*b) : NULL;
+    ItemInstance* copyA = (a && !a->isNull() && a->count > 0) ? new ItemInstance(*a) : NULL;
+    ItemInstance* copyB = (b && !b->isNull() && b->count > 0) ? new ItemInstance(*b) : NULL;
 
     player->inventory->setItem(slotA, copyB);
     player->inventory->setItem(slotB, copyA);
-
-    delete copyA;
-    delete copyB;
 
     if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
 }
@@ -722,7 +728,7 @@ void ClassicCraftingScreen::swapInventorySlots(int slotA, int slotB) {
 void ClassicCraftingScreen::dropFromSlot(ClassicSlotLocation loc, int index, bool entireStack) {
     if (!player) return;
     ItemInstance* item = getSlotItem(loc, index);
-    if (!item || item->isNull()) return;
+    if (!item || item->isNull() || item->count <= 0) return;
 
     if (entireStack || item->count == 1) {
         player->drop(new ItemInstance(*item), false);
@@ -738,7 +744,7 @@ void ClassicCraftingScreen::dropFromSlot(ClassicSlotLocation loc, int index, boo
 }
 
 void ClassicCraftingScreen::dropCarried(bool entireStack) {
-    if (!player || !carriedItem || carriedItem->isNull()) return;
+    if (!player || !carriedItem || carriedItem->isNull() || carriedItem->count <= 0) return;
 
     if (entireStack || carriedItem->count == 1) {
         player->drop(carriedItem, false);
@@ -762,7 +768,7 @@ bool ClassicCraftingScreen::isOutsidePanel(int x, int y) {
 }
 
 void ClassicCraftingScreen::collectMatching(ClassicSlotLocation loc, int index) {
-    if (!carriedItem || carriedItem->isNull()) return;
+    if (!carriedItem || carriedItem->isNull() || carriedItem->count <= 0) return;
 
     int maxStack = carriedItem->getMaxStackSize();
     if (carriedItem->count >= maxStack) return;
@@ -770,7 +776,7 @@ void ClassicCraftingScreen::collectMatching(ClassicSlotLocation loc, int index) 
     // Collect from crafting input
     for (int i = 0; i < CRAFT_GRID_SIZE && carriedItem->count < maxStack; ++i) {
         ItemInstance* item = craftSlots[i];
-        if (item && !item->isNull() && ItemInstance::isStackable(item, carriedItem)) {
+        if (item && !item->isNull() && item->count > 0 && ItemInstance::isStackable(item, carriedItem)) {
             int toTake = std::min(maxStack - carriedItem->count, item->count);
             carriedItem->count += toTake;
             item->count -= toTake;
@@ -785,14 +791,12 @@ void ClassicCraftingScreen::collectMatching(ClassicSlotLocation loc, int index) 
     // Collect from player inventory & hotbar (slots 0..35)
     for (int i = 0; i < player->inventory->getContainerSize() && carriedItem->count < maxStack; ++i) {
         ItemInstance* item = player->inventory->getItem(i);
-        if (item && !item->isNull() && ItemInstance::isStackable(item, carriedItem)) {
+        if (item && !item->isNull() && item->count > 0 && ItemInstance::isStackable(item, carriedItem)) {
             int toTake = std::min(maxStack - carriedItem->count, item->count);
             carriedItem->count += toTake;
             item->count -= toTake;
             if (item->count <= 0) {
                 player->inventory->clearSlot(i);
-            } else {
-                player->inventory->setItem(i, item);
             }
         }
     }
@@ -807,7 +811,7 @@ bool ClassicCraftingScreen::containsDragSlot(ClassicSlotLocation loc, int index)
 }
 
 void ClassicCraftingScreen::executeDragDistribution() {
-    if (!carriedItem || carriedItem->isNull() || draggedSlots.empty()) {
+    if (!carriedItem || carriedItem->isNull() || carriedItem->count <= 0 || draggedSlots.empty()) {
         draggedSlots.clear();
         dragMode = CLASSIC_DRAG_NONE;
         return;
@@ -816,20 +820,20 @@ void ClassicCraftingScreen::executeDragDistribution() {
     if (dragMode == CLASSIC_DRAG_LEFT) {
         int countPerSlot = dragItemOrigCount / (int)draggedSlots.size();
         if (countPerSlot > 0) {
-            for (size_t i = 0; i < draggedSlots.size(); ++i) {
+            for (size_t i = 0; i < draggedSlots.size() && carriedItem->count > 0; ++i) {
                 ClassicSlotLocation loc = draggedSlots[i].location;
                 int idx = draggedSlots[i].index;
                 ItemInstance* existing = getSlotItem(loc, idx);
 
-                if (!existing || existing->isNull()) {
+                if (!existing || existing->isNull() || existing->count <= 0) {
                     ItemInstance placed = *carriedItem;
-                    placed.count = countPerSlot;
+                    placed.count = std::min(countPerSlot, carriedItem->count);
+                    carriedItem->count -= placed.count;
                     setSlotItem(loc, idx, &placed);
-                    carriedItem->count -= countPerSlot;
                 } else if (ItemInstance::isStackable(existing, carriedItem)) {
                     int cap = getSlotCapacity(loc, idx, existing);
                     int space = cap - existing->count;
-                    int toAdd = std::min(space, countPerSlot);
+                    int toAdd = std::min({space, countPerSlot, carriedItem->count});
                     existing->count += toAdd;
                     carriedItem->count -= toAdd;
                     setSlotItem(loc, idx, existing);
@@ -842,11 +846,11 @@ void ClassicCraftingScreen::executeDragDistribution() {
             int idx = draggedSlots[i].index;
             ItemInstance* existing = getSlotItem(loc, idx);
 
-            if (!existing || existing->isNull()) {
+            if (!existing || existing->isNull() || existing->count <= 0) {
                 ItemInstance placed = *carriedItem;
                 placed.count = 1;
-                setSlotItem(loc, idx, &placed);
                 carriedItem->count -= 1;
+                setSlotItem(loc, idx, &placed);
             } else if (ItemInstance::isStackable(existing, carriedItem)) {
                 int cap = getSlotCapacity(loc, idx, existing);
                 if (existing->count < cap) {
@@ -897,7 +901,7 @@ void ClassicCraftingScreen::mouseClicked(int x, int y, int buttonNum) {
     // Double-click to gather matching stacks
     int now = getClassicCurrentTimeMillis();
     ClassicSlotRef clickedRef{loc, index};
-    if (buttonNum == 0 && carriedItem && !carriedItem->isNull() &&
+    if (buttonNum == 0 && carriedItem && !carriedItem->isNull() && carriedItem->count > 0 &&
         lastClickedButton == 0 && (now - lastClickTime) < 300 && lastClickedSlot == clickedRef) {
         collectMatching(loc, index);
         if (minecraft->soundEngine) minecraft->soundEngine->playUI("random.click", 1.0f, 1.0f);
@@ -910,7 +914,7 @@ void ClassicCraftingScreen::mouseClicked(int x, int y, int buttonNum) {
     lastClickedSlot = clickedRef;
 
     // Start Drag Distribution if holding an item
-    if (carriedItem && !carriedItem->isNull() && loc != CLASSIC_SLOT_CRAFT_RESULT) {
+    if (carriedItem && !carriedItem->isNull() && carriedItem->count > 0 && loc != CLASSIC_SLOT_CRAFT_RESULT) {
         dragMode = (buttonNum == 0) ? CLASSIC_DRAG_LEFT : CLASSIC_DRAG_RIGHT;
         dragItemOrigCount = carriedItem->count;
         draggedSlots.clear();
@@ -932,13 +936,13 @@ void ClassicCraftingScreen::mouseMoved(int x, int y, int dx, int dy) {
     lastMouseX = x;
     lastMouseY = y;
 
-    if (dragMode != CLASSIC_DRAG_NONE && carriedItem && !carriedItem->isNull()) {
+    if (dragMode != CLASSIC_DRAG_NONE && carriedItem && !carriedItem->isNull() && carriedItem->count > 0) {
         ClassicSlotLocation loc = CLASSIC_SLOT_NONE;
         int index = -1;
         if (getSlotAt(x, y, loc, index)) {
             if (loc != CLASSIC_SLOT_CRAFT_RESULT && canPlaceInSlot(loc, index, carriedItem)) {
                 ItemInstance* existing = getSlotItem(loc, index);
-                if (!existing || existing->isNull() || ItemInstance::isStackable(existing, carriedItem)) {
+                if (!existing || existing->isNull() || existing->count <= 0 || ItemInstance::isStackable(existing, carriedItem)) {
                     ClassicSlotRef ref{loc, index};
                     if (std::find(draggedSlots.begin(), draggedSlots.end(), ref) == draggedSlots.end()) {
                         draggedSlots.push_back(ref);
@@ -992,22 +996,21 @@ void ClassicCraftingScreen::keyPressed(int eventKey) {
     if (eventKey >= Keyboard::KEY_1 && eventKey <= Keyboard::KEY_9) {
         int hotbarTarget = eventKey - Keyboard::KEY_1;
         if (onSlot && loc != CLASSIC_SLOT_CRAFT_RESULT) {
-            if (loc == CLASSIC_SLOT_INVENTORY) {
-                swapInventorySlots(index, hotbarTarget);
-            } else if (loc == CLASSIC_SLOT_HOTBAR) {
+            if (loc == CLASSIC_SLOT_INVENTORY || loc == CLASSIC_SLOT_HOTBAR) {
                 swapInventorySlots(index, hotbarTarget);
             } else if (loc == CLASSIC_SLOT_CRAFT_INPUT) {
                 ItemInstance* craftItem = craftSlots[index];
                 ItemInstance* hotbarItem = player->inventory->getItem(hotbarTarget);
 
-                ItemInstance* copyCraft = (craftItem && !craftItem->isNull()) ? new ItemInstance(*craftItem) : NULL;
-                ItemInstance* copyHotbar = (hotbarItem && !hotbarItem->isNull()) ? new ItemInstance(*hotbarItem) : NULL;
+                ItemInstance copyCraft = (craftItem && !craftItem->isNull() && craftItem->count > 0) ? *craftItem : ItemInstance();
+                ItemInstance copyHotbar = (hotbarItem && !hotbarItem->isNull() && hotbarItem->count > 0) ? *hotbarItem : ItemInstance();
 
-                setSlotItem(CLASSIC_SLOT_CRAFT_INPUT, index, copyHotbar);
-                player->inventory->setItem(hotbarTarget, copyCraft);
-
-                delete copyCraft;
-                delete copyHotbar;
+                setSlotItem(CLASSIC_SLOT_CRAFT_INPUT, index, copyHotbar.isNull() ? NULL : &copyHotbar);
+                if (!copyCraft.isNull()) {
+                    player->inventory->setItem(hotbarTarget, new ItemInstance(copyCraft));
+                } else {
+                    player->inventory->clearSlot(hotbarTarget);
+                }
             }
         }
         return;
@@ -1028,7 +1031,7 @@ void ClassicCraftingScreen::removed() {
     if (!player) return;
 
     // 1. Safe return of carried item on cursor
-    if (carriedItem && !carriedItem->isNull()) {
+    if (carriedItem && !carriedItem->isNull() && carriedItem->count > 0) {
         if (!player->inventory->add(carriedItem)) {
             player->drop(carriedItem, false);
         } else {
@@ -1039,7 +1042,7 @@ void ClassicCraftingScreen::removed() {
 
     // 2. Safe return of all 9 crafting input slots
     for (int i = 0; i < CRAFT_GRID_SIZE; ++i) {
-        if (craftSlots[i] && !craftSlots[i]->isNull()) {
+        if (craftSlots[i] && !craftSlots[i]->isNull() && craftSlots[i]->count > 0) {
             if (!player->inventory->add(craftSlots[i])) {
                 player->drop(craftSlots[i], false);
             } else {

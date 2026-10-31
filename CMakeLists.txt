@@ -27,11 +27,21 @@ if (${PLATFORM} STREQUAL "Desktop")
     set(PLATFORM_CPP "PLATFORM_DESKTOP")
 
     if (MINGW)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+        if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            # Statically link libc++ and libunwind for LLVM/Clang
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+        else()
+            # Statically link libstdc++ and libgcc for GCC
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+        endif()
     endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-narrowing -Wno-narrowing -Wno-invalid-source-encoding -Wno-reserved-user-defined-literal")
+    endif()
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include cstdint")
     endif()
 
     if (WIN32)
@@ -40,7 +50,7 @@ if (${PLATFORM} STREQUAL "Desktop")
         endif()
         add_definitions(-D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
         include_directories(misc/windows)
-        set(EXTRA_LIBS ws2_32 winhttp)
+        set(EXTRA_LIBS ws2_32 winhttp mfplay mfplat)
         list(APPEND EXTRA_LIBS comdlg32)
     elseif(UNIX)
         find_library(pthread NAMES pthread)
@@ -111,6 +121,9 @@ else()
     set(ALSOFT_STATIC_CXX_RUNTIME ON)
 endif()
 
+# Disable MSVC import .lib generation on MinGW (fixes the missing OpenAL32.def sed error)
+set(ALSOFT_BUILD_IMPORT_LIB OFF CACHE BOOL "Build an import .lib using dlltool" FORCE)
+
 CPMAddPackage(
     NAME "openal"
     GIT_REPOSITORY "https://github.com/kcat/openal-soft.git"
@@ -125,12 +138,14 @@ CPMAddPackage(
         "ALSOFT_STATIC_LIBGCC ${ALSOFT_STATIC_CXX_RUNTIME}"
 )
 
-# TODO: Clear this paths with *
 file(GLOB SERVER_SOURCES
     "${PROJECT_ROOT}/project/lib_projects/raknet/jni/RaknetSources/*.cpp"
     "${PROJECT_ROOT}/src/NinecraftApp.cpp"
     "${PROJECT_ROOT}/src/Performance.cpp"
     "${PROJECT_ROOT}/src/SharedConstants.cpp"
+
+    "${PROJECT_ROOT}/src/mods/*.cpp"
+    "${PROJECT_ROOT}/src/mods/woodland/*.cpp"
 
     "${PROJECT_ROOT}/src/client/IConfigListener.cpp"
     "${PROJECT_ROOT}/src/client/Minecraft.cpp"
@@ -243,6 +258,10 @@ list(REMOVE_ITEM SERVER_SOURCES "${PROJECT_ROOT}/src/world/level/tile/OreFeature
 
 file(GLOB CLIENT_SOURCES 
     "${PROJECT_ROOT}/src/client/*.cpp"
+
+    "${PROJECT_ROOT}/src/mods/*.cpp"
+    "${PROJECT_ROOT}/src/mods/woodland/*.cpp"
+
 
     "${PROJECT_ROOT}/src/client/gamemode/*.cpp"
     "${PROJECT_ROOT}/src/client/gui/*.cpp"
@@ -379,6 +398,9 @@ if(WIN32)
 endif()
 
 add_executable(${PROJECT_NAME} ${CLIENT_SOURCES})
+if (WIN32 AND MINGW)
+    target_link_options(${PROJECT_NAME} PRIVATE -static)
+endif()
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC ${PLATFORM_CPP})
 
@@ -431,6 +453,11 @@ if(${PLATFORM} MATCHES "Web")
     endif()
 
     target_compile_definitions(${PROJECT_NAME} PUBLIC "__EMSCRIPTEN__" "NO_SOUND" "NO_NETWORK")
+endif()
+
+# Dirty fix
+if(TARGET MinecraftPE-server)
+    target_sources(MinecraftPE-server PRIVATE src/platform/CrashHandler.cpp)
 endif()
 
 # Client

@@ -574,9 +574,11 @@ void Level::changeDimension(int dimId) {
 	}
 
 	std::string dimTitle = "";
+#ifndef STANDALONE_SERVER
 	std::string statusSaving = "";
 	std::string statusBuilding = "";
 	std::string statusLoading = "";
+#endif
 
 	if (isCrossingToNether) {
 		if (!I18n::get("progressScreen.dimension.nether.title", dimTitle)) {
@@ -657,14 +659,18 @@ void Level::changeDimension(int dimId) {
 #endif
 
 	levelData.setDimension(dimId);
-	updateProgress(20, statusSaving, 150);
+#ifndef STANDALONE_SERVER
+    updateProgress(20, statusSaving, 150);
+#endif
 
 	_chunkSource->saveAll(true);
 
 	if (levelStorage) {
 		levelStorage->saveGame(this);
 	}
-	updateProgress(40, statusBuilding, 150);
+#ifndef STANDALONE_SERVER
+    updateProgress(40, statusBuilding, 150);
+#endif
 
 	for (int i = (int)entities.size() - 1; i >= 0; i--) {
 		Entity* e = entities[i];
@@ -680,7 +686,9 @@ void Level::changeDimension(int dimId) {
 			delete e;
 		}
 	}
-	updateProgress(60, statusBuilding, 150);
+#ifndef STANDALONE_SERVER
+    updateProgress(60, statusLoading, 150);
+#endif
 
 	Dimension* newDimension = Dimension::getNew(dimId);
 	if (!newDimension) return;
@@ -692,7 +700,9 @@ void Level::changeDimension(int dimId) {
 	dimension->init(this);
 
 	_chunkSource = createChunkSource();
-	updateProgress(80, statusLoading, 150);
+#ifndef STANDALONE_SERVER
+    updateProgress(80, statusLoading, 150);
+#endif
 
 	if (levelStorage) {
 		levelStorage->loadEntities(this, NULL);
@@ -701,7 +711,9 @@ void Level::changeDimension(int dimId) {
 	for (unsigned int i = 0; i < _listeners.size(); i++) {
 		_listeners[i]->allChanged();
 	}
-	updateProgress(100, statusLoading, 200);
+#ifndef STANDALONE_SERVER
+    updateProgress(100, statusLoading, 150);
+#endif
 
 #ifndef STANDALONE_SERVER
 	if (mc) {

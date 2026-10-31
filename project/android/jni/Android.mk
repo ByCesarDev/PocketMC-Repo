@@ -68,11 +68,9 @@ LOCAL_SRC_FILES += \
 	$(LOCAL_PATH)/../../../src/client/gamemode/GameMode.cpp \
 	$(LOCAL_PATH)/../../../src/client/gamemode/SurvivalMode.cpp
 
-# ---- Player ----
-LOCAL_SRC_FILES += \
-	$(LOCAL_PATH)/../../../src/client/player/LocalPlayer.cpp \
-	$(LOCAL_PATH)/../../../src/client/player/RemotePlayer.cpp \
-	$(LOCAL_PATH)/../../../src/client/player/input/KeyboardInput.cpp
+# ---- Player (includes LocalPlayer, RemotePlayer, AccountManager, ApiClient, ProfileManager) ----
+LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/client/player/*.cpp)
+LOCAL_SRC_FILES += $(LOCAL_PATH)/../../../src/client/player/input/KeyboardInput.cpp
 
 # ---- Touch input ----
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/client/player/input/touchscreen/*.cpp)
@@ -142,9 +140,19 @@ LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/*.cpp)
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/biome/*.cpp)
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/chunk/*.cpp)
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/dimension/*.cpp)
+
+# ---- Levelgen (including Vanilla generator tree) ----
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/levelgen/*.cpp)
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/levelgen/feature/*.cpp)
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/levelgen/synth/*.cpp)
+LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/levelgen/vanilla/*.cpp)
+LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/levelgen/vanilla/noise/*.cpp)
+LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/levelgen/vanilla/biome/*.cpp)
+LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/levelgen/vanilla/biomegrid/*.cpp)
+LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/levelgen/vanilla/ground/*.cpp)
+LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/levelgen/vanilla/object/tree/*.cpp)
+LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/levelgen/vanilla/populator/*.cpp)
+
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/material/*.cpp)
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/pathfinder/*.cpp)
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../src/world/level/storage/*.cpp)
@@ -159,7 +167,7 @@ LOCAL_SRC_FILES := $(filter-out %/OreFeature.cpp, $(LOCAL_SRC_FILES))
 LOCAL_SRC_FILES += $(LOCAL_PATH)/../../../src/platform/audio/SoundSystemSL.cpp
 
 # ---- Compiler flags ----
-LOCAL_CFLAGS := -Wno-psabi
+LOCAL_CFLAGS := -Wno-unknown-warning-option
 LOCAL_CPPFLAGS += -std=c++14 -frtti -fexceptions
 
 # ---- Preprocessor defines ----

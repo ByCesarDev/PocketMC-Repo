@@ -1,17 +1,17 @@
 #ifndef NET_MINECRAFT_WORLD_LEVEL_STORAGE__LevelData_H__
 #define NET_MINECRAFT_WORLD_LEVEL_STORAGE__LevelData_H__
 
-//package net.minecraft.world.level.storage;
-
 #include <string>
+#include <vector>
 #include "PlayerData.h"
 #include "../LevelSettings.h"
 #include "../dimension/Dimension.h"
 
-// sorry for RakNet dependency, but I really like using BitStream
 #include "../../../raknet/BitStream.h"
 #include "../../../platform/time.h"
 #include "../../../nbt/CompoundTag.h"
+
+class Player;
 
 class LevelData
 {
@@ -26,7 +26,6 @@ public:
 	void		v1_write(RakNet::BitStream& bitStream);
 	void		v1_read(RakNet::BitStream& bitStream, int storageVersion);
 
-	// Caller's responsibility to destroy this Tag
     CompoundTag* createTag();
     CompoundTag* createTag(const std::vector<Player*>& players);
 
@@ -91,6 +90,10 @@ public:
 	bool		isThundering() const;
 	void		setThundering(bool thundering);
 
+	// Woodland Mod
+	bool		isWoodlandEnabled() const { return woodlandEnabled; }
+	void		setWoodlandEnabled(bool enabled) { woodlandEnabled = enabled; }
+
 public:
 	PlayerData playerData;
 	int playerDataVersion;
@@ -116,8 +119,7 @@ private:
 	bool raining;
 	int thunderTime;
 	bool thundering;
-	//@note: This version is never written or loaded to disk. The only purpose
-	//       is to use it in the level generator on server and clients.
+	bool woodlandEnabled; // Woodland Mod state
 	int generatorVersion;
 };
 

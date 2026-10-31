@@ -31,6 +31,7 @@ private:
 	Button* bCheats;
 	Button* bWorldType;
 	Button* bExperimental;
+	Button* bWoodland; // <-- Woodland mod button
 	ImageButton* bBack;
 	Button* bCreate;
 	bool hasChosen;
@@ -40,10 +41,10 @@ private:
 	bool cheatsEnabled;
 	int worldType;
 	bool experimental;
+	bool woodlandEnabled; // <-- Woodland state
 
 	TextBox tLevelName;
 	TextBox tSeed;
 };
 
 #endif /*NET_MINECRAFT_CLIENT_GUI_SCREENS__DemoChooseLevelScreen_H__*/
-

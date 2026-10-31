@@ -1,4 +1,5 @@
 #include "ModRegistry.h"
+#include "woodland/WoodlandMod.h" // <-- Include Woodland Mod
 
 #include "../world/item/Item.h"
 #include "../world/item/ItemCategory.h"
@@ -115,6 +116,8 @@ std::vector<ModInfo> ModRegistry::scanMods(const std::string& storageRoot)
     ensureFolders(storageRoot);
 
     std::vector<ModInfo> mods;
+    
+    // 1. Built-in Example
     ModInfo builtIn;
     builtIn.id = "builtin.example_custom_content";
     builtIn.name = "Example Custom Content";
@@ -126,6 +129,19 @@ std::vector<ModInfo> ModRegistry::scanMods(const std::string& storageRoot)
     builtIn.hasBeheviorPack = true;
     builtIn.builtIn = true;
     mods.push_back(builtIn);
+
+    // 2. Built-in Woodland
+    ModInfo woodland;
+    woodland.id = "builtin.woodland";
+    woodland.name = "Woodland";
+    woodland.version = "1.0.0";
+    woodland.author = "globalddonater";
+    woodland.description = "Horror mod: wooden mobs, structures, and keys.";
+    woodland.path = "compiled";
+    woodland.hasResourcePack = true;
+    woodland.hasBeheviorPack = true;
+    woodland.builtIn = true;
+    mods.push_back(woodland);
 
     const std::string root = modsRoot(storageRoot);
 
@@ -173,19 +189,29 @@ std::vector<ModInfo> ModRegistry::scanMods(const std::string& storageRoot)
 
 void ModRegistry::registerBuiltInTiles()
 {
-    if (exampleBlock || Tile::tiles[ExampleBlockId]) return;
-    exampleBlock = (new Tile(ExampleBlockId, 1 + 14 * 16, Material::stone))->init()
-        ->setDestroyTime(1.0f)
-        ->setExplodeable(6.0f)
-        ->setSoundType(Tile::SOUND_STONE)
-        ->setCategory(ItemCategory::Decorations)
-        ->setDescriptionId("exampleCustomBlock");
+    // Register Example Block
+    if (!exampleBlock && !Tile::tiles[ExampleBlockId]) {
+        exampleBlock = (new Tile(ExampleBlockId, 1 + 14 * 16, Material::stone))->init()
+            ->setDestroyTime(1.0f)
+            ->setExplodeable(6.0f)
+            ->setSoundType(Tile::SOUND_STONE)
+            ->setCategory(ItemCategory::Decorations)
+            ->setDescriptionId("exampleCustomBlock");
+    }
+
+    // Register Woodland Mod Blocks
+    WoodlandMod::registerTiles();
 }
 
 void ModRegistry::registerBuiltInItems()
 {
-    if (exampleItem || Item::items[256 + ExampleItemId]) return;
-    exampleItem = (new Item(ExampleItemId))->setIcon(6, 10)
-        ->setCategory(ItemCategory::Decorations)
-        ->setDescriptionId("exampleCustomItem");
+    // Register Example Item
+    if (!exampleItem && !Item::items[256 + ExampleItemId]) {
+        exampleItem = (new Item(ExampleItemId))->setIcon(6, 10)
+            ->setCategory(ItemCategory::Decorations)
+            ->setDescriptionId("exampleCustomItem");
+    }
+
+    // Register Woodland Mod Items
+    WoodlandMod::registerItems();
 }
