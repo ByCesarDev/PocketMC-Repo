@@ -28,6 +28,7 @@ SimpleChooseLevelScreen::SimpleChooseLevelScreen(const std::string& levelName)
     bCheats(0),
     bWorldType(0),
     bExperimental(0),
+    bWoodland(0),
     bBack(0),
     bCreate(0),
     levelName(levelName),
@@ -36,6 +37,7 @@ SimpleChooseLevelScreen::SimpleChooseLevelScreen(const std::string& levelName)
     cheatsEnabled(false),
     worldType(WorldType::INFINITE_SIZE),
     experimental(false),
+    woodlandEnabled(false),
     tLevelName(0, I18n::get("selectWorld.enterName")),
     tSeed(1, I18n::get("selectWorld.enterSeed"))
 {
@@ -48,6 +50,7 @@ SimpleChooseLevelScreen::~SimpleChooseLevelScreen()
     delete bCheats;
     delete bWorldType;
     delete bExperimental;
+    delete bWoodland;
     delete bBack;
     delete bCreate;
 }
@@ -73,6 +76,10 @@ void SimpleChooseLevelScreen::init()
     bWorldType = new Button(5, getWorldTypeName(worldType));
     bExperimental = new Button(6, experimental ? I18n::get("selectWorld.experimental.on") : I18n::get("selectWorld.experimental.off"));
     bExperimental->active = (worldType == WorldType::INFINITE_SIZE);
+    
+    // Woodland toggle button (ID 7)
+    bWoodland = new Button(7, woodlandEnabled ? "Woodland Mod: ON" : "Woodland Mod: OFF");
+    
     bCreate  = new Button(3, I18n::get("gui.createButton"));
 
     buttons.push_back(bHeader);
@@ -81,12 +88,14 @@ void SimpleChooseLevelScreen::init()
     buttons.push_back(bCheats);
     buttons.push_back(bWorldType);
     buttons.push_back(bExperimental);
+    buttons.push_back(bWoodland);
     buttons.push_back(bCreate);
 
     tabButtons.push_back(bGamemode);
     tabButtons.push_back(bCheats);
     tabButtons.push_back(bWorldType);
     tabButtons.push_back(bExperimental);
+    tabButtons.push_back(bWoodland);
     tabButtons.push_back(bBack);
     tabButtons.push_back(bCreate);
 
@@ -109,7 +118,6 @@ void SimpleChooseLevelScreen::setupPositions()
     }
 
     int centerX = width / 2;
-    const int padding = 5;
 
     tLevelName.width = tSeed.width = 200;
     tLevelName.x = centerX - tLevelName.width / 2;
@@ -126,9 +134,11 @@ void SimpleChooseLevelScreen::setupPositions()
     bCheats->width = buttonWidth;
     bWorldType->width = buttonWidth;
     bExperimental->width = buttonWidth;
+    bWoodland->width = buttonWidth;
 
     int row1Y = tSeed.y + 22;
     int row2Y = row1Y + bGamemode->height + 6;
+    int row3Y = row2Y + bWorldType->height + 6;
 
     bGamemode->x = centerX - totalButtonWidth / 2;
     bGamemode->y = row1Y;
@@ -141,6 +151,10 @@ void SimpleChooseLevelScreen::setupPositions()
 
     bExperimental->x = bCheats->x;
     bExperimental->y = row2Y;
+
+    // Center the Woodland Mod button on row 3
+    bWoodland->x = centerX - buttonWidth / 2;
+    bWoodland->y = row3Y;
 
     bCreate->width = 110;
     bCreate->x = centerX - bCreate->width / 2;
@@ -166,7 +180,7 @@ void SimpleChooseLevelScreen::render( int xm, int ym, float a )
         modeDesc = "Unlimited resources and flying";
     }
     if (modeDesc) {
-        drawCenteredString(minecraft->font, modeDesc, width / 2, bExperimental->y + bExperimental->height + 4, 0xffcccccc);
+        drawCenteredString(minecraft->font, modeDesc, width / 2, bWoodland->y + bWoodland->height + 4, 0xffcccccc);
     }
 
     drawString(minecraft->font, I18n::get("selectWorld.enterName") + ":", tLevelName.x, tLevelName.y - Font::DefaultLineHeight - 2, 0xffcccccc);
@@ -243,6 +257,13 @@ void SimpleChooseLevelScreen::buttonClicked( Button* button )
         return;
     }
 
+    // Toggle Woodland Mod
+    if (button == bWoodland) {
+        woodlandEnabled = !woodlandEnabled;
+        bWoodland->msg = woodlandEnabled ? "Woodland Mod: ON" : "Woodland Mod: OFF";
+        return;
+    }
+
     if (button == bCreate && !tLevelName.text.empty()) {
         int seed = getEpochTimeS();
         if (!tSeed.text.empty()) {
@@ -256,7 +277,11 @@ void SimpleChooseLevelScreen::buttonClicked( Button* button )
         }
         std::string levelId = getUniqueLevelName(tLevelName.text);
         bool isFlat = (worldType == WorldType::FLAT);
+        
+        // Pass woodlandEnabled through settings into level.dat
         LevelSettings settings(seed, gamemode, cheatsEnabled, worldType, isFlat, experimental);
+        settings.woodlandEnabled = woodlandEnabled;
+
         minecraft->selectLevel(levelId, levelId, settings);
         minecraft->hostMultiplayer();
         minecraft->setScreen(new ProgressScreen());
@@ -283,5 +308,3 @@ bool SimpleChooseLevelScreen::handleBackEvent(bool isDown) {
 		minecraft->screenChooser.setScreen(SCREEN_STARTMENU);
 	return true; 
 }
-
-

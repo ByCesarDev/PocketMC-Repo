@@ -19,6 +19,8 @@ LevelData::LevelData()
 {
 	//LOGI("ctor 1: %p\n", this);
 	spawnMobs = true;
+	//woodland definer | default is false
+	woodlandEnabled = false;
 }
 
 LevelData::LevelData( const LevelSettings& settings, const std::string& levelName, int generatorVersion /*= -1*/ )
@@ -36,6 +38,7 @@ LevelData::LevelData( const LevelSettings& settings, const std::string& levelNam
 	rainTime(0), raining(false), thunderTime(0), thundering(false)
 {
 	//LOGI("ctor 2: %p\n", this);
+	woodlandEnabled = settings.woodlandEnabled;
 
 	if (generatorVersion < 0)
 		generatorVersion = SharedConstants::GeneratorVersion;
@@ -178,6 +181,7 @@ CompoundTag* LevelData::createTag( const std::vector<Player*>& players )
 void LevelData::setTagData( CompoundTag* tag, CompoundTag* playerTag )
 {
 	if (!tag) return;
+	tag->putByte("WoodlandEnabled", woodlandEnabled ? 1 : 0);
 	tag->putLong("RandomSeed", seed);
 	tag->putInt("GameType", gameType);
 	tag->putBoolean("AllowCommands", allowCheats);
@@ -235,6 +239,11 @@ void LevelData::getTagData( const CompoundTag* tag )
 		setPlayerTag(tag->getCompound("Player"));
 
 		//dimension = loadedPlayerTag.getInt("Dimension");
+	}
+	if (tag->contains("WoodlandEnabled")) {
+    		woodlandEnabled = tag->getByte("WoodlandEnabled") != 0;
+	} else {
+    		woodlandEnabled = false;
 	}
 }
 

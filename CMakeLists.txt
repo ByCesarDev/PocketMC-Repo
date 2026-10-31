@@ -138,12 +138,14 @@ CPMAddPackage(
         "ALSOFT_STATIC_LIBGCC ${ALSOFT_STATIC_CXX_RUNTIME}"
 )
 
-# TODO: Clear this paths with *
 file(GLOB SERVER_SOURCES
     "${PROJECT_ROOT}/project/lib_projects/raknet/jni/RaknetSources/*.cpp"
     "${PROJECT_ROOT}/src/NinecraftApp.cpp"
     "${PROJECT_ROOT}/src/Performance.cpp"
     "${PROJECT_ROOT}/src/SharedConstants.cpp"
+
+    "${PROJECT_ROOT}/src/mods/*.cpp"
+    "${PROJECT_ROOT}/src/mods/woodland/*.cpp"
 
     "${PROJECT_ROOT}/src/client/IConfigListener.cpp"
     "${PROJECT_ROOT}/src/client/Minecraft.cpp"
@@ -256,6 +258,10 @@ list(REMOVE_ITEM SERVER_SOURCES "${PROJECT_ROOT}/src/world/level/tile/OreFeature
 
 file(GLOB CLIENT_SOURCES 
     "${PROJECT_ROOT}/src/client/*.cpp"
+
+    "${PROJECT_ROOT}/src/mods/*.cpp"
+    "${PROJECT_ROOT}/src/mods/woodland/*.cpp"
+
 
     "${PROJECT_ROOT}/src/client/gamemode/*.cpp"
     "${PROJECT_ROOT}/src/client/gui/*.cpp"
